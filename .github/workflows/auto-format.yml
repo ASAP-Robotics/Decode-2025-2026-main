@@ -1,0 +1,37 @@
+name: Auto-format Java
+
+on:
+  push:
+    branches: [ "**" ]   # runs on all branches (every commit)
+  pull_request:
+    branches: [ main ]   # runs on PRs targeting main
+
+jobs:
+  google-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run Google Java Format
+        uses: axel-op/googlejavaformat-action@v3
+        with:
+          args: "--replace"
+
+      - name: Commit changes if formatting was applied
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git add -u
+            git commit -m "🤖 Auto-format Java code"
+            git push
+          fi
