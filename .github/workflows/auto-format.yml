@@ -2,9 +2,9 @@ name: Auto-format Java
 
 on:
   push:
-    branches: [ "**" ]   # runs on all branches (every commit)
+    branches: [ "**" ]
   pull_request:
-    branches: [ main ]   # runs on PRs targeting main
+    branches: [ main ]
 
 jobs:
   google-format:
@@ -21,12 +21,23 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Check for Java files
+        id: check_java
+        run: |
+          if git ls-files '*.java' | grep -q .; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run Google Java Format
+        if: steps.check_java.outputs.found == 'true'
         uses: axel-op/googlejavaformat-action@v3
         with:
           args: "--replace"
 
       - name: Commit changes if formatting was applied
+        if: steps.check_java.outputs.found == 'true'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
