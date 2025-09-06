@@ -48,15 +48,15 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  */
 @TeleOp(name = "Concept: Telemetry", group = "Concept")
 @Disabled
-public class ConceptTelemetry extends LinearOpMode  {
-    /** Keeps track of the line of the poem which is to be emitted next */
-    int poemLine = 0;
+public class ConceptTelemetry extends LinearOpMode {
+  /** Keeps track of the line of the poem which is to be emitted next */
+  int poemLine = 0;
 
-    /** Keeps track of how long it's been since we last emitted a line of poetry */
-    ElapsedTime poemElapsed = new ElapsedTime();
+  /** Keeps track of how long it's been since we last emitted a line of poetry */
+  ElapsedTime poemElapsed = new ElapsedTime();
 
-    static final String[] poem = new String[] {
-
+  static final String[] poem =
+      new String[] {
         "Mary had a little lamb,",
         "His fleece was white as snow,",
         "And everywhere that Mary went,",
@@ -78,100 +78,107 @@ public class ConceptTelemetry extends LinearOpMode  {
         "The teacher did reply.",
         "",
         ""
-    };
+      };
 
-    @Override public void runOpMode() {
+  @Override
+  public void runOpMode() {
 
-        /* we keep track of how long it's been since the OpMode was started, just
-         * to have some interesting data to show */
-        ElapsedTime opmodeRunTime = new ElapsedTime();
+    /* we keep track of how long it's been since the OpMode was started, just
+     * to have some interesting data to show */
+    ElapsedTime opmodeRunTime = new ElapsedTime();
 
-        // We show the log in oldest-to-newest order, as that's better for poetry
-        telemetry.log().setDisplayOrder(Telemetry.Log.DisplayOrder.OLDEST_FIRST);
-        // We can control the number of lines shown in the log
-        telemetry.log().setCapacity(6);
-        // The interval between lines of poetry, in seconds
-        double sPoemInterval = 0.6;
+    // We show the log in oldest-to-newest order, as that's better for poetry
+    telemetry.log().setDisplayOrder(Telemetry.Log.DisplayOrder.OLDEST_FIRST);
+    // We can control the number of lines shown in the log
+    telemetry.log().setCapacity(6);
+    // The interval between lines of poetry, in seconds
+    double sPoemInterval = 0.6;
 
-        /*
-         * Wait until we've been given the ok to go. For something to do, we emit the
-         * elapsed time as we sit here and wait. If we didn't want to do anything while
-         * we waited, we would just call waitForStart().
-         */
-        while (!isStarted()) {
-            telemetry.addData("time", "%.1f seconds", opmodeRunTime.seconds());
-            telemetry.update();
-            idle();
-        }
-
-        // Ok, we've been given the ok to go
-
-        /*
-         * As an illustration, the first line on our telemetry display will display the battery voltage.
-         * The idea here is that it's expensive to compute the voltage (at least for purposes of illustration)
-         * so you don't want to do it unless the data is _actually_ going to make it to the
-         * driver station (recall that telemetry transmission is throttled to reduce bandwidth use.
-         * Note that getBatteryVoltage() below returns 'Infinity' if there's no voltage sensor attached.
-         *
-         * @see Telemetry#getMsTransmissionInterval()
-         */
-        telemetry.addData("voltage", "%.1f volts", new Func<Double>() {
-            @Override public Double value() {
-                return getBatteryVoltage();
-            }
-            });
-
-        // Reset to keep some timing stats for the post-'start' part of the OpMode
-        opmodeRunTime.reset();
-        int loopCount = 1;
-
-        // Go go gadget robot!
-        while (opModeIsActive()) {
-
-            // Emit poetry if it's been a while
-            if (poemElapsed.seconds() > sPoemInterval) {
-                emitPoemLine();
-            }
-
-            // As an illustration, show some loop timing information
-            telemetry.addData("loop count", loopCount);
-            telemetry.addData("ms/loop", "%.3f ms", opmodeRunTime.milliseconds() / loopCount);
-
-            // Show joystick information as some other illustrative data
-            telemetry.addLine("left joystick | ")
-                    .addData("x", gamepad1.left_stick_x)
-                    .addData("y", gamepad1.left_stick_y);
-            telemetry.addLine("right joystick | ")
-                    .addData("x", gamepad1.right_stick_x)
-                    .addData("y", gamepad1.right_stick_y);
-
-            /*
-             * Transmit the telemetry to the driver station, subject to throttling.
-             * See the documentation for Telemetry.getMsTransmissionInterval() for more information.
-             */
-            telemetry.update();
-
-            // Update loop info
-            loopCount++;
-        }
+    /*
+     * Wait until we've been given the ok to go. For something to do, we emit the
+     * elapsed time as we sit here and wait. If we didn't want to do anything while
+     * we waited, we would just call waitForStart().
+     */
+    while (!isStarted()) {
+      telemetry.addData("time", "%.1f seconds", opmodeRunTime.seconds());
+      telemetry.update();
+      idle();
     }
 
-    // emits a line of poetry to the telemetry log
-    void emitPoemLine() {
-        telemetry.log().add(poem[poemLine]);
-        poemLine = (poemLine+1) % poem.length;
-        poemElapsed.reset();
-    }
+    // Ok, we've been given the ok to go
 
-    // Computes the current battery voltage
-    double getBatteryVoltage() {
-        double result = Double.POSITIVE_INFINITY;
-        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
-            double voltage = sensor.getVoltage();
-            if (voltage > 0) {
-                result = Math.min(result, voltage);
-            }
-        }
-        return result;
+    /*
+     * As an illustration, the first line on our telemetry display will display the battery voltage.
+     * The idea here is that it's expensive to compute the voltage (at least for purposes of illustration)
+     * so you don't want to do it unless the data is _actually_ going to make it to the
+     * driver station (recall that telemetry transmission is throttled to reduce bandwidth use.
+     * Note that getBatteryVoltage() below returns 'Infinity' if there's no voltage sensor attached.
+     *
+     * @see Telemetry#getMsTransmissionInterval()
+     */
+    telemetry.addData(
+        "voltage",
+        "%.1f volts",
+        new Func<Double>() {
+          @Override
+          public Double value() {
+            return getBatteryVoltage();
+          }
+        });
+
+    // Reset to keep some timing stats for the post-'start' part of the OpMode
+    opmodeRunTime.reset();
+    int loopCount = 1;
+
+    // Go go gadget robot!
+    while (opModeIsActive()) {
+
+      // Emit poetry if it's been a while
+      if (poemElapsed.seconds() > sPoemInterval) {
+        emitPoemLine();
+      }
+
+      // As an illustration, show some loop timing information
+      telemetry.addData("loop count", loopCount);
+      telemetry.addData("ms/loop", "%.3f ms", opmodeRunTime.milliseconds() / loopCount);
+
+      // Show joystick information as some other illustrative data
+      telemetry
+          .addLine("left joystick | ")
+          .addData("x", gamepad1.left_stick_x)
+          .addData("y", gamepad1.left_stick_y);
+      telemetry
+          .addLine("right joystick | ")
+          .addData("x", gamepad1.right_stick_x)
+          .addData("y", gamepad1.right_stick_y);
+
+      /*
+       * Transmit the telemetry to the driver station, subject to throttling.
+       * See the documentation for Telemetry.getMsTransmissionInterval() for more information.
+       */
+      telemetry.update();
+
+      // Update loop info
+      loopCount++;
     }
+  }
+
+  // emits a line of poetry to the telemetry log
+  void emitPoemLine() {
+    telemetry.log().add(poem[poemLine]);
+    poemLine = (poemLine + 1) % poem.length;
+    poemElapsed.reset();
+  }
+
+  // Computes the current battery voltage
+  double getBatteryVoltage() {
+    double result = Double.POSITIVE_INFINITY;
+    for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+      double voltage = sensor.getVoltage();
+      if (voltage > 0) {
+        result = Math.min(result, voltage);
+      }
+    }
+    return result;
+  }
 }
