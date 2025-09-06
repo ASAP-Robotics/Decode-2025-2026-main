@@ -273,7 +273,7 @@ public class FtcRobotControllerActivity extends Activity {
 
     RobotLog
         .onApplicationStart(); // robustify against onCreate() following onDestroy() but using the
-                               // same app instance, which apparently does happen
+    // same app instance, which apparently does happen
     RobotLog.vv(TAG, "onCreate()");
     ThemedActivity.appAppThemeToActivity(
         getTag(), this); // do this way instead of inherit to help AppInventor
