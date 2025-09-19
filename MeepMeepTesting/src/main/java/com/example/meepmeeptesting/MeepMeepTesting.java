@@ -15,7 +15,7 @@ public class MeepMeepTesting {
     MeepMeep meepMeep = new MeepMeep(800);
     Image img = null;
     try {
-      img = ImageIO.read(new File("C:\\Users\\hilly\\OneDrive\\Documents\\field.png"));
+      img = ImageIO.read(new File("MeepMeepTesting/assets/field.png"));
     } catch (IOException e) {
       e.printStackTrace();
     }
