@@ -26,27 +26,27 @@ public class MeepMeepTesting {
             .setConstraints(100, 50, Math.toRadians(180), Math.toRadians(180), 15)
             .build();
 
-    myBot.runAction(
+   /* myBot.runAction(
         myBot
             .getDrive()
-            .actionBuilder(new Pose2d(61.5, 30, Math.toRadians(180)))
-                .splineTo(new Vector2d(-20,-20),Math.toRadians(220))
+            .actionBuilder(new Pose2d(61.5, -30, Math.toRadians(180)))
+                .splineTo(new Vector2d(-20,20),Math.toRadians(-220))
                 .waitSeconds(3)
-                .splineTo(new Vector2d(48,47),Math.toRadians(180))
-                .splineTo(new Vector2d(40,47),Math.toRadians(180)) // i want this to be slower
-                .splineTo(new Vector2d(-20,-20),Math.toRadians(220))
+                .splineTo(new Vector2d(48,-47),Math.toRadians(180))
+                .splineTo(new Vector2d(40,-47),Math.toRadians(180)) // i want this to be slower
+                .splineTo(new Vector2d(-20,20),Math.toRadians(-220))
                 .waitSeconds(3)
 
-                .splineTo(new Vector2d(20,47),Math.toRadians(180))
-                .splineTo(new Vector2d(12,47),Math.toRadians(180))
-                .splineTo(new Vector2d(-20,-20),Math.toRadians(220))
-                .waitSeconds(3)
-               /* .splineTo(new Vector2d(0,47),Math.toRadians(180))
+                .splineTo(new Vector2d(20,-47),Math.toRadians(180))
+                .splineTo(new Vector2d(12,-47),Math.toRadians(180))
+                .splineTo(new Vector2d(-20,20),Math.toRadians(-220))
+                .waitSeconds(3) */
+                /*.splineTo(new Vector2d(0,47),Math.toRadians(180))
                 .splineTo(new Vector2d(-8,47),Math.toRadians(180))
                 .splineTo(new Vector2d(-20,-20),Math.toRadians(220))
-                .waitSeconds(3)*/
-                .build());
-    /*myBot.runAction(
+                .waitSeconds(3)
+                .build());*/
+    myBot.runAction(
             myBot
                     .getDrive()
                     .actionBuilder(new Pose2d(58, 26, Math.toRadians(210)))
@@ -63,7 +63,7 @@ public class MeepMeepTesting {
                     .splineTo(new Vector2d(-8,47),Math.toRadians(180))
                     .splineTo(new Vector2d(58, 26), Math.toRadians(210))
                     .waitSeconds(3)
-                    .build()); */
+                    .build());
     meepMeep.setBackground(img)
             .setDarkMode(true)
             .setBackgroundAlpha(0.95f)
