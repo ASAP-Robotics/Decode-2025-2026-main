@@ -36,8 +36,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-
-import java.lang.Math;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +59,7 @@ public final class MecanumDrive {
         RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
 
     // drive model parameters
-    public double inPerTick = 55828/110;
+    public double inPerTick = 55828 / 110;
     public double lateralInPerTick = inPerTick;
     public double trackWidthTicks = 0;
 
