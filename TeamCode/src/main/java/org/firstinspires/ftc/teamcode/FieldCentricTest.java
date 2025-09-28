@@ -105,6 +105,8 @@ public class FieldCentricTest extends LinearOpMode {
     // backRight.setDirection(DcMotor.Direction.REVERSE);
 
     flywheel = new Flywheel((DcMotorEx) flywheelMotor);
+    flywheel.idle(); // set the flywheel to spin at idle speed
+    flywheel.enable(); // let flywheel spin up
 
     moveTimer.reset();
     feederTimer.reset();
@@ -172,9 +174,10 @@ public class FieldCentricTest extends LinearOpMode {
 
       // Flywheel control (replace 100 with real distance in inches)
       if (gamepad1.right_trigger > 0.25) {
-        flywheel.startMotor(100);
+        flywheel.setTargetDistance(100); // target 100 inches away
+        flywheel.activate(); // let the flywheel spin up from idle speeds
       } else {
-        flywheel.stopMotor();
+        flywheel.idle(); // idle the flywheel
       }
 
       // Which chamber is at shooter (intake at currentSlot; shooter +2 steps CW)
@@ -283,5 +286,7 @@ public class FieldCentricTest extends LinearOpMode {
       // telemetry.addData("Heading (deg)", Math.toDegrees(botHeading));
       telemetry.update();
     }
+
+    flywheel.disable(); // stop the flywheel
   }
 }
