@@ -83,7 +83,8 @@ public class FieldCentricTest extends LinearOpMode {
   private Servo feeder;
   private DistanceSensor range;
   private Flywheel flywheel;
-
+  private boolean xPrev = false;   // for rising-edge detect
+  private boolean xToggle = false; // the thing you're toggling
   @Override
   public void runOpMode() {
     // Initialize motors/servos/sensors
@@ -123,7 +124,12 @@ public class FieldCentricTest extends LinearOpMode {
     waitForStart();
 
     while (opModeIsActive()) {
-
+      // --- X toggle ---
+      boolean xNow = gamepad1.x;
+      if (xNow && !xPrev) {        // rising edge
+        xToggle = !xToggle;      // flip the state
+      }
+      xPrev = xNow;
       if (runtime.milliseconds() - lastMoveTime > MOVE_DELAY) {
         int red = colorSensor.red();
         int green = colorSensor.green();
@@ -180,55 +186,75 @@ public class FieldCentricTest extends LinearOpMode {
         boolean aNow = gamepad1.a;
         boolean aPressed = aNow && !aPrev;
         aPrev = aNow;
-
-        String shootColor = slots[shootIdx];
-
-        // Set current wanted from sequence (for checks & telemetry)
-        colorWanted = currentWanted();
-
-        // Feed if correct color AND A pressed
-        if (aPressed && matchesWanted(shootColor)) {
-          feeder.setPosition(FEED_UP_POS);
-          feederTimer.reset();
-          feederActive = true;
-
-          // consume ball
-          slots[shootIdx] = null;
+        if(xToggle) {
 
 
-          advanceWanted();
-        }
+          String shootColor = slots[shootIdx];
 
-        // Auto-return feeder
-        if (feederActive && feederTimer.milliseconds() > FEED_HOLD_MS) {
-          feeder.setPosition(FEED_DOWN_POS);
-          feederActive = false;
-        }
-      boolean hasWantedColor =
-              matchesWanted(slots[0]) ||
-                      matchesWanted(slots[1]) ||
-                      matchesWanted(slots[2]);
-        // If wrong color at shooter, step mag with cooldown
-        if ((shootColor == null && hasWantedColor)|| (!matchesWanted(shootColor) && shootColor != null)) {
-          if (moveTimer.milliseconds() > MOVE_COOLDOWN_MS) {
-            currentSlot = (currentSlot + 1) % 3;
-            magServo.setPosition(positions[currentSlot]);
-            moveTimer.reset();
+          // Set current wanted from sequence (for checks & telemetry)
+          colorWanted = currentWanted();
+
+          // Feed if correct color AND A pressed
+          if (aPressed && matchesWanted(shootColor)) {
+            feeder.setPosition(FEED_UP_POS);
+            feederTimer.reset();
+            feederActive = true;
+
+            // consume ball
+            slots[shootIdx] = null;
+
+
+            advanceWanted();
+          }
+
+          // Auto-return feeder
+          if (feederActive && feederTimer.milliseconds() > FEED_HOLD_MS) {
+            feeder.setPosition(FEED_DOWN_POS);
+            feederActive = false;
+          }
+          boolean hasWantedColor =
+                  matchesWanted(slots[0]) ||
+                          matchesWanted(slots[1]) ||
+                          matchesWanted(slots[2]);
+          // If wrong color at shooter, step mag with cooldown
+          if ((shootColor == null && hasWantedColor) || (!matchesWanted(shootColor) && shootColor != null)) {
+            if (moveTimer.milliseconds() > MOVE_COOLDOWN_MS) {
+              currentSlot = (currentSlot + 1) % 3;
+              magServo.setPosition(positions[currentSlot]);
+              moveTimer.reset();
+            }
+          }
+          telemetry.addData("ShootColor", shootColor);
+          // Intake logic: reverse if full, else manual
+          int filled = countBalls();
+          if (filled >= 3) {
+            intake.setPower(-0.5);              // reject extras
+          } else if (gamepad1.left_trigger > 0.25) {
+            intake.setPower(0.5);               // intake
+          } else if (gamepad1.b) {
+            intake.setPower(0.0);               // stop
+          } else {
+            intake.setPower(0.0);
           }
         }
+        else {
+          if (aPressed) {
+            feeder.setPosition(FEED_UP_POS);
+            feederTimer.reset();
+            feederActive = true;
 
-        // Intake logic: reverse if full, else manual
-        int filled = countBalls();
-        if (filled >= 3 ) {
-          intake.setPower(-0.5);              // reject extras
-        } else if (gamepad1.left_trigger > 0.25) {
-          intake.setPower(0.5);               // intake
-        } else if (gamepad1.b) {
-          intake.setPower(0.0);               // stop
-        } else {
-          intake.setPower(0.0);
+            // consume ball
+            slots[shootIdx] = null;
+
+
+            advanceWanted();
+          }
+
+          if (feederActive && feederTimer.milliseconds() > FEED_HOLD_MS) {
+            feeder.setPosition(FEED_DOWN_POS);
+            feederActive = false;
+          }
         }
-
         // --- Field-centric drive ---
        /* double y = -gamepad1.left_stick_y; // Forward/back
         double x = gamepad1.left_stick_x;  // Strafe
@@ -256,7 +282,7 @@ public class FieldCentricTest extends LinearOpMode {
         telemetry.addData("Seq idx", wantedIdx);
         telemetry.addData("Slots", "%s | %s | %s", slots[0], slots[1], slots[2]);
         telemetry.addData("ShootIdx", shootIdx);
-        telemetry.addData("ShootColor", shootColor);
+
         telemetry.addData("ball[0]", slots[0]);
         telemetry.addData("ball[1]", slots[1]);
         telemetry.addData("ball[2]", slots[2]);
