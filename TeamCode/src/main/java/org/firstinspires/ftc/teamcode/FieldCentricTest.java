@@ -206,8 +206,8 @@ public class FieldCentricTest extends LinearOpMode {
       if (xToggle) {
 
         // Button edge
-          aNow = gamepad1.a;
-          aPressed = aNow && !aPrev;
+        aNow = gamepad1.a;
+        aPressed = aNow && !aPrev;
         aPrev = aNow;
 
         String shootColor = slots[shootIdx];
