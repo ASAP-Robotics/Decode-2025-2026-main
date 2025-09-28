@@ -7,7 +7,8 @@ public class Flywheel {
   private final DcMotorEx flywheel;
   private static final double G = 9.81;
   private static boolean flywheel_isEnabled = false; // /< if the flywheel is enabled
-
+  private static boolean flywheel_isActive = true; // /< if the flywheel is active (as opposed to idling)
+  private static double flywheel_idleSpeed; // /< the speed (RPM) of the flywheel when idle
   private static double flywheel_distance = 0; // /< the distance (inches) to the target
 
   // ---- set these to match your robot ----
@@ -18,11 +19,25 @@ public class Flywheel {
   // ---- friction/slip lumped into one factor (0<eff<=1). Start ~0.90 and tune. ----
   private static final double EFFICIENCY = 0.90;
 
+  /**
+   * @brief makes an object of the Flywheel class with and idle speed of 500 RPM
+   * @param motor the motor used for the flywheel
+   */
   public Flywheel(DcMotorEx motor) {
+    this(motor, 500); // make a Flywheel with an idle speed of 500 RPM
+  }
+
+  /**
+   * @brief makes an object of the Flywheel class
+   * @param motor the motor used for the flywheel
+   * @param idleSpeed the speed of the flywheel when idling (RPM)
+   */
+  public Flywheel(DcMotorEx motor, double idleSpeed) {
     motor.setZeroPowerBehavior(
-        DcMotorEx.ZeroPowerBehavior.BRAKE); // brake if zero power (motor stoped)
+            DcMotorEx.ZeroPowerBehavior.BRAKE); // brake if zero power (motor stoped)
     this.flywheel = motor;
     this.flywheel.setDirection(DcMotorSimple.Direction.FORWARD);
+    flywheel_idleSpeed = idleSpeed; // set the speed of the flywheel at idle
   }
 
   /**
@@ -54,6 +69,49 @@ public class Flywheel {
   }
 
   /**
+   * @brief sets if the flywheel is active (as opposed to idling)
+   * @param isActive The new activity state, true if active, false if idling
+   * @return the old activation state, true if active, false if idling
+   */
+  public boolean setActive(boolean isActive) {
+    boolean toReturn = flywheel_isActive; // store the old activation state
+    flywheel_isActive = isActive; // update if the flywheel is active or idling
+    update(); // apply any changes
+    return toReturn; // return the old activation state
+  }
+
+  /**
+   * @brief activate the flywheel (spin it up to full speed from idle speed)
+   * @return the old activation state of the flywheel (true if active, false if idle)
+   */
+  public boolean activate() {
+    return setActive(true);
+  }
+
+  /**
+   * @brief idles the flywheel (lower it to idle speed from full speed)
+   * @return the old activation state of the flywheel (true if active, false if idle)
+   */
+  public boolean idle() {
+    return setActive(false);
+  }
+
+  public double setIdleSpeed(double idleSpeed) {
+    double toReturn = flywheel_idleSpeed; // store the old idle speed
+    flywheel_idleSpeed = idleSpeed; // set the new flywheel idle speed
+    update(); // apply any changes
+    return toReturn; // return the old idle speed
+  }
+
+  /**
+   * returns the speed of the flywheel when idle
+   * @return the idle speed of the flywheel, in RPM
+   */
+  public double getIdleSpeed() {
+    return flywheel_idleSpeed; // return the idle speed
+  }
+
+  /**
    * @brief sets the distance to the target
    * @param distInches the new distance to the target, in inches
    * @return the old distance to the target, in inches
@@ -78,10 +136,24 @@ public class Flywheel {
    */
   private void update() {
     if (flywheel_isEnabled) {
-      startMotor(); // set the motor to the correct speed
+      if (flywheel_isActive) {
+        startMotor(); // set the motor to the correct speed
+      } else {
+        idleMotor(); // set the motor to idling speeds
+      }
     } else {
       stopMotor(); // stop the flywheel
     }
+  }
+
+  /**
+   * @brief sets the motor to the idle speed
+   * @note use setIdleSpeed() to set the idle speed
+   */
+  private void idleMotor() {
+    double ticksPerRev = flywheel.getMotorType().getTicksPerRev();
+    double ticksPerSec = (flywheel_idleSpeed / 60.0) * ticksPerRev;
+    flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
   }
 
   /**
