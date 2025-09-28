@@ -165,9 +165,10 @@ public class FieldCentricTest extends LinearOpMode {
 
       // Flywheel control (replace 100 with real distance in inches)
       if (gamepad1.right_trigger > 0.25) {
-        flywheel.startMotor(100);
+        flywheel.setTargetDistance(100); // target 100 inches away
+        flywheel.enable(); // let the flywheel spin up
       } else {
-        flywheel.stopMotor();
+        flywheel.disable(); // stop th flywheel
       }
 
       // Which chamber is at shooter (intake at currentSlot; shooter +2 steps CW)
