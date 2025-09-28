@@ -6,9 +6,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class Flywheel {
   private final DcMotorEx flywheel;
   private static final double G = 9.81;
-  private static boolean flywheel_isEnabled = false; ///< if the flywheel is enabled
+  private static boolean flywheel_isEnabled = false; // /< if the flywheel is enabled
 
-  private static double flywheel_distance = 0; ///< the distance (inches) to the target
+  private static double flywheel_distance = 0; // /< the distance (inches) to the target
 
   // ---- set these to match your robot ----
   private static final double ANGLE_DEG = 45.0; // shooter pitch
@@ -19,7 +19,8 @@ public class Flywheel {
   private static final double EFFICIENCY = 0.90;
 
   public Flywheel(DcMotorEx motor) {
-    motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE); // brake if zero power (motor stoped)
+    motor.setZeroPowerBehavior(
+        DcMotorEx.ZeroPowerBehavior.BRAKE); // brake if zero power (motor stoped)
     this.flywheel = motor;
     this.flywheel.setDirection(DcMotorSimple.Direction.FORWARD);
   }
