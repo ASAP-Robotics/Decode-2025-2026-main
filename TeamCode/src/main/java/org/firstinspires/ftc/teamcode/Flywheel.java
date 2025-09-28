@@ -7,7 +7,8 @@ public class Flywheel {
   private final DcMotorEx flywheel;
   private static final double G = 9.81;
   private static boolean flywheel_isEnabled = false; // /< if the flywheel is enabled
-  private static boolean flywheel_isActive = true; // /< if the flywheel is active (as opposed to idling)
+  private static boolean flywheel_isActive =
+      true; // /< if the flywheel is active (as opposed to idling)
   private static double flywheel_idleSpeed; // /< the speed (RPM) of the flywheel when idle
   private static double flywheel_distance = 0; // /< the distance (inches) to the target
 
@@ -34,7 +35,7 @@ public class Flywheel {
    */
   public Flywheel(DcMotorEx motor, double idleSpeed) {
     motor.setZeroPowerBehavior(
-            DcMotorEx.ZeroPowerBehavior.BRAKE); // brake if zero power (motor stoped)
+        DcMotorEx.ZeroPowerBehavior.BRAKE); // brake if zero power (motor stoped)
     this.flywheel = motor;
     this.flywheel.setDirection(DcMotorSimple.Direction.FORWARD);
     flywheel_idleSpeed = idleSpeed; // set the speed of the flywheel at idle
@@ -105,6 +106,7 @@ public class Flywheel {
 
   /**
    * returns the speed of the flywheel when idle
+   *
    * @return the idle speed of the flywheel, in RPM
    */
   public double getIdleSpeed() {
