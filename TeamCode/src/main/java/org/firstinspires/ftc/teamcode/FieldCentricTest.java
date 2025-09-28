@@ -186,19 +186,21 @@ public class FieldCentricTest extends LinearOpMode {
       aPrev = aNow;
       if (xToggle) {
 
-        String shootColor = slots[shootIdx];
+      // Button edge
+      boolean aNow = gamepad1.a;
+      boolean aPressed = aNow && !aPrev;
+      aPrev = aNow;
 
-        // Set current wanted from sequence (for checks & telemetry)
-        colorWanted = currentWanted();
+      String shootColor = slots[shootIdx];
 
-        // Feed if correct color AND A pressed
-        if (aPressed && matchesWanted(shootColor)) {
-          feeder.setPosition(FEED_UP_POS);
-          feederTimer.reset();
-          feederActive = true;
+      // Set current wanted from sequence (for checks & telemetry)
+      colorWanted = currentWanted();
 
-          // consume ball
-          slots[shootIdx] = null;
+      // Feed if correct color AND A pressed
+      if (aPressed && matchesWanted(shootColor)) {
+        feeder.setPosition(FEED_UP_POS);
+        feederTimer.reset();
+        feederActive = true;
 
           advanceWanted();
         }
@@ -275,7 +277,6 @@ public class FieldCentricTest extends LinearOpMode {
       telemetry.addData("Seq idx", wantedIdx);
       telemetry.addData("Slots", "%s | %s | %s", slots[0], slots[1], slots[2]);
       telemetry.addData("ShootIdx", shootIdx);
-
       telemetry.addData("ball[0]", slots[0]);
       telemetry.addData("ball[1]", slots[1]);
       telemetry.addData("ball[2]", slots[2]);
