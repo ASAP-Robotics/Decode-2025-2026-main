@@ -24,7 +24,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -37,19 +36,21 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class FieldCentricTest extends LinearOpMode {
   private Servo magServo;
 
-  private final long MAG_SETTLE_MS = 200;   // tune
+  private final long MAG_SETTLE_MS = 200; // tune
   private ElapsedTime magTimer = new ElapsedTime();
 
-  private boolean waitMagThenFeed = false;  // are we waiting to feed after rotating?
-  private int pendingShootIdx = -1;         // which slot will be at the shooter when we feed
+  private boolean waitMagThenFeed = false; // are we waiting to feed after rotating?
+  private int pendingShootIdx = -1; // which slot will be at the shooter when we feed
 
-  private String colorWanted;                 // will be set each loop from sequence
+  private String colorWanted; // will be set each loop from sequence
   private String[] slots = new String[3];
   private int currentSlot = 0;
-  private boolean rejectAfterFull = false;  // auto-reject window active?
+  private boolean rejectAfterFull = false; // auto-reject window active?
   private int prevFilled = 0;
-  private com.qualcomm.robotcore.util.ElapsedTime feederTimer = new com.qualcomm.robotcore.util.ElapsedTime();
-  private com.qualcomm.robotcore.util.ElapsedTime intakeTimer = new com.qualcomm.robotcore.util.ElapsedTime();
+  private com.qualcomm.robotcore.util.ElapsedTime feederTimer =
+      new com.qualcomm.robotcore.util.ElapsedTime();
+  private com.qualcomm.robotcore.util.ElapsedTime intakeTimer =
+      new com.qualcomm.robotcore.util.ElapsedTime();
   private com.qualcomm.robotcore.util.ElapsedTime moveTimer =
       new com.qualcomm.robotcore.util.ElapsedTime();
   private static final long MOVE_COOLDOWN_MS = 250;
@@ -85,6 +86,7 @@ public class FieldCentricTest extends LinearOpMode {
     return (w.equals("PURPLE") && (s.equals("PURPLE") || s.equals("P")))
         || (w.equals("GREEN") && (s.equals("GREEN") || s.equals("G")));
   }
+
   // slot i is the wanted color?
   private boolean hasWantedAt(int i) {
     String s = slots[i];
@@ -102,14 +104,15 @@ public class FieldCentricTest extends LinearOpMode {
   // closest to shooter ((currentSlot+2)%3), or -1
   private int wantedNearIndex() {
     int shoot = (currentSlot + 2) % 3;
-    int next  = (shoot + 1) % 3;
+    int next = (shoot + 1) % 3;
     int next2 = (shoot + 2) % 3;
 
     if (hasWantedAt(shoot)) return shoot;
-    if (hasWantedAt(next))  return next;
+    if (hasWantedAt(next)) return next;
     if (hasWantedAt(next2)) return next2;
     return -1;
   }
+
   private int countBalls() {
     int n = 0;
     for (String s : slots) if (s != null) n++;
@@ -237,63 +240,62 @@ public class FieldCentricTest extends LinearOpMode {
       // Which chamber is at shooter (intake at currentSlot; shooter +2 steps CW)
       int shootIdx = (currentSlot + 2) % 3;
 
-        // Button edge
-        boolean aNow = gamepad1.a;
-        boolean aPressed = aNow && !aPrev;
-        aPrev = aNow;
+      // Button edge
+      boolean aNow = gamepad1.a;
+      boolean aPressed = aNow && !aPrev;
+      aPrev = aNow;
       int filled = countBalls();
       if (prevFilled < 3 && filled == 3) {
         rejectAfterFull = true;
         intakeTimer.reset();
       }
-      if(slots[1] == null){
+      if (slots[1] == null) {
         slots[1] = "None";
       }
-      if(slots[2] == null){
+      if (slots[2] == null) {
         slots[2] = "None";
       }
-      if(slots[0] == null){
+      if (slots[0] == null) {
         slots[0] = "None";
       }
-        // sorting
-        if(xToggle) {
-
+      // sorting
+      if (xToggle) {
 
         String shootColor = slots[shootIdx];
 
         // Set current wanted from sequence (for checks & telemetry)
         colorWanted = currentWanted();
 
-          // Feed if correct color AND A pressed
-          if (aPressed) {
-            int targetIdx = wantedNearIndex();        // 0..2 or -1
-            if (targetIdx != -1) {
-              // Rotate mag first
-              magServo.setPosition(positions[(targetIdx + 2) %3]);
-              currentSlot = (currentSlot + 1 + targetIdx) % 3;
-              // Arm the "feed after delay"
-              waitMagThenFeed = true;
-              pendingShootIdx = (targetIdx + 2) % 3;   // your shooter is +2 from mag index
-              magTimer.reset();
-            }
+        // Feed if correct color AND A pressed
+        if (aPressed) {
+          int targetIdx = wantedNearIndex(); // 0..2 or -1
+          if (targetIdx != -1) {
+            // Rotate mag first
+            magServo.setPosition(positions[(targetIdx + 2) % 3]);
+            currentSlot = (currentSlot + 1 + targetIdx) % 3;
+            // Arm the "feed after delay"
+            waitMagThenFeed = true;
+            pendingShootIdx = (targetIdx + 2) % 3; // your shooter is +2 from mag index
+            magTimer.reset();
+          }
+        }
+
+        if (waitMagThenFeed && magTimer.milliseconds() > MAG_SETTLE_MS) {
+          feeder.setPosition(FEED_UP_POS);
+          feederTimer.reset();
+          feederActive = true;
+
+          // consume ball at shooter
+          if (pendingShootIdx != -1) {
+            slots[pendingShootIdx] = null; // leave your "None" policy if you prefer
           }
 
-          if (waitMagThenFeed && magTimer.milliseconds() > MAG_SETTLE_MS) {
-            feeder.setPosition(FEED_UP_POS);
-            feederTimer.reset();
-            feederActive = true;
+          advanceWanted();
 
-            // consume ball at shooter
-            if (pendingShootIdx != -1) {
-              slots[pendingShootIdx] = null;   // leave your "None" policy if you prefer
-            }
-
-            advanceWanted();
-
-            // clear one-shot state
-            waitMagThenFeed = false;
-            pendingShootIdx = -1;
-          }
+          // clear one-shot state
+          waitMagThenFeed = false;
+          pendingShootIdx = -1;
+        }
 
         // Auto-return feeder
         if (feederActive && feederTimer.milliseconds() > FEED_HOLD_MS) {
@@ -311,29 +313,30 @@ public class FieldCentricTest extends LinearOpMode {
             moveTimer.reset();
           }
         }*/
-          telemetry.addData("ShootColor", shootColor);
-          // Intake logic: reverse if full, else manual
+        telemetry.addData("ShootColor", shootColor);
+        // Intake logic: reverse if full, else manual
 
+        double baseIntakePower = 0.0;
+        if (gamepad1.left_trigger > 0.25) {
+          baseIntakePower = 0.5; // normal intake when not rejecting
+        }
 
-
-          double baseIntakePower = 0.0;
-          if (gamepad1.left_trigger > 0.25) {
-          baseIntakePower = 0.5;  // normal intake when not rejecting
+        // Override with reject logic to prevent picking up a 4th ball
+        if (rejectAfterFull) {
+          if (intakeTimer.milliseconds() < 4000) {
+            intake.setPower(-1.0); // spin backward to *block new balls*
+          } else {
+            rejectAfterFull = false;
+            intake.setPower(0.0); // end reject window; stop (or use base next loop)
           }
-
-// Override with reject logic to prevent picking up a 4th ball
-          if (rejectAfterFull) {
-            if (intakeTimer.milliseconds() < 4000) {
-              intake.setPower(-1.0);   // spin backward to *block new balls*
-            } else {
-              rejectAfterFull = false;
-              intake.setPower(0.0);    // end reject window; stop (or use base next loop)
-            }
         } else {
           intake.setPower(baseIntakePower);
         }
-      } else {
+      }
+
+      else {
         if (aPressed) {
+
           feeder.setPosition(FEED_UP_POS);
           feederTimer.reset();
           feederActive = true;
@@ -345,30 +348,30 @@ public class FieldCentricTest extends LinearOpMode {
         }
 
         double baseIntakePower = 0.0;
-          if (gamepad1.left_trigger > 0.25) {
-            baseIntakePower = 0.5;  // normal intake when not rejecting
-          }
-
-// Override with reject logic to prevent picking up a 4th ball
-          if (rejectAfterFull) {
-            if (intakeTimer.milliseconds() < 4000) {
-              intake.setPower(-1.0);   // spin backward to *block new balls*
-            } else {
-              rejectAfterFull = false;
-              intake.setPower(0.0);    // end reject window; stop (or use base next loop)
-            }
-          } else {
-            intake.setPower(baseIntakePower);
-          }
-          if (feederActive && feederTimer.milliseconds() > FEED_HOLD_MS) {
-            feeder.setPosition(FEED_DOWN_POS);
-            feederActive = false;
-          }
+        if (gamepad1.left_trigger > 0.25) {
+          baseIntakePower = 0.5; // normal intake when not rejecting
         }
-        // --- Field-centric drive ---
-       /* double y = -gamepad1.left_stick_y; // Forward/back
-        double x = gamepad1.left_stick_x;  // Strafe
-        double rx = gamepad1.right_stick_x;// Rotation
+
+        // Override with reject logic to prevent picking up a 4th ball
+        if (rejectAfterFull) {
+          if (intakeTimer.milliseconds() < 4000) {
+            intake.setPower(-1.0); // spin backward to *block new balls*
+          } else {
+            rejectAfterFull = false;
+            intake.setPower(0.0); // end reject window; stop (or use base next loop)
+          }
+        } else {
+          intake.setPower(baseIntakePower);
+        }
+        if (feederActive && feederTimer.milliseconds() > FEED_HOLD_MS) {
+          feeder.setPosition(FEED_DOWN_POS);
+          feederActive = false;
+        }
+      }
+      // --- Field-centric drive ---
+      /* double y = -gamepad1.left_stick_y; // Forward/back
+      double x = gamepad1.left_stick_x;  // Strafe
+      double rx = gamepad1.right_stick_x;// Rotation
 
       double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
@@ -385,22 +388,23 @@ public class FieldCentricTest extends LinearOpMode {
       backLeft.setPower(blPower);
       frontRight.setPower(frPower);
       backRight.setPower(brPower); */
-        prevFilled = filled;
+      prevFilled = filled;
       // Telemetry
       telemetry.addData("Wanted now", colorWanted);
       telemetry.addData("Seq", wantedSeq);
       telemetry.addData("Seq idx", wantedIdx);
       telemetry.addData("Slots", "%s | %s | %s", slots[0], slots[1], slots[2]);
       telemetry.addData("ShootIdx", shootIdx);
+
       telemetry.addData("ball[0]", slots[0]);
       telemetry.addData("ball[1]", slots[1]);
       telemetry.addData("ball[2]", slots[2]);
-        telemetry.addData("Rejecting", rejectAfterFull);
-        telemetry.addData("Reject ms left", Math.max(0, 4000 - (int)intakeTimer.milliseconds()));
+      telemetry.addData("Rejecting", rejectAfterFull);
+      telemetry.addData("Reject ms left", Math.max(0, 4000 - (int) intakeTimer.milliseconds()));
       // telemetry.addData("Heading (deg)", Math.toDegrees(botHeading));
       telemetry.update();
     }
 
-    flywheel.disable(); // stop the flywheel
+flywheel.disable(); // stop the flywheel
   }
 }
