@@ -71,7 +71,7 @@ public class Flywheel {
             ? DcMotorEx.ZeroPowerBehavior.FLOAT
             : DcMotorEx.ZeroPowerBehavior
                 .BRAKE); // set behavior if zero power (motor stoped); if enabled, spin freely, if
-                         // disabled, brake
+    // disabled, brake
     update(); // apply any changes
     return toReturn; // return the old enabled state
   }
