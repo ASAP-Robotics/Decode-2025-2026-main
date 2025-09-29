@@ -33,7 +33,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @TeleOp(name = "Field Centric TeleOp", group = "Drive")
-public class FieldCentricTest extends LinearOpMode {
+public class MainOpMode extends LinearOpMode {
   private Servo magServo;
 
   private final long MAG_SETTLE_MS = 200; // tune
