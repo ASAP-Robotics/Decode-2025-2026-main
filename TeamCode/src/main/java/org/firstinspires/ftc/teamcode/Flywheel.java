@@ -17,16 +17,16 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class Flywheel {
   private final DcMotorEx flywheel;
   private static final double G = 9.81;
-  private static boolean flywheel_isEnabled = false; // /< if the flywheel is enabled
-  private static boolean flywheel_isActive =
-      true; // /< if the flywheel is active (as opposed to idling)
-  private static double flywheel_idleSpeed; // /< the speed (RPM) of the flywheel when idle
-  private static double flywheel_distance = 0; // /< the distance (inches) to the target
+  private final double flywheel_ticksPerRev; // /< ticks per revolution of flywheel motor
+  private boolean flywheel_isEnabled = false; // /< if the flywheel is enabled
+  private boolean flywheel_isActive = true; // /< if the flywheel is active (as opposed to idling)
+  private double flywheel_idleSpeed; // /< the speed (RPM) of the flywheel when idle
+  private double flywheel_speed = 0; // /< the latest speed (RPM) of the flywheel
+  private double flywheel_distance = 0; // /< the distance (inches) to the target
 
   // ---- set these to match your robot ----
   private static final double ANGLE_DEG = 45.0; // shooter pitch
@@ -50,10 +50,11 @@ public class Flywheel {
    * @param idleSpeed the speed of the flywheel when idling (RPM)
    */
   public Flywheel(DcMotorEx motor, double idleSpeed) {
-    motor.setZeroPowerBehavior(
-        DcMotorEx.ZeroPowerBehavior.BRAKE); // brake if zero power (motor stoped)
     this.flywheel = motor;
-    this.flywheel.setDirection(DcMotorSimple.Direction.FORWARD);
+    this.flywheel.setZeroPowerBehavior(
+        DcMotorEx.ZeroPowerBehavior.FLOAT); // spin freely if zero power (motor stoped)
+    this.flywheel.setDirection(DcMotorEx.Direction.FORWARD);
+    flywheel_ticksPerRev = this.flywheel.getMotorType().getTicksPerRev(); // get ticks per rev
     flywheel_idleSpeed = idleSpeed; // set the speed of the flywheel at idle
   }
 
@@ -65,6 +66,12 @@ public class Flywheel {
   public boolean setEnabled(boolean isEnabled) {
     boolean toReturn = flywheel_isEnabled; // get the old enabled state
     flywheel_isEnabled = isEnabled; // set the new enabled state
+    this.flywheel.setZeroPowerBehavior(
+        isEnabled
+            ? DcMotorEx.ZeroPowerBehavior.FLOAT
+            : DcMotorEx.ZeroPowerBehavior
+                .BRAKE); // set behavior if zero power (motor stoped); if enabled, spin freely, if
+    // disabled, brake
     update(); // apply any changes
     return toReturn; // return the old enabled state
   }
@@ -151,8 +158,13 @@ public class Flywheel {
 
   /**
    * @brief updates the flywheel, setting the motor to the correct speed
+   * @note call every loop
    */
-  private void update() {
+  public void update() {
+    double ticksPerSec =
+        this.flywheel.getVelocity(); // get the speed of the motor in ticks per second
+    flywheel_speed = (ticksPerSec * 60.0) / flywheel_ticksPerRev; // convert to RPM, store
+
     if (flywheel_isEnabled) {
       if (flywheel_isActive) {
         startMotor(); // set the motor to the correct speed
@@ -169,9 +181,12 @@ public class Flywheel {
    * @note use setIdleSpeed() to set the idle speed
    */
   private void idleMotor() {
-    double ticksPerRev = flywheel.getMotorType().getTicksPerRev();
-    double ticksPerSec = (flywheel_idleSpeed / 60.0) * ticksPerRev;
-    flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
+    if (flywheel_speed <= flywheel_idleSpeed) {
+      double ticksPerSec = (flywheel_idleSpeed / 60.0) * flywheel_ticksPerRev;
+      flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
+    } else {
+      flywheel.setPower(0); // spin freely
+    }
   }
 
   /**
@@ -189,6 +204,7 @@ public class Flywheel {
    * @brief stops the flywheel
    */
   private void stopMotor() {
+    flywheel.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE); // brake if zero power
     flywheel.setPower(0);
   }
 
