@@ -23,8 +23,7 @@ public class Flywheel {
   private static final double G = 9.81;
   private final double flywheel_ticksPerRev; // /< ticks per revolution of flywheel motor
   private boolean flywheel_isEnabled = false; // /< if the flywheel is enabled
-  private boolean flywheel_isActive =
-      true; // /< if the flywheel is active (as opposed to idling)
+  private boolean flywheel_isActive = true; // /< if the flywheel is active (as opposed to idling)
   private double flywheel_idleSpeed; // /< the speed (RPM) of the flywheel when idle
   private double flywheel_speed = 0; // /< the latest speed (RPM) of the flywheel
   private double flywheel_distance = 0; // /< the distance (inches) to the target
@@ -53,7 +52,7 @@ public class Flywheel {
   public Flywheel(DcMotorEx motor, double idleSpeed) {
     this.flywheel = motor;
     this.flywheel.setZeroPowerBehavior(
-            DcMotorEx.ZeroPowerBehavior.FLOAT); // spin freely if zero power (motor stoped)
+        DcMotorEx.ZeroPowerBehavior.FLOAT); // spin freely if zero power (motor stoped)
     this.flywheel.setDirection(DcMotorEx.Direction.FORWARD);
     flywheel_ticksPerRev = this.flywheel.getMotorType().getTicksPerRev(); // get ticks per rev
     flywheel_idleSpeed = idleSpeed; // set the speed of the flywheel at idle
@@ -68,7 +67,11 @@ public class Flywheel {
     boolean toReturn = flywheel_isEnabled; // get the old enabled state
     flywheel_isEnabled = isEnabled; // set the new enabled state
     this.flywheel.setZeroPowerBehavior(
-            isEnabled ? DcMotorEx.ZeroPowerBehavior.FLOAT : DcMotorEx.ZeroPowerBehavior.BRAKE); // set behavior if zero power (motor stoped); if enabled, spin freely, if disabled, brake
+        isEnabled
+            ? DcMotorEx.ZeroPowerBehavior.FLOAT
+            : DcMotorEx.ZeroPowerBehavior
+                .BRAKE); // set behavior if zero power (motor stoped); if enabled, spin freely, if
+                         // disabled, brake
     update(); // apply any changes
     return toReturn; // return the old enabled state
   }
@@ -158,7 +161,8 @@ public class Flywheel {
    * @note call every loop
    */
   public void update() {
-    double ticksPerSec = this.flywheel.getVelocity(); // get the speed of the motor in ticks per second
+    double ticksPerSec =
+        this.flywheel.getVelocity(); // get the speed of the motor in ticks per second
     flywheel_speed = (ticksPerSec * 60.0) / flywheel_ticksPerRev; // convert to RPM, store
 
     if (flywheel_isEnabled) {
