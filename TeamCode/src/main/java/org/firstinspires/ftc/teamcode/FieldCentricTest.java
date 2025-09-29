@@ -20,11 +20,20 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 @TeleOp(name = "Field Centric TeleOp", group = "Drive")
 public class FieldCentricTest extends LinearOpMode {
   private Servo magServo;
+
+  private final long MAG_SETTLE_MS = 200;   // tune
+  private ElapsedTime magTimer = new ElapsedTime();
+
+  private boolean waitMagThenFeed = false;  // are we waiting to feed after rotating?
+  private int pendingShootIdx = -1;         // which slot will be at the shooter when we feed
+
   private String colorWanted;                 // will be set each loop from sequence
   private String[] slots = new String[3];
   private int currentSlot = 0;
-
+  private boolean rejectAfterFull = false;  // auto-reject window active?
+  private int prevFilled = 0;
   private com.qualcomm.robotcore.util.ElapsedTime feederTimer = new com.qualcomm.robotcore.util.ElapsedTime();
+  private com.qualcomm.robotcore.util.ElapsedTime intakeTimer = new com.qualcomm.robotcore.util.ElapsedTime();
   private com.qualcomm.robotcore.util.ElapsedTime moveTimer   = new com.qualcomm.robotcore.util.ElapsedTime();
   private static final long MOVE_COOLDOWN_MS = 250;
   private static final long FEED_HOLD_MS     = 300;
@@ -56,11 +65,39 @@ public class FieldCentricTest extends LinearOpMode {
     return (w.equals("PURPLE") && (s.equals("PURPLE") || s.equals("P")))
             || (w.equals("GREEN")  && (s.equals("GREEN")  || s.equals("G")));
   }
-  private int countBalls() {
-    int n = 0;
-    for (String s : slots) if (s != null) n++;
-    return n;
+  // slot i is the wanted color?
+  private boolean hasWantedAt(int i) {
+    String s = slots[i];
+    return s != null && !"None".equalsIgnoreCase(s) && matchesWanted(s);
   }
+
+  // any slot with wanted color (0..2), or -1
+  private int wantedIndex() {
+    if (hasWantedAt(0)) return 0;
+    if (hasWantedAt(1)) return 1;
+    if (hasWantedAt(2)) return 2;
+    return -1;
+  }
+
+  // closest to shooter ((currentSlot+2)%3), or -1
+  private int wantedNearIndex() {
+    int shoot = (currentSlot + 2) % 3;
+    int next  = (shoot + 1) % 3;
+    int next2 = (shoot + 2) % 3;
+
+    if (hasWantedAt(shoot)) return shoot;
+    if (hasWantedAt(next))  return next;
+    if (hasWantedAt(next2)) return next2;
+    return -1;
+  }
+  private int countBalls() {
+    int c0 = (slots[0] != null && !"None".equalsIgnoreCase(slots[0])) ? 1 : 0;
+    int c1 = (slots[1] != null && !"None".equalsIgnoreCase(slots[1])) ? 1 : 0;
+    int c2 = (slots[2] != null && !"None".equalsIgnoreCase(slots[2])) ? 1 : 0;
+    return c0 + c1 + c2;
+  }
+
+
 
   // hardware/state
   private boolean feederActive = false;
@@ -106,6 +143,7 @@ public class FieldCentricTest extends LinearOpMode {
 
     moveTimer.reset();
     feederTimer.reset();
+    intakeTimer.reset();
     feeder.setPosition(FEED_DOWN_POS);
 
     // IMU
@@ -186,6 +224,21 @@ public class FieldCentricTest extends LinearOpMode {
         boolean aNow = gamepad1.a;
         boolean aPressed = aNow && !aPrev;
         aPrev = aNow;
+      int filled = countBalls();
+      if (prevFilled < 3 && filled == 3) {
+        rejectAfterFull = true;
+        intakeTimer.reset();
+      }
+      if(slots[1] == null){
+        slots[1] = "None";
+      }
+      if(slots[2] == null){
+        slots[2] = "None";
+      }
+      if(slots[0] == null){
+        slots[0] = "None";
+      }
+        // sorting
         if(xToggle) {
 
 
@@ -195,16 +248,34 @@ public class FieldCentricTest extends LinearOpMode {
           colorWanted = currentWanted();
 
           // Feed if correct color AND A pressed
-          if (aPressed && matchesWanted(shootColor)) {
+          if (aPressed) {
+            int targetIdx = wantedNearIndex();        // 0..2 or -1
+            if (targetIdx != -1) {
+              // Rotate mag first
+              magServo.setPosition(positions[(targetIdx + 2) %3]);
+              currentSlot = (currentSlot + 1 + targetIdx) % 3;
+              // Arm the "feed after delay"
+              waitMagThenFeed = true;
+              pendingShootIdx = (targetIdx + 2) % 3;   // your shooter is +2 from mag index
+              magTimer.reset();
+            }
+          }
+
+          if (waitMagThenFeed && magTimer.milliseconds() > MAG_SETTLE_MS) {
             feeder.setPosition(FEED_UP_POS);
             feederTimer.reset();
             feederActive = true;
 
-            // consume ball
-            slots[shootIdx] = null;
-
+            // consume ball at shooter
+            if (pendingShootIdx != -1) {
+              slots[pendingShootIdx] = null;   // leave your "None" policy if you prefer
+            }
 
             advanceWanted();
+
+            // clear one-shot state
+            waitMagThenFeed = false;
+            pendingShootIdx = -1;
           }
 
           // Auto-return feeder
@@ -217,28 +288,39 @@ public class FieldCentricTest extends LinearOpMode {
                           matchesWanted(slots[1]) ||
                           matchesWanted(slots[2]);
           // If wrong color at shooter, step mag with cooldown
-          if ((shootColor == null && hasWantedColor) || (!matchesWanted(shootColor) && shootColor != null)) {
+          /*if ((shootColor == null && hasWantedColor) || (!matchesWanted(shootColor) && shootColor != null)) {
             if (moveTimer.milliseconds() > MOVE_COOLDOWN_MS) {
               currentSlot = (currentSlot + 1) % 3;
               magServo.setPosition(positions[currentSlot]);
               moveTimer.reset();
             }
-          }
+          }*/
           telemetry.addData("ShootColor", shootColor);
           // Intake logic: reverse if full, else manual
-          int filled = countBalls();
-          if (filled >= 3) {
-            intake.setPower(-0.5);              // reject extras
-          } else if (gamepad1.left_trigger > 0.25) {
-            intake.setPower(0.5);               // intake
-          } else if (gamepad1.b) {
-            intake.setPower(0.0);               // stop
+
+
+
+          double baseIntakePower = 0.0;
+          if (gamepad1.left_trigger > 0.25) {
+            baseIntakePower = 0.5;  // normal intake when not rejecting
+          }
+
+// Override with reject logic to prevent picking up a 4th ball
+          if (rejectAfterFull) {
+            if (intakeTimer.milliseconds() < 4000) {
+              intake.setPower(-1.0);   // spin backward to *block new balls*
+            } else {
+              rejectAfterFull = false;
+              intake.setPower(0.0);    // end reject window; stop (or use base next loop)
+            }
           } else {
-            intake.setPower(0.0);
+            intake.setPower(baseIntakePower);
           }
         }
+        // no sorting
         else {
           if (aPressed) {
+
             feeder.setPosition(FEED_UP_POS);
             feederTimer.reset();
             feederActive = true;
@@ -250,6 +332,22 @@ public class FieldCentricTest extends LinearOpMode {
             advanceWanted();
           }
 
+          double baseIntakePower = 0.0;
+          if (gamepad1.left_trigger > 0.25) {
+            baseIntakePower = 0.5;  // normal intake when not rejecting
+          }
+
+// Override with reject logic to prevent picking up a 4th ball
+          if (rejectAfterFull) {
+            if (intakeTimer.milliseconds() < 4000) {
+              intake.setPower(-1.0);   // spin backward to *block new balls*
+            } else {
+              rejectAfterFull = false;
+              intake.setPower(0.0);    // end reject window; stop (or use base next loop)
+            }
+          } else {
+            intake.setPower(baseIntakePower);
+          }
           if (feederActive && feederTimer.milliseconds() > FEED_HOLD_MS) {
             feeder.setPosition(FEED_DOWN_POS);
             feederActive = false;
@@ -275,7 +373,7 @@ public class FieldCentricTest extends LinearOpMode {
         backLeft.setPower(blPower);
         frontRight.setPower(frPower);
         backRight.setPower(brPower); */
-
+        prevFilled = filled;
         // Telemetry
         telemetry.addData("Wanted now", colorWanted);
         telemetry.addData("Seq", wantedSeq);
@@ -286,6 +384,8 @@ public class FieldCentricTest extends LinearOpMode {
         telemetry.addData("ball[0]", slots[0]);
         telemetry.addData("ball[1]", slots[1]);
         telemetry.addData("ball[2]", slots[2]);
+        telemetry.addData("Rejecting", rejectAfterFull);
+        telemetry.addData("Reject ms left", Math.max(0, 4000 - (int)intakeTimer.milliseconds()));
         //telemetry.addData("Heading (deg)", Math.toDegrees(botHeading));
         telemetry.update();
       }
