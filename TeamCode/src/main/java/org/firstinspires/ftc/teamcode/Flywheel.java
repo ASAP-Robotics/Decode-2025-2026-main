@@ -17,7 +17,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class Flywheel {
   private final DcMotorEx flywheel;
@@ -55,7 +54,7 @@ public class Flywheel {
     this.flywheel.setZeroPowerBehavior(
         DcMotorEx.ZeroPowerBehavior.FLOAT); // spin freely if zero power (motor stoped)
     this.flywheel.setDirection(DcMotorEx.Direction.FORWARD);
-  flywheel_ticksPerRev = this.flywheel.getMotorType().getTicksPerRev(); // get ticks per rev
+    flywheel_ticksPerRev = this.flywheel.getMotorType().getTicksPerRev(); // get ticks per rev
     flywheel_idleSpeed = idleSpeed; // set the speed of the flywheel at idle
   }
 

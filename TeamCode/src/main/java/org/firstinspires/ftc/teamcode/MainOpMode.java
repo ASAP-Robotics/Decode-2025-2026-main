@@ -17,8 +17,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.graphics.Color;
-
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -28,8 +26,6 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @TeleOp(name = "Field Centric TeleOp", group = "Drive")
@@ -332,9 +328,7 @@ public class MainOpMode extends LinearOpMode {
         } else {
           intake.setPower(baseIntakePower);
         }
-      }
-
-      else {
+      } else {
         if (aPressed) {
 
           feeder.setPosition(FEED_UP_POS);
@@ -405,6 +399,6 @@ public class MainOpMode extends LinearOpMode {
       telemetry.update();
     }
 
-flywheel.disable(); // stop the flywheel
+    flywheel.disable(); // stop the flywheel
   }
 }
