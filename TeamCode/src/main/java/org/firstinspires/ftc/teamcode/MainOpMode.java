@@ -180,6 +180,7 @@ public class MainOpMode extends LinearOpMode {
     waitForStart();
 
     while (opModeIsActive()) {
+      flywheel.update();
       // --- X toggle ---
       boolean xNow = gamepad1.x;
       if (xNow && !xPrev) { // rising edge
