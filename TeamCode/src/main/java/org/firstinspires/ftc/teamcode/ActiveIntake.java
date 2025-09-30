@@ -16,6 +16,28 @@
 
 package org.firstinspires.ftc.teamcode;
 
-public class ActiveIntake {
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+public class ActiveIntake {
+    private DcMotorEx intake_intakeMotor;
+
+    ActiveIntake(DcMotorEx intakeMotor) {
+        intake_intakeMotor = intakeMotor;
+    }
+
+    /**
+     * @brief brings a ball into the intake
+     * @note placeholder; TODO: fill out
+     */
+    public void intake() {
+
+    }
+
+    /**
+     * @brief ejects a ball from the intake
+     * @note placeholder; TODO: fill out
+     */
+    public void eject() {
+
+    }
 }
