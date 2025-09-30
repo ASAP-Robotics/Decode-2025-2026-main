@@ -21,41 +21,41 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class ActiveIntake {
-    private DcMotorEx intake_intakeMotor;
-    public boolean intaking = false;
-    public boolean ejecting = false;
-    public boolean ballIn = false;
+  private DcMotorEx intake_intakeMotor;
+  public boolean intaking = false;
+  public boolean ejecting = false;
+  public boolean ballIn = false;
 
-    ActiveIntake(DcMotorEx intakeMotor) {
-        intake_intakeMotor = intakeMotor;
-        intake_intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD); // spin forwards
-        intake_intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); // brake if zero power
-    }
+  ActiveIntake(DcMotorEx intakeMotor) {
+    intake_intakeMotor = intakeMotor;
+    intake_intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD); // spin forwards
+    intake_intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); // brake if zero power
+  }
 
-    /**
-     * @brief stops the intake from spinning
-     */
-    public void stop() {
-        intake_intakeMotor.setPower(0);
-        intaking = false;
-        ejecting = false;
-    }
+  /**
+   * @brief stops the intake from spinning
+   */
+  public void stop() {
+    intake_intakeMotor.setPower(0);
+    intaking = false;
+    ejecting = false;
+  }
 
-    /**
-     * @brief brings a ball into the intake
-     * @note placeholder; TODO: update
-     */
-    public void intake() {
-        intake_intakeMotor.setPower(1);
-        intaking = true;
-    }
+  /**
+   * @brief brings a ball into the intake
+   * @note placeholder; TODO: update
+   */
+  public void intake() {
+    intake_intakeMotor.setPower(1);
+    intaking = true;
+  }
 
-    /**
-     * @brief ejects a ball from the intake
-     * @note placeholder; TODO: update
-     */
-    public void eject() {
-        intake_intakeMotor.setPower(-1);
-        ejecting = true;
-    }
+  /**
+   * @brief ejects a ball from the intake
+   * @note placeholder; TODO: update
+   */
+  public void eject() {
+    intake_intakeMotor.setPower(-1);
+    ejecting = true;
+  }
 }
