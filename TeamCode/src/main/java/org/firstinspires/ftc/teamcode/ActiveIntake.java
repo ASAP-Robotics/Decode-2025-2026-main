@@ -16,28 +16,39 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class ActiveIntake {
     private DcMotorEx intake_intakeMotor;
 
     ActiveIntake(DcMotorEx intakeMotor) {
         intake_intakeMotor = intakeMotor;
+        intake_intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD); // spin forwards
+        intake_intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); // brake if zero power
+    }
+
+    /**
+     * @brief stops the intake from spinning
+     */
+    public void stop() {
+        intake_intakeMotor.setPower(0);
     }
 
     /**
      * @brief brings a ball into the intake
-     * @note placeholder; TODO: fill out
+     * @note placeholder; TODO: update
      */
     public void intake() {
-
+        intake_intakeMotor.setPower(1);
     }
 
     /**
      * @brief ejects a ball from the intake
-     * @note placeholder; TODO: fill out
+     * @note placeholder; TODO: update
      */
     public void eject() {
-
+        intake_intakeMotor.setPower(-1);
     }
 }
