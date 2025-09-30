@@ -16,19 +16,29 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 public class SpindexMag {
-  public static final int GREEN = 0; // /< spindex slot contains a green ball
-  public static final int PURPLE = 1; // /< spindex slot contains a purple ball
-  public static final int EMPTY = 3; // /< spindex slot doesn't contain a ball
+  public static enum BallColor {
+    GREEN,
+    PURPLE,
+    EMPTY,
+    UNKNOWN
+  }
   public static final int NULL =
       -1; // /< sort of like null (intentionally doesn't contain a useful value)
-  private final ActiveIntake mag_intake; // /< the intake on the robot
-  private final Servo mag_magServo; // /< the servo that rotates the divider in the mag
-  private final Servo mag_liftServo; // /< the servo that lifts balls into the shooter turret
-  private ColorSensor intakeColorSensor; // /< the color sensor at the intake
+  private final ActiveIntake intake; // /< the intake on the robot
+  private final Flywheel flywheel;
+  private final Servo spinServo; // /< the servo that rotates the divider in the mag
+  private final Servo liftServo; // /< the servo that lifts balls into the shooter turret
+  private final ColorSensor colorSensor; // /< the color sensor at the intake
+  private final DistanceSensor distanceSensor; // /< the distance sensor at the intake (built into color sensor?)
   private final int magSettleTime;
   private final double liftServoRestPos =
       0.0; // /< the position of the lift servo when at rest | TODO: tune
@@ -36,16 +46,19 @@ public class SpindexMag {
       0.3; // /< the position of the lift servo when shooting | TODO: tune
   private static final double[] spindexIntake = {0.0, 0.33, 0.66}; // TODO: tune
   private static final double[] spindexShoot = {0.33, 0.66, 0.00}; // TODO: tune
-  private int[] spindexColor = {EMPTY, EMPTY, EMPTY};
+  private BallColor[] spindexColor = {BallColor.EMPTY, BallColor.EMPTY, BallColor.EMPTY};
   private int mag_intakeIndex;
   private int mag_shootIndex;
 
   public SpindexMag(
-      ActiveIntake intake, Servo spinServo, Servo liftServo, ColorSensor colorSensor) {
-    mag_intake = intake;
-    mag_magServo = spinServo;
-    mag_liftServo = liftServo;
-    intakeColorSensor = colorSensor;
+      ActiveIntake intake, Flywheel flywheel, Servo spinServo, Servo liftServo, ColorSensor colorSensor, DistanceSensor distanceSensor) {
+    this.intake = intake;
+    this.flywheel = flywheel;
+    this.spinServo = spinServo;
+    this.liftServo = liftServo;
+    this.colorSensor = colorSensor;
+    this.distanceSensor = distanceSensor;
+    this.colorSensor.enableLed(true); // turn on color sensor LED
     magSettleTime = 200;
   }
 
@@ -61,16 +74,16 @@ public class SpindexMag {
    * @brief updates everything to do with intaking balls
    */
   private void updateIntake() {
-    if (mag_intake.intaking) { // if the intake is trying to intake a ball
-      int intakeColor = getIntakeColor(); // get the color of ball (if any) in the intake position
-      if (intakeColor != EMPTY) { // if a ball is in the intake position
-        mag_intake.stop(); // stop the intake
+    if (intake.intaking) { // if the intake is trying to intake a ball
+      BallColor intakeColor = getIntakeColor(); // get the color of ball (if any) in the intake position
+      if (intakeColor != BallColor.EMPTY) { // if a ball is in the intake position
+        intake.stop(); // stop the intake
         spindexColor[mag_intakeIndex] = intakeColor; // record the color of the ball taken in
       }
-    } else if (mag_intake.ejecting) {
-      int intakeColor = getIntakeColor(); // get the color of ball (if any) in the intake position
-      if (intakeColor == EMPTY) { // if there isn't a ball in the intake position
-        mag_intake.stop(); // stop the intake
+    } else if (intake.ejecting) {
+      BallColor intakeColor = getIntakeColor(); // get the color of ball (if any) in the intake position
+      if (intakeColor == BallColor.EMPTY) { // if there isn't a ball in the intake position
+        intake.stop(); // stop the intake
       }
     }
   }
@@ -82,7 +95,7 @@ public class SpindexMag {
   public boolean intakeBall() {
     int index = NULL;
     for (int i = 0; i < spindexColor.length; i++) {
-      if (i == EMPTY) index = i;
+      if (spindexColor[i] == BallColor.EMPTY) index = i;
     }
 
     if (index == NULL) return false; // if there are no empty slots, return false
@@ -96,11 +109,11 @@ public class SpindexMag {
    * @return true if a ball was taken in, false if a ball was already in the given index
    */
   private boolean intakeBallIndex(int index) {
-    if (getColorIndex(index) != EMPTY) return false;
+    if (spindexColor[index] != BallColor.EMPTY) return false; // return false if given index contains a ball
 
-    mag_liftServo.setPosition(liftServoRestPos); // lower lifter out of the way
+    liftServo.setPosition(liftServoRestPos); // lower lifter out of the way
     moveSpindexIntake(index); // move spindex to correct position
-    mag_intake.intake(); // intake a ball
+    intake.intake(); // intake a ball
     spindexColor[index] = getIntakeColor(); // set color of ball in spindex index
 
     return true;
@@ -111,7 +124,7 @@ public class SpindexMag {
    * @param color the color to be shot
    * @return true if ball shot, false if no balls of requested color are in mag
    */
-  public boolean shootColor(int color) {
+  public boolean shootColor(BallColor color) {
     int index = getColorIndex(color); // find index in the spindex of requested color
     if (index == NULL) return false;
     shootIndex(index);
@@ -127,9 +140,9 @@ public class SpindexMag {
     // TODO: fix logic; servos don't move instantly
     // TODO: add flywheel control stuff here
     moveSpindexShoot(index); // move spindex to correct position
-    mag_liftServo.setPosition(liftServoShootPos); // lift ball into flywheel
+    liftServo.setPosition(liftServoShootPos); // lift ball into flywheel
     // TODO: add some sort of delay something here, but not blocking
-    mag_liftServo.setPosition(liftServoRestPos); // reset lifter
+    liftServo.setPosition(liftServoRestPos); // reset lifter
   }
 
   /**
@@ -137,7 +150,7 @@ public class SpindexMag {
    * @param index the spindex index to move to the intake position
    */
   private void moveSpindexIntake(int index) {
-    mag_magServo.setPosition(spindexIntake[index]);
+    spinServo.setPosition(spindexIntake[index]);
     mag_intakeIndex = index; // set new intake index
     mag_shootIndex = NULL; // spindex isn't at a shooting index
   }
@@ -147,7 +160,7 @@ public class SpindexMag {
    * @param index the spindex index to move to the shooting position
    */
   private void moveSpindexShoot(int index) {
-    mag_magServo.setPosition(spindexShoot[index]);
+    spinServo.setPosition(spindexShoot[index]);
     mag_shootIndex = index; // set new shooting index
     mag_intakeIndex = NULL; // spindex isn't at an intake index
   }
@@ -156,8 +169,30 @@ public class SpindexMag {
    * @brief gets the color of ball in the intake position
    * @return the color of ball in the intake
    */
-  private int getIntakeColor() {
-    return 0; // placeholder; TODO: change
+  private BallColor getIntakeColor() {
+    BallColor toReturn = BallColor.EMPTY;
+
+    int red = colorSensor.red();
+    int green = colorSensor.green();
+    int blue = colorSensor.blue();
+    float[] hsv = new float[3];
+    Color.RGBToHSV(red * 8, green * 8, blue * 8, hsv);
+    float h = hsv[0];
+    float s = hsv[1];
+    float v = hsv[2];
+
+    if (s > 0.6 && v > 40 && h >= 150 && h <= 170) { // green
+      toReturn = BallColor.GREEN;
+    } else if (s > 0.3 && v > 40 && h >= 220 && h <= 240) { // purple
+      toReturn = BallColor.PURPLE;
+    } else { // color can't be determined
+      double distance = distanceSensor.getDistance(DistanceUnit.INCH);
+      if (distance <= 2.0) { // if a ball is in the intake
+        toReturn = BallColor.UNKNOWN;
+      }
+    }
+
+    return toReturn;
   }
 
   /**
@@ -166,7 +201,7 @@ public class SpindexMag {
    * @return the index in the spindex where that color is located, or -1 if that color isn't in the
    *     mag
    */
-  private int getColorIndex(int color) {
+  private int getColorIndex(BallColor color) {
     int toReturn = NULL;
 
     for (int i = 0; i < spindexColor.length; i++) { // for each spindex slot
