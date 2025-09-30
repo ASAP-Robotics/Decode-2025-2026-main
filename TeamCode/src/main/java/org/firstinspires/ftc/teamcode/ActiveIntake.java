@@ -22,6 +22,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class ActiveIntake {
     private DcMotorEx intake_intakeMotor;
+    public boolean intaking = false;
+    public boolean ejecting = false;
+    public boolean ballIn = false;
 
     ActiveIntake(DcMotorEx intakeMotor) {
         intake_intakeMotor = intakeMotor;
@@ -34,6 +37,8 @@ public class ActiveIntake {
      */
     public void stop() {
         intake_intakeMotor.setPower(0);
+        intaking = false;
+        ejecting = false;
     }
 
     /**
@@ -42,6 +47,7 @@ public class ActiveIntake {
      */
     public void intake() {
         intake_intakeMotor.setPower(1);
+        intaking = true;
     }
 
     /**
@@ -50,5 +56,6 @@ public class ActiveIntake {
      */
     public void eject() {
         intake_intakeMotor.setPower(-1);
+        ejecting = true;
     }
 }
