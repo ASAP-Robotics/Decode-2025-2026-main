@@ -25,6 +25,7 @@ public class Flywheel {
   private boolean flywheel_isEnabled = false; // /< if the flywheel is enabled
   private boolean flywheel_isActive = true; // /< if the flywheel is active (as opposed to idling)
   private double flywheel_idleSpeed; // /< the speed (RPM) of the flywheel when idle
+  private double flywheel_targetSpeed = 0; // /< the speed (RPM) the flywheel is targeting
   private double flywheel_speed = 0; // /< the latest speed (RPM) of the flywheel
   private double flywheel_distance = 0; // /< the distance (inches) to the target
 
@@ -35,6 +36,8 @@ public class Flywheel {
 
   // ---- friction/slip lumped into one factor (0<eff<=1). Start ~0.90 and tune. ----
   private static final double EFFICIENCY = 0.90;
+
+  private final double SPEED_TOLERANCE = 0.95; // think of as the percentage of the target speed the flywheel needs to reach to be "at target speed"
 
   /**
    * @brief makes an object of the Flywheel class with and idle speed of 500 RPM
@@ -59,6 +62,15 @@ public class Flywheel {
   }
 
   /**
+   * @brief returns if the flywheel is fully up to speed
+   * @return true if flywheel is at speed, false if flywheel is below target speed
+   */
+  public boolean isUpToSpeed() {
+    update(); // update flywheel
+    return flywheel_speed >= (flywheel_targetSpeed * SPEED_TOLERANCE);
+  }
+
+  /**
    * @brief sets if the flywheel is enabled
    * @param isEnabled if the flywheel will be enabled (true = enabled, false = not enabled)
    * @return the previous enabled / disabled state of the flywheel
@@ -77,6 +89,14 @@ public class Flywheel {
   }
 
   /**
+   * @brief returns if the flywheel is enabled
+   * @return true if the flywheel is enabled, fals if the flywheel is disabled
+   */
+  public boolean isEnabled() {
+    return flywheel_isEnabled;
+  }
+
+  /**
    * @brief enables the flywheel
    * @return the previous enabled / disabled state of the flywheel
    */
@@ -90,6 +110,14 @@ public class Flywheel {
    */
   public boolean disable() {
     return setEnabled(false);
+  }
+
+  /**
+   * @brief returns if the flywheel is active
+   * @return true if the flywheel is active, false if the flywheel isn't active
+   */
+  public boolean isActive() {
+    return flywheel_isActive;
   }
 
   /**
@@ -197,6 +225,7 @@ public class Flywheel {
     double rpm = rpmForDistance(flywheel_distance);
     double ticksPerRev = flywheel.getMotorType().getTicksPerRev();
     double ticksPerSec = (rpm / 60.0) * ticksPerRev;
+    flywheel_targetSpeed = rpm; // store target speed
     flywheel.setVelocity(ticksPerSec); // built-in velocity PID
   }
 
