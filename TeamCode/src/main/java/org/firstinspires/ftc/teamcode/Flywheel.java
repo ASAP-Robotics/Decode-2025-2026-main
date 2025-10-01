@@ -31,7 +31,7 @@ public class Flywheel {
   private double targetDistance = 0; // /< the distance (inches) to the target
   public boolean containsBall = false; // /< if the flywheel has a ball in it that it is shooting
   public org.firstinspires.ftc.teamcode.utils.SimpleTimer
-      flywheel_shotTimer; // /< timer to keep flywheel on while shooting a ball
+      shotTimer; // /< timer to keep flywheel on while shooting a ball
 
   // ---- set these to match your robot ----
   private static final double ANGLE_DEG = 45.0; // shooter pitch
@@ -67,7 +67,7 @@ public class Flywheel {
     this.flywheel.setDirection(DcMotorEx.Direction.FORWARD);
     motorTicksPerRev = this.flywheel.getMotorType().getTicksPerRev(); // get ticks per rev
     this.idleSpeed = idleSpeed; // set the speed of the flywheel at idle
-    flywheel_shotTimer = new SimpleTimer(shotTimeSeconds);
+    shotTimer = new SimpleTimer(shotTimeSeconds);
   }
 
   /**
