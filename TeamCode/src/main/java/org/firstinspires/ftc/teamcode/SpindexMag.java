@@ -261,9 +261,10 @@ public class SpindexMag {
   /**
    * @brief starts shooting a sequence of balls out of the turret
    * @param sequence the color sequence to shoot
-   * @return true if the mag was full, false if the mag isn't full
+   * @return true if the mag was full, false if the mag isn't full or a sequence is already being shot
    */
   public boolean shootSequence(BallSequence sequence) {
+    if (shootingSequence) return false;
     int purples = 0;
     int greens = 0;
     for (BallColor color : spindexColor) {
