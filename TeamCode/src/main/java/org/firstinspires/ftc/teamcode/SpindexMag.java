@@ -39,7 +39,6 @@ public class SpindexMag {
   private final Servo liftServo; // /< the servo that lifts balls into the shooter turret
   private final ColorSensor colorSensor; // /< the color sensor at the intake
   private final DistanceSensor distanceSensor; // /< the distance sensor at the intake (built into color sensor?)
-  private final int magSettleTime;
   private final double liftServoRestPos =
       0.0; // /< the position of the lift servo when at rest | TODO: tune
   private final double liftServoShootPos =
@@ -59,7 +58,6 @@ public class SpindexMag {
     this.colorSensor = colorSensor;
     this.distanceSensor = distanceSensor;
     this.colorSensor.enableLed(true); // turn on color sensor LED
-    magSettleTime = 200;
   }
 
   /**
@@ -67,11 +65,31 @@ public class SpindexMag {
    * @note call each loop
    */
   public void update() {
+    updateShooting();
     updateIntake();
   }
 
   /**
-   * @brief updates everything to do with intaking balls
+   * @brief updates everything to do with shooting balls out of the turret
+   */
+  private void updateShooting() {
+    if (flywheel.isEnabled() && flywheel.isActive()) {
+      if (flywheel.containsBall) {
+        if (flywheel.flywheel_shotTimer.isFinished()) {
+          flywheel.containsBall = false; // the ball should be out of the flywheel
+          flywheel.idle(); // set the flywheel to slow down to idle speeds
+        }
+      } else {
+        if (flywheel.isUpToSpeed()) {
+          liftServo.setPosition(liftServoShootPos); // lift ball into flywheel
+          flywheel.containsBall = true;
+        }
+      }
+    }
+  }
+
+  /**
+   * @brief updates everything to do with the intake
    */
   private void updateIntake() {
     if (intake.intaking) { // if the intake is trying to intake a ball
@@ -90,7 +108,7 @@ public class SpindexMag {
 
   /**
    * @brief intakes a ball to the first empty intake index in the spindex
-   * @return true if a ball was taken in, false if the mag was full
+   * @return true if a ball was taken in, false if the mag was full or intake is busy
    */
   public boolean intakeBall() {
     int index = NULL;
@@ -106,15 +124,14 @@ public class SpindexMag {
   /**
    * @brief intakes a ball at a specified index in the spindex
    * @param index the index in the spindex to put the ball in
-   * @return true if a ball was taken in, false if a ball was already in the given index
+   * @return true if given index was empty, false if a ball was already in the given index or intake is busy
    */
   private boolean intakeBallIndex(int index) {
-    if (spindexColor[index] != BallColor.EMPTY) return false; // return false if given index contains a ball
+    if ((spindexColor[index] != BallColor.EMPTY) || intake.busy) return false; // return false if given index contains a ball, or intake is busy
 
     liftServo.setPosition(liftServoRestPos); // lower lifter out of the way
     moveSpindexIntake(index); // move spindex to correct position
-    intake.intake(); // intake a ball
-    spindexColor[index] = getIntakeColor(); // set color of ball in spindex index
+    intake.intake(); // start the intake spinning
 
     return true;
   }
@@ -132,17 +149,14 @@ public class SpindexMag {
   }
 
   /**
-   * @brief shoots a ball from a given index in the spindex
+   * @brief starts shooting a ball from a given index in the spindex
    * @param index the ball from the spindex to be shot
-   * @note placeholder, should be updated; assumes servos move instantly
+   * @note this is a work in progress
    */
   private void shootIndex(int index) {
-    // TODO: fix logic; servos don't move instantly
-    // TODO: add flywheel control stuff here
+    // NOTE: assumes that the servos will move in the time it takes the flywheel to spin up
+    flywheel.activate(); // spin flywheel up to speed
     moveSpindexShoot(index); // move spindex to correct position
-    liftServo.setPosition(liftServoShootPos); // lift ball into flywheel
-    // TODO: add some sort of delay something here, but not blocking
-    liftServo.setPosition(liftServoRestPos); // reset lifter
   }
 
   /**
