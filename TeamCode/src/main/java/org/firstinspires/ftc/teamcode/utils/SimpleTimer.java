@@ -19,7 +19,7 @@ package org.firstinspires.ftc.teamcode.utils;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class SimpleTimer {
-    private ElapsedTime timer = new ElapsedTime();
+    private final ElapsedTime timer = new ElapsedTime();
     private double duration; // seconds
     private boolean running = false;
 
@@ -33,6 +33,14 @@ public class SimpleTimer {
     public void start() {
         timer.reset();
         running = true;
+    }
+
+    /**
+     * @brief start or restart the timer with a set duration
+     */
+    public void start(double durationSeconds) {
+        this.duration = durationSeconds;
+        start();
     }
 
     /**
