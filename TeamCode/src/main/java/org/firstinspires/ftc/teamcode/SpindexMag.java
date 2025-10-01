@@ -21,6 +21,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class SpindexMag {
   public static enum BallColor {
@@ -28,6 +29,21 @@ public class SpindexMag {
     PURPLE,
     EMPTY,
     UNKNOWN
+  }
+  public static enum BallSequence {
+    GPP(BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE),
+    PGP(BallColor.PURPLE, BallColor.GREEN, BallColor.PURPLE),
+    PPG(BallColor.PURPLE, BallColor.PURPLE, BallColor.GREEN);
+
+    private final BallColor[] ballColors;
+
+    BallSequence(BallColor... ballColors) {
+        this.ballColors = ballColors;
+    }
+
+    public BallColor[] getBallColors() {
+      return ballColors.clone();
+    }
   }
 
   public static final int NULL =
@@ -45,9 +61,17 @@ public class SpindexMag {
       0.3; // /< the position of the lift servo when shooting | TODO: tune
   private static final double[] spindexIntake = {0.0, 0.33, 0.66}; // TODO: tune
   private static final double[] spindexShoot = {0.33, 0.66, 0.00}; // TODO: tune
-  private BallColor[] spindexColor = {BallColor.EMPTY, BallColor.EMPTY, BallColor.EMPTY};
+  private final BallColor[] spindexColor = {BallColor.EMPTY, BallColor.EMPTY, BallColor.EMPTY};
   private int mag_intakeIndex;
   private int mag_shootIndex;
+  private boolean fillingMag = false; // /< if the mag is being filled
+  private boolean shootingSequence = false; // /< if a sequence is being shot out of the turret
+  private BallSequence ballSequence; // /< the sequence being shot
+  private int sequenceIndex = 0; // /< the index of ball in the sequence that is being shot
+  private int purplesNeeded = 0; // the number of purples needed to fill the mag
+  private int greensNeeded = 0; // the number of greens needed to fill the mag
+  private final org.firstinspires.ftc.teamcode.utils.SimpleTimer liftServoTimer = new SimpleTimer(0.5); // /< timer for lifting ball into flywheel
+  private final org.firstinspires.ftc.teamcode.utils.SimpleTimer spinServoTimer = new SimpleTimer(0.75); // /< timer for moving spindex
 
   public SpindexMag(
       ActiveIntake intake,
@@ -78,9 +102,38 @@ public class SpindexMag {
    * @brief updates everything to do with shooting balls out of the turret
    */
   private void updateShooting() {
-    if (flywheel.isEnabled() && flywheel.isActive()) {
+    if (shootingSequence) { // if we are shooting a sequence (rapid fire)
+      BallColor[] sequence = ballSequence.getBallColors();
+      BallColor shootingColor = sequence[sequenceIndex];
+      if (flywheel.containsBall) { // if there is a ball in the flywheel
+        if (liftServoTimer.isFinished()) {
+          liftServo.setPosition(liftServoRestPos);
+        }
+        if (flywheel.shotTimer.isFinished()) {
+          flywheel.containsBall = false;
+          if (sequenceIndex < sequence.length) { // if the sequence isn't done
+            sequenceIndex++; // move on to the next ball
+          } else { // if the sequence is done
+            shootingSequence = false; // we are no longer shooting a sequence
+            flywheel.idle(); // let flywheel slow down to idle speed
+          }
+        }
+      } else { // if there isn't a ball in the flywheel
+        int shootingColorIndex = getColorIndex(shootingColor);
+        if ((!spinServoTimer.isRunning()) && (spinServo.getPosition() != shootingColorIndex)) { // if the spindex position hasn't been set
+          spinServo.setPosition(shootingColorIndex); // move spindex to correct location
+          spinServoTimer.start(); // start timer for moving spindex
+        } else if (flywheel.isUpToSpeed() && spinServoTimer.isFinished()) { // if the flywheel is up to speed and the spindex is done moving
+          liftServo.setPosition(liftServoShootPos); // lift ball into flywheel
+          liftServoTimer.start();
+          flywheel.containsBall = true; // flywheel now has a ball in it
+          flywheel.shotTimer.start();
+        }
+      }
+
+    } else if (flywheel.isEnabled() && flywheel.isActive()) { // if we are just shooting one ball
       if (flywheel.containsBall) {
-        if (flywheel.flywheel_shotTimer.isFinished()) {
+        if (flywheel.shotTimer.isFinished()) {
           flywheel.containsBall = false; // the ball should be out of the flywheel
           flywheel.idle(); // set the flywheel to slow down to idle speeds
         }
@@ -97,13 +150,42 @@ public class SpindexMag {
    * @brief updates everything to do with the intake
    */
   private void updateIntake() {
-    if (intake.intaking) { // if the intake is trying to intake a ball
+    if (fillingMag) { // if we are filling the magazine
+      BallColor intakeColor =
+          getIntakeColor(); // get the color of ball (if any) in the intake position
+      if (intake.intaking) {
+        if (intakeColor == BallColor.PURPLE) { // if a purple is in the intake
+          if (purplesNeeded >= 1) { // if we need a purple
+            spindexColor[mag_intakeIndex] = intakeColor; // record the color of the ball taken in
+          } else {
+            intake.eject();
+          }
+        } else if (intakeColor == BallColor.GREEN) { // if a green is in the intake
+          if (greensNeeded >= 1) { // if we need a green
+            spindexColor[mag_intakeIndex] = intakeColor; // record the color of the ball taken in
+          } else {
+            intake.eject();
+          }
+        }
+      } else if (intake.ejecting) {
+        if (intakeColor == BallColor.EMPTY) {
+          if (!intake.intakeTimer.isRunning()) {
+            intake.intakeTimer.start();
+          } else if (intake.intakeTimer.isFinished()) {
+            intake.intake(); // start the intake
+          }
+        }
+      }
+      if (!fillMag()) fillingMag = false; // check if there are still empty slots in the mag
+
+    } else if (intake.intaking) { // if the intake is trying to intake a ball
       BallColor intakeColor =
           getIntakeColor(); // get the color of ball (if any) in the intake position
       if (intakeColor != BallColor.EMPTY) { // if a ball is in the intake position
         intake.stop(); // stop the intake
         spindexColor[mag_intakeIndex] = intakeColor; // record the color of the ball taken in
       }
+
     } else if (intake.ejecting) {
       BallColor intakeColor =
           getIntakeColor(); // get the color of ball (if any) in the intake position
@@ -114,7 +196,26 @@ public class SpindexMag {
   }
 
   /**
-   * @brief intakes a ball to the first empty intake index in the spindex
+   * @brief starts filling the mag with two purple balls and one green ball
+   * @return true if mag had empty slots, false if mag is full or contains more than 2 purples or 1 green
+   */
+  public boolean fillMag() {
+    if (getColorIndex(BallColor.EMPTY) == NULL) return false; // if there are no empty slots in the mag, return false
+    fillingMag = true;
+    purplesNeeded = 2; // if all slots are empty, we need 2 purples
+    greensNeeded = 1; // if all slots are empty, we need 1 green
+    for (BallColor color : spindexColor) {
+      if (color == BallColor.PURPLE) purplesNeeded--; // if slot contains purple, decrease number of purples needed by one
+      if (color == BallColor.GREEN) greensNeeded--; // if slot contains green, decrease number of greens needed by one
+    }
+    if (purplesNeeded < 0 || greensNeeded < 0) return false; // if mag contains more than 2 purples or 1 green, return false
+    if (!intake.busy) intake.intake(); // start the intake spinning
+    moveSpindexIntake(getColorIndex(BallColor.EMPTY)); // move the spindex to an empty slot
+    return true;
+  }
+
+  /**
+   * @brief intakes a single ball of any color to the first empty intake index in the spindex
    * @return true if a ball was taken in, false if the mag was full or intake is busy
    */
   public boolean intakeBall() {
@@ -142,6 +243,26 @@ public class SpindexMag {
     moveSpindexIntake(index); // move spindex to correct position
     intake.intake(); // start the intake spinning
 
+    return true;
+  }
+
+  /**
+   * @brief starts shooting a sequence of balls out of the turret
+   * @param sequence the color sequence to shoot
+   * @return true if the mag was full, false if the mag isn't full
+   */
+  public boolean shootSequence(BallSequence sequence) {
+    int purples = 0;
+    int greens = 0;
+    for (BallColor color : spindexColor) {
+      if (color == BallColor.PURPLE) purples++;
+      if (color == BallColor.GREEN) greens++;
+    }
+    if ((purples != 2) || (greens != 1)) return false; // return false if the wrong number of balls are in the mag
+    shootingSequence = true; // a sequence is being shot
+    ballSequence = sequence; // store the requested sequence
+    sequenceIndex = 0; // start with the first ball in the sequence
+    flywheel.activate(); // start flywheel spinning up to full speed
     return true;
   }
 
