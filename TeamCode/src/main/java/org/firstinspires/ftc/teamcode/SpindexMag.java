@@ -17,11 +17,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.graphics.Color;
-
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class SpindexMag {
@@ -31,6 +29,7 @@ public class SpindexMag {
     EMPTY,
     UNKNOWN
   }
+
   public static final int NULL =
       -1; // /< sort of like null (intentionally doesn't contain a useful value)
   private final ActiveIntake intake; // /< the intake on the robot
@@ -38,7 +37,8 @@ public class SpindexMag {
   private final Servo spinServo; // /< the servo that rotates the divider in the mag
   private final Servo liftServo; // /< the servo that lifts balls into the shooter turret
   private final ColorSensor colorSensor; // /< the color sensor at the intake
-  private final DistanceSensor distanceSensor; // /< the distance sensor at the intake (built into color sensor?)
+  private final DistanceSensor
+      distanceSensor; // /< the distance sensor at the intake (built into color sensor?)
   private final double liftServoRestPos =
       0.0; // /< the position of the lift servo when at rest | TODO: tune
   private final double liftServoShootPos =
@@ -50,7 +50,12 @@ public class SpindexMag {
   private int mag_shootIndex;
 
   public SpindexMag(
-      ActiveIntake intake, Flywheel flywheel, Servo spinServo, Servo liftServo, ColorSensor colorSensor, DistanceSensor distanceSensor) {
+      ActiveIntake intake,
+      Flywheel flywheel,
+      Servo spinServo,
+      Servo liftServo,
+      ColorSensor colorSensor,
+      DistanceSensor distanceSensor) {
     this.intake = intake;
     this.flywheel = flywheel;
     this.spinServo = spinServo;
@@ -93,13 +98,15 @@ public class SpindexMag {
    */
   private void updateIntake() {
     if (intake.intaking) { // if the intake is trying to intake a ball
-      BallColor intakeColor = getIntakeColor(); // get the color of ball (if any) in the intake position
+      BallColor intakeColor =
+          getIntakeColor(); // get the color of ball (if any) in the intake position
       if (intakeColor != BallColor.EMPTY) { // if a ball is in the intake position
         intake.stop(); // stop the intake
         spindexColor[mag_intakeIndex] = intakeColor; // record the color of the ball taken in
       }
     } else if (intake.ejecting) {
-      BallColor intakeColor = getIntakeColor(); // get the color of ball (if any) in the intake position
+      BallColor intakeColor =
+          getIntakeColor(); // get the color of ball (if any) in the intake position
       if (intakeColor == BallColor.EMPTY) { // if there isn't a ball in the intake position
         intake.stop(); // stop the intake
       }
@@ -124,10 +131,12 @@ public class SpindexMag {
   /**
    * @brief intakes a ball at a specified index in the spindex
    * @param index the index in the spindex to put the ball in
-   * @return true if given index was empty, false if a ball was already in the given index or intake is busy
+   * @return true if given index was empty, false if a ball was already in the given index or intake
+   *     is busy
    */
   private boolean intakeBallIndex(int index) {
-    if ((spindexColor[index] != BallColor.EMPTY) || intake.busy) return false; // return false if given index contains a ball, or intake is busy
+    if ((spindexColor[index] != BallColor.EMPTY) || intake.busy)
+      return false; // return false if given index contains a ball, or intake is busy
 
     liftServo.setPosition(liftServoRestPos); // lower lifter out of the way
     moveSpindexIntake(index); // move spindex to correct position

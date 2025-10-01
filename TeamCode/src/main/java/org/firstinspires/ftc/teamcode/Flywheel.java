@@ -17,7 +17,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class Flywheel {
@@ -31,7 +30,8 @@ public class Flywheel {
   private double currentSpeed = 0; // /< the latest speed (RPM) of the flywheel
   private double targetDistance = 0; // /< the distance (inches) to the target
   public boolean containsBall = false; // /< if the flywheel has a ball in it that it is shooting
-  public org.firstinspires.ftc.teamcode.utils.SimpleTimer flywheel_shotTimer; // /< timer to keep flywheel on while shooting a ball
+  public org.firstinspires.ftc.teamcode.utils.SimpleTimer
+      flywheel_shotTimer; // /< timer to keep flywheel on while shooting a ball
 
   // ---- set these to match your robot ----
   private static final double ANGLE_DEG = 45.0; // shooter pitch
@@ -41,14 +41,18 @@ public class Flywheel {
   // ---- friction/slip lumped into one factor (0<eff<=1). Start ~0.90 and tune. ----
   private static final double EFFICIENCY = 0.90;
 
-  private final double SPEED_TOLERANCE = 0.95; // think of as the percentage of the target speed the flywheel needs to reach to be "at target speed"
+  private final double SPEED_TOLERANCE =
+      0.95; // think of as the percentage of the target speed the flywheel needs to reach to be "at
+            // target speed"
 
   /**
    * @brief makes an object of the Flywheel class with and idle speed of 500 RPM
    * @param motor the motor used for the flywheel
    */
   public Flywheel(DcMotorEx motor) {
-    this(motor, 500, 1); // make a Flywheel with an idle speed of 500 RPM and a shot time of one second
+    this(
+        motor, 500,
+        1); // make a Flywheel with an idle speed of 500 RPM and a shot time of one second
   }
 
   /**
