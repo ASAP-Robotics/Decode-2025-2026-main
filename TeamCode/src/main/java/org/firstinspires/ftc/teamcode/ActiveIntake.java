@@ -21,7 +21,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class ActiveIntake {
-  private DcMotorEx intake_intakeMotor;
+  private final DcMotorEx intake_intakeMotor;
   public boolean busy = false;
   public boolean intaking = false;
   public boolean ejecting = false;
