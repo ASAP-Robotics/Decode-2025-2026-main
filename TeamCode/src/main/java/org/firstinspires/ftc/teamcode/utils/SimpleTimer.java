@@ -64,6 +64,7 @@ public class SimpleTimer {
      * @return true if the timer is running, false if the timer isn't running
      */
     public boolean isRunning() {
+        update();
         return running;
     }
 
@@ -72,6 +73,7 @@ public class SimpleTimer {
      * @return true if the timer is done, false if the timer isn't done
      */
     public boolean isFinished() {
+        update();
         return !running && timer.seconds() >= duration;
     }
 
@@ -80,6 +82,7 @@ public class SimpleTimer {
      * @return the elapsed time since the timer was started
      */
     public double elapsed() {
+        update();
         return timer.seconds();
     }
 
@@ -88,6 +91,7 @@ public class SimpleTimer {
      * @return the amount of time left on the timer, or 0 if finished
      */
     public double remaining() {
+        update();
         return Math.max(0, duration - timer.seconds());
     }
 }
