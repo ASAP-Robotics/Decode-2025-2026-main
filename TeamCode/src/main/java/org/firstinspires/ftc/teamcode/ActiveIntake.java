@@ -20,12 +20,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
+
 public class ActiveIntake {
   private final DcMotorEx intake_intakeMotor;
   public boolean busy = false;
   public boolean intaking = false;
   public boolean ejecting = false;
   public boolean ballIn = false;
+  public org.firstinspires.ftc.teamcode.utils.SimpleTimer intakeTimer = new SimpleTimer(1);
 
   ActiveIntake(DcMotorEx intakeMotor) {
     intake_intakeMotor = intakeMotor;
