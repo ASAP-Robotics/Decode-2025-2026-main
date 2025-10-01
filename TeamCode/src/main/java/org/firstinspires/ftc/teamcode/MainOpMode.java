@@ -16,7 +16,6 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Color;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -25,8 +24,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @TeleOp(name = "Field Centric TeleOp", group = "Drive")
 public class MainOpMode extends LinearOpMode {
@@ -67,7 +64,7 @@ public class MainOpMode extends LinearOpMode {
 
     intake = new ActiveIntake((DcMotorEx) intakeMotor);
 
-    mag = new SpindexMag(intake, flywheel, magServo, feeder, colorSensor,range);
+    mag = new SpindexMag(intake, flywheel, magServo, feeder, colorSensor, range);
 
     // stuff was here
     // IMU
@@ -80,7 +77,8 @@ public class MainOpMode extends LinearOpMode {
     //  imu.initialize(imuParams);
     //  imu.resetYaw();
     // stuff was here (setting wanted sequence)
-    SpindexMag.BallSequence wantedSequence = SpindexMag.BallSequence.PGP; // the sequence we want to shoot
+    SpindexMag.BallSequence wantedSequence =
+        SpindexMag.BallSequence.PGP; // the sequence we want to shoot
 
     waitForStart();
 
