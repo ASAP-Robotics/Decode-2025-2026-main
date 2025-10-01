@@ -30,6 +30,7 @@ public class SpindexMag {
     EMPTY,
     UNKNOWN
   }
+
   public static enum BallSequence {
     GPP(BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE),
     PGP(BallColor.PURPLE, BallColor.GREEN, BallColor.PURPLE),
@@ -38,7 +39,7 @@ public class SpindexMag {
     private final BallColor[] ballColors;
 
     BallSequence(BallColor... ballColors) {
-        this.ballColors = ballColors;
+      this.ballColors = ballColors;
     }
 
     public BallColor[] getBallColors() {
@@ -70,8 +71,10 @@ public class SpindexMag {
   private int sequenceIndex = 0; // /< the index of ball in the sequence that is being shot
   private int purplesNeeded = 0; // the number of purples needed to fill the mag
   private int greensNeeded = 0; // the number of greens needed to fill the mag
-  private final org.firstinspires.ftc.teamcode.utils.SimpleTimer liftServoTimer = new SimpleTimer(0.5); // /< timer for lifting ball into flywheel
-  private final org.firstinspires.ftc.teamcode.utils.SimpleTimer spinServoTimer = new SimpleTimer(0.75); // /< timer for moving spindex
+  private final org.firstinspires.ftc.teamcode.utils.SimpleTimer liftServoTimer =
+      new SimpleTimer(0.5); // /< timer for lifting ball into flywheel
+  private final org.firstinspires.ftc.teamcode.utils.SimpleTimer spinServoTimer =
+      new SimpleTimer(0.75); // /< timer for moving spindex
 
   public SpindexMag(
       ActiveIntake intake,
@@ -120,10 +123,14 @@ public class SpindexMag {
         }
       } else { // if there isn't a ball in the flywheel
         int shootingColorIndex = getColorIndex(shootingColor);
-        if ((!spinServoTimer.isRunning()) && (spinServo.getPosition() != shootingColorIndex)) { // if the spindex position hasn't been set
+        if ((!spinServoTimer.isRunning())
+            && (spinServo.getPosition()
+                != shootingColorIndex)) { // if the spindex position hasn't been set
           spinServo.setPosition(shootingColorIndex); // move spindex to correct location
           spinServoTimer.start(); // start timer for moving spindex
-        } else if (flywheel.isUpToSpeed() && spinServoTimer.isFinished()) { // if the flywheel is up to speed and the spindex is done moving
+        } else if (flywheel.isUpToSpeed()
+            && spinServoTimer
+                .isFinished()) { // if the flywheel is up to speed and the spindex is done moving
           liftServo.setPosition(liftServoShootPos); // lift ball into flywheel
           liftServoTimer.start();
           flywheel.containsBall = true; // flywheel now has a ball in it
@@ -197,18 +204,23 @@ public class SpindexMag {
 
   /**
    * @brief starts filling the mag with two purple balls and one green ball
-   * @return true if mag had empty slots, false if mag is full or contains more than 2 purples or 1 green
+   * @return true if mag had empty slots, false if mag is full or contains more than 2 purples or 1
+   *     green
    */
   public boolean fillMag() {
-    if (getColorIndex(BallColor.EMPTY) == NULL) return false; // if there are no empty slots in the mag, return false
+    if (getColorIndex(BallColor.EMPTY) == NULL)
+      return false; // if there are no empty slots in the mag, return false
     fillingMag = true;
     purplesNeeded = 2; // if all slots are empty, we need 2 purples
     greensNeeded = 1; // if all slots are empty, we need 1 green
     for (BallColor color : spindexColor) {
-      if (color == BallColor.PURPLE) purplesNeeded--; // if slot contains purple, decrease number of purples needed by one
-      if (color == BallColor.GREEN) greensNeeded--; // if slot contains green, decrease number of greens needed by one
+      if (color == BallColor.PURPLE)
+        purplesNeeded--; // if slot contains purple, decrease number of purples needed by one
+      if (color == BallColor.GREEN)
+        greensNeeded--; // if slot contains green, decrease number of greens needed by one
     }
-    if (purplesNeeded < 0 || greensNeeded < 0) return false; // if mag contains more than 2 purples or 1 green, return false
+    if (purplesNeeded < 0 || greensNeeded < 0)
+      return false; // if mag contains more than 2 purples or 1 green, return false
     if (!intake.busy) intake.intake(); // start the intake spinning
     moveSpindexIntake(getColorIndex(BallColor.EMPTY)); // move the spindex to an empty slot
     return true;
@@ -258,7 +270,8 @@ public class SpindexMag {
       if (color == BallColor.PURPLE) purples++;
       if (color == BallColor.GREEN) greens++;
     }
-    if ((purples != 2) || (greens != 1)) return false; // return false if the wrong number of balls are in the mag
+    if ((purples != 2) || (greens != 1))
+      return false; // return false if the wrong number of balls are in the mag
     shootingSequence = true; // a sequence is being shot
     ballSequence = sequence; // store the requested sequence
     sequenceIndex = 0; // start with the first ball in the sequence

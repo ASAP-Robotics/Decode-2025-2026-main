@@ -43,7 +43,8 @@ public class Flywheel {
 
   private final double SPEED_TOLERANCE =
       0.95; // think of as the percentage of the target speed the flywheel needs to reach to be "at
-            // target speed"
+
+  // target speed"
 
   /**
    * @brief makes an object of the Flywheel class with and idle speed of 500 RPM
