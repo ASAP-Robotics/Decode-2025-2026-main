@@ -25,7 +25,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Field Centric TeleOp", group = "Drive")
+@TeleOp(name = "Main TeliOp", group = "Drive")
 public class MainOpMode extends LinearOpMode {
   // stuff was here
   private DcMotor frontLeft, frontRight, backLeft, backRight, flywheelMotor, intakeMotor;
@@ -64,7 +64,7 @@ public class MainOpMode extends LinearOpMode {
 
     intake = new ActiveIntake((DcMotorEx) intakeMotor);
 
-    mag = new SpindexMag(intake, flywheel, magServo, feeder, colorSensor, range);
+    mag = new SpindexMag(intake, flywheel, magServo, feeder, colorSensor, range, telemetry);
 
     // stuff was here
     // IMU
