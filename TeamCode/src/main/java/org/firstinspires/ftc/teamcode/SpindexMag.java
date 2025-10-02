@@ -20,7 +20,6 @@ import android.graphics.Color;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
@@ -80,13 +79,13 @@ public class SpindexMag {
   private Telemetry telemetry;
 
   public SpindexMag(
-          ActiveIntake intake,
-          Flywheel flywheel,
-          Servo spinServo,
-          Servo liftServo,
-          ColorSensor colorSensor,
-          DistanceSensor distanceSensor,
-          Telemetry telemetry) {
+      ActiveIntake intake,
+      Flywheel flywheel,
+      Servo spinServo,
+      Servo liftServo,
+      ColorSensor colorSensor,
+      DistanceSensor distanceSensor,
+      Telemetry telemetry) {
     this.intake = intake;
     this.flywheel = flywheel;
     this.spinServo = spinServo;
