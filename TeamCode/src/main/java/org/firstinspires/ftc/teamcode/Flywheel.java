@@ -29,7 +29,7 @@ public class Flywheel {
   private double targetSpeed = 0; // /< the speed (RPM) the flywheel is targeting
   private double currentSpeed = 0; // /< the latest speed (RPM) of the flywheel
   private double targetDistance = 0; // /< the distance (inches) to the target
-  public boolean containsBall = false; // /< if the flywheel has a ball in it that it is shooting
+  private boolean containsBall = false; // /< if the flywheel has a ball in it that it is shooting
   public org.firstinspires.ftc.teamcode.utils.SimpleTimer
       shotTimer; // /< timer to keep flywheel on while shooting a ball
 
@@ -78,6 +78,24 @@ public class Flywheel {
   public boolean isUpToSpeed() {
     update(); // update flywheel
     return currentSpeed >= (targetSpeed * SPEED_TOLERANCE);
+  }
+
+  /**
+   * @brief returns if a ball is in the flywheel
+   * @return true if a ball is in the flywheel, false if the flywheel is empty
+   * @note this is basically just a wrapper around a variable that isn't used in any core methods
+   */
+  public boolean getContainsBall() {
+    return containsBall;
+  }
+
+  /**
+   * @brief sets if a ball is in the flywheel
+   * @param containsBall true if a ball is in the flywheel, false if the flywheel is empty
+   * @note this is basically just a wrapper around a variable that isn't used in any core methods
+   */
+  public void setContainsBall(boolean containsBall) {
+    this.containsBall = containsBall;
   }
 
   /**
