@@ -108,12 +108,12 @@ public class SpindexMag {
     if (shootingSequence) { // if we are shooting a sequence (rapid fire)
       BallColor[] sequence = ballSequence.getBallColors();
       BallColor shootingColor = sequence[sequenceIndex];
-      if (flywheel.containsBall) { // if there is a ball in the flywheel
+      if (flywheel.getContainsBall()) { // if there is a ball in the flywheel
         if (liftServoTimer.isFinished()) {
           liftServo.setPosition(liftServoRestPos);
         }
         if (flywheel.shotTimer.isFinished()) {
-          flywheel.containsBall = false;
+          flywheel.setContainsBall(false);
           if (sequenceIndex < sequence.length) { // if the sequence isn't done
             sequenceIndex++; // move on to the next ball
           } else { // if the sequence is done
@@ -133,21 +133,21 @@ public class SpindexMag {
                 .isFinished()) { // if the flywheel is up to speed and the spindex is done moving
           liftServo.setPosition(liftServoShootPos); // lift ball into flywheel
           liftServoTimer.start();
-          flywheel.containsBall = true; // flywheel now has a ball in it
+          flywheel.setContainsBall(true); // flywheel now has a ball in it
           flywheel.shotTimer.start();
         }
       }
 
     } else if (flywheel.isEnabled() && flywheel.isActive()) { // if we are just shooting one ball
-      if (flywheel.containsBall) {
+      if (flywheel.getContainsBall()) {
         if (flywheel.shotTimer.isFinished()) {
-          flywheel.containsBall = false; // the ball should be out of the flywheel
+          flywheel.setContainsBall(false); // the ball should be out of the flywheel
           flywheel.idle(); // set the flywheel to slow down to idle speeds
         }
       } else {
         if (flywheel.isUpToSpeed()) {
           liftServo.setPosition(liftServoShootPos); // lift ball into flywheel
-          flywheel.containsBall = true;
+          flywheel.setContainsBall(true);
         }
       }
     }
