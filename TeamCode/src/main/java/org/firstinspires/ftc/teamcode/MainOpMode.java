@@ -60,7 +60,7 @@ public class MainOpMode extends LinearOpMode {
     flywheel = new Flywheel((DcMotorEx) flywheelMotor);
     flywheel.setTargetDistance(100); // target 100 inches away
     flywheel.idle(); // set the flywheel to spin at idle speed
-    flywheel.enable(); // let flywheel spin up
+    flywheel.disable(); // don't let flywheel spin up
 
     intake = new ActiveIntake((DcMotorEx) intakeMotor);
 
@@ -81,6 +81,8 @@ public class MainOpMode extends LinearOpMode {
         SpindexMag.BallSequence.PGP; // the sequence we want to shoot
 
     waitForStart();
+
+    flywheel.enable(); // let flywheel spin up
 
     while (opModeIsActive()) {
       flywheel.update();
