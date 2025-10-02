@@ -24,6 +24,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
+import java.util.Arrays;
+
 public class SpindexMag {
   public static enum BallColor {
     GREEN,
@@ -103,7 +105,7 @@ public class SpindexMag {
   public void update() {
     updateShooting();
     updateIntake();
-    telemetry.addData("Mag: ", spindexColor);
+    telemetry.addData("Mag: ", Arrays.toString(spindexColor));
   }
 
   /**
