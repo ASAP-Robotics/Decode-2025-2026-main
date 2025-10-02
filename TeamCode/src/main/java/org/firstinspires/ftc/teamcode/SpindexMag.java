@@ -160,7 +160,7 @@ public class SpindexMag {
     if (fillingMag) { // if we are filling the magazine
       BallColor intakeColor =
           getIntakeColor(); // get the color of ball (if any) in the intake position
-      if (intake.intaking) {
+      if (intake.isIntaking()) {
         if (intakeColor == BallColor.PURPLE) { // if a purple is in the intake
           if (purplesNeeded >= 1) { // if we need a purple
             spindexColor[mag_intakeIndex] = intakeColor; // record the color of the ball taken in
@@ -174,7 +174,7 @@ public class SpindexMag {
             intake.eject();
           }
         }
-      } else if (intake.ejecting) {
+      } else if (intake.isEjecting()) {
         if (intakeColor == BallColor.EMPTY) {
           if (!intake.intakeTimer.isRunning()) {
             intake.intakeTimer.start();
@@ -185,7 +185,7 @@ public class SpindexMag {
       }
       if (!fillMag()) fillingMag = false; // check if there are still empty slots in the mag
 
-    } else if (intake.intaking) { // if the intake is trying to intake a ball
+    } else if (intake.isIntaking()) { // if the intake is trying to intake a ball
       BallColor intakeColor =
           getIntakeColor(); // get the color of ball (if any) in the intake position
       if (intakeColor != BallColor.EMPTY) { // if a ball is in the intake position
@@ -193,7 +193,7 @@ public class SpindexMag {
         spindexColor[mag_intakeIndex] = intakeColor; // record the color of the ball taken in
       }
 
-    } else if (intake.ejecting) {
+    } else if (intake.isEjecting()) {
       BallColor intakeColor =
           getIntakeColor(); // get the color of ball (if any) in the intake position
       if (intakeColor == BallColor.EMPTY) { // if there isn't a ball in the intake position
@@ -221,7 +221,7 @@ public class SpindexMag {
     }
     if (purplesNeeded < 0 || greensNeeded < 0)
       return false; // if mag contains more than 2 purples or 1 green, return false
-    if (!intake.busy) intake.intake(); // start the intake spinning
+    if (!intake.isBusy()) intake.intake(); // start the intake spinning
     moveSpindexIntake(getColorIndex(BallColor.EMPTY)); // move the spindex to an empty slot
     return true;
   }
@@ -248,7 +248,7 @@ public class SpindexMag {
    *     is busy
    */
   private boolean intakeBallIndex(int index) {
-    if ((spindexColor[index] != BallColor.EMPTY) || intake.busy)
+    if ((spindexColor[index] != BallColor.EMPTY) || intake.isBusy())
       return false; // return false if given index contains a ball, or intake is busy
 
     liftServo.setPosition(liftServoRestPos); // lower lifter out of the way
