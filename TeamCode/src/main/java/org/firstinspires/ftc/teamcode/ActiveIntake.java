@@ -23,10 +23,9 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class ActiveIntake {
   private final DcMotorEx intake_intakeMotor;
-  public boolean busy = false;
-  public boolean intaking = false;
-  public boolean ejecting = false;
-  public boolean ballIn = false;
+  private boolean intaking = false;
+  private boolean ejecting = false;
+  private boolean ballIn = false;
   public org.firstinspires.ftc.teamcode.utils.SimpleTimer intakeTimer = new SimpleTimer(1);
 
   ActiveIntake(DcMotorEx intakeMotor) {
@@ -40,28 +39,65 @@ public class ActiveIntake {
    */
   public void stop() {
     intake_intakeMotor.setPower(0);
-    busy = false;
     intaking = false;
     ejecting = false;
   }
 
   /**
-   * @brief brings a ball into the intake
-   * @note placeholder; TODO: update
+   * @brief spins intake up to bring balls in
    */
   public void intake() {
     intake_intakeMotor.setPower(1);
-    busy = true;
     intaking = true;
   }
 
   /**
-   * @brief ejects a ball from the intake
-   * @note placeholder; TODO: update
+   * @brief spins intake up in reverse to spit balls out
    */
   public void eject() {
     intake_intakeMotor.setPower(-1);
-    busy = true;
     ejecting = true;
+  }
+
+  /**
+   * @brief returns if the intake is in use (busy)
+   * @return true if intake is spinning, false if intake is stopped
+   */
+  public boolean isBusy() {
+    return intaking || ejecting;
+  }
+
+  /**
+   * @brief returns if the intake is intaking
+   * @return true if intake is intaking, false if ejecting or stopped
+   */
+  public boolean isIntaking() {
+    return intaking;
+  }
+
+  /**
+   * @brief returns if the intake is ejecting
+   * @return true if intake is ejecting, false if intaking or stopped
+   */
+  public boolean isEjecting() {
+    return ejecting;
+  }
+
+  /**
+   * @brief returns if a ball is in the intake
+   * @return true if a ball is in the intake, false if the intake is empty
+   * @note this is basically just a wrapper around a variable that isn't used in any core methods
+   */
+  public boolean isBallIn() {
+    return ballIn;
+  }
+
+  /**
+   * @brief sets if a ball is in the intake
+   * @param ballIn true if a ball is in the intake, false if the intake is empty
+   * @brief this is basically just a wrapper around a variable that isn't used in any core methods
+   */
+  public void setBallIn(boolean ballIn) {
+    this.ballIn = ballIn;
   }
 }
