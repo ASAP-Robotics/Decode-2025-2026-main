@@ -42,7 +42,7 @@ public class Flywheel {
   private static final double EFFICIENCY = 0.90;
 
   private final double SPEED_TOLERANCE =
-      0.95; // think of as the percentage of the target speed the flywheel needs to reach to be "at
+      0.1; // think of as the percentage of the target speed the flywheel needs to reach to be "at
 
   // target speed"
 

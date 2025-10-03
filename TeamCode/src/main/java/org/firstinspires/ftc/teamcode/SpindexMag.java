@@ -104,7 +104,9 @@ public class SpindexMag {
   public void update() {
     updateShooting();
     updateIntake();
-    telemetry.addData("Mag: ", Arrays.toString(spindexColor));
+    telemetry.addData("Mag", Arrays.toString(spindexColor));
+    telemetry.addData("Shooting", shootingSequence);
+    telemetry.addData("Filling", fillingMag);
   }
 
   /**
