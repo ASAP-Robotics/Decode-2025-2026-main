@@ -73,6 +73,8 @@ public class SpindexMag {
   private int sequenceIndex = 0; // /< the index of ball in the sequence that is being shot
   private int purplesNeeded = 0; // the number of purples needed to fill the mag
   private int greensNeeded = 0; // the number of greens needed to fill the mag
+  private BallColor intakeColor = BallColor.UNKNOWN; // /< the color of ball in the intake the most recent time checked
+  private BallColor oldIntakeColor = BallColor.UNKNOWN; // /< the color of ball in the intake last time checked
   private final org.firstinspires.ftc.teamcode.utils.SimpleTimer liftServoTimer =
       new SimpleTimer(0.5); // /< timer for lifting ball into flywheel
   private final org.firstinspires.ftc.teamcode.utils.SimpleTimer spinServoTimer =
@@ -172,9 +174,9 @@ public class SpindexMag {
    */
   private void updateIntake() {
     if (fillingMag) { // if we are filling the magazine
-      BallColor intakeColor =
-          getIntakeColor(); // get the color of ball (if any) in the intake position
-      if (intake.isIntaking()) {
+      getIntakeColor(); // get the color of ball (if any) in the intake position
+
+      if (intake.isIntaking() && intakeColor != oldIntakeColor) {
         if (intakeColor == BallColor.PURPLE) { // if a purple is in the intake
           if (purplesNeeded >= 1) { // if we need a purple
             spindexColor[mag_intakeIndex] = intakeColor; // record the color of the ball taken in
@@ -202,6 +204,7 @@ public class SpindexMag {
           }
         }
       }
+
       if (!fillMagSorted()) fillingMag = false; // check if there are still empty slots in the mag
 
     } else if (intake.isIntaking()) { // if the intake is trying to intake a ball
@@ -324,32 +327,25 @@ public class SpindexMag {
   }
 
   /**
-   * @brief moves the specified spindex index to its intake position
    * @param index the spindex index to move to the intake position
+   * @brief moves the specified spindex index to its intake position
    */
-  private boolean moveSpindexIntake(int index) {
-    double prevPos = spinServo.getPosition(); // get old position
-    double newPos = spindexIntake[index]; // get new position
-    spinServo.setPosition(newPos); // set servo to new position
+  private void moveSpindexIntake(int index) {
+    spinServo.setPosition(spindexIntake[index]); // set servo to new position
     spinServoTimer.start(); // start timer for moving spindex
     mag_intakeIndex = index; // set new intake index
     mag_shootIndex = NULL; // spindex isn't at a shooting index
-    return prevPos != newPos; // return true if new position is different from old one
   }
 
   /**
-   * @brief moves the specified spindex index to its shooting position
    * @param index the spindex index to move to the shooting position
-   * @return true if the servo moved, false if the servo was already at requested location
+   * @brief moves the specified spindex index to its shooting position
    */
-  private boolean moveSpindexShoot(int index) {
-    double prevPos = spinServo.getPosition(); // get old position
-    double newPos = spindexShoot[index]; // get new position
-    spinServo.setPosition(newPos); // set servo to new position
+  private void moveSpindexShoot(int index) {
+    spinServo.setPosition(spindexShoot[index]); // set servo to new position
     spinServoTimer.start(); // start timer for moving spindex
     mag_shootIndex = index; // set new shooting index
     mag_intakeIndex = NULL; // spindex isn't at an intake index
-    return prevPos != newPos; // return true if new position is different from old one
   }
 
   /**
@@ -357,7 +353,8 @@ public class SpindexMag {
    * @return the color of ball in the intake
    */
   private BallColor getIntakeColor() {
-    BallColor toReturn = BallColor.EMPTY;
+    oldIntakeColor = intakeColor; // store old intake ball color
+    intakeColor = BallColor.EMPTY; // default to an empty intake
 
     int red = colorSensor.red();
     int green = colorSensor.green();
@@ -369,17 +366,17 @@ public class SpindexMag {
     float v = hsv[2];
 
     if (s > 0.6 && v > 40 && h >= 150 && h <= 170) { // green
-      toReturn = BallColor.GREEN;
+      intakeColor = BallColor.GREEN; // intake has a green ball in it
     } else if (s > 0.3 && v > 40 && h >= 220 && h <= 240) { // purple
-      toReturn = BallColor.PURPLE;
+      intakeColor = BallColor.PURPLE; // intake has a purple ball in it
     } else { // color can't be determined
       double distance = distanceSensor.getDistance(DistanceUnit.INCH);
       if (distance <= 2.0) { // if a ball is in the intake
-        toReturn = BallColor.UNKNOWN;
+        intakeColor = BallColor.UNKNOWN; // intake has an unknown ball in it
       }
     }
 
-    return toReturn;
+    return intakeColor;
   }
 
   /**
