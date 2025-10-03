@@ -73,8 +73,10 @@ public class SpindexMag {
   private int sequenceIndex = 0; // /< the index of ball in the sequence that is being shot
   private int purplesNeeded = 0; // the number of purples needed to fill the mag
   private int greensNeeded = 0; // the number of greens needed to fill the mag
-  private BallColor intakeColor = BallColor.UNKNOWN; // /< the color of ball in the intake the most recent time checked
-  private BallColor oldIntakeColor = BallColor.UNKNOWN; // /< the color of ball in the intake last time checked
+  private BallColor intakeColor =
+      BallColor.UNKNOWN; // /< the color of ball in the intake the most recent time checked
+  private BallColor oldIntakeColor =
+      BallColor.UNKNOWN; // /< the color of ball in the intake last time checked
   private final org.firstinspires.ftc.teamcode.utils.SimpleTimer liftServoTimer =
       new SimpleTimer(0.5); // /< timer for lifting ball into flywheel
   private final org.firstinspires.ftc.teamcode.utils.SimpleTimer spinServoTimer =
