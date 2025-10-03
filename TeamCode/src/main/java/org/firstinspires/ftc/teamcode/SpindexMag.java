@@ -114,9 +114,11 @@ public class SpindexMag {
     if (shootingSequence) { // if we are shooting a sequence (rapid fire)
       BallColor[] sequence = ballSequence.getBallColors();
       BallColor shootingColor = sequence[sequenceIndex];
+      telemetry.addData("Shooting: ", shootingColor);
       if (flywheel.getContainsBall()) { // if there is a ball in the flywheel
         if (liftServoTimer.isFinished()) {
           liftServo.setPosition(liftServoRestPos);
+          telemetry.addData("Shot: ", sequenceIndex);
         }
         if (flywheel.shotTimer.isFinished()) {
           flywheel.setContainsBall(false);
@@ -125,6 +127,7 @@ public class SpindexMag {
           } else { // if the sequence is done
             shootingSequence = false; // we are no longer shooting a sequence
             flywheel.idle(); // let flywheel slow down to idle speed
+            telemetry.addData("Done: ", true);
           }
         }
       } else { // if there isn't a ball in the flywheel
