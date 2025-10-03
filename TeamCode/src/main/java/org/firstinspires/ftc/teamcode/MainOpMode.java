@@ -85,7 +85,6 @@ public class MainOpMode extends LinearOpMode {
     flywheel.enable(); // let flywheel spin up
 
     while (opModeIsActive()) {
-      flywheel.update();
       mag.update();
       // --- X toggle ---
       boolean xNow = gamepad1.x;
@@ -109,7 +108,7 @@ public class MainOpMode extends LinearOpMode {
 
       // fil mag
       if (aPressed) {
-        mag.fillMag(); // fill the mag
+        mag.fillMagSorted(); // fill the mag
       }
 
       // stuff was here

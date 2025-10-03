@@ -77,7 +77,7 @@ public class SpindexMag {
       new SimpleTimer(0.5); // /< timer for lifting ball into flywheel
   private final org.firstinspires.ftc.teamcode.utils.SimpleTimer spinServoTimer =
       new SimpleTimer(0.75); // /< timer for moving spindex
-  private Telemetry telemetry;
+  private final Telemetry telemetry;
 
   public SpindexMag(
       ActiveIntake intake,
@@ -104,6 +104,7 @@ public class SpindexMag {
   public void update() {
     updateShooting();
     updateIntake();
+    flywheel.update();
     telemetry.addData("Mag", Arrays.toString(spindexColor));
     telemetry.addData("Shooting", shootingSequence);
     telemetry.addData("Filling", fillingMag);
@@ -116,29 +117,30 @@ public class SpindexMag {
     if (shootingSequence) { // if we are shooting a sequence (rapid fire)
       BallColor[] sequence = ballSequence.getBallColors();
       BallColor shootingColor = sequence[sequenceIndex];
-      telemetry.addData("Shooting: ", shootingColor);
+      telemetry.addData("Shooting color", shootingColor);
+      telemetry.addData("Shooting index", sequenceIndex);
       if (flywheel.getContainsBall()) { // if there is a ball in the flywheel
         if (liftServoTimer.isFinished()) {
           liftServo.setPosition(liftServoRestPos);
-          telemetry.addData("Shot: ", sequenceIndex);
         }
-        if (flywheel.shotTimer.isFinished()) {
-          flywheel.setContainsBall(false);
+        if (flywheel.shotTimer.isFinished()) { // if the ball entered the flywheel long enough ago
+          flywheel.setContainsBall(false); // there is not a ball in the flywheel
+          spindexColor[mag_shootIndex] = BallColor.EMPTY; // spindex slot is now empty
           if (sequenceIndex < sequence.length) { // if the sequence isn't done
-            sequenceIndex++; // move on to the next ball
+            sequenceIndex++; // move on to the next ball in the sequence
+
           } else { // if the sequence is done
             shootingSequence = false; // we are no longer shooting a sequence
             flywheel.idle(); // let flywheel slow down to idle speed
-            telemetry.addData("Done: ", true);
           }
         }
+
       } else { // if there isn't a ball in the flywheel
         int shootingColorIndex = getColorIndex(shootingColor);
         if ((!spinServoTimer.isRunning())
-            && (spinServo.getPosition()
-                != shootingColorIndex)) { // if the spindex position hasn't been set
-          spinServo.setPosition(shootingColorIndex); // move spindex to correct location
-          spinServoTimer.start(); // start timer for moving spindex
+            && (mag_shootIndex != shootingColorIndex)) { // if the spindex position hasn't been set
+          moveSpindexShoot(shootingColorIndex); // move spindex to correct location
+
         } else if (flywheel.isUpToSpeed()
             && spinServoTimer
                 .isFinished()) { // if the flywheel is up to speed and the spindex is done moving
@@ -155,6 +157,7 @@ public class SpindexMag {
           flywheel.setContainsBall(false); // the ball should be out of the flywheel
           flywheel.idle(); // set the flywheel to slow down to idle speeds
         }
+
       } else {
         if (flywheel.isUpToSpeed()) {
           liftServo.setPosition(liftServoShootPos); // lift ball into flywheel
@@ -175,26 +178,31 @@ public class SpindexMag {
         if (intakeColor == BallColor.PURPLE) { // if a purple is in the intake
           if (purplesNeeded >= 1) { // if we need a purple
             spindexColor[mag_intakeIndex] = intakeColor; // record the color of the ball taken in
+
           } else {
             intake.eject();
           }
+
         } else if (intakeColor == BallColor.GREEN) { // if a green is in the intake
           if (greensNeeded >= 1) { // if we need a green
             spindexColor[mag_intakeIndex] = intakeColor; // record the color of the ball taken in
+
           } else {
             intake.eject();
           }
         }
+
       } else if (intake.isEjecting()) {
         if (intakeColor == BallColor.EMPTY) {
           if (!intake.intakeTimer.isRunning()) {
             intake.intakeTimer.start();
+
           } else if (intake.intakeTimer.isFinished()) {
             intake.intake(); // start the intake
           }
         }
       }
-      if (!fillMag()) fillingMag = false; // check if there are still empty slots in the mag
+      if (!fillMagSorted()) fillingMag = false; // check if there are still empty slots in the mag
 
     } else if (intake.isIntaking()) { // if the intake is trying to intake a ball
       BallColor intakeColor =
@@ -218,7 +226,7 @@ public class SpindexMag {
    * @return true if mag had empty slots, false if mag is full or contains more than 2 purples or 1
    *     green
    */
-  public boolean fillMag() {
+  public boolean fillMagSorted() {
     if (getColorIndex(BallColor.EMPTY) == NULL)
       return false; // if there are no empty slots in the mag, return false
     fillingMag = true;
@@ -319,20 +327,29 @@ public class SpindexMag {
    * @brief moves the specified spindex index to its intake position
    * @param index the spindex index to move to the intake position
    */
-  private void moveSpindexIntake(int index) {
-    spinServo.setPosition(spindexIntake[index]);
+  private boolean moveSpindexIntake(int index) {
+    double prevPos = spinServo.getPosition(); // get old position
+    double newPos = spindexIntake[index]; // get new position
+    spinServo.setPosition(newPos); // set servo to new position
+    spinServoTimer.start(); // start timer for moving spindex
     mag_intakeIndex = index; // set new intake index
     mag_shootIndex = NULL; // spindex isn't at a shooting index
+    return prevPos != newPos; // return true if new position is different from old one
   }
 
   /**
    * @brief moves the specified spindex index to its shooting position
    * @param index the spindex index to move to the shooting position
+   * @return true if the servo moved, false if the servo was already at requested location
    */
-  private void moveSpindexShoot(int index) {
-    spinServo.setPosition(spindexShoot[index]);
+  private boolean moveSpindexShoot(int index) {
+    double prevPos = spinServo.getPosition(); // get old position
+    double newPos = spindexShoot[index]; // get new position
+    spinServo.setPosition(newPos); // set servo to new position
+    spinServoTimer.start(); // start timer for moving spindex
     mag_shootIndex = index; // set new shooting index
     mag_intakeIndex = NULL; // spindex isn't at an intake index
+    return prevPos != newPos; // return true if new position is different from old one
   }
 
   /**
