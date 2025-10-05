@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.DualNum;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -46,8 +44,8 @@ public final class ThreeDeadWheelLocalizer implements Localizer {
     par0 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "leftBack")));
     par1 = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "rightFront")));
     perp = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "rightBack")));
-    par1.setDirection(DcMotorSimple.Direction.REVERSE);
     par0.setDirection(DcMotorSimple.Direction.REVERSE);
+    par1.setDirection(DcMotorSimple.Direction.REVERSE);
     // TODO: reverse encoder directions if needed
     //   par0.setDirection(DcMotorSimple.Direction.REVERSE);
 
