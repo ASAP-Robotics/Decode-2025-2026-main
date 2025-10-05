@@ -32,18 +32,24 @@ public class MeepMeepTesting {
                     .actionBuilder(new Pose2d(-61.50, -10, Math.toRadians(0)))
                     .waitSeconds(2)
                     //part where we steal for 61 pts
+                  //  .splineTo(new Vector2d(-16, 58), Math.toRadians(0))
+                  //  .splineTo(new Vector2d(-25, 30), Math.toRadians(0))
+                  //  .waitSeconds(1.5)
+                    //OPTIONAL ^^^
+                    //MORE REALISTIC VARIANT
+                    
                     .splineTo(new Vector2d(-16, 58), Math.toRadians(0))
                     .splineTo(new Vector2d(-25, 30), Math.toRadians(0))
                     .waitSeconds(1.5)
-                    //OPTIONAL ^^^
+
                     .splineTo(new Vector2d(-12, -47), Math.toRadians(0))
                     .splineTo(new Vector2d(-16,-10),Math.toRadians(0))
                     .waitSeconds(1.5)
                     .splineTo(new Vector2d(10, -47), Math.toRadians(0))
                     .splineTo(new Vector2d(-16,-10),Math.toRadians(0))
                     .waitSeconds(1.5)
-                    .splineTo(new Vector2d(27, -47), Math.toRadians(0))
-                    .splineTo(new Vector2d(50,-10),Math.toRadians(0))
+                    .splineTo(new Vector2d(30, -47), Math.toRadians(0))
+                  //  .splineTo(new Vector2d(50,-10),Math.toRadians(0)) this is for the optional one
                     .waitSeconds(1.5)
                     .splineTo(new Vector2d(34, -34), Math.toRadians(0))
                     .build());
