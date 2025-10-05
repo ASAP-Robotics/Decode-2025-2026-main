@@ -25,8 +25,8 @@ public class MeepMeepTesting {
                     // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                     .setConstraints(120, 63, Math.toRadians(180), Math.toRadians(180), 15)
                     .build();
-//BIG SIDE RED TEAM
-     myBot.runAction(
+//BIG SIDE RED TEAM || 21 sec
+   /*  myBot.runAction(
             myBot
                     .getDrive()
                     .actionBuilder(new Pose2d(-61.50, -10, Math.toRadians(0)))
@@ -42,8 +42,8 @@ public class MeepMeepTesting {
                     .waitSeconds(1.5)
                     .splineTo(new Vector2d(40, -48), Math.toRadians(0))
                     .splineTo(new Vector2d(38, -30), Math.toRadians(0))
-                    .build());
-    //BIG SIDE BLUE TEAM
+                    .build()); */
+    //BIG SIDE BLUE TEAM || 21 sec
   /*  myBot.runAction(
             myBot
                     .getDrive()
@@ -61,14 +61,14 @@ public class MeepMeepTesting {
                     .splineTo(new Vector2d(40, 48), Math.toRadians(0))
                     .splineTo(new Vector2d(38, 30), Math.toRadians(0))
                     .build()); */
-    //SMALL SIDE BLUE TEAM
+    //SMALL SIDE BLUE TEAM || 24 sec
    /* myBot.runAction(
             myBot
                     .getDrive()
                     .actionBuilder(new Pose2d(61, 10, Math.toRadians(180)))
                     .waitSeconds(2)
                     .splineTo(new Vector2d(38, -40), Math.toRadians(90))
-                    .splineTo(new Vector2d(57, -10), Math.toRadians(90))
+                    .splineTo(new Vector2d(57, -10), Math.toRadians(180))
                     .waitSeconds(1.5)
                     .splineTo(new Vector2d(38, 48), Math.toRadians(180))
                     .splineTo(new Vector2d(58, 10), Math.toRadians(180))
@@ -79,7 +79,7 @@ public class MeepMeepTesting {
                     .splineTo(new Vector2d(-10, 48), Math.toRadians(180))
                     .splineTo(new Vector2d(38, 30), Math.toRadians(0))
                     .build()); */
-    //SMALL SIDE RED TEAM
+    //SMALL SIDE RED TEAM || 24 sec
  /*   myBot.runAction(
             myBot
                     .getDrive()
