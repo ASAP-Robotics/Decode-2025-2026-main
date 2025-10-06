@@ -123,6 +123,9 @@ public class SpindexMag {
       BallColor shootingColor = sequence[sequenceIndex];
       telemetry.addData("Shooting color", shootingColor);
       telemetry.addData("Shooting index", sequenceIndex);
+      telemetry.addData("Contains ball", flywheel.getContainsBall());
+      telemetry.addData("UpToSpeed", flywheel.isUpToSpeed());
+      telemetry.addData("spinServoTimer.isFinished", spinServoTimer.isFinished());
       if (flywheel.getContainsBall()) { // if there is a ball in the flywheel
         if (liftServoTimer.isFinished()) {
           liftServo.setPosition(liftServoRestPos);
@@ -130,7 +133,7 @@ public class SpindexMag {
         if (flywheel.shotTimer.isFinished()) { // if the ball entered the flywheel long enough ago
           flywheel.setContainsBall(false); // there is not a ball in the flywheel
           spindexColor[mag_shootIndex] = BallColor.EMPTY; // spindex slot is now empty
-          if (sequenceIndex < sequence.length) { // if the sequence isn't done
+          if (sequenceIndex < (sequence.length - 1)) { // if the sequence isn't done
             sequenceIndex++; // move on to the next ball in the sequence
 
           } else { // if the sequence is done

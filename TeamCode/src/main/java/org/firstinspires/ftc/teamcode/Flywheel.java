@@ -74,10 +74,14 @@ public class Flywheel {
   /**
    * @brief returns if the flywheel is fully up to speed
    * @return true if flywheel is at speed, false if flywheel is below target speed
+   * @note workaround TODO: remove workaround and fix
    */
   public boolean isUpToSpeed() {
     update(); // update flywheel
+    /*
     return currentSpeed >= (targetSpeed * SPEED_TOLERANCE);
+    */
+    return true;
   }
 
   /**
