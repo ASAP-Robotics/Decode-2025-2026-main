@@ -21,60 +21,88 @@ public class MeepMeepTesting {
     }
 
     RoadRunnerBotEntity myBot =
-        new DefaultBotBuilder(meepMeep)
-            // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-            .setConstraints(120, 63, Math.toRadians(180), Math.toRadians(180), 15)
-            .build();
+            new DefaultBotBuilder(meepMeep)
+                    // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
+                    .setConstraints(120, 63, Math.toRadians(180), Math.toRadians(180), 15)
+                    .build();
+//BIG SIDE RED TEAM || 21 sec
+     myBot.runAction(
+            myBot
+                    .getDrive()
+                    .actionBuilder(new Pose2d(-61.50, 10, Math.toRadians(0)))
+                    .waitSeconds(3)
+                    .splineTo(new Vector2d(-16, 47), Math.toRadians(0))
+                    .splineTo(new Vector2d(-25, 30), Math.toRadians(0))
+                    .waitSeconds(3)
+                    .splineTo(new Vector2d(-10, -48), Math.toRadians(0))
+                    .splineTo(new Vector2d(-10, -10), Math.toRadians(0))
+                    .waitSeconds(3)
+                    .splineTo(new Vector2d(7, -48), Math.toRadians(180))
+                    .splineTo(new Vector2d(-10, -10), Math.toRadians(0))
+                    .waitSeconds(3)
+                    .splineTo(new Vector2d(40, -48), Math.toRadians(0))
+                    .splineTo(new Vector2d(38, -33), Math.toRadians(0))
+                    .build());
+    //BIG SIDE BLUE TEAM || 21 sec
+/*    myBot.runAction(
+            myBot
+                    .getDrive()
+                    .actionBuilder(new Pose2d(-61.50, 10, Math.toRadians(0)))
+                    .waitSeconds(2)
+                    .splineTo(new Vector2d(-16, -47), Math.toRadians(0))
+                    .splineTo(new Vector2d(-25, -30), Math.toRadians(0))
+                    .waitSeconds(1.5)
+                    .splineTo(new Vector2d(-10, 48), Math.toRadians(0))
+                    .splineTo(new Vector2d(-10, 10), Math.toRadians(0))
+                    .waitSeconds(1.5)
+                    .splineTo(new Vector2d(7, 48), Math.toRadians(180))
+                    .splineTo(new Vector2d(-10, 10), Math.toRadians(0))
+                    .waitSeconds(1.5)
+                    .splineTo(new Vector2d(40, 48), Math.toRadians(0))
+                    .splineTo(new Vector2d(38, 33), Math.toRadians(0))
+                    .build()); */
+    //SMALL SIDE BLUE TEAM || 24 sec
+ /*   myBot.runAction(
+            myBot
+                    .getDrive()
+                    .actionBuilder(new Pose2d(61, 10, Math.toRadians(180)))
+                    .waitSeconds(2)
+                    .splineTo(new Vector2d(38, -40), Math.toRadians(90))
+                    .splineTo(new Vector2d(57, -10), Math.toRadians(180))
+                    .waitSeconds(1.5)
+                    .splineTo(new Vector2d(38, 48), Math.toRadians(90))
+                    .splineTo(new Vector2d(58, 10), Math.toRadians(180))
+                    .waitSeconds(1.5)
+                    .splineTo(new Vector2d(10, 48), Math.toRadians(180))
+                    .splineTo(new Vector2d(58, 10), Math.toRadians(180))
+                    .waitSeconds(1.5)
+                    .splineTo(new Vector2d(-10, 48), Math.toRadians(180))
+                    .splineTo(new Vector2d(38, 33), Math.toRadians(0))
+                    .build()); */
+    //SMALL SIDE RED TEAM || 24 sec
+/*   myBot.runAction(
+            myBot
+                    .getDrive()
+                    .actionBuilder(new Pose2d(61, -10, Math.toRadians(180)))
+                    .waitSeconds(2)
+                    .splineTo(new Vector2d(38, 48), Math.toRadians(90))
+                    .splineTo(new Vector2d(57, 10), Math.toRadians(180))
+                    .waitSeconds(1.5)
+                    .splineTo(new Vector2d(38, -48), Math.toRadians(90))
+                    .splineTo(new Vector2d(58, -10), Math.toRadians(180))
+                    .waitSeconds(1.5)
+                    .splineTo(new Vector2d(10, -48), Math.toRadians(180))
+                    .splineTo(new Vector2d(58, -10), Math.toRadians(180))
+                    .waitSeconds(1.5)
+                    .splineTo(new Vector2d(-10, -48), Math.toRadians(180))
+                    .splineTo(new Vector2d(38, -33), Math.toRadians(0))
+                    .build()); */
 
-    /* myBot.runAction(
-    myBot
-        .getDrive()
-        .actionBuilder(new Pose2d(61.5, 30, Math.toRadians(180)))
-            //.splineTo(new Vector2d(61.5,30),Math.toRadians(180))
-            .waitSeconds(3)
-            .strafeTo(new Vector2d(61.5,61.5))
-            .strafeTo(new Vector2d(61.5,30))
-            .waitSeconds(3)
-            .splineTo(new Vector2d(48,47),Math.toRadians(180))
-            .splineTo(new Vector2d(40,47),Math.toRadians(180)) // i want this to be slower
-            .splineTo(new Vector2d(61.5,20),Math.toRadians(180))
-            .waitSeconds(3)
-
-            .splineTo(new Vector2d(20,47),Math.toRadians(180))
-            .splineTo(new Vector2d(12,47),Math.toRadians(180))
-            .splineTo(new Vector2d(-20,20),Math.toRadians(235))
-            .waitSeconds(3)
-            .splineTo(new Vector2d(-3,47),Math.toRadians(180))
-            .splineTo(new Vector2d(-12,47),Math.toRadians(180))
-            .splineTo(new Vector2d(-20,20),Math.toRadians(235))
-            .waitSeconds(3)
-            .build());*/
-    myBot.runAction(
-        myBot
-            .getDrive()
-            .actionBuilder(new Pose2d(-61.50, -10, Math.toRadians(0)))
-            .waitSeconds(3)
-            .splineTo(new Vector2d(-8, -47), Math.toRadians(0))
-            .splineTo(new Vector2d(-7, -47), Math.toRadians(0))
-            .splineTo(new Vector2d(-20, -20), Math.toRadians(180))
-            .waitSeconds(3)
-            .splineTo(new Vector2d(12, -47), Math.toRadians(0))
-            .splineTo(new Vector2d(16, -47), Math.toRadians(0))
-            .splineTo(new Vector2d(-20, -20), Math.toRadians(180))
-            .waitSeconds(3)
-            .splineTo(new Vector2d(40, -47), Math.toRadians(0))
-            .splineTo(new Vector2d(48, -47), Math.toRadians(0))
-            .splineTo(new Vector2d(61.5, -30), Math.toRadians(0))
-            .waitSeconds(3)
-            .strafeTo(new Vector2d(61.5, -61.5))
-            .strafeTo(new Vector2d(61.5, -30))
-            .waitSeconds(3)
-            .build());
     meepMeep
-        .setBackground(img)
-        .setDarkMode(true)
-        .setBackgroundAlpha(0.95f)
-        .addEntity(myBot)
-        .start();
+            .setBackground(img)
+            .setDarkMode(true)
+            .setBackgroundAlpha(0.95f)
+            .addEntity(myBot)
+            .start();
   }
 }
