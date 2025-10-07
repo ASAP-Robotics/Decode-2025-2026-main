@@ -25,6 +25,8 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.types.BallSequence;
+
 @TeleOp(name = "Main TeliOp", group = "Drive")
 public class MainOpMode extends LinearOpMode {
   // stuff was here
@@ -35,7 +37,8 @@ public class MainOpMode extends LinearOpMode {
   private DistanceSensor range;
   private Flywheel flywheel;
   private ActiveIntake intake;
-  private SpindexMag mag;
+  private Spindex spindex;
+  private ScoringSystem mag;
   private boolean xPrev = false; // for rising-edge detect
   private boolean xToggle = false; // the thing you're toggling
   private boolean aPrev = false;
@@ -64,7 +67,7 @@ public class MainOpMode extends LinearOpMode {
 
     intake = new ActiveIntake((DcMotorEx) intakeMotor);
 
-    mag = new SpindexMag(intake, flywheel, magServo, feeder, colorSensor, range, telemetry);
+    mag = new ScoringSystem(intake, flywheel, spindex, telemetry);
 
     // stuff was here
     // IMU
@@ -77,8 +80,8 @@ public class MainOpMode extends LinearOpMode {
     //  imu.initialize(imuParams);
     //  imu.resetYaw();
     // stuff was here (setting wanted sequence)
-    SpindexMag.BallSequence wantedSequence =
-        SpindexMag.BallSequence.PGP; // the sequence we want to shoot
+    BallSequence wantedSequence =
+        BallSequence.PGP; // the sequence we want to shoot
 
     waitForStart();
 
