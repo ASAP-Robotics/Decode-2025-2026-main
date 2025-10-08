@@ -42,6 +42,8 @@ public class MainOpMode extends LinearOpMode {
   private boolean xToggle = false; // the thing you're toggling
   private boolean aPrev = false;
 
+  // this is a super long line of comments and stuff to get the automatic formating to actually do something. This really is quite a lot of text. Wow. Super long. Crazy. The formating had better work!
+
   @Override
   public void runOpMode() {
     BallSequence wantedSequence = BallSequence.PGP; // the sequence we want to shoot
