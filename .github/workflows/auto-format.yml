@@ -12,13 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
 
       - name: Check for Java files
@@ -33,7 +34,7 @@ jobs:
       - name: Run Google Java Format
         if: steps.check_java.outputs.found == 'true'
         run: |
-          wget https://github.com/google/google-java-format/releases/download/v1.22.0/google-java-format-1.22.0-all-deps.jar
+          wget -q https://github.com/google/google-java-format/releases/download/v1.22.0/google-java-format-1.22.0-all-deps.jar
           java -jar google-java-format-1.22.0-all-deps.jar --replace $(git ls-files '*.java')
 
       - name: Commit changes if formatting was applied
