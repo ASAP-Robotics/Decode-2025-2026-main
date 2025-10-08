@@ -45,6 +45,9 @@ public class MainOpMode extends LinearOpMode {
 
   @Override
   public void runOpMode() {
+    BallSequence wantedSequence =
+        BallSequence.PGP; // the sequence we want to shoot
+
     // Initialize motors/servos/sensors
     // frontLeft = hardwareMap.get(DcMotor.class, "leftFront");
     // frontRight = hardwareMap.get(DcMotor.class, "rightFront");
@@ -66,9 +69,6 @@ public class MainOpMode extends LinearOpMode {
 
     mag = new ScoringSystem(intake, flywheel, spindex, telemetry);
     mag.setTargetDistance(100); // PLACEHOLDER
-
-    BallSequence wantedSequence =
-        BallSequence.PGP; // the sequence we want to shoot
 
     // stuff was here
     // IMU
