@@ -33,7 +33,7 @@ public class MainOpMode extends LinearOpMode {
   private Servo magServo, feeder;
   private IMU imu;
   private ColorSensor colorSensor;
-  private DistanceSensor range;
+  private DistanceSensor distanceSensor;
   private Flywheel flywheel;
   private ActiveIntake intake;
   private Spindex spindex;
@@ -53,7 +53,7 @@ public class MainOpMode extends LinearOpMode {
     // backRight = hardwareMap.get(DcMotor.class, "rightBack");
     flywheelMotor = hardwareMap.get(DcMotor.class, "flywheel");
     intakeMotor = hardwareMap.get(DcMotor.class, "intake");
-    range = hardwareMap.get(DistanceSensor.class, "colorSensor");
+    distanceSensor = hardwareMap.get(DistanceSensor.class, "colorSensor");
     colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
     feeder = hardwareMap.get(Servo.class, "feeder");
     magServo = hardwareMap.get(Servo.class, "magServo");
@@ -63,7 +63,7 @@ public class MainOpMode extends LinearOpMode {
 
     flywheel = new Flywheel((DcMotorEx) flywheelMotor);
     intake = new ActiveIntake((DcMotorEx) intakeMotor);
-    spindex = new Spindex(magServo, feeder, colorSensor, range);
+    spindex = new Spindex(magServo, feeder, colorSensor, distanceSensor);
 
     mag = new ScoringSystem(intake, flywheel, spindex, telemetry);
     mag.setTargetDistance(100); // PLACEHOLDER
