@@ -24,6 +24,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 @TeleOp(name = "Main TeliOp", group = "Drive")
 public class MainOpMode extends LinearOpMode {
@@ -32,39 +33,44 @@ public class MainOpMode extends LinearOpMode {
   private Servo magServo, feeder;
   private IMU imu;
   private ColorSensor colorSensor;
-  private DistanceSensor range;
+  private DistanceSensor distanceSensor;
   private Flywheel flywheel;
   private ActiveIntake intake;
-  private SpindexMag mag;
+  private Spindex spindex;
+  private ScoringSystem mag;
   private boolean xPrev = false; // for rising-edge detect
   private boolean xToggle = false; // the thing you're toggling
   private boolean aPrev = false;
 
+  // this is a super long line of comments and stuff to get the automatic formating to actually do
+  // something. This really is quite a lot of text. Wow. Super long. Crazy. The formating had better
+  // work!
+
   @Override
   public void runOpMode() {
+    BallSequence wantedSequence = BallSequence.PGP; // the sequence we want to shoot
+
     // Initialize motors/servos/sensors
     // frontLeft = hardwareMap.get(DcMotor.class, "leftFront");
-    flywheelMotor = hardwareMap.get(DcMotor.class, "flywheel");
     // frontRight = hardwareMap.get(DcMotor.class, "rightFront");
     // backLeft = hardwareMap.get(DcMotor.class, "leftBack");
     // backRight = hardwareMap.get(DcMotor.class, "rightBack");
-    range = hardwareMap.get(DistanceSensor.class, "colorSensor");
+    flywheelMotor = hardwareMap.get(DcMotor.class, "flywheel");
+    intakeMotor = hardwareMap.get(DcMotor.class, "intake");
+    distanceSensor = hardwareMap.get(DistanceSensor.class, "colorSensor");
     colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
     feeder = hardwareMap.get(Servo.class, "feeder");
     magServo = hardwareMap.get(Servo.class, "magServo");
-    intakeMotor = hardwareMap.get(DcMotor.class, "intake");
 
     // frontRight.setDirection(DcMotor.Direction.REVERSE);
     // backRight.setDirection(DcMotor.Direction.REVERSE);
 
     flywheel = new Flywheel((DcMotorEx) flywheelMotor);
-    flywheel.setTargetDistance(100); // target 100 inches away
-    flywheel.idle(); // set the flywheel to spin at idle speed
-    flywheel.disable(); // don't let flywheel spin up
-
     intake = new ActiveIntake((DcMotorEx) intakeMotor);
+    spindex = new Spindex(magServo, feeder, colorSensor, distanceSensor);
 
-    mag = new SpindexMag(intake, flywheel, magServo, feeder, colorSensor, range, telemetry);
+    mag = new ScoringSystem(intake, flywheel, spindex, telemetry);
+    mag.setTargetDistance(100); // PLACEHOLDER
 
     // stuff was here
     // IMU
@@ -77,12 +83,10 @@ public class MainOpMode extends LinearOpMode {
     //  imu.initialize(imuParams);
     //  imu.resetYaw();
     // stuff was here (setting wanted sequence)
-    SpindexMag.BallSequence wantedSequence =
-        SpindexMag.BallSequence.PGP; // the sequence we want to shoot
 
     waitForStart();
 
-    flywheel.enable(); // let flywheel spin up
+    mag.start(); // start scoring systems up
 
     while (opModeIsActive()) {
       mag.update();
@@ -136,7 +140,6 @@ public class MainOpMode extends LinearOpMode {
       telemetry.update();
     }
 
-    flywheel.disable(); // stop the flywheel
-    intake.stop(); // stop the intake
+    mag.stop(); // stop all powered movement in scoring systems
   }
 }
