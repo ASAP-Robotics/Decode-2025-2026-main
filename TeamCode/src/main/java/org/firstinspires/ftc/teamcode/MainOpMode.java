@@ -47,27 +47,28 @@ public class MainOpMode extends LinearOpMode {
   public void runOpMode() {
     // Initialize motors/servos/sensors
     // frontLeft = hardwareMap.get(DcMotor.class, "leftFront");
-    flywheelMotor = hardwareMap.get(DcMotor.class, "flywheel");
     // frontRight = hardwareMap.get(DcMotor.class, "rightFront");
     // backLeft = hardwareMap.get(DcMotor.class, "leftBack");
     // backRight = hardwareMap.get(DcMotor.class, "rightBack");
+    flywheelMotor = hardwareMap.get(DcMotor.class, "flywheel");
+    intakeMotor = hardwareMap.get(DcMotor.class, "intake");
     range = hardwareMap.get(DistanceSensor.class, "colorSensor");
     colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
     feeder = hardwareMap.get(Servo.class, "feeder");
     magServo = hardwareMap.get(Servo.class, "magServo");
-    intakeMotor = hardwareMap.get(DcMotor.class, "intake");
 
     // frontRight.setDirection(DcMotor.Direction.REVERSE);
     // backRight.setDirection(DcMotor.Direction.REVERSE);
 
     flywheel = new Flywheel((DcMotorEx) flywheelMotor);
-    flywheel.setTargetDistance(100); // target 100 inches away
-    flywheel.idle(); // set the flywheel to spin at idle speed
-    flywheel.disable(); // don't let flywheel spin up
-
     intake = new ActiveIntake((DcMotorEx) intakeMotor);
+    spindex = new Spindex(magServo, feeder, colorSensor, range);
 
     mag = new ScoringSystem(intake, flywheel, spindex, telemetry);
+    mag.setTargetDistance(100); // PLACEHOLDER
+
+    BallSequence wantedSequence =
+        BallSequence.PGP; // the sequence we want to shoot
 
     // stuff was here
     // IMU
@@ -80,12 +81,10 @@ public class MainOpMode extends LinearOpMode {
     //  imu.initialize(imuParams);
     //  imu.resetYaw();
     // stuff was here (setting wanted sequence)
-    BallSequence wantedSequence =
-        BallSequence.PGP; // the sequence we want to shoot
 
     waitForStart();
 
-    flywheel.enable(); // let flywheel spin up
+    mag.start(); // start scoring systems up
 
     while (opModeIsActive()) {
       mag.update();
@@ -139,7 +138,6 @@ public class MainOpMode extends LinearOpMode {
       telemetry.update();
     }
 
-    flywheel.disable(); // stop the flywheel
-    intake.stop(); // stop the intake
+    mag.stop(); // stop all powered movement in scoring systems
   }
 }
