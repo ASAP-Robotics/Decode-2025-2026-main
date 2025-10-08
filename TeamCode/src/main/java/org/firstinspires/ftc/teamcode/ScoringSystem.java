@@ -28,14 +28,34 @@ public class ScoringSystem {
     this.flywheel = flywheel;
     this.spindex = spindex;
     this.telemetry = telemetry;
+    this.flywheel.idle(); // set flywheel to spin at idle speed
+    this.flywheel.disable(); // don't let the flywheel spin up
+    this.init(); // initialize scoring systems
   }
 
   /**
    * @brief initializes the artifact scoring system
-   * @note call when the "init" button is pressed
+   * @note call when OpMode is initialized ("Init" is pressed)
    */
   public void init() {
     spindex.init();
+  }
+
+  /**
+   * @brief starts scoring systems up
+   * @note call when OpMode is started ("Start" is pressed)
+   */
+  public void start() {
+    flywheel.enable(); // let the flywheel spin up
+  }
+
+  /**
+   * @brief stops all movement as quickly as possible (think E-stop)
+   * @note intended to be called when the "Stop" button is pressed
+   */
+  public void stop() {
+    flywheel.disable(); // stop the flywheel
+    intake.stop(); // stop the intake
   }
 
   /**
@@ -47,7 +67,7 @@ public class ScoringSystem {
     spindex.update();
     updateShooting();
     updateIntake();
-    //telemetry.addData("Mag", Arrays.toString(spindexColor));
+    telemetry.addData("Mag", Arrays.toString(spindex.getSpindexColor()));
     telemetry.addData("Shooting", shootingSequence);
     telemetry.addData("Filling", fillingMag);
   }
@@ -62,7 +82,6 @@ public class ScoringSystem {
       telemetry.addData("Shooting color", shootingColor);
       telemetry.addData("Shooting index", sequenceIndex);
       telemetry.addData("Contains ball", flywheel.getContainsBall());
-      telemetry.addData("UpToSpeed", flywheel.isUpToSpeed());
       if (flywheel.getContainsBall()) { // if there is a ball in the flywheel
         if (flywheel.shotTimer.isFinished()) { // if the ball entered the flywheel long enough ago
           flywheel.setContainsBall(false); // there is not a ball in the flywheel
@@ -237,6 +256,10 @@ public class ScoringSystem {
     sequenceIndex = 0; // start with the first ball in the sequence
     flywheel.activate(); // start flywheel spinning up to full speed
     return true;
+  }
+
+  public double setTargetDistance(double inches) {
+    return flywheel.setTargetDistance(inches);
   }
 
   /**
