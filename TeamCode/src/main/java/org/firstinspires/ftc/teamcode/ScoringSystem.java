@@ -102,7 +102,7 @@ public class ScoringSystem {
         } else if (flywheel.isUpToSpeed()
             && spindex
                 .getIsSpindexMoved()) { // if the flywheel is up to speed and the spindex is done
-                                        // moving
+          // moving
           spindex.liftBall(); // lift ball into flywheel
           flywheel.setContainsBall(true); // flywheel now has a ball in it
           flywheel.shotTimer.start();
