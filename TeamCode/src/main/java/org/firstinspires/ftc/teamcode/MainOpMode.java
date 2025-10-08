@@ -24,7 +24,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 @TeleOp(name = "Main TeliOp", group = "Drive")
@@ -45,8 +44,7 @@ public class MainOpMode extends LinearOpMode {
 
   @Override
   public void runOpMode() {
-    BallSequence wantedSequence =
-        BallSequence.PGP; // the sequence we want to shoot
+    BallSequence wantedSequence = BallSequence.PGP; // the sequence we want to shoot
 
     // Initialize motors/servos/sensors
     // frontLeft = hardwareMap.get(DcMotor.class, "leftFront");

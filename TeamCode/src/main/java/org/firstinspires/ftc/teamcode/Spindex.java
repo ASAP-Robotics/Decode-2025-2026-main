@@ -1,14 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Color;
+import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
+import android.graphics.Color;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.types.BallColor;
-import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class Spindex {
@@ -36,7 +35,8 @@ public class Spindex {
   private BallColor oldIntakeColor =
       BallColor.UNKNOWN; // /< the color of ball in the intake last time checked
 
-  public Spindex(Servo spinServo, Servo liftServo, ColorSensor colorSensor, DistanceSensor distanceSensor) {
+  public Spindex(
+      Servo spinServo, Servo liftServo, ColorSensor colorSensor, DistanceSensor distanceSensor) {
     this.spinServo = spinServo;
     this.liftServo = liftServo;
     this.colorSensor = colorSensor;
@@ -87,7 +87,8 @@ public class Spindex {
   }
 
   /**
-   * @brief stores the color of ball detected in the intake as the color of ball in the spindex index at the intake position
+   * @brief stores the color of ball detected in the intake as the color of ball in the spindex
+   *     index at the intake position
    * @note uses the stored intake color, call update() to update
    * @return true if the color was stored, false if the spindex wasn't at an intake position
    */

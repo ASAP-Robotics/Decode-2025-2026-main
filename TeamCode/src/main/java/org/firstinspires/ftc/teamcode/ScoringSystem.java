@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
 import java.util.Arrays;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
-import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
 public class ScoringSystem {
   private final ActiveIntake intake; // /< the intake on the robot
@@ -20,10 +20,7 @@ public class ScoringSystem {
   private final Telemetry telemetry;
 
   public ScoringSystem(
-      ActiveIntake intake,
-      Flywheel flywheel,
-      Spindex spindex,
-      Telemetry telemetry) {
+      ActiveIntake intake, Flywheel flywheel, Spindex spindex, Telemetry telemetry) {
     this.intake = intake;
     this.flywheel = flywheel;
     this.spindex = spindex;
@@ -98,11 +95,14 @@ public class ScoringSystem {
       } else { // if there isn't a ball in the flywheel
         int shootingColorIndex = spindex.getColorIndex(shootingColor);
         if (spindex.getIsSpindexMoved()
-            && (spindex.getShootIndex() != shootingColorIndex)) { // if the spindex position hasn't been set
+            && (spindex.getShootIndex()
+                != shootingColorIndex)) { // if the spindex position hasn't been set
           spindex.moveSpindexShoot(shootingColorIndex); // move spindex to correct location
 
         } else if (flywheel.isUpToSpeed()
-            && spindex.getIsSpindexMoved()) { // if the flywheel is up to speed and the spindex is done moving
+            && spindex
+                .getIsSpindexMoved()) { // if the flywheel is up to speed and the spindex is done
+                                        // moving
           spindex.liftBall(); // lift ball into flywheel
           flywheel.setContainsBall(true); // flywheel now has a ball in it
           flywheel.shotTimer.start();
@@ -198,7 +198,8 @@ public class ScoringSystem {
     if (purplesNeeded < 0 || greensNeeded < 0)
       return false; // if mag contains more than 2 purples or 1 green, return false
     if (!intake.isBusy()) intake.intake(); // start the intake spinning
-    spindex.moveSpindexIntake(spindex.getColorIndex(BallColor.EMPTY)); // move the spindex to an empty slot
+    spindex.moveSpindexIntake(
+        spindex.getColorIndex(BallColor.EMPTY)); // move the spindex to an empty slot
     return true;
   }
 
@@ -215,7 +216,8 @@ public class ScoringSystem {
 
     if (index == NULL) return false; // if there are no empty slots, return false
 
-    return intakeBallIndex(spindex.getIntakeIndex()); // intake ball to index currently at the intake
+    return intakeBallIndex(
+        spindex.getIntakeIndex()); // intake ball to index currently at the intake
   }
 
   /**
