@@ -34,8 +34,8 @@ jobs:
       - name: Run Google Java Format
         if: steps.check_java.outputs.found == 'true'
         run: |
-          wget -q https://github.com/google/google-java-format/releases/download/v1.22.0/google-java-format-1.22.0-all-deps.jar
-          java -jar google-java-format-1.22.0-all-deps.jar --replace $(git ls-files '*.java')
+          wget -q https://github.com/google/google-java-format/releases/download/v1.25.2/google-java-format-1.25.2-all-deps.jar
+          java -jar google-java-format-1.25.2-all-deps.jar --replace $(git ls-files '*.java')
 
       - name: Commit changes if formatting was applied
         if: steps.check_java.outputs.found == 'true'
