@@ -24,6 +24,10 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
+import org.firstinspires.ftc.teamcode.hardware.Flywheel;
+import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
+import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 @TeleOp(name = "Main TeliOp", group = "Drive")

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -28,7 +28,7 @@ public class ActiveIntake {
   private boolean ballIn = false;
   public org.firstinspires.ftc.teamcode.utils.SimpleTimer intakeTimer = new SimpleTimer(1);
 
-  ActiveIntake(DcMotorEx intakeMotor) {
+  public ActiveIntake(DcMotorEx intakeMotor) {
     intake_intakeMotor = intakeMotor;
     intake_intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD); // spin forwards
     intake_intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); // brake if zero power
