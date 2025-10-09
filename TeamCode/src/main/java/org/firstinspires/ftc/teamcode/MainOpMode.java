@@ -19,13 +19,11 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
-import org.firstinspires.ftc.teamcode.hardware.Flywheel;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
@@ -34,7 +32,13 @@ import org.firstinspires.ftc.teamcode.types.BallSequence;
 @TeleOp(name = "Main TeliOp", group = "Drive")
 public class MainOpMode extends LinearOpMode {
   // stuff was here
-  private DcMotorEx frontLeft, frontRight, backLeft, backRight, flywheelMotor, intakeMotor, turretRotator;
+  private DcMotorEx frontLeft,
+      frontRight,
+      backLeft,
+      backRight,
+      flywheelMotor,
+      intakeMotor,
+      turretRotator;
   private Servo magServo, feeder, turretHood;
   private IMU imu;
   private ColorSensor colorSensor;
