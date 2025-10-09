@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 public class ScoringSystem {
   private final ActiveIntake intake; // /< the intake on the robot
-  private final Flywheel flywheel; // /< the flywheel on the robot
+  private final Turret turret; // /< the flywheel on the robot
   private final Spindex spindex; // /< the spindex on the robot
   private boolean fillingMag = false; // /< if the mag is being filled
   private boolean shootingSequence = false; // /< if a sequence is being shot out of the turret
@@ -20,13 +20,13 @@ public class ScoringSystem {
   private final Telemetry telemetry;
 
   public ScoringSystem(
-      ActiveIntake intake, Flywheel flywheel, Spindex spindex, Telemetry telemetry) {
+      ActiveIntake intake, Turret turret, Spindex spindex, Telemetry telemetry) {
     this.intake = intake;
-    this.flywheel = flywheel;
+    this.turret = turret;
     this.spindex = spindex;
     this.telemetry = telemetry;
-    this.flywheel.idle(); // set flywheel to spin at idle speed
-    this.flywheel.disable(); // don't let the flywheel spin up
+    this.turret.idle(); // set turret to spin at idle speed
+    this.turret.disable(); // don't let the turret spin up
     this.init(); // initialize scoring systems
   }
 
@@ -43,7 +43,7 @@ public class ScoringSystem {
    * @note call when OpMode is started ("Start" is pressed)
    */
   public void start() {
-    flywheel.enable(); // let the flywheel spin up
+    turret.enable(); // let the flywheel spin up
   }
 
   /**
@@ -51,7 +51,7 @@ public class ScoringSystem {
    * @note intended to be called when the "Stop" button is pressed
    */
   public void stop() {
-    flywheel.disable(); // stop the flywheel
+    turret.disable(); // stop the flywheel
     intake.stop(); // stop the intake
   }
 
@@ -60,7 +60,7 @@ public class ScoringSystem {
    * @note call each loop
    */
   public void update() {
-    flywheel.update();
+    turret.update();
     spindex.update();
     updateShooting();
     updateIntake();
@@ -78,17 +78,17 @@ public class ScoringSystem {
       BallColor shootingColor = sequence[sequenceIndex];
       telemetry.addData("Shooting color", shootingColor);
       telemetry.addData("Shooting index", sequenceIndex);
-      telemetry.addData("Contains ball", flywheel.getContainsBall());
-      if (flywheel.getContainsBall()) { // if there is a ball in the flywheel
-        if (flywheel.shotTimer.isFinished()) { // if the ball entered the flywheel long enough ago
-          flywheel.setContainsBall(false); // there is not a ball in the flywheel
+      telemetry.addData("Contains ball", turret.getContainsBall());
+      if (turret.getContainsBall()) { // if there is a ball in the flywheel
+        if (turret.shotTimer.isFinished()) { // if the ball entered the flywheel long enough ago
+          turret.setContainsBall(false); // there is not a ball in the flywheel
           spindex.setShootingIndexEmpty(); // spindex slot is now empty
           if (sequenceIndex < (sequence.length - 1)) { // if the sequence isn't done
             sequenceIndex++; // move on to the next ball in the sequence
 
           } else { // if the sequence is done
             shootingSequence = false; // we are no longer shooting a sequence
-            flywheel.idle(); // let flywheel slow down to idle speed
+            turret.idle(); // let flywheel slow down to idle speed
           }
         }
 
@@ -99,27 +99,27 @@ public class ScoringSystem {
                 != shootingColorIndex)) { // if the spindex position hasn't been set
           spindex.moveSpindexShoot(shootingColorIndex); // move spindex to correct location
 
-        } else if (flywheel.isUpToSpeed()
+        } else if (turret.isUpToSpeed()
             && spindex
                 .getIsSpindexMoved()) { // if the flywheel is up to speed and the spindex is done
           // moving
           spindex.liftBall(); // lift ball into flywheel
-          flywheel.setContainsBall(true); // flywheel now has a ball in it
-          flywheel.shotTimer.start();
+          turret.setContainsBall(true); // flywheel now has a ball in it
+          turret.shotTimer.start();
         }
       }
 
-    } else if (flywheel.isEnabled() && flywheel.isActive()) { // if we are just shooting one ball
-      if (flywheel.getContainsBall()) {
-        if (flywheel.shotTimer.isFinished()) {
-          flywheel.setContainsBall(false); // the ball should be out of the flywheel
-          flywheel.idle(); // set the flywheel to slow down to idle speeds
+    } else if (turret.isEnabled() && turret.isActive()) { // if we are just shooting one ball
+      if (turret.getContainsBall()) {
+        if (turret.shotTimer.isFinished()) {
+          turret.setContainsBall(false); // the ball should be out of the flywheel
+          turret.idle(); // set the flywheel to slow down to idle speeds
         }
 
       } else {
-        if (flywheel.isUpToSpeed()) {
+        if (turret.isUpToSpeed()) {
           spindex.liftBall(); // lift ball into flywheel
-          flywheel.setContainsBall(true);
+          turret.setContainsBall(true);
         }
       }
     }
@@ -256,12 +256,12 @@ public class ScoringSystem {
     shootingSequence = true; // a sequence is being shot
     ballSequence = sequence; // store the requested sequence
     sequenceIndex = 0; // start with the first ball in the sequence
-    flywheel.activate(); // start flywheel spinning up to full speed
+    turret.activate(); // start flywheel spinning up to full speed
     return true;
   }
 
   public double setTargetDistance(double inches) {
-    return flywheel.setTargetDistance(inches);
+    return turret.setTargetDistance(inches);
   }
 
   /**
@@ -283,7 +283,7 @@ public class ScoringSystem {
    */
   private void shootIndex(int index) {
     // NOTE: assumes that the servos will move in the time it takes the flywheel to spin up
-    flywheel.activate(); // spin flywheel up to speed
+    turret.activate(); // spin flywheel up to speed
     spindex.moveSpindexShoot(index); // move spindex to correct position
   }
 }
