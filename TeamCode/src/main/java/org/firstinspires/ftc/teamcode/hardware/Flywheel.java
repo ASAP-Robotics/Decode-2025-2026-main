@@ -23,8 +23,8 @@ public class Flywheel {
   private final DcMotorEx flywheel;
   private static final double G = 9.81;
   private final double motorTicksPerRev; // /< ticks per revolution of flywheel motor
-  private boolean isEnabled = false; // /< if the flywheel is enabled
-  private boolean isActive = true; // /< if the flywheel is active (as opposed to idling)
+  protected boolean isEnabled = false; // /< if the flywheel is enabled
+  protected boolean isActive = true; // /< if the flywheel is active (as opposed to idling)
   private double idleSpeed; // /< the speed (RPM) of the flywheel when idle
   private double targetSpeed = 0; // /< the speed (RPM) the flywheel is targeting
   private double currentSpeed = 0; // /< the latest speed (RPM) of the flywheel
