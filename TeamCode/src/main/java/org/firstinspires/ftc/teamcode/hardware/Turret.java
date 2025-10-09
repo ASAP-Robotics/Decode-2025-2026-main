@@ -9,6 +9,14 @@ public class Turret extends Flywheel {
   private double targetHorizontalAngleDegrees; // target angle for side-to-side turret movement
   private double targetVerticalAngleDegrees; // target angle for up-and-down turret movement
 
+  public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Servo hoodServo) {
+    super(flywheelMotor);
+    this.rotator = rotator;
+    this.hoodServo = hoodServo;
+    this.rotator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+    this.rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+  }
+
   public Turret(
       DcMotorEx flywheelMotor,
       DcMotorEx rotator,
