@@ -16,7 +16,6 @@
 
 package org.firstinspires.ftc.teamcode.hardware;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 public class MecanumWheelBase {
@@ -24,7 +23,12 @@ public class MecanumWheelBase {
   private final double sensitivityCurve; // exponent used to scale input throttle values
   private double targetThrottleX, targetThrottleY, targetThrottleZ; // scaled throttle values
 
-  public MecanumWheelBase(DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight, double sensitivityCurve) {
+  public MecanumWheelBase(
+      DcMotorEx frontLeft,
+      DcMotorEx frontRight,
+      DcMotorEx backLeft,
+      DcMotorEx backRight,
+      double sensitivityCurve) {
     this.frontLeft = frontLeft;
     this.frontRight = frontRight;
     this.backLeft = backLeft;
@@ -46,7 +50,8 @@ public class MecanumWheelBase {
     // TODO: put PIDF constant tining here
   }
 
-  public MecanumWheelBase(DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight) {
+  public MecanumWheelBase(
+      DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight) {
     this(frontLeft, frontRight, backLeft, backRight, 2);
   }
 
@@ -175,10 +180,7 @@ public class MecanumWheelBase {
     double maxTargetSpeed =
         Math.max(
             1.0,
-            Math.max(Math.abs(fl),
-                Math.max(Math.abs(fr),
-                    Math.max(Math.abs(bl),
-                        Math.abs(br)))));
+            Math.max(Math.abs(fl), Math.max(Math.abs(fr), Math.max(Math.abs(bl), Math.abs(br)))));
 
     // adjust motor speeds so none exceed 100% speed
     fl /= maxTargetSpeed;
