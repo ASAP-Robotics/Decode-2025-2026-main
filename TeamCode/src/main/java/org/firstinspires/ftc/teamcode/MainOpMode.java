@@ -19,29 +19,36 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
-import org.firstinspires.ftc.teamcode.hardware.Flywheel;
+import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
+import org.firstinspires.ftc.teamcode.hardware.Turret;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 @TeleOp(name = "Main TeliOp", group = "Drive")
 public class MainOpMode extends LinearOpMode {
   // stuff was here
-  private DcMotor frontLeft, frontRight, backLeft, backRight, flywheelMotor, intakeMotor;
-  private Servo magServo, feeder;
+  private DcMotorEx frontLeft,
+      frontRight,
+      backLeft,
+      backRight,
+      flywheelMotor,
+      intakeMotor,
+      turretRotator;
+  private Servo magServo, feeder, turretHood;
   private IMU imu;
   private ColorSensor colorSensor;
   private DistanceSensor distanceSensor;
-  private Flywheel flywheel;
+  private Turret turret;
   private ActiveIntake intake;
   private Spindex spindex;
   private ScoringSystem mag;
+  private MecanumWheelBase wheelBase;
   private boolean xPrev = false; // for rising-edge detect
   private boolean xToggle = false; // the thing you're toggling
   private boolean aPrev = false;
@@ -55,26 +62,29 @@ public class MainOpMode extends LinearOpMode {
     BallSequence wantedSequence = BallSequence.PGP; // the sequence we want to shoot
 
     // Initialize motors/servos/sensors
-    // frontLeft = hardwareMap.get(DcMotor.class, "leftFront");
-    // frontRight = hardwareMap.get(DcMotor.class, "rightFront");
-    // backLeft = hardwareMap.get(DcMotor.class, "leftBack");
-    // backRight = hardwareMap.get(DcMotor.class, "rightBack");
-    flywheelMotor = hardwareMap.get(DcMotor.class, "flywheel");
-    intakeMotor = hardwareMap.get(DcMotor.class, "intake");
+    frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
+    frontRight = hardwareMap.get(DcMotorEx.class, "rightFront");
+    backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
+    backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
+    // TODO: add turret motor configuration
+    turretRotator = hardwareMap.get(DcMotorEx.class, "turretRotator");
+    flywheelMotor = hardwareMap.get(DcMotorEx.class, "flywheel");
+    intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
     distanceSensor = hardwareMap.get(DistanceSensor.class, "colorSensor");
     colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+    // TODO: add turret servo configuration
+    turretHood = hardwareMap.get(Servo.class, "turretHood");
     feeder = hardwareMap.get(Servo.class, "feeder");
     magServo = hardwareMap.get(Servo.class, "magServo");
 
-    // frontRight.setDirection(DcMotor.Direction.REVERSE);
-    // backRight.setDirection(DcMotor.Direction.REVERSE);
-
-    flywheel = new Flywheel((DcMotorEx) flywheelMotor);
-    intake = new ActiveIntake((DcMotorEx) intakeMotor);
+    turret = new Turret(flywheelMotor, turretRotator, turretHood);
+    intake = new ActiveIntake(intakeMotor);
     spindex = new Spindex(magServo, feeder, colorSensor, distanceSensor);
 
-    mag = new ScoringSystem(intake, flywheel, spindex, telemetry);
+    mag = new ScoringSystem(intake, turret, spindex, telemetry);
     mag.setTargetDistance(100); // PLACEHOLDER
+
+    wheelBase = new MecanumWheelBase(frontLeft, frontRight, backLeft, backRight);
 
     // stuff was here
     // IMU
@@ -119,6 +129,9 @@ public class MainOpMode extends LinearOpMode {
         mag.fillMagSorted(); // fill the mag
       }
 
+      // set wheelbase throttle levels
+      wheelBase.setThrottle(gamepad1.right_stick_x, gamepad1.right_stick_y, gamepad1.left_stick_x);
+
       // stuff was here
       // --- Field-centric drive ---
       /* double y = -gamepad1.left_stick_y; // Forward/back
@@ -145,5 +158,6 @@ public class MainOpMode extends LinearOpMode {
     }
 
     mag.stop(); // stop all powered movement in scoring systems
+    wheelBase.stop(); // stop all powered movement in wheels
   }
 }
