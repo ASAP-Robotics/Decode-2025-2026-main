@@ -19,26 +19,31 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
-import org.firstinspires.ftc.teamcode.hardware.Flywheel;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
+import org.firstinspires.ftc.teamcode.hardware.Turret;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 @TeleOp(name = "Main TeliOp", group = "Drive")
 public class MainOpMode extends LinearOpMode {
   // stuff was here
-  private DcMotor frontLeft, frontRight, backLeft, backRight, flywheelMotor, intakeMotor;
-  private Servo magServo, feeder;
+  private DcMotorEx frontLeft,
+      frontRight,
+      backLeft,
+      backRight,
+      flywheelMotor,
+      intakeMotor,
+      turretRotator;
+  private Servo magServo, feeder, turretHood;
   private IMU imu;
   private ColorSensor colorSensor;
   private DistanceSensor distanceSensor;
-  private Flywheel flywheel;
+  private Turret turret;
   private ActiveIntake intake;
   private Spindex spindex;
   private ScoringSystem mag;
@@ -59,21 +64,25 @@ public class MainOpMode extends LinearOpMode {
     // frontRight = hardwareMap.get(DcMotor.class, "rightFront");
     // backLeft = hardwareMap.get(DcMotor.class, "leftBack");
     // backRight = hardwareMap.get(DcMotor.class, "rightBack");
-    flywheelMotor = hardwareMap.get(DcMotor.class, "flywheel");
-    intakeMotor = hardwareMap.get(DcMotor.class, "intake");
+    // TODO: add turret motor configuration
+    turretRotator = hardwareMap.get(DcMotorEx.class, "turretRotator");
+    flywheelMotor = hardwareMap.get(DcMotorEx.class, "flywheel");
+    intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
     distanceSensor = hardwareMap.get(DistanceSensor.class, "colorSensor");
     colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+    // TODO: add turret servo configuration
+    turretHood = hardwareMap.get(Servo.class, "turretHood");
     feeder = hardwareMap.get(Servo.class, "feeder");
     magServo = hardwareMap.get(Servo.class, "magServo");
 
     // frontRight.setDirection(DcMotor.Direction.REVERSE);
     // backRight.setDirection(DcMotor.Direction.REVERSE);
 
-    flywheel = new Flywheel((DcMotorEx) flywheelMotor);
-    intake = new ActiveIntake((DcMotorEx) intakeMotor);
+    turret = new Turret(flywheelMotor, turretRotator, turretHood);
+    intake = new ActiveIntake(intakeMotor);
     spindex = new Spindex(magServo, feeder, colorSensor, distanceSensor);
 
-    mag = new ScoringSystem(intake, flywheel, spindex, telemetry);
+    mag = new ScoringSystem(intake, turret, spindex, telemetry);
     mag.setTargetDistance(100); // PLACEHOLDER
 
     // stuff was here
