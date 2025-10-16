@@ -8,6 +8,10 @@ This project includes code from the following sources:
   Licensed under the Apache License, Version 2.0.
   Copyright (c) 2019-2025 Acme Robotics.
 
+- GoBILDA Pinpoint driver and example code (https://github.com/goBILDA-Official/FtcRobotController-Add-Pinpoint)
+  Licensed under the MIT License.
+  Copyright (c) [2025] [Base 10 Assets, LLC].
+
 Additional modifications and original code:
 - Copyright (c) 2025 ASAP Robotics (FTC team 22029).
   Licensed under the Apache License, Version 2.0.
