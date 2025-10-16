@@ -22,11 +22,9 @@
 package org.firstinspires.ftc.robotcontroller.external.samples;
 
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /*
@@ -63,94 +61,92 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  * See the sensor's product page: https://www.tindie.com/products/35114/
  */
 @Disabled
-@TeleOp(name = "OctoQuad Basic", group="OctoQuad")
+@TeleOp(name = "OctoQuad Basic", group = "OctoQuad")
 public class SensorOctoQuad extends LinearOpMode {
 
-    // Identify which encoder OctoQuad inputs are connected to each odometry pod.
-    private final int ODO_LEFT  = 0; // Facing forward direction on left side of robot
-    private final int ODO_RIGHT = 1; // Facing forward direction on right side or robot
-    private final int ODO_PERP  = 2; // Facing perpendicular direction at the center of the robot
+  // Identify which encoder OctoQuad inputs are connected to each odometry pod.
+  private final int ODO_LEFT = 0; // Facing forward direction on left side of robot
+  private final int ODO_RIGHT = 1; // Facing forward direction on right side or robot
+  private final int ODO_PERP = 2; // Facing perpendicular direction at the center of the robot
 
-    // Declare the OctoQuad object;
-    private OctoQuad    octoquad;
+  // Declare the OctoQuad object;
+  private OctoQuad octoquad;
 
-    private int         posLeft;
-    private int         posRight;
-    private int         posPerp;
-    private int         velLeft;
-    private int         velRight;
-    private int         velPerp;
+  private int posLeft;
+  private int posRight;
+  private int posPerp;
+  private int velLeft;
+  private int velRight;
+  private int velPerp;
 
-    /**
-     * This function is executed when this OpMode is selected from the Driver Station.
-     */
-    @Override
-    public void runOpMode() {
+  /** This function is executed when this OpMode is selected from the Driver Station. */
+  @Override
+  public void runOpMode() {
 
-        // Connect to OctoQuad by referring to its name in the Robot Configuration.
-        octoquad = hardwareMap.get(OctoQuad.class, "octoquad");
+    // Connect to OctoQuad by referring to its name in the Robot Configuration.
+    octoquad = hardwareMap.get(OctoQuad.class, "octoquad");
 
-        // Read the Firmware Revision number from the OctoQuad and display it as telemetry.
-        telemetry.addData("OctoQuad Firmware Version ", octoquad.getFirmwareVersion());
+    // Read the Firmware Revision number from the OctoQuad and display it as telemetry.
+    telemetry.addData("OctoQuad Firmware Version ", octoquad.getFirmwareVersion());
 
-        // Reverse the count-direction of any encoder that is not what you require.
-        // e.g. if you push the robot forward and the left encoder counts down, then reverse it.
-        octoquad.setSingleEncoderDirection(ODO_LEFT,  OctoQuad.EncoderDirection.REVERSE);
-        octoquad.setSingleEncoderDirection(ODO_RIGHT, OctoQuad.EncoderDirection.FORWARD);
-        octoquad.setSingleEncoderDirection(ODO_PERP,  OctoQuad.EncoderDirection.FORWARD);
+    // Reverse the count-direction of any encoder that is not what you require.
+    // e.g. if you push the robot forward and the left encoder counts down, then reverse it.
+    octoquad.setSingleEncoderDirection(ODO_LEFT, OctoQuad.EncoderDirection.REVERSE);
+    octoquad.setSingleEncoderDirection(ODO_RIGHT, OctoQuad.EncoderDirection.FORWARD);
+    octoquad.setSingleEncoderDirection(ODO_PERP, OctoQuad.EncoderDirection.FORWARD);
 
-        // set the interval over which pulses are counted to determine velocity.
-        octoquad.setAllVelocitySampleIntervals(50);  // 50 mSec means 20 velocity updates per second.
+    // set the interval over which pulses are counted to determine velocity.
+    octoquad.setAllVelocitySampleIntervals(50); // 50 mSec means 20 velocity updates per second.
 
-        // Save any changes that are made, just in case there is a sensor power glitch.
-        octoquad.saveParametersToFlash();
+    // Save any changes that are made, just in case there is a sensor power glitch.
+    octoquad.saveParametersToFlash();
 
-        telemetry.addLine("\nPress START to read encoder values");
-        telemetry.update();
+    telemetry.addLine("\nPress START to read encoder values");
+    telemetry.update();
 
-        waitForStart();
+    waitForStart();
 
-        // Configure the telemetry for optimal display of data.
-        telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
-        telemetry.setMsTransmissionInterval(100);
+    // Configure the telemetry for optimal display of data.
+    telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
+    telemetry.setMsTransmissionInterval(100);
 
-        // Set all the encoder inputs to zero.
+    // Set all the encoder inputs to zero.
+    octoquad.resetAllPositions();
+
+    // Loop while displaying the odometry pod positions.
+    while (opModeIsActive()) {
+      telemetry.addData(">", "Press X to Reset Encoders\n");
+
+      // Check for X button to reset encoders.
+      if (gamepad1.x) {
+        // Reset the position of all encoders to zero.
         octoquad.resetAllPositions();
+      }
 
-        // Loop while displaying the odometry pod positions.
-        while (opModeIsActive()) {
-            telemetry.addData(">", "Press X to Reset Encoders\n");
+      // Read all the encoder data.  Load into local members.
+      readOdometryPods();
 
-            // Check for X button to reset encoders.
-            if (gamepad1.x) {
-                // Reset the position of all encoders to zero.
-                octoquad.resetAllPositions();
-            }
-
-            // Read all the encoder data.  Load into local members.
-            readOdometryPods();
-
-            // Display the values.
-            telemetry.addData("Left  P", "%7d   V :%6d CPS ", posLeft, velLeft);
-            telemetry.addData("Right P", "%7d   V :%6d CPS ", posRight, velRight);
-            telemetry.addData("Perp  P", "%7d   V :%6d CPS ", posPerp, velPerp);
-            telemetry.update();
-        }
+      // Display the values.
+      telemetry.addData("Left  P", "%7d   V :%6d CPS ", posLeft, velLeft);
+      telemetry.addData("Right P", "%7d   V :%6d CPS ", posRight, velRight);
+      telemetry.addData("Perp  P", "%7d   V :%6d CPS ", posPerp, velPerp);
+      telemetry.update();
     }
+  }
 
-    private void readOdometryPods() {
-        // For best performance, we should only perform ONE transaction with the OctoQuad each cycle.
-        //  This can be achieved in one of two ways:
-        //   1) by doing a block data read once per control cycle
-        //  or
-        //   2) by doing individual caching reads, but only reading each encoder value ONCE per cycle.
-        //
-        // Since method 2 is simplest, we will use it here.
-        posLeft  = octoquad.readSinglePosition_Caching(ODO_LEFT);
-        posRight = octoquad.readSinglePosition_Caching(ODO_RIGHT);
-        posPerp  = octoquad.readSinglePosition_Caching(ODO_PERP);
-        velLeft  = octoquad.readSingleVelocity_Caching(ODO_LEFT)  * 20;  // scale up to cps
-        velRight = octoquad.readSingleVelocity_Caching(ODO_RIGHT) * 20;  // scale up to cps
-        velPerp  = octoquad.readSingleVelocity_Caching(ODO_PERP)  * 20;  // scale up to cps
-    }
+  private void readOdometryPods() {
+    // For best performance, we should only perform ONE transaction with the OctoQuad each cycle.
+    //  This can be achieved in one of two ways:
+    //   1) by doing a block data read once per control cycle
+    //  or
+    //   2) by doing individual caching reads, but only reading each encoder value ONCE per cycle.
+    //
+    // Since method 2 is simplest, we will use it here.
+    posLeft = octoquad.readSinglePosition_Caching(ODO_LEFT);
+    posRight = octoquad.readSinglePosition_Caching(ODO_RIGHT);
+    posPerp = octoquad.readSinglePosition_Caching(ODO_PERP);
+    velLeft = octoquad.readSingleVelocity_Caching(ODO_LEFT) * 20; // scale up to cps
+    velRight = octoquad.readSingleVelocity_Caching(ODO_RIGHT) * 20; // scale up to cps
+    velPerp = octoquad.readSingleVelocity_Caching(ODO_PERP) * 20; // scale up to cps
+  }
 }
