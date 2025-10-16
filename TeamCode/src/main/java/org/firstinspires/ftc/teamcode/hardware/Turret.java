@@ -30,6 +30,7 @@ public class Turret extends Flywheel {
     this.rotator = rotator;
     this.hoodServo = hoodServo;
     this.rotator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+    this.rotator.setTargetPosition(0); // placeholder
     this.rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
   }
 
