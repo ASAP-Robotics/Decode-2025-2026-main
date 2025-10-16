@@ -43,28 +43,34 @@ public class ConceptNullOp extends OpMode {
 
   private ElapsedTime runtime = new ElapsedTime();
 
-  /** This method will be called once, when the INIT button is pressed. */
+  /**
+   * This method will be called once, when the INIT button is pressed.
+   */
   @Override
   public void init() {
     telemetry.addData("Status", "Initialized");
   }
 
   /**
-   * This method will be called repeatedly during the period between when the INIT button is pressed
-   * and when the START button is pressed (or the OpMode is stopped).
+   * This method will be called repeatedly during the period between when
+   * the INIT button is pressed and when the START button is pressed (or the
+   * OpMode is stopped).
    */
   @Override
-  public void init_loop() {}
+  public void init_loop() {
+  }
 
-  /** This method will be called once, when the START button is pressed. */
+  /**
+   * This method will be called once, when the START button is pressed.
+   */
   @Override
   public void start() {
     runtime.reset();
   }
 
   /**
-   * This method will be called repeatedly during the period between when the START button is
-   * pressed and when the OpMode is stopped.
+   * This method will be called repeatedly during the period between when
+   * the START button is pressed and when the OpMode is stopped.
    */
   @Override
   public void loop() {
@@ -73,9 +79,11 @@ public class ConceptNullOp extends OpMode {
 
   /**
    * This method will be called once, when this OpMode is stopped.
-   *
-   * <p>Your ability to control hardware from this method will be limited.
+   * <p>
+   * Your ability to control hardware from this method will be limited.
    */
   @Override
-  public void stop() {}
+  public void stop() {
+
+  }
 }

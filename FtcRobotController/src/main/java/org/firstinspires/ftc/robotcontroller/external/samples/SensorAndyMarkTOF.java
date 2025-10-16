@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 FIRST
+Copyright (c) 2025 FIRST
 
 All rights reserved.
 
@@ -32,7 +32,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.robotcontroller.external.samples;
 
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.hardware.andymark.AndyMarkTOF;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -40,18 +40,16 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 /*
- * This OpMode illustrates how to use the REV Robotics 2M Distance Sensor.
+ * This OpMode illustrates how to use the AndyMark 2m TOF Lidar Sensor.
  *
  * The OpMode assumes that the sensor is configured with a name of "sensor_distance".
  *
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
- *
- * See the sensor's product page: https://www.revrobotics.com/rev-31-1505/
  */
-@TeleOp(name = "Sensor: REV2mDistance", group = "Sensor")
+@TeleOp(name = "Sensor: AndyMarkTOF", group = "Sensor")
 @Disabled
-public class SensorREV2mDistance extends LinearOpMode {
+public class SensorAndyMarkTOF extends LinearOpMode {
 
     private DistanceSensor sensorDistance;
 
@@ -60,9 +58,9 @@ public class SensorREV2mDistance extends LinearOpMode {
         // you can use this as a regular DistanceSensor.
         sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
 
-        // you can also cast this to a Rev2mDistanceSensor if you want to use added
-        // methods associated with the Rev2mDistanceSensor class.
-        Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor) sensorDistance;
+        // you can also cast this to a AndyMarkTOF if you want to use added
+        // methods associated with the AndyMarkTOF class.
+        AndyMarkTOF sensorTimeOfFlight = (AndyMarkTOF) sensorDistance;
 
         telemetry.addData(">>", "Press start to continue");
         telemetry.update();
@@ -76,7 +74,7 @@ public class SensorREV2mDistance extends LinearOpMode {
             telemetry.addData("range", String.format("%.01f m", sensorDistance.getDistance(DistanceUnit.METER)));
             telemetry.addData("range", String.format("%.01f in", sensorDistance.getDistance(DistanceUnit.INCH)));
 
-            // Rev2mDistanceSensor specific methods.
+            // AndyMarkTOF specific methods.
             telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
             telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
 

@@ -49,37 +49,39 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp(name = "Concept: Blackboard", group = "Concept")
 @Disabled
 public class ConceptBlackboard extends OpMode {
-  // We use constants here so we won't have the problem of typos in different places when we
-  // meant to refer to the same thing.
-  public static final String TIMES_STARTED_KEY = "Times started";
-  public static final String ALLIANCE_KEY = "Alliance";
+    // We use constants here so we won't have the problem of typos in different places when we
+    // meant to refer to the same thing.
+    public static final String TIMES_STARTED_KEY = "Times started";
+    public static final String ALLIANCE_KEY = "Alliance";
 
-  /** This method will be called once, when the INIT button is pressed. */
-  @Override
-  public void init() {
-    // This gets us what is in the blackboard or the default if it isn't in there.
-    Object timesStarted = blackboard.getOrDefault(TIMES_STARTED_KEY, 0);
-    blackboard.put(TIMES_STARTED_KEY, (int) timesStarted + 1);
+    /**
+     * This method will be called once, when the INIT button is pressed.
+     */
+    @Override
+    public void init() {
+        // This gets us what is in the blackboard or the default if it isn't in there.
+        Object timesStarted = blackboard.getOrDefault(TIMES_STARTED_KEY, 0);
+        blackboard.put(TIMES_STARTED_KEY, (int) timesStarted + 1);
 
-    telemetry.addData("OpMode started times", blackboard.get(TIMES_STARTED_KEY));
-  }
-
-  /**
-   * This method will be called repeatedly during the period between when the START button is
-   * pressed and when the OpMode is stopped.
-   *
-   * <p>If the left bumper is pressed it will store the value "RED" in the blackboard for alliance.
-   * If the right bumper is pressed it will store the value "BLUE" in the blackboard for alliance.
-   *
-   * <p>You'll notice that if you quit the OpMode and come back in, the value will persist.
-   */
-  @Override
-  public void loop() {
-    if (gamepad1.left_bumper) {
-      blackboard.put(ALLIANCE_KEY, "RED");
-    } else if (gamepad1.right_bumper) {
-      blackboard.put(ALLIANCE_KEY, "BLUE");
+        telemetry.addData("OpMode started times", blackboard.get(TIMES_STARTED_KEY));
     }
-    telemetry.addData("Alliance", blackboard.get(ALLIANCE_KEY));
-  }
+
+    /**
+     * This method will be called repeatedly during the period between when
+     * the START button is pressed and when the OpMode is stopped.
+     * <p>
+     * If the left bumper is pressed it will store the value "RED" in the blackboard for alliance.
+     * If the right bumper is pressed it will store the value "BLUE" in the blackboard for alliance.
+     * <p>
+     * You'll notice that if you quit the OpMode and come back in, the value will persist.
+     */
+    @Override
+    public void loop() {
+        if (gamepad1.left_bumper) {
+            blackboard.put(ALLIANCE_KEY, "RED");
+        } else if (gamepad1.right_bumper) {
+            blackboard.put(ALLIANCE_KEY, "BLUE");
+        }
+        telemetry.addData("Alliance", blackboard.get(ALLIANCE_KEY));
+    }
 }
