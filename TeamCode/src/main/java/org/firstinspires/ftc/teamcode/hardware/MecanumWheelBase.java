@@ -93,8 +93,8 @@ public class MecanumWheelBase {
    * @param x the throttle controlling the x-axis speed
    * @param y the throttle controlling the y-axis speed
    * @param z the throttle controlling turning speed
-   * @note inputs must be between 1 and -1, values below 0 reverse direction.
-   * Does not set motors; call update() to apply
+   * @note inputs must be between 1 and -1, values below 0 reverse direction. Does not set motors;
+   *     call update() to apply
    */
   public void setThrottle(double x, double y, double z) {
     setThrottleX(x, false);
@@ -197,7 +197,7 @@ public class MecanumWheelBase {
     double rotatedX = x * Math.cos(radians) - y * Math.sin(radians);
     double rotatedY = x * Math.sin(radians) + y * Math.cos(radians);
 
-    return new double[] { rotatedX, rotatedY };
+    return new double[] {rotatedX, rotatedY};
   }
 
   /**
