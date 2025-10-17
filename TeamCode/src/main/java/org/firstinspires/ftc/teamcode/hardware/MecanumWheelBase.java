@@ -34,20 +34,19 @@ public class MecanumWheelBase {
     this.backLeft = backLeft;
     this.backRight = backRight;
     this.sensitivityCurve = sensitivityCurve;
-    // set motors to velocity-based control
-    this.frontLeft.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-    this.frontRight.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-    this.backLeft.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-    this.backRight.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-    // set motors to brake when set to zero power
-    this.frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-    this.frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-    this.backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-    this.backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-    // reverse motors on right side of the robot
-    this.frontRight.setDirection(DcMotorEx.Direction.REVERSE);
-    this.backRight.setDirection(DcMotorEx.Direction.REVERSE);
-    // TODO: put PIDF constant tining here
+    // set motors to power-based control
+    this.frontLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+    this.frontRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+    this.backLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+    this.backRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+    // set motors to float when set to zero power
+    this.frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+    this.frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+    this.backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+    this.backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+    // reverse motors on left side of the robot
+    this.frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
+    this.backLeft.setDirection(DcMotorEx.Direction.REVERSE);
   }
 
   public MecanumWheelBase(
@@ -102,7 +101,8 @@ public class MecanumWheelBase {
    * @note input must be between 1 and -1, values below 0 reverse direction
    */
   private void setThrottleX(double x, boolean update) {
-    targetThrottleX = scaleThrottle(x);
+    // x throttle is increased to account for imperfect strafing
+    targetThrottleX = Math.min(1, Math.max(-1, scaleThrottle(x) * 1.1));
     if (update) update();
   }
 
