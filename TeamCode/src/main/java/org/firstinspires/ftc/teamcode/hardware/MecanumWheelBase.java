@@ -67,6 +67,12 @@ public class MecanumWheelBase {
     backLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
     backRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
+    // set motors to brake when set to 0% power
+    frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+    frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+    backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+    backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
     // set motor powers to 0%
     frontLeft.setPower(0);
     frontRight.setPower(0);
