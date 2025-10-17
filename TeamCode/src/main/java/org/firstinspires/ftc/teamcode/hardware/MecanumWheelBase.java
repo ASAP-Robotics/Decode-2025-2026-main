@@ -21,7 +21,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 public class MecanumWheelBase {
   private final DcMotorEx frontLeft, frontRight, backLeft, backRight;
   private final double sensitivityCurve; // exponent used to scale input throttle values
-  private double targetThrottleX, targetThrottleY, targetThrottleZ; // scaled throttle values
+  private double rotation = 0; // number of degrees the robot is rotated relative to field forward
+  private double rawThrottleX = 0, rawThrottleY = 0, rawThrottleZ = 0; // raw throttle values
+  private double throttleX = 0, throttleY = 0, throttleZ = 0; // processed (robot) throttle values
 
   public MecanumWheelBase(
       DcMotorEx frontLeft,
@@ -34,20 +36,19 @@ public class MecanumWheelBase {
     this.backLeft = backLeft;
     this.backRight = backRight;
     this.sensitivityCurve = sensitivityCurve;
-    // set motors to velocity-based control
-    this.frontLeft.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-    this.frontRight.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-    this.backLeft.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-    this.backRight.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-    // set motors to brake when set to zero power
-    this.frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-    this.frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-    this.backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-    this.backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-    // reverse motors on right side of the robot
-    this.frontRight.setDirection(DcMotorEx.Direction.REVERSE);
-    this.backRight.setDirection(DcMotorEx.Direction.REVERSE);
-    // TODO: put PIDF constant tining here
+    // set motors to power-based control
+    this.frontLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+    this.frontRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+    this.backLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+    this.backRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+    // set motors to float when set to zero power
+    this.frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+    this.frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+    this.backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+    this.backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+    // reverse motors on left side of the robot
+    this.frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
+    this.backLeft.setDirection(DcMotorEx.Direction.REVERSE);
   }
 
   public MecanumWheelBase(
@@ -66,6 +67,12 @@ public class MecanumWheelBase {
     backLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
     backRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
+    // set motors to brake when set to 0% power
+    frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+    frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+    backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+    backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
     // set motor powers to 0%
     frontLeft.setPower(0);
     frontRight.setPower(0);
@@ -74,11 +81,20 @@ public class MecanumWheelBase {
   }
 
   /**
+   * @brief sets the rotation of the robot relative to the field (for field-centric control)
+   * @param degrees the number of degrees the robot is rotated relative to the field
+   */
+  public void setRotation(double degrees) {
+    rotation = degrees;
+  }
+
+  /**
    * @brief sets all throttle values controlling the wheel base
    * @param x the throttle controlling the x-axis speed
    * @param y the throttle controlling the y-axis speed
    * @param z the throttle controlling turning speed
-   * @note inputs must be between 1 and -1, values below 0 reverse direction
+   * @note inputs must be between 1 and -1, values below 0 reverse direction. Does not set motors;
+   *     call update() to apply
    */
   public void setThrottle(double x, double y, double z) {
     setThrottleX(x, false);
@@ -102,7 +118,7 @@ public class MecanumWheelBase {
    * @note input must be between 1 and -1, values below 0 reverse direction
    */
   private void setThrottleX(double x, boolean update) {
-    targetThrottleX = scaleThrottle(x);
+    rawThrottleX = x;
     if (update) update();
   }
 
@@ -122,7 +138,7 @@ public class MecanumWheelBase {
    * @note input must be between 1 and -1, values below 0 reverse direction
    */
   public void setThrottleY(double y, boolean update) {
-    targetThrottleY = scaleThrottle(y);
+    rawThrottleY = y;
     if (update) update();
   }
 
@@ -142,7 +158,7 @@ public class MecanumWheelBase {
    * @note input must be between 1 and -1, values below 0 reverse direction
    */
   public void setThrottleZ(double z, boolean update) {
-    targetThrottleZ = scaleThrottle(z);
+    rawThrottleZ = z;
     if (update) update();
   }
 
@@ -168,27 +184,66 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief sets motor target speeds according to throttle values
+   * @brief rotates the vector of a pair of throttle inputs by the given number of degrees
+   * @param degrees the number of degrees to rotate the throttle by
+   * @param x the input x throttle value
+   * @param y the input y throttle value
+   * @return an array with the rotated throttle values in the format [x, y]
    */
-  private void update() {
-    double fl = targetThrottleY + targetThrottleX + targetThrottleZ;
-    double fr = targetThrottleY - targetThrottleX - targetThrottleZ;
-    double bl = targetThrottleY - targetThrottleX + targetThrottleZ;
-    double br = targetThrottleY + targetThrottleX - targetThrottleZ;
+  private double[] rotateThrottle(double degrees, double x, double y) {
+    double radians = Math.toRadians(degrees);
 
-    // find maximum motor target speed (or 100% if none exceed 100%)
+    // rotate throttle values
+    double rotatedX = x * Math.cos(radians) - y * Math.sin(radians);
+    double rotatedY = x * Math.sin(radians) + y * Math.cos(radians);
+
+    return new double[] {rotatedX, rotatedY};
+  }
+
+  /**
+   * @brief sets motor target speeds according to throttle values
+   * @note this override uses robot-centric control. Call update(true) for field-centric control
+   */
+  public void update() {
+    update(false);
+  }
+
+  /**
+   * @brief sets motor target speeds according to throttle values
+   * @param fieldCentric driving will be field-centric if true, robot-centric if false
+   */
+  public void update(boolean fieldCentric) {
+    // scale raw throttle values to match sensitivity curve
+    // x throttle is increased to account for imperfect strafing
+    throttleX = Math.min(1, Math.max(-1, scaleThrottle(rawThrottleX) * 1.1));
+    throttleY = scaleThrottle(rawThrottleY);
+    throttleZ = scaleThrottle(rawThrottleZ);
+
+    if (fieldCentric) { // rotate throttle values if field centric
+      double[] rotated = rotateThrottle(rotation, throttleX, throttleY); // rotate throttle
+      throttleX = rotated[0];
+      throttleY = rotated[1];
+    }
+
+    // find motor power ratios
+    double fl = throttleY + throttleX + throttleZ;
+    double fr = throttleY - throttleX - throttleZ;
+    double bl = throttleY - throttleX + throttleZ;
+    double br = throttleY + throttleX - throttleZ;
+
+    // find maximum motor power (or 100% if none exceed 100%)
     double maxTargetSpeed =
         Math.max(
             1.0,
             Math.max(Math.abs(fl), Math.max(Math.abs(fr), Math.max(Math.abs(bl), Math.abs(br)))));
 
-    // adjust motor speeds so none exceed 100% speed
+    // adjust motor powers so none exceed 100% power
     fl /= maxTargetSpeed;
     fr /= maxTargetSpeed;
     bl /= maxTargetSpeed;
     br /= maxTargetSpeed;
 
-    // set motor target speeds (as a percentage of the maximum achievable motor speeds)
+    // set motor target powers
     frontLeft.setPower(fl);
     frontRight.setPower(fr);
     backLeft.setPower(bl);
