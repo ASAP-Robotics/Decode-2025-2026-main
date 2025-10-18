@@ -20,11 +20,11 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 /**
- * @brief placeholder class for a camera
- * TODO: actually fill out
+ * @brief placeholder class for a camera TODO: actually fill out
  */
 public class Camera {
   private AllianceColor allianceColor;
+
   public Camera(AllianceColor allianceColor) {
     this.allianceColor = allianceColor;
   }
@@ -47,7 +47,7 @@ public class Camera {
 
   /**
    * @brief returns the estimated number of degrees the camera would need to be rotated by to be
-   * pointing directly at the navigation apriltag
+   *     pointing directly at the navigation apriltag
    * @return the number of degrees to rotate the camera by in the x axis
    */
   public double getNavigationAprilTagAngleX() {
@@ -56,7 +56,7 @@ public class Camera {
 
   /**
    * @brief returns the estimated number of degrees the camera would need to be elevated by to be
-   * pointing directly at the navigation apriltag
+   *     pointing directly at the navigation apriltag
    * @return the number of degrees to rotate the camera by in the y axis
    */
   public double getNavigationAprilTagAngleY() {
