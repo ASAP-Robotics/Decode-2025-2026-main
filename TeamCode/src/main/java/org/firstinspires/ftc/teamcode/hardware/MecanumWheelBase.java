@@ -24,6 +24,7 @@ public class MecanumWheelBase {
   private double rotation = 0; // number of degrees the robot is rotated relative to field forward
   private double rawThrottleX = 0, rawThrottleY = 0, rawThrottleZ = 0; // raw throttle values
   private double throttleX = 0, throttleY = 0, throttleZ = 0; // processed (robot) throttle values
+  private boolean fieldCentric = false; // whether or not to use field-centric control
 
   public MecanumWheelBase(
       DcMotorEx frontLeft,
@@ -78,6 +79,14 @@ public class MecanumWheelBase {
     frontRight.setPower(0);
     backLeft.setPower(0);
     backRight.setPower(0);
+  }
+
+  /**
+   * @brief sets weather or not field-centric control will be used
+   * @param fieldCentric true for field-centric control, false for robot-centric control
+   */
+  public void setFieldCentric(boolean fieldCentric) {
+    this.fieldCentric = fieldCentric;
   }
 
   /**
@@ -205,7 +214,7 @@ public class MecanumWheelBase {
    * @note this override uses robot-centric control. Call update(true) for field-centric control
    */
   public void update() {
-    update(false);
+    update(fieldCentric);
   }
 
   /**
