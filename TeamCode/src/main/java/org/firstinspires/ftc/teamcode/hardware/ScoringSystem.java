@@ -27,6 +27,7 @@ public class ScoringSystem {
   private final ActiveIntake intake; // /< the intake on the robot
   private final Turret turret; // /< the flywheel on the robot
   private final Spindex spindex; // /< the spindex on the robot
+  private final Camera camera; // /< the camera on the turret
   private boolean fillingMag = false; // /< if the mag is being filled
   private boolean shootingSequence = false; // /< if a sequence is being shot out of the turret
   private BallSequence ballSequence; // /< the sequence being shot
@@ -35,10 +36,11 @@ public class ScoringSystem {
   private int greensNeeded = 0; // the number of greens needed to fill the mag
   private final Telemetry telemetry;
 
-  public ScoringSystem(ActiveIntake intake, Turret turret, Spindex spindex, Telemetry telemetry) {
+  public ScoringSystem(ActiveIntake intake, Turret turret, Spindex spindex, Camera camera, Telemetry telemetry) {
     this.intake = intake;
     this.turret = turret;
     this.spindex = spindex;
+    this.camera = camera;
     this.telemetry = telemetry;
     this.turret.idle(); // set turret to spin at idle speed
     this.turret.disable(); // don't let the turret spin up

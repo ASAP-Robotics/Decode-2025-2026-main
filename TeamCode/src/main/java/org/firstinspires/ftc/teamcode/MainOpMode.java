@@ -24,10 +24,12 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
+import org.firstinspires.ftc.teamcode.hardware.Camera;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
+import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 @TeleOp(name = "Main TeliOp", group = "Drive")
@@ -47,6 +49,7 @@ public class MainOpMode extends LinearOpMode {
   private Turret turret;
   private ActiveIntake intake;
   private Spindex spindex;
+  private Camera camera;
   private ScoringSystem mag;
   private MecanumWheelBase wheelBase;
   private boolean xPrev = false; // for rising-edge detect
@@ -80,8 +83,9 @@ public class MainOpMode extends LinearOpMode {
     turret = new Turret(flywheelMotor, turretRotator, turretHood);
     intake = new ActiveIntake(intakeMotor);
     spindex = new Spindex(magServo, feeder, colorSensor, distanceSensor);
+    camera = new Camera(AllianceColor.RED); // placeholder TODO: update
 
-    mag = new ScoringSystem(intake, turret, spindex, telemetry);
+    mag = new ScoringSystem(intake, turret, spindex, camera, telemetry);
     mag.setTargetDistance(100); // PLACEHOLDER
 
     wheelBase = new MecanumWheelBase(frontLeft, frontRight, backLeft, backRight);
