@@ -36,7 +36,8 @@ public class ScoringSystem {
   private int greensNeeded = 0; // the number of greens needed to fill the mag
   private final Telemetry telemetry;
 
-  public ScoringSystem(ActiveIntake intake, Turret turret, Spindex spindex, Camera camera, Telemetry telemetry) {
+  public ScoringSystem(
+      ActiveIntake intake, Turret turret, Spindex spindex, Camera camera, Telemetry telemetry) {
     this.intake = intake;
     this.turret = turret;
     this.spindex = spindex;
