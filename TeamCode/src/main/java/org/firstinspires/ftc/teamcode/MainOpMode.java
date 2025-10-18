@@ -22,7 +22,6 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpointDriver;
@@ -74,7 +73,9 @@ public class MainOpMode extends LinearOpMode {
     pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
     // the following is temporary; TODO: remove once Auto code configures stuff
     pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-    pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+    pinpoint.setEncoderDirections(
+        GoBildaPinpointDriver.EncoderDirection.FORWARD,
+        GoBildaPinpointDriver.EncoderDirection.FORWARD);
     pinpoint.resetPosAndIMU(); // TODO: only calibrate IMU once Auto code configures stuff
 
     turretHood = hardwareMap.get(Servo.class, "turretHood");
