@@ -16,21 +16,14 @@
 
 package org.firstinspires.ftc.teamcode.types;
 
-public enum BallSequence {
-  GPP(21, BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE),
-  PGP(22, BallColor.PURPLE, BallColor.GREEN, BallColor.PURPLE),
-  PPG(23, BallColor.PURPLE, BallColor.PURPLE, BallColor.GREEN);
+public enum AllianceColor {
+  RED(24),
+  BLUE(20);
 
-  private final BallColor[] ballColors;
   private final int aprilTagId;
 
-  BallSequence(int aprilTagId, BallColor... ballColors) {
+  AllianceColor(int aprilTagId) {
     this.aprilTagId = aprilTagId;
-    this.ballColors = ballColors;
-  }
-
-  public BallColor[] getBallColors() {
-    return ballColors.clone();
   }
 
   public int getAprilTagId() {
