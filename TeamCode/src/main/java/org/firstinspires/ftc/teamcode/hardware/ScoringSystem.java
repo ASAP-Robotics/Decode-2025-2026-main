@@ -93,10 +93,10 @@ public class ScoringSystem {
    */
   private void updateAiming() {
     turret.setTargetDistance(camera.getNavigationAprilTagDistance());
-    turret.setHorizontalAngle(turret.getTargetHorizontalAngleDegrees() +
-        camera.getNavigationAprilTagAngleX());
-    turret.setVerticalAngle(turret.getTargetVerticalAngleDegrees() +
-        camera.getNavigationAprilTagAngleY());
+    turret.setHorizontalAngle(
+        turret.getTargetHorizontalAngleDegrees() + camera.getNavigationAprilTagAngleX());
+    turret.setVerticalAngle(
+        turret.getTargetVerticalAngleDegrees() + camera.getNavigationAprilTagAngleY());
   }
 
   /**
