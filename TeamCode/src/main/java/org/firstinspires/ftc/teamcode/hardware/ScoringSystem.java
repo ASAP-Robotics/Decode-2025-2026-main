@@ -78,13 +78,25 @@ public class ScoringSystem {
    * @note call each loop
    */
   public void update() {
-    turret.update();
-    spindex.update();
+    updateAiming();
     updateShooting();
     updateIntake();
+    turret.update();
+    spindex.update();
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexColor()));
     telemetry.addData("Shooting", shootingSequence);
     telemetry.addData("Filling", fillingMag);
+  }
+
+  /**
+   * @brief updates everything to do with aiming the turret
+   */
+  private void updateAiming() {
+    turret.setTargetDistance(camera.getNavigationAprilTagDistance());
+    turret.setHorizontalAngle(turret.getTargetHorizontalAngleDegrees() +
+        camera.getNavigationAprilTagAngleX());
+    turret.setVerticalAngle(turret.getTargetVerticalAngleDegrees() +
+        camera.getNavigationAprilTagAngleY());
   }
 
   /**
