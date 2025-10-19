@@ -1,8 +1,6 @@
 name: Auto-format Java
 
 on:
-  push:
-    branches: [ "**" ]
   pull_request:
     branches: [ main ]
 
@@ -12,13 +10,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref || github.ref }}
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
 
       - name: Check for Java files
@@ -32,9 +31,9 @@ jobs:
 
       - name: Run Google Java Format
         if: steps.check_java.outputs.found == 'true'
-        uses: axel-op/googlejavaformat-action@v3
-        with:
-          args: "--replace"
+        run: |
+          wget -q https://github.com/google/google-java-format/releases/download/v1.25.2/google-java-format-1.25.2-all-deps.jar
+          java -jar google-java-format-1.25.2-all-deps.jar --replace $(git ls-files '*.java')
 
       - name: Commit changes if formatting was applied
         if: steps.check_java.outputs.found == 'true'
@@ -44,5 +43,6 @@ jobs:
           if ! git diff --quiet; then
             git add -u
             git commit -m "🤖 Auto-format Java code"
+            git pull --rebase origin "${{ github.ref_name }}" || true
             git push
           fi
