@@ -121,7 +121,7 @@ public class MainOpMode extends LinearOpMode {
 
       // update wheelbase
       wheelBase.setRotation(location.getHeading(AngleUnit.DEGREES)); // for field-centric control
-      wheelBase.setThrottle(gamepad1.right_stick_x, gamepad1.right_stick_y, gamepad1.left_stick_x);
+      wheelBase.setThrottle(gamepad1.right_stick_x, -gamepad1.right_stick_y, gamepad1.left_stick_x);
 
       // update telemetry
       telemetry.update();
