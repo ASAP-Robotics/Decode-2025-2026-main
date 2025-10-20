@@ -21,8 +21,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
@@ -41,7 +43,7 @@ public class MainOpMode extends LinearOpMode {
       intakeMotor,
       turretRotator;
   private Servo magServo, feeder, turretHood;
-  private IMU imu;
+  private GoBildaPinpointDriver pinpoint;
   private ColorSensor colorSensor;
   private DistanceSensor distanceSensor;
   private Turret turret;
@@ -49,13 +51,7 @@ public class MainOpMode extends LinearOpMode {
   private Spindex spindex;
   private ScoringSystem mag;
   private MecanumWheelBase wheelBase;
-  private boolean xPrev = false; // for rising-edge detect
-  private boolean xToggle = false; // the thing you're toggling
-  private boolean aPrev = false;
-
-  // this is a super long line of comments and stuff to get the automatic formating to actually do
-  // something. This really is quite a lot of text. Wow. Super long. Crazy. The formating had better
-  // work!
+  private boolean fieldCentric = false; // if control will be field-centric
 
   @Override
   public void runOpMode() {
@@ -66,13 +62,22 @@ public class MainOpMode extends LinearOpMode {
     frontRight = hardwareMap.get(DcMotorEx.class, "rightFront");
     backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
     backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
-    // TODO: add turret motor configuration
+
     turretRotator = hardwareMap.get(DcMotorEx.class, "turretRotator");
     flywheelMotor = hardwareMap.get(DcMotorEx.class, "flywheel");
     intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
+
     distanceSensor = hardwareMap.get(DistanceSensor.class, "colorSensor");
     colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
-    // TODO: add turret servo configuration
+
+    pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+    // the following is temporary; TODO: remove once Auto code configures stuff
+    pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+    pinpoint.setEncoderDirections(
+        GoBildaPinpointDriver.EncoderDirection.FORWARD,
+        GoBildaPinpointDriver.EncoderDirection.FORWARD);
+    pinpoint.resetPosAndIMU(); // TODO: only calibrate IMU once Auto code configures stuff
+
     turretHood = hardwareMap.get(Servo.class, "turretHood");
     feeder = hardwareMap.get(Servo.class, "feeder");
     magServo = hardwareMap.get(Servo.class, "magServo");
@@ -86,74 +91,39 @@ public class MainOpMode extends LinearOpMode {
 
     wheelBase = new MecanumWheelBase(frontLeft, frontRight, backLeft, backRight);
 
-    // stuff was here
-    // IMU
-    // imu = hardwareMap.get(IMU.class, "imu");
-    //  IMU.Parameters imuParams =
-    //          new IMU.Parameters(
-    //                 new RevHubOrientationOnRobot(
-    //                          RevHubOrientationOnRobot.LogoFacingDirection.UP,
-    //                          RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
-    //  imu.initialize(imuParams);
-    //  imu.resetYaw();
-    // stuff was here (setting wanted sequence)
-
     waitForStart();
 
     mag.start(); // start scoring systems up
 
     while (opModeIsActive()) {
+      // get robot position
+      pinpoint.update(GoBildaPinpointDriver.ReadData.ONLY_UPDATE_HEADING);
+      Pose2D location = pinpoint.getPosition();
+
+      // update scoring systems
       mag.update();
-      // --- X toggle ---
-      boolean xNow = gamepad1.x;
-      if (xNow && !xPrev) { // rising edge
-        xToggle = !xToggle; // flip the state
+
+      // control mode toggle
+      if (gamepad1.xWasPressed()) { // rising edge
+        fieldCentric = !fieldCentric; // flip the state
+        wheelBase.setFieldCentric(fieldCentric);
       }
-      xPrev = xNow;
-      // stuff was here
 
       // shoot
       if (gamepad1.right_trigger > 0.25) {
         mag.shootSequence(wantedSequence); // shoot the desired sequence
       }
 
-      // stuff was here
-
-      // Button edge
-      boolean aNow = gamepad1.a;
-      boolean aPressed = aNow && !aPrev;
-      aPrev = aNow;
-
       // fil mag
-      if (aPressed) {
+      if (gamepad1.aWasPressed()) {
         mag.fillMagSorted(); // fill the mag
       }
 
-      // set wheelbase throttle levels
-      wheelBase.setThrottle(gamepad1.right_stick_x, gamepad1.right_stick_y, gamepad1.left_stick_x);
+      // update wheelbase
+      wheelBase.setRotation(location.getHeading(AngleUnit.DEGREES)); // for field-centric control
+      wheelBase.setThrottle(gamepad1.right_stick_x, -gamepad1.right_stick_y, gamepad1.left_stick_x);
 
-      // stuff was here
-      // --- Field-centric drive ---
-      /* double y = -gamepad1.left_stick_y; // Forward/back
-      double x = gamepad1.left_stick_x;  // Strafe
-      double rx = gamepad1.right_stick_x;// Rotation
-
-      double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
-      double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-      double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-
-      double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1.0);
-      double flPower = (rotY + rotX + rx) / denominator;
-      double blPower = (rotY - rotX + rx) / denominator;
-      double frPower = (rotY - rotX - rx) / denominator;
-      double brPower = (rotY + rotX - rx) / denominator;
-
-      frontLeft.setPower(flPower);
-      backLeft.setPower(blPower);
-      frontRight.setPower(frPower);
-      backRight.setPower(brPower); */
-      // telemetry was here
+      // update telemetry
       telemetry.update();
     }
 
