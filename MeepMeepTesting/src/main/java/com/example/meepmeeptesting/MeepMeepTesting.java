@@ -29,8 +29,8 @@ public class MeepMeepTesting {
     myBot.runAction(
             myBot
                     .getDrive()
-                    .actionBuilder(new Pose2d(-46, -47, Math.toRadians(0)))
-                    .waitSeconds(2)
+                    .actionBuilder(new Pose2d(-38, -53, Math.toRadians(0)))
+                    .waitSeconds(3)
                     .splineTo(new Vector2d(-12, -47), Math.toRadians(0))
                     .splineToConstantHeading(new Vector2d(-40, -47), Math.toRadians(0))
                     .waitSeconds(1)
@@ -38,7 +38,7 @@ public class MeepMeepTesting {
                     .splineToConstantHeading(new Vector2d(-40, -47), Math.toRadians(0))
                     .waitSeconds(1)
                     //^ chunk 1 48 points if sorted.
-                    .strafeTo(new Vector2d(1, -47))
+                    .splineTo(new Vector2d(1,-47), Math.toRadians(0))
                     .strafeTo(new Vector2d(1, -55))
                     .waitSeconds(4)
                     .strafeTo(new Vector2d(1, -53))
@@ -58,8 +58,8 @@ public class MeepMeepTesting {
 /*    myBot.runAction(
             myBot
                     .getDrive()
-                    .actionBuilder(new Pose2d(-46, 47, Math.toRadians(0)))
-                    .waitSeconds(2)
+                    .actionBuilder(new Pose2d(-38, 53, Math.toRadians(0)))
+                    .waitSeconds(3)
                     .splineTo(new Vector2d(-12, 47), Math.toRadians(0))
                     .splineToConstantHeading(new Vector2d(-40, 47), Math.toRadians(0))
                     .waitSeconds(1)
@@ -67,7 +67,7 @@ public class MeepMeepTesting {
                     .splineToConstantHeading(new Vector2d(-40, 47), Math.toRadians(0))
                     .waitSeconds(1)
                     //^ chunk 1 48 points if sorted.
-                    .strafeTo(new Vector2d(1, 47))
+                    .splineTo(new Vector2d(1,47), Math.toRadians(0))
                     .strafeTo(new Vector2d(1, 55))
                     .waitSeconds(4)
                     .strafeTo(new Vector2d(1, 53))
