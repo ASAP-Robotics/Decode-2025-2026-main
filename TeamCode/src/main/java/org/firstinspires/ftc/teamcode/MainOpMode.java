@@ -24,6 +24,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
 import org.firstinspires.ftc.teamcode.hardware.Camera;
@@ -88,7 +89,10 @@ public class MainOpMode extends LinearOpMode {
     turret = new Turret(flywheelMotor, turretRotator, turretHood);
     intake = new ActiveIntake(intakeMotor);
     spindex = new Spindex(magServo, feeder, colorSensor, distanceSensor);
-    camera = new Camera(AllianceColor.RED); // placeholder TODO: update
+    camera = new Camera(hardwareMap,
+        "camera",
+        new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0),
+        AllianceColor.RED); // placeholder TODO: update
 
     mag = new ScoringSystem(intake, turret, spindex, camera, telemetry);
     mag.setTargetDistance(100); // PLACEHOLDER
