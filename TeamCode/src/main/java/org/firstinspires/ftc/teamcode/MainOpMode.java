@@ -89,10 +89,12 @@ public class MainOpMode extends LinearOpMode {
     turret = new Turret(flywheelMotor, turretRotator, turretHood);
     intake = new ActiveIntake(intakeMotor);
     spindex = new Spindex(magServo, feeder, colorSensor, distanceSensor);
-    camera = new Camera(hardwareMap,
-        "camera",
-        new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0),
-        AllianceColor.RED); // placeholder TODO: update
+    camera =
+        new Camera(
+            hardwareMap,
+            "camera",
+            new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0),
+            AllianceColor.RED); // placeholder TODO: update
 
     mag = new ScoringSystem(intake, turret, spindex, camera, telemetry);
     mag.setTargetDistance(100); // PLACEHOLDER

@@ -17,16 +17,14 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
+import java.util.List;
+import java.util.Set;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.CameraLowLevel;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * @brief placeholder class for a camera TODO: actually fill out
@@ -35,22 +33,24 @@ public class Camera extends CameraLowLevel {
   private AllianceColor allianceColor;
   private boolean navigationOnly = false;
 
-  public Camera(HardwareMap hardwareMap,
-                String webcamName,
-                YawPitchRollAngles cameraOrientation,
-                AllianceColor allianceColor) {
-    super(hardwareMap,
+  public Camera(
+      HardwareMap hardwareMap,
+      String webcamName,
+      YawPitchRollAngles cameraOrientation,
+      AllianceColor allianceColor) {
+    super(
+        hardwareMap,
         false,
         webcamName,
         new Position(DistanceUnit.INCH, 0, 0, 0, 0),
         cameraOrientation);
 
-    super.setAllowedIds(Set.of(
-        allianceColor.getAprilTagId(),
-        BallSequence.GPP.getAprilTagId(),
-        BallSequence.PGP.getAprilTagId(),
-        BallSequence.PPG.getAprilTagId()
-    ));
+    super.setAllowedIds(
+        Set.of(
+            allianceColor.getAprilTagId(),
+            BallSequence.GPP.getAprilTagId(),
+            BallSequence.PGP.getAprilTagId(),
+            BallSequence.PPG.getAprilTagId()));
 
     this.allianceColor = allianceColor;
   }
@@ -85,9 +85,10 @@ public class Camera extends CameraLowLevel {
 
   /**
    * @brief returns the estimated distance to the navigation apriltag for the alliance
-   * @return the distance to the navigation apriltag in inches, or 0 if out of frame or multiple tags tracked
+   * @return the distance to the navigation apriltag in inches, or 0 if out of frame or multiple
+   *     tags tracked
    * @note the distance cannot be found if obelisk apriltags are visible and being looked for; this
-   * is a limitation of the underlying CameraLowLevel class
+   *     is a limitation of the underlying CameraLowLevel class
    */
   public double getNavigationAprilTagDistance() {
     boolean inFrame = isNavigationAprilTagInFrame();
