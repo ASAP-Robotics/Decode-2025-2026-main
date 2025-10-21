@@ -90,7 +90,7 @@ public class MainOpMode extends LinearOpMode {
     spindex = new Spindex(magServo, feeder, colorSensor, distanceSensor);
     camera = new Camera(AllianceColor.RED); // placeholder TODO: update
 
-    mag = new ScoringSystem(intake, turret, spindex, camera, telemetry);
+    mag = new ScoringSystem(intake, turret, spindex, camera, wantedSequence, telemetry);
     mag.setTargetDistance(100); // PLACEHOLDER
 
     wheelBase = new MecanumWheelBase(frontLeft, frontRight, backLeft, backRight);
@@ -115,12 +115,15 @@ public class MainOpMode extends LinearOpMode {
 
       // shoot
       if (gamepad1.right_trigger > 0.25) {
-        mag.shootSequence(wantedSequence); // shoot the desired sequence
+        mag.shootMag(); // shoot all balls in the mag, in a sequence if possible
       }
 
       // fil mag
       if (gamepad1.aWasPressed()) {
-        mag.fillMagSorted(); // fill the mag
+        mag.fillMagUnsorted(); // fill the mag with any three balls
+
+      } else if (gamepad1.bWasPressed()) {
+        mag.fillMagSorted(); // fill the mag with 1 green and 2 purple balls
       }
 
       // update wheelbase

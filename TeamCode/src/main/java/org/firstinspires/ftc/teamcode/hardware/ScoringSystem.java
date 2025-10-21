@@ -24,24 +24,32 @@ import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 public class ScoringSystem {
-  private final ActiveIntake intake; // /< the intake on the robot
-  private final Turret turret; // /< the flywheel on the robot
-  private final Spindex spindex; // /< the spindex on the robot
-  private final Camera camera; // /< the camera on the turret
-  private boolean fillingMag = false; // /< if the mag is being filled
-  private boolean shootingSequence = false; // /< if a sequence is being shot out of the turret
-  private BallSequence ballSequence; // /< the sequence being shot
-  private int sequenceIndex = 0; // /< the index of ball in the sequence that is being shot
+  private enum SequenceMode {
+    SORTED,
+    UNSORTED
+  }
+
+  private final ActiveIntake intake; // the intake on the robot
+  private final Turret turret; // the flywheel on the robot
+  private final Spindex spindex; // the spindex on the robot
+  private final Camera camera; // the camera on the turret
+  private boolean fillingMag = false; // if the mag is being filled
+  private SequenceMode fillingMode = SequenceMode.SORTED; // the mode the mag is being filled in
+  private boolean emptyingMag = false; // if a sequence is being shot out of the turret
+  private SequenceMode emptyingMode = SequenceMode.SORTED; // the mode the mag is being emptied in
+  private BallSequence ballSequence; // the sequence being shot
+  private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private int purplesNeeded = 0; // the number of purples needed to fill the mag
   private int greensNeeded = 0; // the number of greens needed to fill the mag
   private final Telemetry telemetry;
 
   public ScoringSystem(
-      ActiveIntake intake, Turret turret, Spindex spindex, Camera camera, Telemetry telemetry) {
+      ActiveIntake intake, Turret turret, Spindex spindex, Camera camera, BallSequence sequence, Telemetry telemetry) {
     this.intake = intake;
     this.turret = turret;
     this.spindex = spindex;
     this.camera = camera;
+    this.ballSequence = sequence;
     this.telemetry = telemetry;
     this.turret.idle(); // set turret to spin at idle speed
     this.turret.disable(); // don't let the turret spin up
@@ -84,7 +92,7 @@ public class ScoringSystem {
     turret.update();
     spindex.update();
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexColor()));
-    telemetry.addData("Shooting", shootingSequence);
+    telemetry.addData("Shooting", emptyingMag);
     telemetry.addData("Filling", fillingMag);
   }
 
@@ -103,57 +111,89 @@ public class ScoringSystem {
    * @brief updates everything to do with shooting balls out of the turret
    */
   private void updateShooting() {
-    if (shootingSequence) { // if we are shooting a sequence (rapid fire)
-      BallColor[] sequence = ballSequence.getBallColors();
-      BallColor shootingColor = sequence[sequenceIndex];
-      telemetry.addData("Shooting color", shootingColor);
-      telemetry.addData("Shooting index", sequenceIndex);
-      telemetry.addData("Contains ball", turret.getContainsBall());
-      if (turret.getContainsBall()) { // if there is a ball in the flywheel
-        if (turret.shotTimer.isFinished()) { // if the ball entered the flywheel long enough ago
-          turret.setContainsBall(false); // there is not a ball in the flywheel
-          spindex.setShootingIndexEmpty(); // spindex slot is now empty
-          if (sequenceIndex < (sequence.length - 1)) { // if the sequence isn't done
-            sequenceIndex++; // move on to the next ball in the sequence
+    if (emptyingMag) { // if we are emptying the mag (rapid fire)
+      boolean isSorted = (emptyingMode == SequenceMode.SORTED); // if we are shooting a sequence
 
-          } else { // if the sequence is done
-            shootingSequence = false; // we are no longer shooting a sequence
+      if (turret.getContainsBall()) { // if there is a ball in the turret
+        if (turret.shotTimer.isFinished()) { // if the ball is now out of the turret
+          turret.setContainsBall(false); // there is not a ball in the turret
+          spindex.setShootingIndexEmpty(); // spindex slot is now empty
+
+          if (isSorted) { // if shooting a sequence
+            BallColor[] sequence = ballSequence.getBallColors();
+            if (sequenceIndex < (sequence.length - 1)) { // if the sequence isn't done
+              sequenceIndex++; // move on to the next ball in the sequence
+
+            } else { // if the sequence is done
+              emptyingMag = false; // we are no longer shooting a sequence
+              turret.idle(); // let flywheel slow down to idle speed
+            }
+
+          } else { // if emptying the mag in no particular order
+            int numBallsLeft = 0;
+            for (BallColor color : spindex.getSpindexColor()) {
+              if (color != BallColor.EMPTY) numBallsLeft++;
+            }
+
+            if (numBallsLeft == 0) { // if the mag is empty
+              emptyingMag = false; // we are no longer emptying the mag
+              turret.idle(); // let flywheel slow down to idle speed
+            } // if (numBallsLeft == 0)
+          } // else ( if (isSorted) )
+        } // if (turret.shotTimer.isFinished())
+
+      } else { // if there isn't a ball in the turret
+        int shootingColorIndex = NULL;
+
+        if (isSorted) { // if shooting a sequence
+          BallColor[] sequence = ballSequence.getBallColors();
+          BallColor shootingColor = sequence[sequenceIndex];
+          shootingColorIndex = spindex.getColorIndex(shootingColor);
+
+        } else { // if emptying the mag in no particular order
+          for (BallColor color : spindex.getSpindexColor()) { // for each spindex slot
+            if (color != BallColor.EMPTY) { // if it isn't empty
+              shootingColorIndex = spindex.getColorIndex(color); // shoot this ball
+              break; // we don't need to keep looking
+            }
+          }
+
+          if (shootingColorIndex == NULL) { // if the mag is empty
+            // this should never happen, but just in case
+            emptyingMag = false; // we are no longer emptying the mag
             turret.idle(); // let flywheel slow down to idle speed
+            return;
           }
         }
 
-      } else { // if there isn't a ball in the flywheel
-        int shootingColorIndex = spindex.getColorIndex(shootingColor);
         if (spindex.getIsSpindexMoved()
-            && (spindex.getShootIndex()
-                != shootingColorIndex)) { // if the spindex position hasn't been set
+            && (spindex.getShootIndex() != shootingColorIndex)) { // if the spindex position hasn't been set
           spindex.moveSpindexShoot(shootingColorIndex); // move spindex to correct location
 
         } else if (turret.isUpToSpeed()
-            && spindex
-                .getIsSpindexMoved()) { // if the flywheel is up to speed and the spindex is done
+            && spindex.getIsSpindexMoved()) { // if the flywheel is up to speed and the spindex is done
           // moving
-          spindex.liftBall(); // lift ball into flywheel
-          turret.setContainsBall(true); // flywheel now has a ball in it
-          turret.shotTimer.start();
+          spindex.liftBall(); // lift ball into turret
+          turret.setContainsBall(true); // turret now has a ball in it
+          turret.shotTimer.start(); // start the shot timer (how long the ball takes to leave the turret)
         }
       }
 
     } else if (turret.isEnabled() && turret.isActive()) { // if we are just shooting one ball
-      if (turret.getContainsBall()) {
-        if (turret.shotTimer.isFinished()) {
+      if (turret.getContainsBall()) { // if the turret contains a ball
+        if (turret.shotTimer.isFinished()) { // if the turret no longer contains a ball
           turret.setContainsBall(false); // the ball should be out of the flywheel
           turret.idle(); // set the flywheel to slow down to idle speeds
         }
 
-      } else {
-        if (turret.isUpToSpeed()) {
-          spindex.liftBall(); // lift ball into flywheel
-          turret.setContainsBall(true);
-        }
-      }
-    }
-  }
+      } else { // if the turret doesn't contain a ball yet
+        if (turret.isUpToSpeed()) { // if the flywheel is spinning fast enough
+          spindex.liftBall(); // lift ball into turret
+          turret.setContainsBall(true); // turret now contains a ball
+        } // if (turret.isUpToSpeed())
+      } // else ( if (turret.getContainsBall()) )
+    } // else if (turret.isEnabled() && turret.isActive())
+  } // updateShooting()
 
   /**
    * @brief updates everything to do with the intake
@@ -189,7 +229,17 @@ public class ScoringSystem {
         }
       }
 
-      if (!fillMagSorted()) fillingMag = false; // check if there are still empty slots in the mag
+      switch (fillingMode) {
+        case SORTED:
+          // check if there are still empty slots in the mag
+          if (!fillMagSorted()) fillingMag = false;
+          break;
+
+        case UNSORTED:
+          // check if there are still empty slots in the mag
+          if (!fillMagUnsorted()) fillingMag = false;
+          break;
+      }
 
     } else if (intake.isIntaking()) { // if the intake is trying to intake a ball
       BallColor intakeColor =
@@ -217,6 +267,7 @@ public class ScoringSystem {
     if (spindex.getColorIndex(BallColor.EMPTY) == NULL)
       return false; // if there are no empty slots in the mag, return false
     fillingMag = true;
+    fillingMode = SequenceMode.SORTED; // fill the mag with sorted balls
     purplesNeeded = 2; // if all slots are empty, we need 2 purples
     greensNeeded = 1; // if all slots are empty, we need 1 green
     for (BallColor color : spindex.getSpindexColor()) {
@@ -228,6 +279,23 @@ public class ScoringSystem {
     if (purplesNeeded < 0 || greensNeeded < 0)
       return false; // if mag contains more than 2 purples or 1 green, return false
     if (!intake.isBusy()) intake.intake(); // start the intake spinning
+    spindex.moveSpindexIntake(
+        spindex.getColorIndex(BallColor.EMPTY)); // move the spindex to an empty slot
+    return true;
+  }
+
+  /**
+   * @brief starts filling the mag with three balls of any color
+   * @return true if the mag had empty slots, false if the mag is full
+   */
+  public boolean fillMagUnsorted() {
+    if (spindex.getColorIndex(BallColor.EMPTY) == NULL)
+      return false; // if there are no empty slots in the mag, return false
+    fillingMag = true;
+    fillingMode = SequenceMode.UNSORTED; // fill the mag with unsorted balls
+    purplesNeeded = 3; // we could intake up to 3 greens
+    greensNeeded = 3; // we could intake up to 3 purples
+    if (!intake.isIntaking()) intake.intake(); // start the intake spinning
     spindex.moveSpindexIntake(
         spindex.getColorIndex(BallColor.EMPTY)); // move the spindex to an empty slot
     return true;
@@ -268,13 +336,32 @@ public class ScoringSystem {
   }
 
   /**
+   * @brief shoots all balls in the mag, in sequence order if possible
+   * @return true if the mag contained at least one ball, false if the mag is empty
+   * @note if the balls in the mag are not sorted, they will be shot unsorted. If the mag contains
+   * exactly one green and two purple balls, the last shot sequence will be shot
+   */
+  public boolean shootMag() {
+    if (shootSequence(ballSequence)) return true; // try shooting the last shot sequence
+    int fullSlots = 0;
+    for (BallColor color : spindex.getSpindexColor()) { // for each spindex slot
+      if (color != BallColor.EMPTY) fullSlots++; // if it isn't empty
+    }
+    if (fullSlots == 0) return false; // if mag is empty, return false
+    emptyingMag = true; // the mag is being emptied
+    emptyingMode = SequenceMode.UNSORTED; // shooting in any order
+    turret.activate(); // start the flywheel spinning up to full speed
+    return true; // we are emptying the mag; return true
+  }
+
+  /**
    * @brief starts shooting a sequence of balls out of the turret
    * @param sequence the color sequence to shoot
    * @return true if the mag was full, false if the mag isn't full or a sequence is already being
    *     shot
    */
   public boolean shootSequence(BallSequence sequence) {
-    if (shootingSequence) return false;
+    if (emptyingMag) return false;
     int purples = 0;
     int greens = 0;
     for (BallColor color : spindex.getSpindexColor()) {
@@ -283,7 +370,8 @@ public class ScoringSystem {
     }
     if ((purples != 2) || (greens != 1))
       return false; // return false if the wrong number of balls are in the mag
-    shootingSequence = true; // a sequence is being shot
+    emptyingMag = true; // the mag is being emptied
+    emptyingMode = SequenceMode.SORTED; // shooting sorted sequence
     ballSequence = sequence; // store the requested sequence
     sequenceIndex = 0; // start with the first ball in the sequence
     turret.activate(); // start flywheel spinning up to full speed
