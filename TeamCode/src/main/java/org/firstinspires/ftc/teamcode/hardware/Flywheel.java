@@ -17,7 +17,6 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
@@ -46,10 +45,13 @@ public class Flywheel {
   // these arrays constitute a lookup table for finding the correct flywheel RPM for a distance
   // the distance values need to be in ascending order, or things will break
   // the two array MUST be the same length, or things will break
-  private static final double[] DISTANCES =
-      {5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100}; // placeholder values TODO: tune
-  private static final double[] RPMs =
-      {1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000}; // placeholder values TODO: tune
+  private static final double[] DISTANCES = {
+    5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100
+  }; // placeholder values TODO: tune
+  private static final double[] RPMs = {
+    1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000,
+    5250, 5500, 5750, 6000
+  }; // placeholder values TODO: tune
 
   private final double SPEED_TOLERANCE =
       0.95; // think of as the percentage of the target speed the flywheel needs to reach to be "at
