@@ -26,10 +26,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
+import org.firstinspires.ftc.teamcode.hardware.Camera;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
+import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 @TeleOp(name = "Main TeliOp", group = "Drive")
@@ -49,6 +51,7 @@ public class MainOpMode extends LinearOpMode {
   private Turret turret;
   private ActiveIntake intake;
   private Spindex spindex;
+  private Camera camera;
   private ScoringSystem mag;
   private MecanumWheelBase wheelBase;
   private boolean fieldCentric = false; // if control will be field-centric
@@ -85,8 +88,9 @@ public class MainOpMode extends LinearOpMode {
     turret = new Turret(flywheelMotor, turretRotator, turretHood);
     intake = new ActiveIntake(intakeMotor);
     spindex = new Spindex(magServo, feeder, colorSensor, distanceSensor);
+    camera = new Camera(AllianceColor.RED); // placeholder TODO: update
 
-    mag = new ScoringSystem(intake, turret, spindex, telemetry);
+    mag = new ScoringSystem(intake, turret, spindex, camera, telemetry);
     mag.setTargetDistance(100); // PLACEHOLDER
 
     wheelBase = new MecanumWheelBase(frontLeft, frontRight, backLeft, backRight);
