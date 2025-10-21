@@ -44,7 +44,12 @@ public class ScoringSystem {
   private final Telemetry telemetry;
 
   public ScoringSystem(
-      ActiveIntake intake, Turret turret, Spindex spindex, Camera camera, BallSequence sequence, Telemetry telemetry) {
+      ActiveIntake intake,
+      Turret turret,
+      Spindex spindex,
+      Camera camera,
+      BallSequence sequence,
+      Telemetry telemetry) {
     this.intake = intake;
     this.turret = turret;
     this.spindex = spindex;
@@ -167,15 +172,18 @@ public class ScoringSystem {
         }
 
         if (spindex.getIsSpindexMoved()
-            && (spindex.getShootIndex() != shootingColorIndex)) { // if the spindex position hasn't been set
+            && (spindex.getShootIndex()
+                != shootingColorIndex)) { // if the spindex position hasn't been set
           spindex.moveSpindexShoot(shootingColorIndex); // move spindex to correct location
 
         } else if (turret.isUpToSpeed()
-            && spindex.getIsSpindexMoved()) { // if the flywheel is up to speed and the spindex is done
+            && spindex
+                .getIsSpindexMoved()) { // if the flywheel is up to speed and the spindex is done
           // moving
           spindex.liftBall(); // lift ball into turret
           turret.setContainsBall(true); // turret now has a ball in it
-          turret.shotTimer.start(); // start the shot timer (how long the ball takes to leave the turret)
+          turret.shotTimer
+              .start(); // start the shot timer (how long the ball takes to leave the turret)
         }
       }
 
@@ -339,7 +347,7 @@ public class ScoringSystem {
    * @brief shoots all balls in the mag, in sequence order if possible
    * @return true if the mag contained at least one ball, false if the mag is empty
    * @note if the balls in the mag are not sorted, they will be shot unsorted. If the mag contains
-   * exactly one green and two purple balls, the last shot sequence will be shot
+   *     exactly one green and two purple balls, the last shot sequence will be shot
    */
   public boolean shootMag() {
     if (shootSequence(ballSequence)) return true; // try shooting the last shot sequence
