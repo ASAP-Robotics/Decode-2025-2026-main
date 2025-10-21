@@ -32,7 +32,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
  * consider these IDs (null/empty = any) tags.setSelectedId(2); // lock to a single ID (null to
  * clear) // Or cycle at runtime with your buttons, using getLastVisibleIds() to choose.
  */
-public class AprilTag {
+public class CameraLowLevel {
 
   // --- Construction/config ---
   private final HardwareMap hardwareMap;
@@ -58,7 +58,7 @@ public class AprilTag {
   private Integer selectedId = null; // if set, only accept this ID
   private final List<Integer> lastVisibleIds = new ArrayList<>();
 
-  public AprilTag(
+  public CameraLowLevel(
       HardwareMap hardwareMap,
       boolean useWebcam,
       String webcamName,
