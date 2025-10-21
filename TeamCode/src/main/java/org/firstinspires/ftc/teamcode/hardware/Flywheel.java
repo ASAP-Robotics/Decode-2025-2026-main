@@ -17,6 +17,7 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class Flywheel {
@@ -41,8 +42,19 @@ public class Flywheel {
   // ---- friction/slip lumped into one factor (0<eff<=1). Start ~0.90 and tune. ----
   private static final double EFFICIENCY = 0.90;
 
+  // these arrays constitute a lookup table for finding the correct flywheel RPM for a distance
+  // the distance values need to be in ascending order, or things will break
+  // the two array MUST be the same length, or things will break
+  private static final double[] DISTANCES = {
+    5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100
+  }; // placeholder values TODO: tune
+  private static final double[] RPMs = {
+    1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000,
+    5250, 5500, 5750, 6000
+  }; // placeholder values TODO: tune
+
   private final double SPEED_TOLERANCE =
-      0.1; // think of as the percentage of the target speed the flywheel needs to reach to be "at
+      0.95; // think of as the percentage of the target speed the flywheel needs to reach to be "at
 
   // target speed"
 
@@ -74,14 +86,10 @@ public class Flywheel {
   /**
    * @brief returns if the flywheel is fully up to speed
    * @return true if flywheel is at speed, false if flywheel is below target speed
-   * @note workaround TODO: remove workaround and fix
    */
   public boolean isUpToSpeed() {
     update(); // update flywheel
-    /*
     return currentSpeed >= (targetSpeed * SPEED_TOLERANCE);
-    */
-    return true;
   }
 
   /**
@@ -276,6 +284,7 @@ public class Flywheel {
    * @note Core math: distance (in) → wheel RPM, including efficiency loss
    */
   private double rpmForDistance(double Rin) {
+    /*
     // convert to meters
     double Rm = Rin * 0.0254;
     double deltaHm = DELTA_H_IN * 0.0254;
@@ -292,5 +301,35 @@ public class Flywheel {
     double wheelSurfaceSpeed = vExit / EFFICIENCY;
 
     return (60.0 * wheelSurfaceSpeed) / (Math.PI * wheelDiamM); // RPM
+     */
+
+    return getRPMLookup(Rin);
+  }
+
+  /**
+   * @brief gets the RPM for a given distance from the lookup table
+   * @param distanceInches the target distance to get flywheel RPM for
+   * @return the flywheel RPM for the given distance
+   */
+  private double getRPMLookup(double distanceInches) {
+    int indexOver = DISTANCES.length - 1;
+    int indexUnder = 0;
+    for (int i = 0; i < DISTANCES.length; i++) {
+      if (DISTANCES[i] >= distanceInches) {
+        indexOver = i;
+        indexUnder = indexOver - 1; // assuming values go from low to high
+        break;
+      }
+    }
+
+    double toReturn =
+        MathUtils.map(
+            distanceInches,
+            DISTANCES[indexUnder],
+            DISTANCES[indexOver],
+            RPMs[indexUnder],
+            RPMs[indexOver]);
+
+    return toReturn;
   }
 }
