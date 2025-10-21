@@ -18,7 +18,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
 import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpointDriver;
 
 @TeleOp(name = "Pinpoint Behavior Test", group = "Testing")
@@ -26,8 +25,7 @@ public class PinpointBehaviorTest extends LinearOpMode {
 
   @Override
   public void runOpMode() {
-    GoBildaPinpointDriver pinpoint =
-        hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+    GoBildaPinpointDriver pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
     pinpoint.update();
     telemetry.addData("Initialized", false);
@@ -57,6 +55,7 @@ public class PinpointBehaviorTest extends LinearOpMode {
     telemetry.addData("Encoder Y", pinpoint.getEncoderY());
     telemetry.update();
 
-    while (opModeIsActive()); // wait for program end
+    while (opModeIsActive())
+      ; // wait for program end
   }
 }

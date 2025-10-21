@@ -18,12 +18,11 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
+import com.qualcomm.robotcore.util.ReadWriteFile;
+import java.io.File;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.qualcomm.robotcore.util.ReadWriteFile;
-import java.io.File;
 
 @TeleOp(name = "File usage test", group = "Testing")
 public class FileUsageTest extends LinearOpMode {
@@ -77,6 +76,7 @@ public class FileUsageTest extends LinearOpMode {
     telemetry.addData("test_2", test2);
     telemetry.update();
 
-    while (opModeIsActive()); // wait for program to stop
+    while (opModeIsActive())
+      ; // wait for program to stop
   }
 }
