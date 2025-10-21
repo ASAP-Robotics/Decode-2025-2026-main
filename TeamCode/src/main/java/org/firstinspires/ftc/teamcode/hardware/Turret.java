@@ -64,7 +64,7 @@ public class Turret extends Flywheel {
    */
   @Override
   public boolean setEnabled(boolean isEnabled) {
-    //rotator.setPower(isEnabled ? 1 : 0); // 0% power if disabled, 100% power if enabled
+    // rotator.setPower(isEnabled ? 1 : 0); // 0% power if disabled, 100% power if enabled
     return super.setEnabled(isEnabled);
   }
 
