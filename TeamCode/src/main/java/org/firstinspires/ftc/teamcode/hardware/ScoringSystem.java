@@ -345,7 +345,7 @@ public class ScoringSystem {
    * @brief shoots all balls in the mag, in sequence order if possible
    * @return true if the mag contained at least one ball, false if the mag is empty
    * @note if the balls in the mag are not sorted, they will be shot unsorted. If the mag contains
-   * exactly one green and two purple balls, the last shot sequence will be shot
+   *     exactly one green and two purple balls, the last shot sequence will be shot
    */
   public boolean shootMag() {
     return shootMag(ballSequence); // default to last shot sequence
@@ -355,7 +355,7 @@ public class ScoringSystem {
    * @brief shoots all balls in the mag, in sequence order if possible
    * @return true if the mag contained at least one ball, false if the mag is empty
    * @note if the balls in the mag are not sorted, they will be shot unsorted. If the mag contains
-   * exactly one green and two purple balls, the specified sequence will be shot
+   *     exactly one green and two purple balls, the specified sequence will be shot
    */
   public boolean shootMag(BallSequence sequence) {
     if (shootSequence(ballSequence)) return true; // try shooting the last shot sequence
