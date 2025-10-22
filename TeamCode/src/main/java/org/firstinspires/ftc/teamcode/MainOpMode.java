@@ -121,7 +121,7 @@ public class MainOpMode extends LinearOpMode {
 
       // shoot
       if (gamepad1.right_trigger > 0.25) {
-        mag.shootMag(); // shoot all balls in the mag, in a sequence if possible
+        mag.shootMag(wantedSequence); // shoot all balls in the mag, in a sequence if possible
       }
 
       // fil mag

@@ -108,8 +108,6 @@ public class ScoringSystem {
     turret.setTargetDistance(camera.getNavigationAprilTagDistance());
     turret.setHorizontalAngle(
         turret.getTargetHorizontalAngleDegrees() + camera.getNavigationAprilTagAngleX());
-    turret.setVerticalAngle(
-        turret.getTargetVerticalAngleDegrees() + camera.getNavigationAprilTagAngleY());
   }
 
   /**
@@ -347,9 +345,19 @@ public class ScoringSystem {
    * @brief shoots all balls in the mag, in sequence order if possible
    * @return true if the mag contained at least one ball, false if the mag is empty
    * @note if the balls in the mag are not sorted, they will be shot unsorted. If the mag contains
-   *     exactly one green and two purple balls, the last shot sequence will be shot
+   * exactly one green and two purple balls, the last shot sequence will be shot
    */
   public boolean shootMag() {
+    return shootMag(ballSequence); // default to last shot sequence
+  }
+
+  /**
+   * @brief shoots all balls in the mag, in sequence order if possible
+   * @return true if the mag contained at least one ball, false if the mag is empty
+   * @note if the balls in the mag are not sorted, they will be shot unsorted. If the mag contains
+   * exactly one green and two purple balls, the specified sequence will be shot
+   */
+  public boolean shootMag(BallSequence sequence) {
     if (shootSequence(ballSequence)) return true; // try shooting the last shot sequence
     int fullSlots = 0;
     for (BallColor color : spindex.getSpindexColor()) { // for each spindex slot
@@ -358,8 +366,18 @@ public class ScoringSystem {
     if (fullSlots == 0) return false; // if mag is empty, return false
     emptyingMag = true; // the mag is being emptied
     emptyingMode = SequenceMode.UNSORTED; // shooting in any order
+    ballSequence = sequence;
     turret.activate(); // start the flywheel spinning up to full speed
     return true; // we are emptying the mag; return true
+  }
+
+  /**
+   * @brief starts shooting the lsat shot sequence of balls out of the turret
+   * @return true if the mag was full, false if the mag isn't full or a sequence is already being
+   *     shot
+   */
+  public boolean shootSequence() {
+    return shootSequence(ballSequence); // use last shot sequence
   }
 
   /**
