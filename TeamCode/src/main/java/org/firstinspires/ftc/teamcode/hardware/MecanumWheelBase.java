@@ -17,6 +17,7 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class MecanumWheelBase {
   private final DcMotorEx frontLeft, frontRight, backLeft, backRight;
@@ -24,18 +25,22 @@ public class MecanumWheelBase {
   private double rotation = 0; // number of degrees the robot is rotated relative to field forward
   private double rawThrottleX = 0, rawThrottleY = 0, rawThrottleZ = 0; // raw throttle values
   private double throttleX = 0, throttleY = 0, throttleZ = 0; // processed (robot) throttle values
+  private double minAccelerationTime; // the time in seconds to go from 0 to full speed
   private boolean fieldCentric = false; // whether or not to use field-centric control
+  private ElapsedTime lastUpdateTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
   public MecanumWheelBase(
       DcMotorEx frontLeft,
       DcMotorEx frontRight,
       DcMotorEx backLeft,
       DcMotorEx backRight,
+      double accelerationTime,
       double sensitivityCurve) {
     this.frontLeft = frontLeft;
     this.frontRight = frontRight;
     this.backLeft = backLeft;
     this.backRight = backRight;
+    this.minAccelerationTime = accelerationTime;
     this.sensitivityCurve = sensitivityCurve;
     // set motors to power-based control
     this.frontLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -54,7 +59,7 @@ public class MecanumWheelBase {
 
   public MecanumWheelBase(
       DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight) {
-    this(frontLeft, frontRight, backLeft, backRight, 2);
+    this(frontLeft, frontRight, backLeft, backRight, 1, 2);
   }
 
   /**
@@ -87,6 +92,14 @@ public class MecanumWheelBase {
    */
   public void setFieldCentric(boolean fieldCentric) {
     this.fieldCentric = fieldCentric;
+  }
+
+  /**
+   * @brief sets the minimum time that the robot can go from 0% to 100% throttle
+   * @param seconds the time in seconds to go from 0 to full speed
+   */
+  public void setAccelerationTime(double seconds) {
+    minAccelerationTime = seconds;
   }
 
   /**
@@ -178,8 +191,38 @@ public class MecanumWheelBase {
    * @note if passed an input less than -1 or greater than 1, 0 will be returned
    */
   private double scaleThrottle(double input) {
+    return scaleThrottle(input, 0, 0, false);
+  }
+
+  /**
+   * @brief adjusts throttle inputs from 1 to -1 to fit a sensitivity curve and limit acceleration
+   * @param input the throttle input, from 1 to -1
+   * @param lastOutput the value used to calculate maximum output increase
+   * @param maxIncrease the maximum amount the output is allowed to increase by
+   * @return the adjusted throttle output, from 1 to -1
+   * @note if passed an input less than -1 or greater than 1, 0 will be returned
+   */
+  private double scaleThrottle(double input, double lastOutput, double maxIncrease) {
+    return scaleThrottle(input, lastOutput, maxIncrease, true);
+  }
+
+  /**
+   * @brief adjusts throttle inputs from 1 to -1 to fit a sensitivity curve
+   * @param input the throttle input, from 1 to -1
+   * @param lastOutput the value used to calculate maximum output increase
+   * @param maxIncrease the maximum amount the output is allowed to increase by
+   * @param limitAcceleration if the output will be clamped to lastOutput + maxIncrease
+   * @return the adjusted throttle output, from 1 to -1
+   * @note if passed an input less than -1 or greater than 1, 0 will be returned
+   */
+  private double scaleThrottle(double input,
+                               double lastOutput,
+                               double maxIncrease,
+                               boolean limitAcceleration) {
     double filteredInput = Math.min(Math.abs(input), 1); // clamp absolute value below 1
     double scaledValue = Math.pow(filteredInput, sensitivityCurve); // fit to curve
+    if (limitAcceleration) // if acceleration is limited
+      scaledValue = Math.min(Math.abs(lastOutput) + maxIncrease, scaledValue); // limit acceleration
 
     if ((input > 0) && (input <= 1)) { // input is positive and in bounds
       return scaledValue;
@@ -222,11 +265,16 @@ public class MecanumWheelBase {
    * @param fieldCentric driving will be field-centric if true, robot-centric if false
    */
   public void update(boolean fieldCentric) {
+    double timeSinceLastUpdate = lastUpdateTimer.seconds(); // get time since last update
+    lastUpdateTimer.reset(); // reset time since last update
+    double maxIncrease = timeSinceLastUpdate / minAccelerationTime; // find max throttle increase
     // scale raw throttle values to match sensitivity curve
     // x throttle is increased to account for imperfect strafing
-    throttleX = Math.min(1, Math.max(-1, scaleThrottle(rawThrottleX) * 1.1));
-    throttleY = scaleThrottle(rawThrottleY);
-    throttleZ = scaleThrottle(rawThrottleZ);
+    // x will be able to accelerate slightly faster than y and z due to this
+    throttleX = scaleThrottle(rawThrottleX, throttleX, maxIncrease); // get processed x throttle
+    throttleX = Math.min(1, Math.max(-1, throttleX * 1.1)); // adjust for imperfect strafing
+    throttleY = scaleThrottle(rawThrottleY, throttleY, maxIncrease); // get processed y throttle
+    throttleZ = scaleThrottle(rawThrottleZ, throttleZ, maxIncrease); // get processed z throttle
 
     if (fieldCentric) { // rotate throttle values if field centric
       double[] rotated = rotateThrottle(rotation, throttleX, throttleY); // rotate throttle
