@@ -215,14 +215,12 @@ public class MecanumWheelBase {
    * @return the adjusted throttle output, from 1 to -1
    * @note if passed an input less than -1 or greater than 1, 0 will be returned
    */
-  private double scaleThrottle(double input,
-                               double lastOutput,
-                               double maxIncrease,
-                               boolean limitAcceleration) {
+  private double scaleThrottle(
+      double input, double lastOutput, double maxIncrease, boolean limitAcceleration) {
     double filteredInput = Math.min(Math.abs(input), 1); // clamp absolute value below 1
     double scaledValue = Math.pow(filteredInput, sensitivityCurve); // fit to curve
     if (limitAcceleration) // if acceleration is limited
-      scaledValue = Math.min(Math.abs(lastOutput) + maxIncrease, scaledValue); // limit acceleration
+    scaledValue = Math.min(Math.abs(lastOutput) + maxIncrease, scaledValue); // limit acceleration
 
     if ((input > 0) && (input <= 1)) { // input is positive and in bounds
       return scaledValue;
