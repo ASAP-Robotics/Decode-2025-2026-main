@@ -219,8 +219,9 @@ public class MecanumWheelBase {
       double input, double lastOutput, double maxIncrease, boolean limitAcceleration) {
     double filteredInput = Math.min(Math.abs(input), 1); // clamp absolute value below 1
     double scaledValue = Math.pow(filteredInput, sensitivityCurve); // fit to curve
-    if (limitAcceleration) // if acceleration is limited
-    scaledValue = Math.min(Math.abs(lastOutput) + maxIncrease, scaledValue); // limit acceleration
+    if (limitAcceleration) { // if acceleration is limited
+      scaledValue = Math.min(Math.abs(lastOutput) + maxIncrease, scaledValue); // limit acceleration
+    }
 
     if ((input > 0) && (input <= 1)) { // input is positive and in bounds
       return scaledValue;
