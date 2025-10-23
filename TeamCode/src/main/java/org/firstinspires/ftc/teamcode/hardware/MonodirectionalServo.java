@@ -21,13 +21,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 /**
  * @brief a class that makes a continuous rotation servo behave like a normal servo that only moves
- * in one direction to achieve target positions
+ *     in one direction to achieve target positions
  */
 public class MonodirectionalServo {
   private final Servo servo; // the servo being controlled
   private final AnalogInput encoder; // the analog input used to read the servo's position
   private double deadZoneDegrees; // size of dead zone to prevent jitter (in degrees)
-  private double toleranceDegrees; // acceptable position error in degrees (if position is within <this> of the target, reverse movement to maintain position is OK)
+  private double
+      toleranceDegrees; // acceptable position error in degrees (if position is within <this> of the
+                        // target, reverse movement to maintain position is OK)
   private double slowDownZoneDegrees; // size of the "slow down" zone (in degrees)
   private double targetPositionDegrees; // target position of the servo in degrees
   private double currentPositionDegrees; // last read position of the servo in degrees
@@ -37,10 +39,16 @@ public class MonodirectionalServo {
    * @param servo the servo to control
    * @param toleranceDegrees the acceptable position error in degrees
    * @param slowDownZoneDegrees the size of the zone (in degrees) in which the servo's speed will be
-   *                            ramped down before reaching the target
+   *     ramped down before reaching the target
    * @param direction the direction of the servo
    */
-  public MonodirectionalServo(Servo servo, AnalogInput encoder, double deadZoneDegrees, double toleranceDegrees, double slowDownZoneDegrees, Servo.Direction direction) {
+  public MonodirectionalServo(
+      Servo servo,
+      AnalogInput encoder,
+      double deadZoneDegrees,
+      double toleranceDegrees,
+      double slowDownZoneDegrees,
+      Servo.Direction direction) {
     this.servo = servo;
     this.encoder = encoder;
     this.servo.setDirection(direction);
@@ -60,8 +68,10 @@ public class MonodirectionalServo {
   }
 
   /**
-   * @brief sets the size of the zone on either side of the target position in which the servo will be set to not move
-   * @param deadZoneDegrees the size of the dead zone on either side of the target position, in degrees
+   * @brief sets the size of the zone on either side of the target position in which the servo will
+   *     be set to not move
+   * @param deadZoneDegrees the size of the dead zone on either side of the target position, in
+   *     degrees
    */
   public void setDeadZoneDegrees(double deadZoneDegrees) {
     this.deadZoneDegrees = deadZoneDegrees;
@@ -69,7 +79,7 @@ public class MonodirectionalServo {
 
   /**
    * @brief sets the threshold of error (in degrees) above which the servo is no longer at the
-   * target position (and cannot move in reverse to maintain position)
+   *     target position (and cannot move in reverse to maintain position)
    * @param toleranceDegrees the number of degrees the position can differ from the target position
    */
   public void setToleranceDegrees(double toleranceDegrees) {
@@ -77,7 +87,8 @@ public class MonodirectionalServo {
   }
 
   /**
-   * @brief sets the number of degrees away from the target at which the servo will start slowing down
+   * @brief sets the number of degrees away from the target at which the servo will start slowing
+   *     down
    * @param slowDownZoneDegrees the distance from the target to slow down at (degrees)
    */
   public void setSlowDownZoneDegrees(double slowDownZoneDegrees) {
@@ -109,11 +120,12 @@ public class MonodirectionalServo {
     currentPositionDegrees = readPosition();
     double error = getDifferenceDegrees(targetPositionDegrees, currentPositionDegrees);
 
-    if (Math.abs(error) <= deadZoneDegrees) { // if we are within the dead zone (exactly at the target)
+    if (Math.abs(error)
+        <= deadZoneDegrees) { // if we are within the dead zone (exactly at the target)
       setSpeed(0); // stop servo
 
-    } else if ((Math.abs(error) <= toleranceDegrees) ||
-        (error <= slowDownZoneDegrees && error >= 0)) {
+    } else if ((Math.abs(error) <= toleranceDegrees)
+        || (error <= slowDownZoneDegrees && error >= 0)) {
       // if we are within the tolerance zone (close to the target) OR if we aren't at the target,
       // but are close enough to start slowing down
       setSpeed(error / slowDownZoneDegrees); // move servo towards target position
