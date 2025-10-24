@@ -17,14 +17,14 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 
 /**
  * @brief a class that makes a continuous rotation servo behave like a normal servo that only moves
  *     in one direction to achieve target positions
  */
 public class MonodirectionalServo {
-  private final Servo servo; // the servo being controlled
+  private final CRServo servo; // the servo being controlled
   private final AnalogInput encoder; // the analog input used to read the servo's position
   private double deadZoneDegrees; // size of dead zone to prevent jitter (in degrees)
   private double
@@ -43,12 +43,12 @@ public class MonodirectionalServo {
    * @param direction the direction of the servo
    */
   public MonodirectionalServo(
-      Servo servo,
+      CRServo servo,
       AnalogInput encoder,
       double deadZoneDegrees,
       double toleranceDegrees,
       double slowDownZoneDegrees,
-      Servo.Direction direction) {
+      CRServo.Direction direction) {
     this.servo = servo;
     this.encoder = encoder;
     this.servo.setDirection(direction);
@@ -63,8 +63,8 @@ public class MonodirectionalServo {
    * @brief makes a new MonodirectionalServo with default parameters
    * @param servo the servo to control
    */
-  public MonodirectionalServo(Servo servo, AnalogInput encoder) {
-    this(servo, encoder, 2.5, 5.0, 10.0, Servo.Direction.FORWARD);
+  public MonodirectionalServo(CRServo servo, AnalogInput encoder) {
+    this(servo, encoder, 2.5, 5.0, 10.0, CRServo.Direction.FORWARD);
   }
 
   /**
@@ -141,7 +141,7 @@ public class MonodirectionalServo {
    */
   private void setSpeed(double speed) {
     speed = Math.max(-1.0, Math.min(1.0, speed)); // constrain speed to -1 to 1
-    servo.setPosition(0.5 + (speed / 2)); // set speed of the servo
+    servo.setPower(speed); // set speed of the servo
   }
 
   /**
@@ -149,7 +149,7 @@ public class MonodirectionalServo {
    * @return the current position of the servo, in degrees (from 0 to 360)
    */
   private double readPosition() {
-    return (encoder.getVoltage() / 3.3) * 360; // 3.3v is a placeholder TODO: tune
+    return (encoder.getVoltage() / 3.3) * 360; // 0v = 0 degrees, 3.3v = 360 degrees
   }
 
   /**
