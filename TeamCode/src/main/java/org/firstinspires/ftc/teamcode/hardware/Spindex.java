@@ -27,37 +27,53 @@ import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class Spindex {
-  private final Servo spinServo; // /< the servo that rotates the divider in the mag
-  private final Servo liftServo; // /< the servo that lifts balls into the shooter turret
-  private final ColorSensor colorSensor; // /< the color sensor at the intake
+  public enum SpindexState {
+    INTAKING,
+    SHOOTING,
+    LIFTING,
+    LIFTED,
+    UNINITIALIZED
+  }
+  private final MonodirectionalServo spinServo1; // one servo that rotates the divider in the mag
+  private final MonodirectionalServo spinServo2; // other servo that rotates the divider in the mag
+  //private final Servo spinServo; // the servo that rotates the divider in the mag
+  private final Servo rampServo; // the servo that lifts balls into the shooter turret
+  private final ColorSensor colorSensor; // the color sensor at the intake
   private final DistanceSensor
-      distanceSensor; // /< the distance sensor at the intake (built into color sensor?)
-  private final double liftServoRestPos =
-      0.0; // /< the position of the lift servo when at rest | TODO: tune
-  private final double liftServoShootPos =
-      0.3; // /< the position of the lift servo when shooting | TODO: tune
+      distanceSensor; // the distance sensor at the intake (built into color sensor?)
+  private final double rampServoRetractedPos =
+      0.0; // the position of the lift servo when at rest | TODO: tune
+  private final double rampServoLiftPos =
+      0.3; // the position of the lift servo when shooting | TODO: tune
   private static final double[] spindexIntake = {0.0, 0.33, 0.66}; // TODO: tune
-  private static final double[] spindexShoot = {0.33, 0.66, 0.00}; // TODO: tune
+  // position(s) to move the spindex to to insert the lifter lever for a give index TODO: tune
+  private static final double[] spindexShootInsert = {0.33, 0.66, 0.00};
+  // position(s) to move the spindex to to lift the ball in a given index TODO: tune
+  private static final double[] spindexShootLift = {0.66, 0.00, 0.33};
   private final BallColor[] spindexColor = {BallColor.EMPTY, BallColor.EMPTY, BallColor.EMPTY};
-  private final org.firstinspires.ftc.teamcode.utils.SimpleTimer liftServoTimer =
-      new SimpleTimer(0.5); // /< timer for lifting ball into flywheel
-  private final org.firstinspires.ftc.teamcode.utils.SimpleTimer spinServoTimer =
-      new SimpleTimer(0.75); // /< timer for moving spindex
+  private final org.firstinspires.ftc.teamcode.utils.SimpleTimer rampServoTimer =
+      new SimpleTimer(0.5); // timer for lifting ball into flywheel
+  //private final org.firstinspires.ftc.teamcode.utils.SimpleTimer spinServoTimer =
+      //new SimpleTimer(0.75); // timer for moving spindex
 
-  private int intakeIndex = NULL;
-  private int shootIndex = NULL;
+  private SpindexState state; // the current state of the spindex
+  private int currentIndex = NULL; // the current index the spindex is at, dependant on the state
+  //private int intakeIndex = NULL;
+  //private int shootIndex = NULL;
   private BallColor intakeColor =
-      BallColor.UNKNOWN; // /< the color of ball in the intake the most recent time checked
+      BallColor.UNKNOWN; // the color of ball in the intake the most recent time checked
   private BallColor oldIntakeColor =
-      BallColor.UNKNOWN; // /< the color of ball in the intake last time checked
+      BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
   public Spindex(
-      Servo spinServo, Servo liftServo, ColorSensor colorSensor, DistanceSensor distanceSensor) {
-    this.spinServo = spinServo;
-    this.liftServo = liftServo;
+      MonodirectionalServo spinServo1, MonodirectionalServo spinServo2, Servo rampServo, ColorSensor colorSensor, DistanceSensor distanceSensor) {
+    this.spinServo1 = spinServo1;
+    this.spinServo2 = spinServo2;
+    this.rampServo = rampServo;
     this.colorSensor = colorSensor;
     this.distanceSensor = distanceSensor;
     this.colorSensor.enableLed(true);
+    this.state = SpindexState.UNINITIALIZED;
   }
 
   /**
@@ -65,9 +81,11 @@ public class Spindex {
    * @note call when the "init" button is pressed
    */
   public void init() {
-    this.spinServo.setPosition(spindexIntake[0]); // move spindex slot 0 to intake
-    this.intakeIndex = 0;
-    this.liftServo.setPosition(liftServoRestPos); // move lifting mechanism to rest position
+    // move spindex slot 0 to intake
+    setSpindexPosition(spindexIntake[0]);
+    this.state = SpindexState.INTAKING; // spindex in intaking mode
+    this.currentIndex = 0; // spindex at index 0
+    this.rampServo.setPosition(rampServoRetractedPos); // move lifting mechanism to rest position
   }
 
   /**
@@ -75,8 +93,28 @@ public class Spindex {
    */
   public void update() {
     updateIntakeColor();
-    if (liftServo.getPosition() == liftServoShootPos && liftServoTimer.isFinished()) {
-      liftServo.setPosition(liftServoRestPos); // move lifter back to resting position
+
+    // if the spindex is intaking, and the lifter ramp is out, retract lifter ramp
+    if (state != SpindexState.INTAKING && rampServo.getPosition() == rampServoLiftPos) {
+      rampServo.setPosition(rampServoRetractedPos); // move lifter back to resting position
+    }
+
+    if (currentIndex == NULL) return; // nothing more can be done without a valid index
+
+    // if the spindex is shooting, and the lifter ramp is retracted, extend the lifter ramp
+    if (state == SpindexState.SHOOTING && rampServo.getPosition() == rampServoRetractedPos && getIsSpindexMoved()) {
+      rampServo.setPosition(rampServoLiftPos); // move lifter ramp to extended position
+    }
+
+    // if the spindex is lifting, and the lifter ramp is extended
+    if (state == SpindexState.LIFTING && rampServo.getPosition() == rampServoLiftPos && rampServoTimer.isFinished()) {
+      if (!isSpindexPosition(spindexShootLift[currentIndex])) { // if the spindex hasn't been set to the correct position yet
+        setSpindexPosition(spindexShootLift[currentIndex]); // move divider to force ball up ramp
+
+      } else if (getIsSpindexMoved()) { // if the spindex is stationary at the correct position
+        spindexColor[currentIndex] = BallColor.EMPTY; // spindex slot is now empty
+        state = SpindexState.LIFTED; // spindex in interim "lifted" mode
+      }
     }
   }
 
@@ -85,10 +123,11 @@ public class Spindex {
    * @brief moves the specified spindex index to its intake position
    */
   public void moveSpindexIntake(int index) {
-    spinServo.setPosition(spindexIntake[index]); // set servo to new position
-    spinServoTimer.start(); // start timer for moving spindex
-    intakeIndex = index; // set new intake index
-    shootIndex = NULL; // spindex isn't at a shooting index
+    if (index < 0 || index >= spindexColor.length) return; // return on invalid parameters
+    setRampPosition(rampServoRetractedPos); // retract lifter ramp
+    setSpindexPosition(spindexIntake[index]); // set spindex to new position
+    currentIndex = index; // set new index
+    state = SpindexState.INTAKING; // spindex in intaking mode
   }
 
   /**
@@ -96,48 +135,62 @@ public class Spindex {
    * @brief moves the specified spindex index to its shooting position
    */
   public void moveSpindexShoot(int index) {
-    spinServo.setPosition(spindexShoot[index]); // set servo to new position
-    spinServoTimer.start(); // start timer for moving spindex
-    shootIndex = index; // set new shooting index
-    intakeIndex = NULL; // spindex isn't at an intake index
+    if (index < 0 || index >= spindexColor.length) return; // return on invalid parameters
+    setSpindexPosition(spindexShootInsert[index]); // set spindex to new position
+    currentIndex = index; // set new index
+    state = SpindexState.SHOOTING; // spindex in shooting mode
   }
 
   /**
    * @brief stores the color of ball detected in the intake as the color of ball in the spindex
    *     index at the intake position
    * @note uses the stored intake color, call update() to update
-   * @return true if the color was stored, false if the spindex wasn't at an intake position
+   * @return true if the color was stored, false if the spindex wasn't stationary at an intake position
    */
   public boolean storeIntakeColor() {
-    if (intakeIndex == NULL) { // if spindex isn't at a intake position
+    // if spindex isn't stationary at an intake position, return false
+    if (state != SpindexState.INTAKING || !getIsSpindexMoved())
       return false;
 
-    } else {
-      setSpindexIndexColor(intakeIndex, intakeColor);
-      return true;
-    }
+    setSpindexIndexColor(currentIndex, intakeColor);
+    return true;
   }
 
   /**
    * @brief sets the spindex index at the shooting position as empty
-   * @return true if the spindex was at a shooting position, false if it wasn't
+   * @return true if the spindex was finished lifting a ball, false if it wasn't
+   * @note DO NOT USE! spindex slots are now automatically set as empty
    */
+  @Deprecated
   public boolean setShootingIndexEmpty() {
-    if (shootIndex == NULL) { // if spindex isn't at a shooting position
+    if (state != SpindexState.LIFTED) { // if spindex isn't finished lifting a ball
       return false;
 
     } else {
-      setSpindexIndexColor(shootIndex, BallColor.EMPTY);
+      setSpindexIndexColor(currentIndex, BallColor.EMPTY);
       return true;
     }
   }
 
   /**
-   * @brief lifts the lifter mechanism, lifting a ball into the turret
+   * @brief starts lifting a ball into the turret
+   * @note most of this operation is actually handled by regular calls to update()
    */
-  public void liftBall() {
-    liftServo.setPosition(liftServoShootPos);
-    liftServoTimer.start();
+  public boolean liftBall() {
+    // if the spindex is not stationary at a valid shooting position, we cannot lift a ball
+    if (state != SpindexState.SHOOTING || currentIndex == NULL || !getIsSpindexMoved()) return false;
+
+    // if the lifter ramp isn't extended, extend it (this shouldn't happen, but just in case)
+    if (rampServo.getPosition() != rampServoLiftPos || !rampServoTimer.isFinished()) {
+      rampServo.setPosition(rampServoLiftPos);
+      rampServoTimer.start();
+
+    } else { // if the lifter ramp is extended, move the divider to force balls up it
+      setSpindexPosition(spindexShootLift[currentIndex]); // start moving the spindex
+    }
+
+    state = SpindexState.LIFTING; // spindex in lifting mode
+    return true; // we can lift (and are lifting) a ball
   }
 
   /**
@@ -145,7 +198,7 @@ public class Spindex {
    * @return true if the spindex is stationary, false if the spindex is moving
    */
   public boolean getIsSpindexMoved() {
-    return spinServoTimer.isFinished();
+    return spinServo1.isAtTarget() && spinServo2.isAtTarget();
   }
 
   /**
@@ -174,19 +227,20 @@ public class Spindex {
   }
 
   /**
-   * @brief returns the spindex index that is at the intake
+   * @brief returns the spindex index that is currently active
    * @return the index that is at the intake, or NULL (-1) if the spindex isn't at an intake index
+   * @note what the "active" index means depends on state / mode (e.g. intaking vs shooting)
    */
-  public int getIntakeIndex() {
-    return intakeIndex;
+  public int getIndex() {
+    return currentIndex;
   }
 
   /**
-   * @brief returns the spindex index that is at the turret
-   * @return the index that is at the turret, or NULL (-1) if the spindex isn't at a turret index
+   * @brief gets the current state / mode of the spindex
+   * @return the current state / mode of the spindex
    */
-  public int getShootIndex() {
-    return shootIndex;
+  public SpindexState getState() {
+    return state;
   }
 
   /**
@@ -206,6 +260,43 @@ public class Spindex {
     }
 
     return toReturn;
+  }
+
+  /**
+   * @brief gets the color of ball at a given index in the spindex
+   * @param index the index to get the color of contained ball of
+   * @return the color of ball in the given index in the spindex
+   */
+  public BallColor getIndexColor(int index) {
+    if (index < 0 || index >= spindexColor.length) return BallColor.UNKNOWN; // return on invalid parameters
+    return spindexColor[index]; // return color of ball at index
+  }
+
+  /**
+   * @brief sets the position of the ramp that lifts the ball into the turret
+   * @param position the position (degrees) to set the ramp servo to
+   */
+  private void setRampPosition(double position) {
+    rampServo.setPosition(position);
+    rampServoTimer.start();
+  }
+
+  /**
+   * @brief sets the position of the spindex
+   * @param position the position (degrees) to set the spindex servos to
+   */
+  private void setSpindexPosition(double position) {
+    spinServo1.setPosition(position);
+    spinServo2.setPosition(position);
+  }
+
+  /**
+   * @brief checks if the target position of the spindex is the same as the position supplied
+   * @param positionToCheck the position to compare against the spindex's target position
+   * @return true if the supplied position is the same as the spindex's target position, false otherwise
+   */
+  private boolean isSpindexPosition(double positionToCheck) {
+    return spinServo1.getTargetPosition() == positionToCheck && spinServo2.getTargetPosition() == positionToCheck;
   }
 
   /**

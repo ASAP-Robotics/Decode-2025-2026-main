@@ -18,6 +18,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -29,6 +31,7 @@ import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
 import org.firstinspires.ftc.teamcode.hardware.Camera;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
+import org.firstinspires.ftc.teamcode.hardware.MonodirectionalServo;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
@@ -45,7 +48,10 @@ public class MainOpMode extends LinearOpMode {
       flywheelMotor,
       intakeMotor,
       turretRotator;
-  private Servo magServo, feeder, turretHood;
+  private Servo spindexRampServo, turretHood;
+  private Servo rawMagServo1, rawMagServo2;
+  private AnalogInput magServo1Encoder, magServo2Encoder;
+  private MonodirectionalServo magServo1, magServo2;
   private GoBildaPinpointDriver pinpoint;
   private ColorSensor colorSensor;
   private DistanceSensor distanceSensor;
@@ -83,12 +89,20 @@ public class MainOpMode extends LinearOpMode {
     pinpoint.resetPosAndIMU(); // TODO: only calibrate IMU once Auto code configures stuff
 
     turretHood = hardwareMap.get(Servo.class, "turretHood");
-    feeder = hardwareMap.get(Servo.class, "feeder");
-    magServo = hardwareMap.get(Servo.class, "magServo");
+    spindexRampServo = hardwareMap.get(Servo.class, "feeder");
+
+    rawMagServo1 = hardwareMap.get(Servo.class, "magServo1");
+    rawMagServo2 = hardwareMap.get(Servo.class, "magServo2");
+
+    magServo1Encoder = hardwareMap.get(AnalogInput.class, "magServo1Encoder");
+    magServo2Encoder = hardwareMap.get(AnalogInput.class, "magServo2Encoder");
+
+    magServo1 = new MonodirectionalServo(rawMagServo1, magServo1Encoder);
+    magServo2 = new MonodirectionalServo(rawMagServo2, magServo2Encoder);
 
     turret = new Turret(flywheelMotor, turretRotator, turretHood);
     intake = new ActiveIntake(intakeMotor);
-    spindex = new Spindex(magServo, feeder, colorSensor, distanceSensor);
+    spindex = new Spindex(magServo1, magServo2, spindexRampServo, colorSensor, distanceSensor);
     camera =
         new Camera(
             hardwareMap,

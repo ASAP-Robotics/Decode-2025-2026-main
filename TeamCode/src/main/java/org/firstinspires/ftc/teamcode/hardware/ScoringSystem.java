@@ -120,7 +120,6 @@ public class ScoringSystem {
       if (turret.getContainsBall()) { // if there is a ball in the turret
         if (turret.shotTimer.isFinished()) { // if the ball is now out of the turret
           turret.setContainsBall(false); // there is not a ball in the turret
-          spindex.setShootingIndexEmpty(); // spindex slot is now empty
 
           if (isSorted) { // if shooting a sequence
             BallColor[] sequence = ballSequence.getBallColors();
@@ -170,7 +169,7 @@ public class ScoringSystem {
         }
 
         if (spindex.getIsSpindexMoved()
-            && (spindex.getShootIndex()
+            && (spindex.getIndex()
                 != shootingColorIndex)) { // if the spindex position hasn't been set
           spindex.moveSpindexShoot(shootingColorIndex); // move spindex to correct location
 
@@ -321,7 +320,7 @@ public class ScoringSystem {
     if (index == NULL) return false; // if there are no empty slots, return false
 
     return intakeBallIndex(
-        spindex.getIntakeIndex()); // intake ball to index currently at the intake
+        spindex.getColorIndex(BallColor.EMPTY)); // intake ball to first empty index
   }
 
   /**

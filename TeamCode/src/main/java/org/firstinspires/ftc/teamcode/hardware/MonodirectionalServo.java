@@ -114,6 +114,14 @@ public class MonodirectionalServo {
   }
 
   /**
+   * @brief gets the servo's target position in degrees
+   * @return the servo's target position, in degrees
+   */
+  public double getTargetPosition() {
+    return targetPositionDegrees;
+  }
+
+  /**
    * @brief updates the servo's movement. Call every loop
    */
   public void update() {
