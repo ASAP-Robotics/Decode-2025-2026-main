@@ -29,7 +29,7 @@ public class MonodirectionalServo {
   private double deadZoneDegrees; // size of dead zone to prevent jitter (in degrees)
   private double
       toleranceDegrees; // acceptable position error in degrees (if position is within <this> of the
-                        // target, reverse movement to maintain position is OK)
+  // target, reverse movement to maintain position is OK)
   private double slowDownZoneDegrees; // size of the "slow down" zone (in degrees)
   private double targetPositionDegrees; // target position of the servo in degrees
   private double currentPositionDegrees; // last read position of the servo in degrees
