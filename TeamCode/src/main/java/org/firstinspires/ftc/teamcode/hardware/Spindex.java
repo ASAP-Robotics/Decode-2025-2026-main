@@ -286,6 +286,14 @@ public class Spindex {
   }
 
   /**
+   * @brief gets if the spindex is ready to lift a ball into the turret
+   * @return true if the spindex is stationary and in shooting mode, false otherwise
+   */
+  public boolean isReadyToShoot() {
+    return state == SpindexState.SHOOTING && getIsSpindexMoved() && currentIndex != NULL;
+  }
+
+  /**
    * @brief sets the position of the ramp that lifts the ball into the turret
    * @param position the position (degrees) to set the ramp servo to
    */
