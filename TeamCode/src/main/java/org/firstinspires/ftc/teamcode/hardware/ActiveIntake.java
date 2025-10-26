@@ -23,10 +23,11 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class ActiveIntake {
   private final DcMotorEx intake_intakeMotor;
+  private boolean idling = true;
   private boolean intaking = false;
   private boolean ejecting = false;
   private boolean ballIn = false;
-  public org.firstinspires.ftc.teamcode.utils.SimpleTimer intakeTimer = new SimpleTimer(1);
+  public org.firstinspires.ftc.teamcode.utils.SimpleTimer timer = new SimpleTimer(1);
 
   public ActiveIntake(DcMotorEx intakeMotor) {
     intake_intakeMotor = intakeMotor;
@@ -41,6 +42,7 @@ public class ActiveIntake {
     intake_intakeMotor.setPower(0);
     intaking = false;
     ejecting = false;
+    idling = false;
   }
 
   /**
@@ -49,6 +51,17 @@ public class ActiveIntake {
   public void intake() {
     intake_intakeMotor.setPower(1);
     intaking = true;
+    idling = false;
+  }
+
+  /**
+   * @brief spins intake up to half speed to hold balls in the mag
+   */
+  public void intakeIdle() {
+    intake_intakeMotor.setPower(0.5);
+    intaking = true;
+    ejecting = false;
+    idling = true;
   }
 
   /**
@@ -57,14 +70,25 @@ public class ActiveIntake {
   public void eject() {
     intake_intakeMotor.setPower(-1);
     ejecting = true;
+    idling = false;
+  }
+
+  /**
+   * @brief spins intake up in reverse to half speed to keep balls out of the mag
+   */
+  public void ejectIdle() {
+    intake_intakeMotor.setPower(-0.5);
+    ejecting = true;
+    intaking = false;
+    idling = true;
   }
 
   /**
    * @brief returns if the intake is in use (busy)
-   * @return true if intake is spinning, false if intake is stopped
+   * @return true if intake is spinning at full speed, false if intake is stopped or idling
    */
   public boolean isBusy() {
-    return intaking || ejecting;
+    return (intaking || ejecting) && !idling;
   }
 
   /**
@@ -81,6 +105,14 @@ public class ActiveIntake {
    */
   public boolean isEjecting() {
     return ejecting;
+  }
+
+  /**
+   * @brief returns if the intake is idling (spinning at half speed)
+   * @return true if the intake is idling, false if the intake is spinning at full speed or stopped
+   */
+  public boolean isIdling() {
+    return idling;
   }
 
   /**
