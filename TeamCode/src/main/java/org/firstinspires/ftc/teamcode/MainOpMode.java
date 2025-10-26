@@ -110,6 +110,7 @@ public class MainOpMode extends LinearOpMode {
             AllianceColor.RED); // placeholder TODO: update
 
     mag = new ScoringSystem(intake, turret, spindex, camera, wantedSequence, telemetry);
+    mag.init(false); // initialize scoring systems | after auto, mag is empty
     mag.setTargetDistance(100); // PLACEHOLDER
 
     wheelBase = new MecanumWheelBase(frontLeft, frontRight, backLeft, backRight);
