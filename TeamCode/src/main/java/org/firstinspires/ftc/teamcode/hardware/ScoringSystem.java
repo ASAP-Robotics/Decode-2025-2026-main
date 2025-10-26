@@ -289,9 +289,9 @@ public class ScoringSystem {
           break;
       }
 
-    } else if (spindex.getState() == Spindex.SpindexState.IDLE &&
-        spindex.getIsSpindexMoved() &&
-        intake.isIntaking()) {
+    } else if (spindex.getState() == Spindex.SpindexState.IDLE
+        && spindex.getIsSpindexMoved()
+        && intake.isIntaking()) {
       // ^ if the spindex is stationary at an idle position and the intake is intaking
       intake.eject(); // eject any balls in the intake
       intake.timer.start(); // start the timer for ejecting the ball
@@ -442,7 +442,7 @@ public class ScoringSystem {
   /**
    * @brief sets the intake to eject at full speed (for some amount of time)
    * @note intended for use in emergency game situations (when something has malfunctioned); not
-   * intended to be used normally or regularly
+   *     intended to be used normally or regularly
    */
   public void emergencyEject() {
     intake.eject();
