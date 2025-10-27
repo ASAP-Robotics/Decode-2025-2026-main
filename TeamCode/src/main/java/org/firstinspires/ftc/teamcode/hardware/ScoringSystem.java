@@ -107,7 +107,7 @@ public class ScoringSystem {
   private void updateAiming() {
     turret.setTargetDistance(camera.getNavigationAprilTagDistance());
     turret.setHorizontalAngle(
-        turret.getTargetHorizontalAngleDegrees() + camera.getNavigationAprilTagAngleX());
+        turret.getTargetHorizontalAngleDegrees() + camera.getNavigationAprilTagAngleX()); // TODO: update
   }
 
   /**
@@ -351,6 +351,7 @@ public class ScoringSystem {
     for (int i = 0; i < spindexColor.length; i++) {
       if (spindexColor[i] == BallColor.EMPTY) index = i;
     }
+    // TODO: update logic
 
     if (index == NULL) return false; // if there are no empty slots, return false
 
@@ -366,7 +367,7 @@ public class ScoringSystem {
    */
   private boolean intakeBallIndex(int index) {
     if ((spindex.getIndexColor(index) != BallColor.EMPTY) || intake.isBusy())
-      return false; // return false if given index contains a ball, or intake is busy
+      return false; // return false if given index contains a ball, or intake is busy TODO: update
 
     spindex.moveSpindexIntake(index); // move spindex to correct position
     intake.intake(); // start the intake spinning
@@ -391,7 +392,7 @@ public class ScoringSystem {
    *     exactly one green and two purple balls, the specified sequence will be shot
    */
   public boolean shootMag(BallSequence sequence) {
-    if (shootSequence(ballSequence)) return true; // try shooting the last shot sequence
+    if (shootSequence(sequence)) return true; // try shooting the last shot sequence
     int fullSlots = 0;
     for (BallColor color : spindex.getSpindexColor()) { // for each spindex slot
       if (color != BallColor.EMPTY) fullSlots++; // if it isn't empty

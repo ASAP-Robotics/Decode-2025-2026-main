@@ -115,7 +115,7 @@ public class Turret extends Flywheel {
    */
   private double turretDegreesToMotorDegrees(double turretDegrees) {
     double MOTOR_GEAR_TEETH = 24; // number of teeth on the gear attached to the motor
-    double TURRET_GEAR_TEETH = 120; // number of teeth on the gear attached to the turret
+    double TURRET_GEAR_TEETH = 121; // number of teeth on the gear attached to the turret
     return turretDegrees * (TURRET_GEAR_TEETH / MOTOR_GEAR_TEETH);
   }
 }
