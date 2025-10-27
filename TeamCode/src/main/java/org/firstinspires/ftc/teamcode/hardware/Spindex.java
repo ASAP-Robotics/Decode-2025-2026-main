@@ -424,7 +424,7 @@ public class Spindex {
       intakeColor = BallColor.PURPLE; // intake has a purple ball in it
     } else { // color can't be determined
       double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-      if (distance <= 2.0) { // if a ball is in the intake
+      if (distance <= 1.0) { // if a ball is in the intake
         intakeColor = BallColor.UNKNOWN; // intake has an unknown ball in it
       }
     }
