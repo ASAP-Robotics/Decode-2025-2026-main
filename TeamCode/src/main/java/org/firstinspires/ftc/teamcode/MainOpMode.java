@@ -31,7 +31,7 @@ import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
 import org.firstinspires.ftc.teamcode.hardware.Camera;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
-import org.firstinspires.ftc.teamcode.hardware.MonodirectionalDualServo;
+import org.firstinspires.ftc.teamcode.hardware.servos.MonodirectionalDualServo;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
