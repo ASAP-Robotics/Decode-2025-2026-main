@@ -263,8 +263,7 @@ public class Flywheel {
    */
   private void startMotor() {
     double rpm = rpmForDistance(targetDistance);
-    double ticksPerRev = flywheel.getMotorType().getTicksPerRev();
-    double ticksPerSec = (rpm / 60.0) * ticksPerRev;
+    double ticksPerSec = (rpm / 60.0) * motorTicksPerRev;
     targetSpeed = rpm; // store target speed
     flywheel.setVelocity(ticksPerSec); // built-in velocity PID
   }

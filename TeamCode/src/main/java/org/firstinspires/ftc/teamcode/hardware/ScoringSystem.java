@@ -231,12 +231,10 @@ public class ScoringSystem {
           }
         }
 
-      } else if (intake.isEjecting()) {
-        if (spindex.getIntakeColor() == BallColor.EMPTY) {
-          if (intake.timer.isFinished()) {
-            intake.intake(); // start the intake
-          }
-        }
+      } else if (intake.isEjecting() &&
+          spindex.getIntakeColor() == BallColor.EMPTY &&
+          intake.timer.isFinished()) {
+        intake.intake(); // start the intake
       }
 
       switch (fillingMode) {
@@ -347,15 +345,7 @@ public class ScoringSystem {
    * @return true if a ball was taken in, false if the mag was full or intake is busy
    */
   public boolean intakeBall() {
-    int index = NULL;
-    BallColor[] spindexColor = spindex.getSpindexColor();
-    for (int i = 0; i < spindexColor.length; i++) {
-      if (spindexColor[i] == BallColor.EMPTY) index = i;
-    }
-    // TODO: update logic
-
-    if (index == NULL) return false; // if there are no empty slots, return false
-
+    // intakeBallIndex() will handle returning false if mag is full
     return intakeBallIndex(
         spindex.getColorIndex(BallColor.EMPTY)); // intake ball to first empty index
   }
@@ -367,8 +357,10 @@ public class ScoringSystem {
    *     is busy
    */
   private boolean intakeBallIndex(int index) {
-    if ((spindex.getIndexColor(index) != BallColor.EMPTY) || intake.isBusy())
-      return false; // return false if given index contains a ball, or intake is busy TODO: update
+    // return false if given index contains a ball, or intake is busy and not idling
+    // spindex will return BallColor.UNKNOWN on invalid indexes (not BallColor.EMPTY)
+    if ((spindex.getIndexColor(index) != BallColor.EMPTY) ||
+        (intake.isBusy() && !intake.isIdling())) return false;
 
     spindex.moveSpindexIntake(index); // move spindex to correct position
     intake.intake(); // start the intake spinning
@@ -394,11 +386,8 @@ public class ScoringSystem {
    */
   public boolean shootMag(BallSequence sequence) {
     if (shootSequence(sequence)) return true; // try shooting the last shot sequence
-    int fullSlots = 0;
-    for (BallColor color : spindex.getSpindexColor()) { // for each spindex slot
-      if (color != BallColor.EMPTY) fullSlots++; // if it isn't empty
-    }
-    if (fullSlots == 0) return false; // if mag is empty, return false
+    // if mag is empty, return false
+    if (spindex.getColorIndex(BallColor.EMPTY) == NULL) return false;
     emptyingMag = true; // the mag is being emptied
     emptyingMode = SequenceMode.UNSORTED; // shooting in any order
     ballSequence = sequence;

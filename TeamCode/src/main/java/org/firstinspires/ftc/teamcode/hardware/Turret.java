@@ -58,17 +58,6 @@ public class Turret extends Flywheel {
   }
 
   /**
-   * @brief sets if the turret is enabled
-   * @param isEnabled if the turret will be enabled (true = enabled, false = not enabled)
-   * @return the previous enabled / disabled state of the turret
-   */
-  @Override
-  public boolean setEnabled(boolean isEnabled) {
-    // rotator.setPower(isEnabled ? 1 : 0); // 0% power if disabled, 100% power if enabled
-    return super.setEnabled(isEnabled);
-  }
-
-  /**
    * @brief sets the side-to-side angle of the turret in degrees
    * @param degrees the number of degrees from straight to move the turret
    * @return the old horizontal angle of the turret
