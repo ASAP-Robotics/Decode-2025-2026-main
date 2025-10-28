@@ -119,34 +119,32 @@ public class ScoringSystem {
     if (emptyingMag) { // if we are emptying the mag (rapid fire)
       boolean isSorted = (emptyingMode == SequenceMode.SORTED); // if we are shooting a sequence
 
-      if (turret.containsBall()) { // if there is a ball in the turret
-        if (turret.ballLeft()) { // if the ball is now out of the turret
-          if (isSorted) { // if shooting a sequence
-            BallColor[] sequence = ballSequence.getBallColors();
-            if (sequenceIndex < (sequence.length - 1)) { // if the sequence isn't done
-              sequenceIndex++; // move on to the next ball in the sequence
+      if (turret.ballLeft()) { // if there was a ball in the turret, that is now out of the turret
+        if (isSorted) { // if shooting a sequence
+          BallColor[] sequence = ballSequence.getBallColors();
+          if (sequenceIndex < (sequence.length - 1)) { // if the sequence isn't done
+            sequenceIndex++; // move on to the next ball in the sequence
 
-            } else { // if the sequence is done
-              emptyingMag = false; // we are no longer shooting a sequence
-              turret.idle(); // let flywheel slow down to idle speed
-              spindex.moveSpindexIdle(spindex.getIndex()); // idle the spindex
-            }
+          } else { // if the sequence is done
+            emptyingMag = false; // we are no longer shooting a sequence
+            turret.idle(); // let flywheel slow down to idle speed
+            spindex.moveSpindexIdle(spindex.getIndex()); // idle the spindex
+          }
 
-          } else { // if emptying the mag in no particular order
-            int numBallsLeft = 0;
-            for (BallColor color : spindex.getSpindexColor()) {
-              if (color != BallColor.EMPTY) numBallsLeft++;
-            }
+        } else { // if emptying the mag in no particular order
+          int numBallsLeft = 0;
+          for (BallColor color : spindex.getSpindexColor()) {
+            if (color != BallColor.EMPTY) numBallsLeft++;
+          }
 
-            if (numBallsLeft == 0) { // if the mag is empty
-              emptyingMag = false; // we are no longer emptying the mag
-              turret.idle(); // let flywheel slow down to idle speed
-              spindex.moveSpindexIdle(spindex.getIndex()); // idle the spindex
-            } // if (numBallsLeft == 0)
-          } // else ( if (isSorted) )
-        } // if (turret.shotTimer.isFinished())
+          if (numBallsLeft == 0) { // if the mag is empty
+            emptyingMag = false; // we are no longer emptying the mag
+            turret.idle(); // let flywheel slow down to idle speed
+            spindex.moveSpindexIdle(spindex.getIndex()); // idle the spindex
+          } // if (numBallsLeft == 0)
+        } // else ( if (isSorted) )
 
-      } else { // if there isn't a ball in the turret
+      } else if (!turret.containsBall()) { // if there isn't a ball in the turret
         int shootingColorIndex = NULL;
 
         if (isSorted) { // if shooting a sequence
