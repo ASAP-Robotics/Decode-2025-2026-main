@@ -62,7 +62,8 @@ public class Spindex {
     }
   }
 
-  private final MonodirectionalDualServo spinServo; // the two servos that rotates the divider in the mag
+  private final MonodirectionalDualServo
+      spinServo; // the two servos that rotates the divider in the mag
   private final Servo rampServo; // the servo that lifts balls into the shooter turret
   private final ColorSensor colorSensor; // the color sensor at the intake
   private final DistanceSensor
