@@ -16,31 +16,23 @@
 
 package org.firstinspires.ftc.teamcode.hardware;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class Flywheel {
   private final DcMotorEx flywheel;
-  private static final double G = 9.81;
-  private final double motorTicksPerRev; // /< ticks per revolution of flywheel motor
-  protected boolean isEnabled = false; // /< if the flywheel is enabled
-  protected boolean isActive = true; // /< if the flywheel is active (as opposed to idling)
-  private double idleSpeed; // /< the speed (RPM) of the flywheel when idle
-  private double targetSpeed = 0; // /< the speed (RPM) the flywheel is targeting
-  private double currentSpeed = 0; // /< the latest speed (RPM) of the flywheel
-  private double targetDistance = 0; // /< the distance (inches) to the target
-  private boolean containsBall = false; // /< if the flywheel has a ball in it that it is shooting
-  public org.firstinspires.ftc.teamcode.utils.SimpleTimer
-      shotTimer; // /< timer to keep flywheel on while shooting a ball
-
-  // ---- set these to match your robot ----
-  private static final double ANGLE_DEG = 45.0; // shooter pitch
-  private static final double DELTA_H_IN = 24.0; // goalHeight - releaseHeight (inches)
-  private static final double WHEEL_DIAM_IN = 3.78; // flywheel diameter (inches)
-
-  // ---- friction/slip lumped into one factor (0<eff<=1). Start ~0.90 and tune. ----
-  private static final double EFFICIENCY = 0.90;
+  private final double motorTicksPerRev; // ticks per revolution of flywheel motor
+  protected boolean isEnabled = false; // if the flywheel is enabled
+  protected boolean isActive = true; // if the flywheel is active (as opposed to idling)
+  private double idleSpeed; // the speed (RPM) of the flywheel when idle
+  private double targetSpeed = 0; // the speed (RPM) the flywheel is targeting
+  private double currentSpeed = 0; // the latest speed (RPM) of the flywheel
+  private double targetDistance = 0; // the distance (inches) to the target
+  private boolean containsBall = false; // if the flywheel has a ball in it that it is shooting
+  // timer to keep flywheel on while shooting a ball
+  private final org.firstinspires.ftc.teamcode.utils.SimpleTimer shotTimer;
 
   // these arrays constitute a lookup table for finding the correct flywheel RPM for a distance
   // the distance values need to be in ascending order, or things will break
@@ -75,9 +67,12 @@ public class Flywheel {
    */
   public Flywheel(DcMotorEx motor, double idleSpeed, double shotTimeSeconds) {
     this.flywheel = motor;
-    this.flywheel.setZeroPowerBehavior(
-        DcMotorEx.ZeroPowerBehavior.FLOAT); // spin freely if zero power (motor stoped)
-    this.flywheel.setDirection(DcMotorEx.Direction.FORWARD);
+    // set motor to use speed-based control
+    this.flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    // set motor to spin freely if set to 0% power
+    this.flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+    // set motor to spin forwards
+    this.flywheel.setDirection(DcMotor.Direction.FORWARD);
     motorTicksPerRev = this.flywheel.getMotorType().getTicksPerRev(); // get ticks per rev
     this.idleSpeed = idleSpeed; // set the speed of the flywheel at idle
     shotTimer = new SimpleTimer(shotTimeSeconds);
@@ -95,19 +90,34 @@ public class Flywheel {
   /**
    * @brief returns if a ball is in the flywheel
    * @return true if a ball is in the flywheel, false if the flywheel is empty
-   * @note this is basically just a wrapper around a variable that isn't used in any core methods
+   * @note no actual detection of if the flywheel contains a ball is done
    */
-  public boolean getContainsBall() {
+  public boolean containsBall() {
     return containsBall;
   }
 
   /**
-   * @brief sets if a ball is in the flywheel
-   * @param containsBall true if a ball is in the flywheel, false if the flywheel is empty
-   * @note this is basically just a wrapper around a variable that isn't used in any core methods
+   * @brief returns if the ball has left the flywheel since the last check
+   * @return true if the turret contained a ball, and the shot timer finished since last call
+   * @note no actual detection of if the flywheel contains a ball is done
    */
-  public void setContainsBall(boolean containsBall) {
-    this.containsBall = containsBall;
+  public boolean ballLeft() {
+    if (containsBall && shotTimer.isFinished()) {
+      containsBall = false;
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * @brief sets that a ball is in the flywheel
+   * @note no actual detection of if the flywheel contains a ball is done
+   */
+  public void setContainsBall() {
+    // start shot timer if the turret now contains a ball
+    if (!containsBall) shotTimer.start();
+    containsBall = true;
   }
 
   /**
@@ -118,12 +128,9 @@ public class Flywheel {
   public boolean setEnabled(boolean isEnabled) {
     boolean toReturn = this.isEnabled; // get the old enabled state
     this.isEnabled = isEnabled; // set the new enabled state
-    this.flywheel.setZeroPowerBehavior(
-        isEnabled
-            ? DcMotorEx.ZeroPowerBehavior.FLOAT
-            : DcMotorEx.ZeroPowerBehavior
-                .BRAKE); // set behavior if zero power (motor stoped); if enabled, spin freely, if
-    // disabled, brake
+    // set motor mode; if enabled, use speed-based control, if disabled, use power-based control
+    flywheel.setMode(
+        isEnabled ? DcMotor.RunMode.RUN_USING_ENCODER : DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     update(); // apply any changes
     return toReturn; // return the old enabled state
   }
@@ -233,14 +240,16 @@ public class Flywheel {
         this.flywheel.getVelocity(); // get the speed of the motor in ticks per second
     currentSpeed = (ticksPerSec * 60.0) / motorTicksPerRev; // convert to RPM, store
 
-    if (isEnabled) {
-      if (isActive) {
+    if (isEnabled) { // if flywheel is enabled
+      if (isActive) { // if flywheel is active
         startMotor(); // set the motor to the correct speed
-      } else {
-        idleMotor(); // set the motor to idling speeds
+
+      } else { // if flywheel is idle
+        idleMotor(); // set the motor to idle speed
       }
-    } else {
-      stopMotor(); // stop the flywheel
+
+    } else { // if flywheel is disabled
+      stopMotor(); // set the motor to 0% power
     }
   }
 
@@ -249,10 +258,13 @@ public class Flywheel {
    * @note use setIdleSpeed() to set the idle speed
    */
   private void idleMotor() {
-    if (currentSpeed <= idleSpeed) {
+    if (currentSpeed <= idleSpeed) { // if flywheel is going too slow
       double ticksPerSec = (idleSpeed / 60.0) * motorTicksPerRev;
+      flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
       flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
-    } else {
+
+    } else { // if flywheel is going too fast
+      flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
       flywheel.setPower(0); // spin freely
     }
   }
@@ -263,17 +275,25 @@ public class Flywheel {
    */
   private void startMotor() {
     double rpm = rpmForDistance(targetDistance);
-    double ticksPerRev = flywheel.getMotorType().getTicksPerRev();
-    double ticksPerSec = (rpm / 60.0) * ticksPerRev;
+    double ticksPerSec = (rpm / 60.0) * motorTicksPerRev;
     targetSpeed = rpm; // store target speed
-    flywheel.setVelocity(ticksPerSec); // built-in velocity PID
+
+    if (currentSpeed <= rpm) { // if flywheel is going too slow
+      flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
+      flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
+
+    } else { // if flywheel is going too fast
+      flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
+      flywheel.setPower(0); // spin freely
+    }
   }
 
   /**
-   * @brief stops the flywheel
+   * @brief stops powered movement of the flywheel
    */
   private void stopMotor() {
-    flywheel.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE); // brake if zero power
+    flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
+    flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT); // brake if zero power
     flywheel.setPower(0);
   }
 
@@ -284,25 +304,6 @@ public class Flywheel {
    * @note Core math: distance (in) → wheel RPM, including efficiency loss
    */
   private double rpmForDistance(double Rin) {
-    /*
-    // convert to meters
-    double Rm = Rin * 0.0254;
-    double deltaHm = DELTA_H_IN * 0.0254;
-    double wheelDiamM = WHEEL_DIAM_IN * 0.0254;
-
-    double theta = Math.toRadians(ANGLE_DEG);
-    double cos = Math.cos(theta), tan = Math.tan(theta);
-    double denom = 2.0 * cos * cos * (Rm * tan - deltaHm);
-    if (denom <= 0) throw new IllegalArgumentException("Unreachable shot at this distance.");
-
-    double vExit = Math.sqrt(G * Rm * Rm / denom); // ideal exit speed (m/s)
-
-    // ---- Apply efficiency: wheel surface speed must be higher than exit speed. ----
-    double wheelSurfaceSpeed = vExit / EFFICIENCY;
-
-    return (60.0 * wheelSurfaceSpeed) / (Math.PI * wheelDiamM); // RPM
-     */
-
     return getRPMLookup(Rin);
   }
 

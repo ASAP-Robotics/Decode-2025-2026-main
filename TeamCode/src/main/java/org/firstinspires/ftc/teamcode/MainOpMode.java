@@ -18,6 +18,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -32,12 +34,13 @@ import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
+import org.firstinspires.ftc.teamcode.hardware.servos.EncoderServo;
+import org.firstinspires.ftc.teamcode.hardware.servos.MonodirectionalDualServo;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 @TeleOp(name = "Main TeliOp", group = "Drive")
 public class MainOpMode extends LinearOpMode {
-  // stuff was here
   private DcMotorEx frontLeft,
       frontRight,
       backLeft,
@@ -45,7 +48,11 @@ public class MainOpMode extends LinearOpMode {
       flywheelMotor,
       intakeMotor,
       turretRotator;
-  private Servo magServo, feeder, turretHood;
+  private Servo rawRampServo, turretHood;
+  private CRServo rawMagServo1, rawMagServo2;
+  private AnalogInput magServoEncoder, rampServoEncoder;
+  private MonodirectionalDualServo magServo;
+  private EncoderServo rampServo;
   private GoBildaPinpointDriver pinpoint;
   private ColorSensor colorSensor;
   private DistanceSensor distanceSensor;
@@ -83,12 +90,20 @@ public class MainOpMode extends LinearOpMode {
     pinpoint.resetPosAndIMU(); // TODO: only calibrate IMU once Auto code configures stuff
 
     turretHood = hardwareMap.get(Servo.class, "turretHood");
-    feeder = hardwareMap.get(Servo.class, "feeder");
-    magServo = hardwareMap.get(Servo.class, "magServo");
+    rawRampServo = hardwareMap.get(Servo.class, "feeder");
+
+    rawMagServo1 = hardwareMap.get(CRServo.class, "magServo1");
+    rawMagServo2 = hardwareMap.get(CRServo.class, "magServo2");
+
+    magServoEncoder = hardwareMap.get(AnalogInput.class, "magServoEncoder");
+    rampServoEncoder = hardwareMap.get(AnalogInput.class, "rampServoEncoder");
+
+    magServo = new MonodirectionalDualServo(rawMagServo1, rawMagServo2, magServoEncoder);
+    rampServo = new EncoderServo(rawRampServo, rampServoEncoder);
 
     turret = new Turret(flywheelMotor, turretRotator, turretHood);
     intake = new ActiveIntake(intakeMotor);
-    spindex = new Spindex(magServo, feeder, colorSensor, distanceSensor);
+    spindex = new Spindex(magServo, rampServo, colorSensor, distanceSensor);
     camera =
         new Camera(
             hardwareMap,
@@ -97,6 +112,7 @@ public class MainOpMode extends LinearOpMode {
             AllianceColor.RED); // placeholder TODO: update
 
     mag = new ScoringSystem(intake, turret, spindex, camera, wantedSequence, telemetry);
+    mag.init(false); // initialize scoring systems | after auto, mag is empty
     mag.setTargetDistance(100); // PLACEHOLDER
 
     wheelBase = new MecanumWheelBase(frontLeft, frontRight, backLeft, backRight);

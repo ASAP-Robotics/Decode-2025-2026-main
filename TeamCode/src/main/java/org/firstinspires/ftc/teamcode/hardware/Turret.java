@@ -20,8 +20,14 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Turret extends Flywheel {
+  // number of teeth on the gear attached to the turret
+  public static final double TURRET_GEAR_TEETH = 121;
+  // number of teeth on the gear attached to the motor
+  private static final double MOTOR_GEAR_TEETH = 24;
+
   private final DcMotorEx rotator;
   private final Servo hoodServo;
+  private final double ticksPerDegree;
   private double targetHorizontalAngleDegrees; // target angle for side-to-side turret movement
   private double targetVerticalAngleDegrees; // target angle for up-and-down turret movement
 
@@ -33,6 +39,7 @@ public class Turret extends Flywheel {
     this.rotator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
     this.rotator.setTargetPosition(0); // placeholder
     this.rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+    this.ticksPerDegree = this.rotator.getMotorType().getTicksPerRev() / 360;
   }
 
   public Turret(
@@ -46,26 +53,15 @@ public class Turret extends Flywheel {
     this.hoodServo = hoodServo;
     this.rotator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
     this.rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+    ticksPerDegree = this.rotator.getMotorType().getTicksPerRev() / 360;
   }
 
   @Override
   public void update() {
     super.update();
     hoodServo.setPosition(targetVerticalAngleDegrees); // this might need updating
-    double ticksPerDegree = rotator.getMotorType().getTicksPerRev() / 360;
     double motorDegrees = turretDegreesToMotorDegrees(targetHorizontalAngleDegrees);
     rotator.setTargetPosition((int) (motorDegrees * ticksPerDegree));
-  }
-
-  /**
-   * @brief sets if the turret is enabled
-   * @param isEnabled if the turret will be enabled (true = enabled, false = not enabled)
-   * @return the previous enabled / disabled state of the turret
-   */
-  @Override
-  public boolean setEnabled(boolean isEnabled) {
-    // rotator.setPower(isEnabled ? 1 : 0); // 0% power if disabled, 100% power if enabled
-    return super.setEnabled(isEnabled);
   }
 
   /**
@@ -86,6 +82,16 @@ public class Turret extends Flywheel {
    */
   public double getTargetHorizontalAngleDegrees() {
     return targetHorizontalAngleDegrees;
+  }
+
+  /**
+   * @brief returns the current side-to-side angle of the turret
+   * @return the current horizontal angle of the turret
+   */
+  public double getHorizontalAngleDegrees() {
+    double ticks = rotator.getCurrentPosition(); // get motor position in ticks
+    double motorDegrees = ticks / ticksPerDegree; // convert motor position to degrees
+    return motorDegreesToTurretDegrees(motorDegrees); // convert motor position to turret position
   }
 
   /**
@@ -114,8 +120,16 @@ public class Turret extends Flywheel {
    * @return the number of degrees the motor should turn to get the turret to move correctly
    */
   private double turretDegreesToMotorDegrees(double turretDegrees) {
-    double MOTOR_GEAR_TEETH = 24; // number of teeth on the gear attached to the motor
-    double TURRET_GEAR_TEETH = 120; // number of teeth on the gear attached to the turret
     return turretDegrees * (TURRET_GEAR_TEETH / MOTOR_GEAR_TEETH);
+  }
+
+  /**
+   * @brief finds the number of degrees the turret needs to turn for the motor to turn some amount
+   * @param motorDegrees the number of degrees the motor should move by
+   * @return the number of degrees the turret should turn for the motor to move by the supplied
+   *     amount
+   */
+  private double motorDegreesToTurretDegrees(double motorDegrees) {
+    return motorDegrees / (TURRET_GEAR_TEETH / MOTOR_GEAR_TEETH);
   }
 }
