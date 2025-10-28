@@ -40,7 +40,6 @@ import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 @TeleOp(name = "Main TeliOp", group = "Drive")
 public class MainOpMode extends LinearOpMode {
-  // stuff was here
   private DcMotorEx frontLeft,
       frontRight,
       backLeft,

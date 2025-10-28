@@ -16,6 +16,7 @@
 
 package org.firstinspires.ftc.teamcode.hardware;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
@@ -75,9 +76,12 @@ public class Flywheel {
    */
   public Flywheel(DcMotorEx motor, double idleSpeed, double shotTimeSeconds) {
     this.flywheel = motor;
-    this.flywheel.setZeroPowerBehavior(
-        DcMotorEx.ZeroPowerBehavior.FLOAT); // spin freely if zero power (motor stoped)
-    this.flywheel.setDirection(DcMotorEx.Direction.FORWARD);
+    // set motor to use speed-based control
+    this.flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    // set motor to spin freely if set to 0% power
+    this.flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+    // set motor to spin forwards
+    this.flywheel.setDirection(DcMotor.Direction.FORWARD);
     motorTicksPerRev = this.flywheel.getMotorType().getTicksPerRev(); // get ticks per rev
     this.idleSpeed = idleSpeed; // set the speed of the flywheel at idle
     shotTimer = new SimpleTimer(shotTimeSeconds);
@@ -118,12 +122,9 @@ public class Flywheel {
   public boolean setEnabled(boolean isEnabled) {
     boolean toReturn = this.isEnabled; // get the old enabled state
     this.isEnabled = isEnabled; // set the new enabled state
-    this.flywheel.setZeroPowerBehavior(
-        isEnabled
-            ? DcMotorEx.ZeroPowerBehavior.FLOAT
-            : DcMotorEx.ZeroPowerBehavior
-                .BRAKE); // set behavior if zero power (motor stoped); if enabled, spin freely, if
-    // disabled, brake
+    // set motor mode; if enabled, use speed-based control, if disabled, use power-based control
+    flywheel.setMode(
+        isEnabled ? DcMotor.RunMode.RUN_USING_ENCODER : DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     update(); // apply any changes
     return toReturn; // return the old enabled state
   }
@@ -233,14 +234,16 @@ public class Flywheel {
         this.flywheel.getVelocity(); // get the speed of the motor in ticks per second
     currentSpeed = (ticksPerSec * 60.0) / motorTicksPerRev; // convert to RPM, store
 
-    if (isEnabled) {
-      if (isActive) {
+    if (isEnabled) { // if flywheel is enabled
+      if (isActive) { // if flywheel is active
         startMotor(); // set the motor to the correct speed
-      } else {
-        idleMotor(); // set the motor to idling speeds
+
+      } else { // if flywheel is idle
+        idleMotor(); // set the motor to idle speed
       }
-    } else {
-      stopMotor(); // stop the flywheel
+
+    } else { // if flywheel is disabled
+      stopMotor(); // set the motor to 0% power
     }
   }
 
@@ -249,10 +252,13 @@ public class Flywheel {
    * @note use setIdleSpeed() to set the idle speed
    */
   private void idleMotor() {
-    if (currentSpeed <= idleSpeed) {
+    if (currentSpeed <= idleSpeed) { // if flywheel is going too slow
       double ticksPerSec = (idleSpeed / 60.0) * motorTicksPerRev;
+      flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
       flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
-    } else {
+
+    } else { // if flywheel is going too fast
+      flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
       flywheel.setPower(0); // spin freely
     }
   }
@@ -265,14 +271,23 @@ public class Flywheel {
     double rpm = rpmForDistance(targetDistance);
     double ticksPerSec = (rpm / 60.0) * motorTicksPerRev;
     targetSpeed = rpm; // store target speed
-    flywheel.setVelocity(ticksPerSec); // built-in velocity PID
+
+    if (currentSpeed <= rpm) { // if flywheel is going too slow
+      flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
+      flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
+
+    } else { // if flywheel is going too fast
+      flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
+      flywheel.setPower(0); // spin freely
+    }
   }
 
   /**
-   * @brief stops the flywheel
+   * @brief stops powered movement of the flywheel
    */
   private void stopMotor() {
-    flywheel.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE); // brake if zero power
+    flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
+    flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT); // brake if zero power
     flywheel.setPower(0);
   }
 
