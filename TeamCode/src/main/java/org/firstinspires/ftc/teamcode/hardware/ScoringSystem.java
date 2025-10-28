@@ -163,14 +163,14 @@ public class ScoringSystem {
               break; // we don't need to keep looking
             }
           }
+        }
 
-          if (shootingColorIndex == NULL) { // if the mag is empty
-            // this should never happen, but just in case
-            emptyingMag = false; // we are no longer emptying the mag
-            turret.idle(); // let flywheel slow down to idle speed
-            spindex.moveSpindexIdle(spindex.getIndex()); // idle the spindex
-            return; // we don't need to finish the rest of the logic
-          }
+        if (shootingColorIndex == NULL) { // if the mag is empty
+          // this should never happen, but just in case
+          emptyingMag = false; // we are no longer emptying the mag
+          turret.idle(); // let flywheel slow down to idle speed
+          spindex.moveSpindexIdle(spindex.getIndex()); // idle the spindex
+          return; // we don't need to finish the rest of the logic
         }
 
         if (spindex.getIndex() != shootingColorIndex) { // if the spindex position hasn't been set
