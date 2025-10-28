@@ -231,9 +231,9 @@ public class ScoringSystem {
           }
         }
 
-      } else if (intake.isEjecting() &&
-          spindex.getIntakeColor() == BallColor.EMPTY &&
-          intake.timer.isFinished()) {
+      } else if (intake.isEjecting()
+          && spindex.getIntakeColor() == BallColor.EMPTY
+          && intake.timer.isFinished()) {
         intake.intake(); // start the intake
       }
 
@@ -359,8 +359,8 @@ public class ScoringSystem {
   private boolean intakeBallIndex(int index) {
     // return false if given index contains a ball, or intake is busy and not idling
     // spindex will return BallColor.UNKNOWN on invalid indexes (not BallColor.EMPTY)
-    if ((spindex.getIndexColor(index) != BallColor.EMPTY) ||
-        (intake.isBusy() && !intake.isIdling())) return false;
+    if ((spindex.getIndexColor(index) != BallColor.EMPTY)
+        || (intake.isBusy() && !intake.isIdling())) return false;
 
     spindex.moveSpindexIntake(index); // move spindex to correct position
     intake.intake(); // start the intake spinning
