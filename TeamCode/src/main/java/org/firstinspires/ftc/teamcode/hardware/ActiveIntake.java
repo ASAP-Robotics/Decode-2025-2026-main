@@ -51,6 +51,7 @@ public class ActiveIntake {
   public void intake() {
     intake_intakeMotor.setPower(1);
     intaking = true;
+    ejecting = false;
     idling = false;
   }
 
@@ -70,6 +71,7 @@ public class ActiveIntake {
   public void eject() {
     intake_intakeMotor.setPower(-1);
     ejecting = true;
+    intaking = false;
     idling = false;
   }
 
