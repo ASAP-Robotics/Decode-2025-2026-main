@@ -21,13 +21,11 @@ import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 import android.graphics.Color;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.hardware.servos.EncoderServo;
 import org.firstinspires.ftc.teamcode.hardware.servos.MonodirectionalDualServo;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
-import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class Spindex {
   public enum SpindexState {
@@ -78,8 +76,8 @@ public class Spindex {
     new SpindexSlot(0.33, 0.66, 0.00, 0.495), // slot 1 | TODO: tune
     new SpindexSlot(0.66, 0.00, 0.33, 0.835) // slot 2 | TODO: tune
   };
-  //private final org.firstinspires.ftc.teamcode.utils.SimpleTimer rampServoTimer =
-      //new SimpleTimer(0.5); // timer for lifting ball into flywheel
+  // private final org.firstinspires.ftc.teamcode.utils.SimpleTimer rampServoTimer =
+  // new SimpleTimer(0.5); // timer for lifting ball into flywheel
 
   private SpindexState state; // the current state of the spindex
   private int currentIndex = NULL; // the current index the spindex is at, dependant on the state

@@ -42,7 +42,7 @@ public class EncoderServo {
    * @param servo the servo to control
    * @param encoder the encoder of the servo being controlled
    * @param toleranceDegrees the amount the angle read can differ from the target angle and the
-   *                         servo still be considered "at target"
+   *     servo still be considered "at target"
    */
   public EncoderServo(Servo servo, AnalogInput encoder, double toleranceDegrees) {
     this.servo = servo;
@@ -52,7 +52,7 @@ public class EncoderServo {
 
   /**
    * @brief gets the amount the angle read can differ from the target angle and the servo still be
-   * considered "at target"
+   *     considered "at target"
    * @return the tolerance, in degrees
    */
   public double getToleranceDegrees() {
@@ -60,8 +60,8 @@ public class EncoderServo {
   }
 
   /**
-   * @brief sets the amount the angle read can differ from the target angle and the servo still be
-   *    * considered "at target"
+   * @brief sets the amount the angle read can differ from the target angle and the servo still be *
+   *     considered "at target"
    * @param toleranceDegrees the tolerance, in degrees
    */
   public void setToleranceDegrees(double toleranceDegrees) {
