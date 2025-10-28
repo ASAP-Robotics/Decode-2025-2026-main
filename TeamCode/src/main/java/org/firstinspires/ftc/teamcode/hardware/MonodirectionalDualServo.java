@@ -20,11 +20,11 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 
 /**
- * @brief a class that makes a continuous rotation servo behave like a normal servo that only moves
- *     in one direction to achieve target positions
+ * @brief a class that makes two continuous rotation servo behave like a single normal servo that
+ *      only moves in one direction to achieve target positions
  */
-public class MonodirectionalServo {
-  private final CRServo servo; // the servo being controlled
+public class MonodirectionalDualServo {
+  private final CRServo servo1, servo2; // the servos being controlled
   private final AnalogInput encoder; // the analog input used to read the servo's position
   private double deadZoneDegrees; // size of dead zone to prevent jitter (in degrees)
   private double
@@ -35,23 +35,28 @@ public class MonodirectionalServo {
   private double currentPositionDegrees; // last read position of the servo in degrees
 
   /**
-   * @brief makes a new MonodirectionalServo
-   * @param servo the servo to control
-   * @param toleranceDegrees the acceptable position error in degrees
+   * @brief makes a new MonodirectionalDualServo
+   * @param servo1 the first servo to control
+   * @param servo2 the second servo to control
+   * @param encoder the encoder to read to get the servo's positions (one of the servo's encoders)
+   * @param deadZoneDegrees the acceptable position error in degrees where servos will be stationary
+   * @param toleranceDegrees the acceptable position error in degrees where backwords power is OK
    * @param slowDownZoneDegrees the size of the zone (in degrees) in which the servo's speed will be
    *     ramped down before reaching the target
    * @param direction the direction of the servo
    */
-  public MonodirectionalServo(
-      CRServo servo,
+  public MonodirectionalDualServo(
+      CRServo servo1,
+      CRServo servo2,
       AnalogInput encoder,
       double deadZoneDegrees,
       double toleranceDegrees,
       double slowDownZoneDegrees,
       CRServo.Direction direction) {
-    this.servo = servo;
+    this.servo1 = servo1;
+    this.servo2 = servo2;
     this.encoder = encoder;
-    this.servo.setDirection(direction);
+    this.servo1.setDirection(direction);
     this.deadZoneDegrees = deadZoneDegrees;
     this.toleranceDegrees = toleranceDegrees;
     this.slowDownZoneDegrees = slowDownZoneDegrees;
@@ -61,10 +66,10 @@ public class MonodirectionalServo {
 
   /**
    * @brief makes a new MonodirectionalServo with default parameters
-   * @param servo the servo to control
+   * @param servo1 the servo to control
    */
-  public MonodirectionalServo(CRServo servo, AnalogInput encoder) {
-    this(servo, encoder, 2.5, 5.0, 10.0, CRServo.Direction.FORWARD);
+  public MonodirectionalDualServo(CRServo servo1, CRServo servo2, AnalogInput encoder) {
+    this(servo1, servo2, encoder, 2.5, 5.0, 10.0, CRServo.Direction.FORWARD);
   }
 
   /**
@@ -144,12 +149,14 @@ public class MonodirectionalServo {
   }
 
   /**
-   * @brief sets the speed of the servo
-   * @param speed the speed of the servo (-1 [fully backwords] to 1 [fully forwards])
+   * @brief sets the speed of the servos
+   * @param speed the speed of the servos (-1 [fully backwords] to 1 [fully forwards])
    */
   private void setSpeed(double speed) {
     speed = Math.max(-1.0, Math.min(1.0, speed)); // constrain speed to -1 to 1
-    servo.setPower(speed); // set speed of the servo
+    // set speed of the servos
+    servo1.setPower(speed);
+    servo2.setPower(speed);
   }
 
   /**

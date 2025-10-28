@@ -62,9 +62,7 @@ public class Spindex {
     }
   }
 
-  private final MonodirectionalServo spinServo1; // one servo that rotates the divider in the mag
-  private final MonodirectionalServo spinServo2; // other servo that rotates the divider in the mag
-  // private final Servo spinServo; // the servo that rotates the divider in the mag
+  private final MonodirectionalDualServo spinServo; // the two servos that rotates the divider in the mag
   private final Servo rampServo; // the servo that lifts balls into the shooter turret
   private final ColorSensor colorSensor; // the color sensor at the intake
   private final DistanceSensor
@@ -89,13 +87,11 @@ public class Spindex {
       BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
   public Spindex(
-      MonodirectionalServo spinServo1,
-      MonodirectionalServo spinServo2,
+      MonodirectionalDualServo spinServo1,
       Servo rampServo,
       ColorSensor colorSensor,
       DistanceSensor distanceSensor) {
-    this.spinServo1 = spinServo1;
-    this.spinServo2 = spinServo2;
+    this.spinServo = spinServo1;
     this.rampServo = rampServo;
     this.colorSensor = colorSensor;
     this.distanceSensor = distanceSensor;
@@ -131,8 +127,7 @@ public class Spindex {
    */
   public void update() {
     updateIntakeColor();
-    spinServo1.update();
-    spinServo2.update();
+    spinServo.update();
 
     // do something different depending on the spindex state / mode
     switch (state) {
@@ -268,7 +263,7 @@ public class Spindex {
    * @return true if the spindex is stationary, false if the spindex is moving
    */
   public boolean getIsSpindexMoved() {
-    return spinServo1.isAtTarget() && spinServo2.isAtTarget();
+    return spinServo.isAtTarget();
   }
 
   /**
@@ -378,8 +373,7 @@ public class Spindex {
    * @param position the position (degrees) to set the spindex servos to
    */
   private void setSpindexPosition(double position) {
-    spinServo1.setPosition(position);
-    spinServo2.setPosition(position);
+    spinServo.setPosition(position);
   }
 
   /**
@@ -389,8 +383,7 @@ public class Spindex {
    *     otherwise
    */
   private boolean isSpindexPosition(double positionToCheck) {
-    return spinServo1.getTargetPosition() == positionToCheck
-        && spinServo2.getTargetPosition() == positionToCheck;
+    return spinServo.getTargetPosition() == positionToCheck;
   }
 
   /**
