@@ -23,6 +23,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.hardware.servos.EncoderServo;
 import org.firstinspires.ftc.teamcode.hardware.servos.MonodirectionalDualServo;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -63,9 +64,8 @@ public class Spindex {
     }
   }
 
-  private final MonodirectionalDualServo
-      spinServo; // the two servos that rotates the divider in the mag
-  private final Servo rampServo; // the servo that lifts balls into the shooter turret
+  private final MonodirectionalDualServo spinServo; // the servos that rotate the divider in the mag
+  private final EncoderServo rampServo; // the servo that lifts balls into the shooter turret
   private final ColorSensor colorSensor; // the color sensor at the intake
   private final DistanceSensor
       distanceSensor; // the distance sensor at the intake (built into color sensor?)
@@ -78,8 +78,8 @@ public class Spindex {
     new SpindexSlot(0.33, 0.66, 0.00, 0.495), // slot 1 | TODO: tune
     new SpindexSlot(0.66, 0.00, 0.33, 0.835) // slot 2 | TODO: tune
   };
-  private final org.firstinspires.ftc.teamcode.utils.SimpleTimer rampServoTimer =
-      new SimpleTimer(0.5); // timer for lifting ball into flywheel
+  //private final org.firstinspires.ftc.teamcode.utils.SimpleTimer rampServoTimer =
+      //new SimpleTimer(0.5); // timer for lifting ball into flywheel
 
   private SpindexState state; // the current state of the spindex
   private int currentIndex = NULL; // the current index the spindex is at, dependant on the state
@@ -90,7 +90,7 @@ public class Spindex {
 
   public Spindex(
       MonodirectionalDualServo spinServo1,
-      Servo rampServo,
+      EncoderServo rampServo,
       ColorSensor colorSensor,
       DistanceSensor distanceSensor) {
     this.spinServo = spinServo1;
@@ -135,7 +135,7 @@ public class Spindex {
     switch (state) {
       case IDLE: // if the spindex is idle
         // if the lifter ramp is retracted and the spindex has not been set to the correct position
-        if (rampServoTimer.isFinished() && !isSpindexPosition(spindex[currentIndex].idlePosition)) {
+        if (rampServo.isAtTarget() && !isSpindexPosition(spindex[currentIndex].idlePosition)) {
           setSpindexPosition(spindex[currentIndex].idlePosition); // move spindex to idle position
         }
         break;
@@ -158,7 +158,7 @@ public class Spindex {
       case LIFTING: // if the spindex is lifting
         if (currentIndex == NULL) break; // nothing can be done without a valid index
         // if the lifter ramp is extended (it *should* always be, but just in case)
-        if (rampServoTimer.isFinished()) {
+        if (rampServo.isAtTarget()) {
           // if the spindex hasn't been set to the correct position yet
           if (!isSpindexPosition(spindex[currentIndex].shootLiftPosition)) {
             // move divider to force ball up ramp
@@ -213,7 +213,7 @@ public class Spindex {
   public void moveSpindexIdle(int index) {
     if (index < 0 || index >= spindex.length) return; // return on invalid parameters
     // if the lifter ramp is retracted
-    if (isRampPosition(rampServoRetractedPos) && rampServoTimer.isFinished()) {
+    if (isRampPosition(rampServoRetractedPos) && rampServo.isAtTarget()) {
       setSpindexPosition(spindex[index].idlePosition); // set spindex to new position
 
     } else if (!isRampPosition(rampServoRetractedPos)) { // if the lifter ramp is extended
@@ -251,7 +251,7 @@ public class Spindex {
     if (!isRampPosition(rampServoLiftPos)) {
       setRampPosition(rampServoLiftPos);
 
-    } else if (rampServoTimer.isFinished()) {
+    } else if (rampServo.isAtTarget()) {
       // ^ if the lifter ramp is extended, move the divider to force balls up it
       setSpindexPosition(spindex[currentIndex].shootLiftPosition); // start moving the spindex
     }
@@ -358,7 +358,6 @@ public class Spindex {
    */
   private void setRampPosition(double position) {
     rampServo.setPosition(position);
-    rampServoTimer.start();
   }
 
   /**

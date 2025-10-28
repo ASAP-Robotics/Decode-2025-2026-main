@@ -31,6 +31,7 @@ import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
 import org.firstinspires.ftc.teamcode.hardware.Camera;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
+import org.firstinspires.ftc.teamcode.hardware.servos.EncoderServo;
 import org.firstinspires.ftc.teamcode.hardware.servos.MonodirectionalDualServo;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
@@ -47,10 +48,11 @@ public class MainOpMode extends LinearOpMode {
       flywheelMotor,
       intakeMotor,
       turretRotator;
-  private Servo spindexRampServo, turretHood;
+  private Servo rawRampServo, turretHood;
   private CRServo rawMagServo1, rawMagServo2;
-  private AnalogInput magServoEncoder;
+  private AnalogInput magServoEncoder, rampServoEncoder;
   private MonodirectionalDualServo magServo;
+  private EncoderServo rampServo;
   private GoBildaPinpointDriver pinpoint;
   private ColorSensor colorSensor;
   private DistanceSensor distanceSensor;
@@ -88,18 +90,20 @@ public class MainOpMode extends LinearOpMode {
     pinpoint.resetPosAndIMU(); // TODO: only calibrate IMU once Auto code configures stuff
 
     turretHood = hardwareMap.get(Servo.class, "turretHood");
-    spindexRampServo = hardwareMap.get(Servo.class, "feeder");
+    rawRampServo = hardwareMap.get(Servo.class, "feeder");
 
     rawMagServo1 = hardwareMap.get(CRServo.class, "magServo1");
     rawMagServo2 = hardwareMap.get(CRServo.class, "magServo2");
 
     magServoEncoder = hardwareMap.get(AnalogInput.class, "magServoEncoder");
+    rampServoEncoder = hardwareMap.get(AnalogInput.class, "rampServoEncoder");
 
     magServo = new MonodirectionalDualServo(rawMagServo1, rawMagServo2, magServoEncoder);
+    rampServo = new EncoderServo(rawRampServo, rampServoEncoder);
 
     turret = new Turret(flywheelMotor, turretRotator, turretHood);
     intake = new ActiveIntake(intakeMotor);
-    spindex = new Spindex(magServo, spindexRampServo, colorSensor, distanceSensor);
+    spindex = new Spindex(magServo, rampServo, colorSensor, distanceSensor);
     camera =
         new Camera(
             hardwareMap,
