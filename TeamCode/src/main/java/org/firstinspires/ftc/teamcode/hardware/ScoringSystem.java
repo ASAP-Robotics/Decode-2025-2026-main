@@ -105,10 +105,11 @@ public class ScoringSystem {
    * @brief updates everything to do with aiming the turret
    */
   private void updateAiming() {
+    // set turret distance to target
     turret.setTargetDistance(camera.getNavigationAprilTagDistance());
+    // adjust turret angle
     turret.setHorizontalAngle(
-        turret.getTargetHorizontalAngleDegrees()
-            + camera.getNavigationAprilTagAngleX()); // TODO: update
+        turret.getHorizontalAngleDegrees() + camera.getNavigationAprilTagAngleX());
   }
 
   /**
