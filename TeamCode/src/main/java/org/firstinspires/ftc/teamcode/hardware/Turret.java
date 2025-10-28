@@ -127,7 +127,7 @@ public class Turret extends Flywheel {
    * @brief finds the number of degrees the turret needs to turn for the motor to turn some amount
    * @param motorDegrees the number of degrees the motor should move by
    * @return the number of degrees the turret should turn for the motor to move by the supplied
-   * amount
+   *     amount
    */
   private double motorDegreesToTurretDegrees(double motorDegrees) {
     return motorDegrees / (TURRET_GEAR_TEETH / MOTOR_GEAR_TEETH);
