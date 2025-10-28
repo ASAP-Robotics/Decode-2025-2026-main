@@ -76,8 +76,6 @@ public class Spindex {
     new SpindexSlot(0.33, 0.66, 0.00, 0.495), // slot 1 | TODO: tune
     new SpindexSlot(0.66, 0.00, 0.33, 0.835) // slot 2 | TODO: tune
   };
-  // private final org.firstinspires.ftc.teamcode.utils.SimpleTimer rampServoTimer =
-  // new SimpleTimer(0.5); // timer for lifting ball into flywheel
 
   private SpindexState state; // the current state of the spindex
   private int currentIndex = NULL; // the current index the spindex is at, dependant on the state
