@@ -23,16 +23,16 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class Flywheel {
   private final DcMotorEx flywheel;
-  private final double motorTicksPerRev; // /< ticks per revolution of flywheel motor
-  protected boolean isEnabled = false; // /< if the flywheel is enabled
-  protected boolean isActive = true; // /< if the flywheel is active (as opposed to idling)
-  private double idleSpeed; // /< the speed (RPM) of the flywheel when idle
-  private double targetSpeed = 0; // /< the speed (RPM) the flywheel is targeting
-  private double currentSpeed = 0; // /< the latest speed (RPM) of the flywheel
-  private double targetDistance = 0; // /< the distance (inches) to the target
-  private boolean containsBall = false; // /< if the flywheel has a ball in it that it is shooting
-  public org.firstinspires.ftc.teamcode.utils.SimpleTimer
-      shotTimer; // /< timer to keep flywheel on while shooting a ball
+  private final double motorTicksPerRev; // ticks per revolution of flywheel motor
+  protected boolean isEnabled = false; // if the flywheel is enabled
+  protected boolean isActive = true; // if the flywheel is active (as opposed to idling)
+  private double idleSpeed; // the speed (RPM) of the flywheel when idle
+  private double targetSpeed = 0; // the speed (RPM) the flywheel is targeting
+  private double currentSpeed = 0; // the latest speed (RPM) of the flywheel
+  private double targetDistance = 0; // the distance (inches) to the target
+  private boolean containsBall = false; // if the flywheel has a ball in it that it is shooting
+  // timer to keep flywheel on while shooting a ball
+  private final org.firstinspires.ftc.teamcode.utils.SimpleTimer shotTimer;
 
   // these arrays constitute a lookup table for finding the correct flywheel RPM for a distance
   // the distance values need to be in ascending order, or things will break
@@ -90,19 +90,34 @@ public class Flywheel {
   /**
    * @brief returns if a ball is in the flywheel
    * @return true if a ball is in the flywheel, false if the flywheel is empty
-   * @note this is basically just a wrapper around a variable that isn't used in any core methods
+   * @note no actual detection of if the flywheel contains a ball is done
    */
-  public boolean getContainsBall() {
+  public boolean containsBall() {
     return containsBall;
   }
 
   /**
-   * @brief sets if a ball is in the flywheel
-   * @param containsBall true if a ball is in the flywheel, false if the flywheel is empty
-   * @note this is basically just a wrapper around a variable that isn't used in any core methods
+   * @brief returns if the ball has left the flywheel since the last check
+   * @return true if the turret contained a ball, and the shot timer finished since last call
+   * @note no actual detection of if the flywheel contains a ball is done
    */
-  public void setContainsBall(boolean containsBall) {
-    this.containsBall = containsBall;
+  public boolean ballLeft() {
+    if (containsBall && shotTimer.isFinished()) {
+      containsBall = false;
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * @brief sets that a ball is in the flywheel
+   * @note no actual detection of if the flywheel contains a ball is done
+   */
+  public void setContainsBall() {
+    // start shot timer if the turret now contains a ball
+    if (!containsBall) shotTimer.start();
+    containsBall = true;
   }
 
   /**

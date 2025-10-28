@@ -119,10 +119,8 @@ public class ScoringSystem {
     if (emptyingMag) { // if we are emptying the mag (rapid fire)
       boolean isSorted = (emptyingMode == SequenceMode.SORTED); // if we are shooting a sequence
 
-      if (turret.getContainsBall()) { // if there is a ball in the turret
-        if (turret.shotTimer.isFinished()) { // if the ball is now out of the turret
-          turret.setContainsBall(false); // there is not a ball in the turret
-
+      if (turret.containsBall()) { // if there is a ball in the turret
+        if (turret.ballLeft()) { // if the ball is now out of the turret
           if (isSorted) { // if shooting a sequence
             BallColor[] sequence = ballSequence.getBallColors();
             if (sequenceIndex < (sequence.length - 1)) { // if the sequence isn't done
@@ -179,15 +177,13 @@ public class ScoringSystem {
         } else if (turret.isUpToSpeed() && spindex.isReadyToShoot()) {
           // ^ if the flywheel is up to speed and the spindex is ready to shoot
           spindex.liftBall(); // lift ball into turret
-          turret.setContainsBall(true); // turret now has a ball in it
-          turret.shotTimer.start(); // start the shot timer
+          turret.setContainsBall(); // turret now has a ball in it
         }
       }
 
     } else if (turret.isEnabled() && turret.isActive()) { // if we are just shooting one ball
-      if (turret.getContainsBall()) { // if the turret contains a ball
-        if (turret.shotTimer.isFinished()) { // if the turret no longer contains a ball
-          turret.setContainsBall(false); // the ball should be out of the flywheel
+      if (turret.containsBall()) { // if the turret contains a ball
+        if (turret.ballLeft()) { // if the turret no longer contains a ball
           turret.idle(); // set the flywheel to slow down to idle speeds
           spindex.moveSpindexIdle(spindex.getIndex()); // idle the spindex
         }
@@ -196,8 +192,7 @@ public class ScoringSystem {
         // if the flywheel is spinning fast enough, and the spindex is ready to shoot
         if (turret.isUpToSpeed() && spindex.isReadyToShoot()) {
           spindex.liftBall(); // lift ball into turret
-          turret.setContainsBall(true); // turret now contains a ball
-          turret.shotTimer.start(); // start timer for shot duration
+          turret.setContainsBall(); // turret now contains a ball
         } // if (turret.isUpToSpeed())
       } // else ( if (turret.getContainsBall()) )
     } // else if (turret.isEnabled() && turret.isActive())
