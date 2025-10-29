@@ -18,86 +18,56 @@ package org.firstinspires.ftc.teamcode.hardware.servos;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
+import org.firstinspires.ftc.teamcode.hardware.thirdparty.RTPAxon;
 
 /**
  * @brief a class that makes two continuous rotation servo behave like a single normal servo that
  *     only moves in one direction to achieve target positions
+ * @note this is just a wrapper around the RTPAxon class
  */
 public class MonodirectionalDualServo {
-  private final CRServo servo1, servo2; // the servos being controlled
-  private final AnalogInput encoder; // the analog input used to read the servo's position
-  private double deadZoneDegrees; // size of dead zone to prevent jitter (in degrees)
-  private double
-      toleranceDegrees; // acceptable position error in degrees (if position is within <this> of the
-  // target, reverse movement to maintain position is OK)
-  private double slowDownZoneDegrees; // size of the "slow down" zone (in degrees)
+  private final RTPAxon servo1, servo2; // class to handle most servo control
+  // acceptable position error in degrees (if position is within <this> of the target, reverse
+  // movement to maintain position is OK)
+  private double toleranceDegrees;
   private double targetPositionDegrees; // target position of the servo in degrees
-  private double currentPositionDegrees; // last read position of the servo in degrees
 
   /**
    * @brief makes a new MonodirectionalDualServo
    * @param servo1 the first servo to control
    * @param servo2 the second servo to control
    * @param encoder the encoder to read to get the servo's positions (one of the servo's encoders)
-   * @param deadZoneDegrees the acceptable position error in degrees where servos will be stationary
-   * @param toleranceDegrees the acceptable position error in degrees where backwords power is OK
-   * @param slowDownZoneDegrees the size of the zone (in degrees) in which the servo's speed will be
-   *     ramped down before reaching the target
+   * @param toleranceDegrees the position error in degrees where the servo is still "at target"
    * @param direction the direction of the servo
    */
   public MonodirectionalDualServo(
       CRServo servo1,
       CRServo servo2,
       AnalogInput encoder,
-      double deadZoneDegrees,
       double toleranceDegrees,
-      double slowDownZoneDegrees,
-      CRServo.Direction direction) {
-    this.servo1 = servo1;
-    this.servo2 = servo2;
-    this.encoder = encoder;
-    this.servo1.setDirection(direction);
-    this.deadZoneDegrees = deadZoneDegrees;
+      RTPAxon.Direction direction) {
     this.toleranceDegrees = toleranceDegrees;
-    this.slowDownZoneDegrees = slowDownZoneDegrees;
-    this.currentPositionDegrees = readPosition();
-    this.targetPositionDegrees = currentPositionDegrees; // start with target at current position
+    this.servo1 = new RTPAxon(servo1, encoder, direction);
+    this.servo2 = new RTPAxon(servo2, encoder, direction);
+    // start with target at current position
+    this.targetPositionDegrees = this.servo1.getCurrentAngle();
   }
 
   /**
-   * @brief makes a new MonodirectionalServo with default parameters
+   * @brief makes a new MonodirectionalDualServo with default parameters
    * @param servo1 the servo to control
    */
   public MonodirectionalDualServo(CRServo servo1, CRServo servo2, AnalogInput encoder) {
-    this(servo1, servo2, encoder, 2.5, 5.0, 10.0, CRServo.Direction.FORWARD);
-  }
-
-  /**
-   * @brief sets the size of the zone on either side of the target position in which the servo will
-   *     be set to not move
-   * @param deadZoneDegrees the size of the dead zone on either side of the target position, in
-   *     degrees
-   */
-  public void setDeadZoneDegrees(double deadZoneDegrees) {
-    this.deadZoneDegrees = deadZoneDegrees;
+    this(servo1, servo2, encoder, 1.0, RTPAxon.Direction.FORWARD);
   }
 
   /**
    * @brief sets the threshold of error (in degrees) above which the servo is no longer at the
-   *     target position (and cannot move in reverse to maintain position)
+   *     target position
    * @param toleranceDegrees the number of degrees the position can differ from the target position
    */
   public void setToleranceDegrees(double toleranceDegrees) {
     this.toleranceDegrees = toleranceDegrees;
-  }
-
-  /**
-   * @brief sets the number of degrees away from the target at which the servo will start slowing
-   *     down
-   * @param slowDownZoneDegrees the distance from the target to slow down at (degrees)
-   */
-  public void setSlowDownZoneDegrees(double slowDownZoneDegrees) {
-    this.slowDownZoneDegrees = slowDownZoneDegrees;
   }
 
   /**
@@ -106,16 +76,32 @@ public class MonodirectionalDualServo {
    * @note does not update the servo's movement; call update() to update movement
    */
   public void setPosition(double position) {
-    targetPositionDegrees = Math.min(Math.abs(position), 360.0);
+    // filter target to be between 0 and 360
+    double filteredPosition = Math.min(Math.abs(position), 360.0);
+
+    if (targetPositionDegrees - toleranceDegrees > filteredPosition ||
+        targetPositionDegrees + toleranceDegrees < filteredPosition) {
+      // ^ if new target is not the same as old target
+      double change = 360 - (targetPositionDegrees - filteredPosition); // get change
+      while (change >= 360) change -= 360; // change should never be more than 360
+
+      servo1.changeTargetRotation(change);
+      servo2.changeTargetRotation(change);
+
+    } else { // new target is "the same" as old target
+      servo1.setTargetRotation(filteredPosition);
+      servo2.setTargetRotation(filteredPosition);
+    }
+
+    targetPositionDegrees = filteredPosition; // store new target
   }
 
   /**
-   * @brief gets if the servo is at the target position
-   * @return true if the servo is at the target position, false otherwise
+   * @brief gets if the servo(s) are at the target position
+   * @return true if the servo(s) are at the target position, false otherwise
    */
   public boolean isAtTarget() {
-    double error = getDifferenceDegrees(targetPositionDegrees, currentPositionDegrees);
-    return Math.abs(error) <= toleranceDegrees;
+    return servo1.isAtTarget(toleranceDegrees) && servo2.isAtTarget(toleranceDegrees);
   }
 
   /**
@@ -130,54 +116,7 @@ public class MonodirectionalDualServo {
    * @brief updates the servo's movement. Call every loop
    */
   public void update() {
-    currentPositionDegrees = readPosition();
-    double error = getDifferenceDegrees(targetPositionDegrees, currentPositionDegrees);
-
-    if (Math.abs(error)
-        <= deadZoneDegrees) { // if we are within the dead zone (exactly at the target)
-      setSpeed(0); // stop servo
-
-    } else if ((Math.abs(error) <= toleranceDegrees)
-        || (error <= slowDownZoneDegrees && error >= 0)) {
-      // if we are within the tolerance zone (close to the target) OR if we aren't at the target,
-      // but are close enough to start slowing down
-      setSpeed(error / slowDownZoneDegrees); // move servo towards target position
-
-    } else { // if we aren't close to the target
-      setSpeed(1); // move forwards at full speed
-    }
-  }
-
-  /**
-   * @brief sets the speed of the servos
-   * @param speed the speed of the servos (-1 [fully backwords] to 1 [fully forwards])
-   */
-  private void setSpeed(double speed) {
-    speed = Math.max(-1.0, Math.min(1.0, speed)); // constrain speed to -1 to 1
-    // set speed of the servos
-    servo1.setPower(speed);
-    servo2.setPower(speed);
-  }
-
-  /**
-   * @brief reads the current position of the servo
-   * @return the current position of the servo, in degrees (from 0 to 360)
-   */
-  private double readPosition() {
-    return (encoder.getVoltage() / 3.3) * 360; // 0v = 0 degrees, 3.3v = 360 degrees
-  }
-
-  /**
-   * @brief gets the difference between two angles in degrees
-   * @param a the first angle
-   * @param b the second angle
-   * @return the between the two angles in degrees
-   * @note positive means a is larger, negative means b is larger
-   */
-  private double getDifferenceDegrees(double a, double b) {
-    double diff = a - b; // get raw difference between the two angles
-    while (diff > 180.0) diff -= 360.0; // adjust to be under 180 degrees
-    while (diff < -180.0) diff += 360.0; // adjust to be over -180 degrees
-    return diff;
+    servo1.update();
+    servo2.update();
   }
 }
