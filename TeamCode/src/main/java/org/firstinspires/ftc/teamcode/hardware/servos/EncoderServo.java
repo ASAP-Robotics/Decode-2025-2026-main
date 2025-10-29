@@ -73,7 +73,7 @@ public class EncoderServo {
    * @param degrees
    */
   public void setPosition(double degrees) {
-    servo.setPosition(degrees);
+    servo.setPosition(degrees / 360);
   }
 
   /**

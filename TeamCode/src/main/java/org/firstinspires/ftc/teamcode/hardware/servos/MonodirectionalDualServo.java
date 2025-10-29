@@ -71,7 +71,7 @@ public class MonodirectionalDualServo {
   }
 
   /**
-   * @brief sets the target position of the servo (like servo.setPosition())
+   * @brief sets the target position of the servos
    * @param position the target position of the servo, in degrees (0 to 360)
    * @note does not update the servo's movement; call update() to update movement
    */

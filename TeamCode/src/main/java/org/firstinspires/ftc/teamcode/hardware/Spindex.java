@@ -40,13 +40,13 @@ public class Spindex {
   private class SpindexSlot {
     // the color of ball in the spindex slot
     public BallColor color;
-    // the position to move the spindex to to intake a ball into this slot
+    // the position to intake a ball into this slot, in degrees
     public final double intakePosition;
-    // the position to move the spindex to to insert the lifter ramp directly before this slot
+    // the position to insert the lifter ramp directly before this slot, in degrees
     public final double shootInsertPosition;
-    // the position to move the spindex to to lift the ball in this slot up into the turret
+    // the position to lift the ball in this slot up into the turret, in degrees
     public final double shootLiftPosition;
-    // the position half-a-slot off from intake position, so balls cannot exit the mag
+    // the position half-a-slot off from intake position, so balls cannot exit the mag, in degrees
     public final double idlePosition;
 
     public SpindexSlot(
@@ -68,13 +68,13 @@ public class Spindex {
   private final DistanceSensor
       distanceSensor; // the distance sensor at the intake (built into color sensor?)
   private final double rampServoRetractedPos =
-      0.0; // the position of the lift servo when at rest | TODO: tune
+      0.0; // the position of the lift servo when at rest, in degrees | TODO: tune
   private final double rampServoLiftPos =
-      0.3; // the position of the lift servo when shooting | TODO: tune
+      120; // the position of the lift servo when shooting, in degrees | TODO: tune
   private final SpindexSlot[] spindex = {
-    new SpindexSlot(0.0, 0.33, 0.66, 0.165), // slot 0 | TODO: tune
-    new SpindexSlot(0.33, 0.66, 0.00, 0.495), // slot 1 | TODO: tune
-    new SpindexSlot(0.66, 0.00, 0.33, 0.835) // slot 2 | TODO: tune
+    new SpindexSlot(0.0, 120.0, 240.0, 60.0), // slot 0 | TODO: tune
+    new SpindexSlot(120.0, 240.0, 0.00, 180.0), // slot 1 | TODO: tune
+    new SpindexSlot(240.0, 0.00, 120.0, 300) // slot 2 | TODO: tune
   };
 
   private SpindexState state; // the current state of the spindex
