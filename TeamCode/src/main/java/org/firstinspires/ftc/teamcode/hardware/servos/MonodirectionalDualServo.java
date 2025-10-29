@@ -79,8 +79,8 @@ public class MonodirectionalDualServo {
     // filter target to be between 0 and 360
     double filteredPosition = Math.min(Math.abs(position), 360.0);
 
-    if (targetPositionDegrees - toleranceDegrees > filteredPosition ||
-        targetPositionDegrees + toleranceDegrees < filteredPosition) {
+    if (targetPositionDegrees - toleranceDegrees > filteredPosition
+        || targetPositionDegrees + toleranceDegrees < filteredPosition) {
       // ^ if new target is not the same as old target
       double change = 360 - (targetPositionDegrees - filteredPosition); // get change
       while (change >= 360) change -= 360; // change should never be more than 360
