@@ -41,7 +41,8 @@ public class ScoringSystem {
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private int purplesNeeded = 0; // the number of purples needed to fill the mag
   private int greensNeeded = 0; // the number of greens needed to fill the mag
-  private boolean clearingIntake = false; // if the intake is being reversed to clear a blockage causing a stall
+  private boolean clearingIntake =
+      false; // if the intake is being reversed to clear a blockage causing a stall
   private final Telemetry telemetry;
 
   public ScoringSystem(
