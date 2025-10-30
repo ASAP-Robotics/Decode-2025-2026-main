@@ -74,7 +74,7 @@ public class ActiveIntake {
     currentReadings.add(new CurrentReading(amps, now)); // add new reading
 
     // remove old readings
-    while (!currentReadings.isEmpty() && now - currentReadings.getFirst().timeStamp > 1) {
+    while (!currentReadings.isEmpty() && now - currentReadings.getFirst().timeStamp > readingTime) {
       currentReadings.removeFirst();
     }
 
