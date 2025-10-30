@@ -41,6 +41,8 @@ public class ScoringSystem {
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private int purplesNeeded = 0; // the number of purples needed to fill the mag
   private int greensNeeded = 0; // the number of greens needed to fill the mag
+  private boolean clearingIntake =
+      false; // if the intake is being reversed to clear a blockage causing a stall
   private final Telemetry telemetry;
 
   public ScoringSystem(
@@ -94,11 +96,13 @@ public class ScoringSystem {
     updateAiming();
     updateShooting();
     updateIntake();
+    intake.update();
     turret.update();
     spindex.update();
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexColor()));
     telemetry.addData("Shooting", emptyingMag);
     telemetry.addData("Filling", fillingMag);
+    telemetry.addData("Intake current", intake.getAverageCurrentAmps());
   }
 
   /**
@@ -200,34 +204,48 @@ public class ScoringSystem {
    * @brief updates everything to do with the intake
    */
   private void updateIntake() {
-    // if we are filling the magazine
-    if (fillingMag) {
-      // if intaking a ball, the spindex is stationary, and a new color of ball is in the intake
+    if (clearingIntake) {
+      if (intake.timer.isFinished()) {
+        clearingIntake = false;
+        intake.intake(); // start the intake up again
+      }
+
+      return; // don't do the rest of the logic
+    }
+
+    if (intake.isStalled() && intake.isIntaking()) {
+      // ^ if intake is intaking and stalled
+      intake.eject(); // eject the intake
+      intake.timer.start(); // start the intake timer
+      clearingIntake = true; // we are clearing the intake
+
+    } else if (fillingMag) {
+      // ^ if we are filling the magazine
       if (intake.isIntaking() && spindex.getIsIntakeColorNew() && spindex.getIsSpindexMoved()) {
-        // if a purple is in the intake
+        // ^ if intaking a ball, the spindex is stationary, and a new color of ball is in the intake
         if (spindex.getIntakeColor() == BallColor.PURPLE) {
-          // if we need a purple
-          if (purplesNeeded >= 1) {
+          // ^ if a purple is in the intake
+          if (purplesNeeded >= 1) { // if we need a purple
             spindex.storeIntakeColor(); // record the color of the ball taken in
 
-          } else {
+          } else { // if we don't need a purple
             intake.eject();
             intake.timer.start();
           }
 
-        } else if (spindex.getIntakeColor() == BallColor.GREEN) { // if a green is in the intake
+        } else if (spindex.getIntakeColor() == BallColor.GREEN) {
+          // ^ if a green is in the intake
           if (greensNeeded >= 1) { // if we need a green
             spindex.storeIntakeColor(); // record the color of the ball taken in
 
-          } else {
+          } else { // if we don't need a green
             intake.eject();
             intake.timer.start();
           }
         }
 
-      } else if (intake.isEjecting()
-          && spindex.getIntakeColor() == BallColor.EMPTY
-          && intake.timer.isFinished()) {
+      } else if (intake.isEjecting() && intake.timer.isFinished()) {
+        // ^ if intake is ejecting and the intake timer is done
         intake.intake(); // start the intake
       }
 
