@@ -94,6 +94,7 @@ public class ScoringSystem {
     updateAiming();
     updateShooting();
     updateIntake();
+    intake.update();
     turret.update();
     spindex.update();
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexColor()));
