@@ -41,6 +41,7 @@ public class ScoringSystem {
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private int purplesNeeded = 0; // the number of purples needed to fill the mag
   private int greensNeeded = 0; // the number of greens needed to fill the mag
+  private boolean clearingIntake = false; // if the intake is being reversed to clear a blockage causing a stall
   private final Telemetry telemetry;
 
   public ScoringSystem(
@@ -100,6 +101,7 @@ public class ScoringSystem {
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexColor()));
     telemetry.addData("Shooting", emptyingMag);
     telemetry.addData("Filling", fillingMag);
+    telemetry.addData("Intake current", intake.getAverageCurrentAmps());
   }
 
   /**
@@ -201,10 +203,20 @@ public class ScoringSystem {
    * @brief updates everything to do with the intake
    */
   private void updateIntake() {
+    if (clearingIntake) {
+      if (intake.timer.isFinished()) {
+        clearingIntake = false;
+        intake.intake(); // start the intake up again
+      }
+
+      return; // don't do the rest of the logic
+    }
+
     if (intake.isStalled() && intake.isIntaking()) {
       // ^ if intake is intaking and stalled
       intake.eject(); // eject the intake
       intake.timer.start(); // start the intake timer
+      clearingIntake = true; // we are clearing the intake
 
     } else if (fillingMag) {
       // ^ if we are filling the magazine
