@@ -22,7 +22,9 @@ import com.qualcomm.robotcore.hardware.CRServo;
 /**
  * @brief a class that makes two continuous rotation servo behave like a single normal servo that
  *     only moves in one direction to achieve target positions
+ * @note probably will not be used, currently doesn't work
  */
+@Deprecated
 public class MonodirectionalDualServo {
   private final CRServo servo1, servo2; // the servos being controlled
   private final AnalogInput encoder; // the analog input used to read the servo's position
