@@ -21,7 +21,6 @@ import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 import android.graphics.Color;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.BallColor;
@@ -53,10 +52,7 @@ public class Spindex {
     // the position half-a-slot off from intake position, so balls cannot exit the mag
     public final double idlePosition;
 
-    public SpindexSlot(
-        double intakePosition,
-        double shootPosition,
-        double idlePosition) {
+    public SpindexSlot(double intakePosition, double shootPosition, double idlePosition) {
       this.color = BallColor.UNKNOWN;
       this.intakePosition = intakePosition;
       this.shootPosition = shootPosition;
@@ -298,7 +294,7 @@ public class Spindex {
   /**
    * @brief returns if the spindex is at its target position
    * @return true if the spindex is at its target angle and set to the correct target angle for the
-   * mode the spindex is in, false otherwise
+   *     mode the spindex is in, false otherwise
    */
   public boolean isAtTarget() {
     boolean isSet = true;

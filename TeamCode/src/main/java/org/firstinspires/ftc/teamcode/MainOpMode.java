@@ -87,11 +87,12 @@ public class MainOpMode extends LinearOpMode {
     Spindex spindex =
         new Spindex(magServo1, magServo2, lifterServo1, lifterServo2, colorSensor, distanceSensor);
 
-    Camera camera = new Camera(
-        hardwareMap,
-        "camera",
-        new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0),
-        AllianceColor.RED); // placeholder TODO: update
+    Camera camera =
+        new Camera(
+            hardwareMap,
+            "camera",
+            new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0),
+            AllianceColor.RED); // placeholder TODO: update
 
     ScoringSystem mag =
         new ScoringSystem(intake, turret, spindex, camera, wantedSequence, telemetry);
