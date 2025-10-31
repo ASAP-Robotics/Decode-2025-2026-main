@@ -22,10 +22,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 /**
  * @brief wrapper around the `Servo` class to add encoder feedback
  */
-public class EncoderServo {
+public class Axon {
   private Servo servo; // the servo being controlled
   private AnalogInput encoder; // the encoder of the servo being controlled
-
   private double toleranceDegrees;
 
   /**
@@ -33,7 +32,7 @@ public class EncoderServo {
    * @param servo the servo to control
    * @param encoder the encoder of the servo being controlled
    */
-  public EncoderServo(Servo servo, AnalogInput encoder) {
+  public Axon(Servo servo, AnalogInput encoder) {
     this(servo, encoder, 2.5);
   }
 
@@ -44,7 +43,7 @@ public class EncoderServo {
    * @param toleranceDegrees the amount the angle read can differ from the target angle and the
    *     servo still be considered "at target"
    */
-  public EncoderServo(Servo servo, AnalogInput encoder, double toleranceDegrees) {
+  public Axon(Servo servo, AnalogInput encoder, double toleranceDegrees) {
     this.servo = servo;
     this.encoder = encoder;
     this.toleranceDegrees = toleranceDegrees;
@@ -73,7 +72,7 @@ public class EncoderServo {
    * @param degrees
    */
   public void setPosition(double degrees) {
-    servo.setPosition(degrees);
+    servo.setPosition(degrees / 360);
   }
 
   /**
@@ -82,7 +81,7 @@ public class EncoderServo {
    * @note this method doesn't return the *current position*, it returns the *target position*
    */
   public double getTargetPosition() {
-    return servo.getPosition();
+    return servo.getPosition() * 360;
   }
 
   /**

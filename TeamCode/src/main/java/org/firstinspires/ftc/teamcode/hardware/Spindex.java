@@ -21,13 +21,16 @@ import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 import android.graphics.Color;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.hardware.servos.EncoderServo;
-import org.firstinspires.ftc.teamcode.hardware.servos.MonodirectionalDualServo;
+import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 public class Spindex {
+  /**
+   * @brief simple enum to track the spindex's mode / state
+   */
   public enum SpindexState {
     UNINITIALIZED,
     IDLE,
@@ -37,44 +40,83 @@ public class Spindex {
     LIFTED
   }
 
+  /**
+   * @brief simple class to store info tied to each spindex slot
+   */
   private class SpindexSlot {
     // the color of ball in the spindex slot
     public BallColor color;
     // the position to move the spindex to to intake a ball into this slot
     public final double intakePosition;
-    // the position to move the spindex to to insert the lifter ramp directly before this slot
-    public final double shootInsertPosition;
-    // the position to move the spindex to to lift the ball in this slot up into the turret
-    public final double shootLiftPosition;
+    // the position to move the spindex to to shoot a ball from this slot
+    public final double shootPosition;
     // the position half-a-slot off from intake position, so balls cannot exit the mag
     public final double idlePosition;
 
     public SpindexSlot(
         double intakePosition,
-        double shootInsertPosition,
-        double shootLiftPosition,
+        double shootPosition,
         double idlePosition) {
       this.color = BallColor.UNKNOWN;
       this.intakePosition = intakePosition;
-      this.shootInsertPosition = shootInsertPosition;
-      this.shootLiftPosition = shootLiftPosition;
+      this.shootPosition = shootPosition;
       this.idlePosition = idlePosition;
     }
   }
 
-  private final MonodirectionalDualServo spinServo; // the servos that rotate the divider in the mag
-  private final EncoderServo rampServo; // the servo that lifts balls into the shooter turret
+  /**
+   * @brief simple class to control two Axon servos at once
+   */
+  private class DualServo {
+    private final Axon servo1, servo2; // servos
+    private double targetPosition; // the angle to move the servos to
+
+    public DualServo(Axon servo1, Axon servo2) {
+      this.servo1 = servo1;
+      this.servo2 = servo2;
+    }
+
+    /**
+     * @brief sets the position of the servos
+     * @param degrees the angle to turn the servo to
+     */
+    public void setPosition(double degrees) {
+      targetPosition = degrees; // store target position
+      // set servo angles:
+      servo1.setPosition(targetPosition);
+      servo2.setPosition(targetPosition);
+    }
+
+    /**
+     * @brief gets if both servos are at the target
+     * @return true if both servos are at target, false otherwise
+     */
+    public boolean isAtTarget() {
+      return servo1.isAtTarget() && servo2.isAtTarget();
+    }
+
+    /**
+     * @brief gets the target position of the servos
+     * @return the target angle of the servos
+     */
+    public double getTargetPosition() {
+      return targetPosition;
+    }
+  }
+
+  private final DualServo spinner; // the servos that rotate the divider in the mag
+  private final DualServo lifter; // the servos that lift balls into the shooter turret
   private final ColorSensor colorSensor; // the color sensor at the intake
   private final DistanceSensor
       distanceSensor; // the distance sensor at the intake (built into color sensor?)
-  private final double rampServoRetractedPos =
+  private final double lifterRetractedPos =
       0.0; // the position of the lift servo when at rest | TODO: tune
-  private final double rampServoLiftPos =
+  private final double lifterExtendedPos =
       0.3; // the position of the lift servo when shooting | TODO: tune
   private final SpindexSlot[] spindex = {
-    new SpindexSlot(0.0, 0.33, 0.66, 0.165), // slot 0 | TODO: tune
-    new SpindexSlot(0.33, 0.66, 0.00, 0.495), // slot 1 | TODO: tune
-    new SpindexSlot(0.66, 0.00, 0.33, 0.835) // slot 2 | TODO: tune
+    new SpindexSlot(0.0, 0.33, 0.165), // slot 0 | TODO: tune
+    new SpindexSlot(0.33, 0.66, 0.495), // slot 1 | TODO: tune
+    new SpindexSlot(0.66, 0.00, 0.835) // slot 2 | TODO: tune
   };
 
   private SpindexState state; // the current state of the spindex
@@ -85,12 +127,14 @@ public class Spindex {
       BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
   public Spindex(
-      MonodirectionalDualServo spinServo1,
-      EncoderServo rampServo,
+      Axon spinServo1,
+      Axon spinServo2,
+      Axon liftServo1,
+      Axon liftServo2,
       ColorSensor colorSensor,
       DistanceSensor distanceSensor) {
-    this.spinServo = spinServo1;
-    this.rampServo = rampServo;
+    this.spinner = new DualServo(spinServo1, spinServo2);
+    this.lifter = new DualServo(liftServo1, liftServo2);
     this.colorSensor = colorSensor;
     this.distanceSensor = distanceSensor;
     this.colorSensor.enableLed(true);
@@ -114,10 +158,10 @@ public class Spindex {
     }
 
     // move spindex slot 0 to intake
-    setSpindexPosition(spindex[0].intakePosition);
+    spinner.setPosition(spindex[0].intakePosition);
     this.state = SpindexState.INTAKING; // spindex in intaking mode
     this.currentIndex = 0; // spindex at index 0
-    this.rampServo.setPosition(rampServoRetractedPos); // move lifting mechanism to rest position
+    this.lifter.setPosition(lifterRetractedPos); // move lifting mechanism to rest position
   }
 
   /**
@@ -125,50 +169,44 @@ public class Spindex {
    */
   public void update() {
     updateIntakeColor();
-    spinServo.update();
 
     // do something different depending on the spindex state / mode
     switch (state) {
       case IDLE: // if the spindex is idle
-        // if the lifter ramp is retracted and the spindex has not been set to the correct position
-        if (rampServo.isAtTarget() && !isSpindexPosition(spindex[currentIndex].idlePosition)) {
-          setSpindexPosition(spindex[currentIndex].idlePosition); // move spindex to idle position
+        if (currentIndex == NULL) break; // nothing can be done without a valid index
+        // if the lifter is retracted and the spindex has not been set to the correct position
+        if (!isSpindexPosition(spindex[currentIndex].idlePosition) && lifter.isAtTarget()) {
+          // move spindex to idle position
+          spinner.setPosition(spindex[currentIndex].idlePosition);
         }
         break;
 
       case INTAKING: // if the spindex is intaking
-        // if the lifter ramp is out, retract lifter ramp
-        if (rampServo.getPosition() == rampServoLiftPos) {
-          rampServo.setPosition(rampServoRetractedPos); // move lifter back to resting position
+        if (currentIndex == NULL) break; // nothing can be done without a valid index
+        // if the lifter is retracted and the spindex has not been set to the correct position
+        if (!isSpindexPosition(spindex[currentIndex].intakePosition) && lifter.isAtTarget()) {
+          spinner.setPosition(spindex[currentIndex].intakePosition);
         }
         break;
 
       case SHOOTING: // if the spindex is shooting
         if (currentIndex == NULL) break; // nothing can be done without a valid index
-        // if the lifter ramp is retracted, extend the lifter ramp
-        if (!isRampPosition(rampServoLiftPos) && getIsSpindexMoved()) {
-          setRampPosition(rampServoLiftPos); // move lifter ramp to extended position
+        // if the lifter is retracted and the spindex has not been set to the correct position
+        if (!isSpindexPosition(spindex[currentIndex].shootPosition) && lifter.isAtTarget()) {
+          spinner.setPosition(spindex[currentIndex].shootPosition);
         }
         break;
 
       case LIFTING: // if the spindex is lifting
         if (currentIndex == NULL) break; // nothing can be done without a valid index
-        // if the lifter ramp is extended (it *should* always be, but just in case)
-        if (rampServo.isAtTarget()) {
-          // if the spindex hasn't been set to the correct position yet
-          if (!isSpindexPosition(spindex[currentIndex].shootLiftPosition)) {
-            // move divider to force ball up ramp
-            setSpindexPosition(spindex[currentIndex].shootLiftPosition);
-
-          } else if (getIsSpindexMoved()) { // if the spindex is stationary at the correct position
-            spindex[currentIndex].color = BallColor.EMPTY; // spindex slot is now empty
-            state = SpindexState.LIFTED; // spindex in interim "lifted" mode
-          }
+        if (lifter.isAtTarget()) { // if lifter is fully extended
+          lifter.setPosition(lifterRetractedPos); // retract lifter
+          spindex[currentIndex].color = BallColor.EMPTY; // spindex slot is now empty
+          state = SpindexState.LIFTED; // spindex in interim "lifted" mode
         }
         break;
 
       case LIFTED: // if the spindex is lifted
-        if (currentIndex == NULL) break; // nothing can be done without a valid index
         // nothing needs to be done
         break;
 
@@ -184,8 +222,12 @@ public class Spindex {
    */
   public void moveSpindexIntake(int index) {
     if (index < 0 || index >= spindex.length) return; // return on invalid parameters
-    setRampPosition(rampServoRetractedPos); // retract lifter ramp
-    setSpindexPosition(spindex[index].intakePosition); // set spindex to new position
+    // retract lifter
+    lifter.setPosition(lifterRetractedPos);
+    if (lifter.isAtTarget()) { // if lifter is fully retracted
+      // set spindex to new position
+      spinner.setPosition(spindex[index].intakePosition);
+    }
     currentIndex = index; // set new index
     state = SpindexState.INTAKING; // spindex in intaking mode
   }
@@ -196,7 +238,12 @@ public class Spindex {
    */
   public void moveSpindexShoot(int index) {
     if (index < 0 || index >= spindex.length) return; // return on invalid parameters
-    setSpindexPosition(spindex[index].shootInsertPosition); // set spindex to new position
+    // retract lifter
+    lifter.setPosition(lifterRetractedPos);
+    if (lifter.isAtTarget()) { // if lifter is fully retracted
+      // set spindex to new position
+      spinner.setPosition(spindex[index].shootPosition);
+    }
     currentIndex = index; // set new index
     state = SpindexState.SHOOTING; // spindex in shooting mode
   }
@@ -208,12 +255,12 @@ public class Spindex {
    */
   public void moveSpindexIdle(int index) {
     if (index < 0 || index >= spindex.length) return; // return on invalid parameters
-    // if the lifter ramp is retracted
-    if (isRampPosition(rampServoRetractedPos) && rampServo.isAtTarget()) {
-      setSpindexPosition(spindex[index].idlePosition); // set spindex to new position
-
-    } else if (!isRampPosition(rampServoRetractedPos)) { // if the lifter ramp is extended
-      setRampPosition(rampServoRetractedPos); // retract lifter ramp
+    // retract lifter
+    lifter.setPosition(lifterRetractedPos);
+    // if the lifter is fully retracted
+    if (lifter.isAtTarget()) {
+      // set spindex to new position
+      spinner.setPosition(spindex[index].idlePosition);
     }
     currentIndex = index; // set new index
     state = SpindexState.IDLE; // spindex in idle mode
@@ -228,7 +275,7 @@ public class Spindex {
    */
   public boolean storeIntakeColor() {
     // if spindex isn't stationary at an intake position, return false
-    if (state != SpindexState.INTAKING || !getIsSpindexMoved()) return false;
+    if (state != SpindexState.INTAKING || !isAtTarget()) return false;
 
     setSpindexIndexColor(currentIndex, intakeColor);
     return true;
@@ -236,32 +283,41 @@ public class Spindex {
 
   /**
    * @brief starts lifting a ball into the turret
-   * @note most of this operation is actually handled by regular calls to update()
    */
   public boolean liftBall() {
-    // if the spindex is not stationary at a valid shooting position, we cannot lift a ball
-    if (state != SpindexState.SHOOTING || currentIndex == NULL || !getIsSpindexMoved())
-      return false;
+    // if the spindex is not stationary at a valid shooting position, or the lifter is not
+    // retracted, we cannot lift a ball
+    if (state != SpindexState.SHOOTING || currentIndex == NULL || !isAtTarget()) return false;
 
-    // if the lifter ramp isn't extended, extend it (this shouldn't happen, but just in case)
-    if (!isRampPosition(rampServoLiftPos)) {
-      setRampPosition(rampServoLiftPos);
-
-    } else if (rampServo.isAtTarget()) {
-      // ^ if the lifter ramp is extended, move the divider to force balls up it
-      setSpindexPosition(spindex[currentIndex].shootLiftPosition); // start moving the spindex
-    }
+    lifter.setPosition(lifterExtendedPos);
 
     state = SpindexState.LIFTING; // spindex in lifting mode
     return true; // we can lift (and are lifting) a ball
   }
 
   /**
-   * @brief returns if the spindex is finished moving
-   * @return true if the spindex is stationary, false if the spindex is moving
+   * @brief returns if the spindex is at its target position
+   * @return true if the spindex is at its target angle and set to the correct target angle for the
+   * mode the spindex is in, false otherwise
    */
-  public boolean getIsSpindexMoved() {
-    return spinServo.isAtTarget();
+  public boolean isAtTarget() {
+    boolean isSet = true;
+    double targetPosition = spinner.getTargetPosition();
+    switch (state) {
+      case IDLE:
+        if (targetPosition != spindex[currentIndex].idlePosition) isSet = false;
+        break;
+
+      case INTAKING:
+        if (targetPosition != spindex[currentIndex].intakePosition) isSet = false;
+        break;
+
+      case SHOOTING:
+        if (targetPosition != spindex[currentIndex].shootPosition) isSet = false;
+        break;
+    }
+
+    return spinner.isAtTarget() && isSet;
   }
 
   /**
@@ -345,32 +401,16 @@ public class Spindex {
    * @return true if the spindex is stationary and in shooting mode, false otherwise
    */
   public boolean isReadyToShoot() {
-    return state == SpindexState.SHOOTING && getIsSpindexMoved() && currentIndex != NULL;
+    return state == SpindexState.SHOOTING && isAtTarget() && currentIndex != NULL;
   }
 
   /**
-   * @brief sets the position of the ramp that lifts the ball into the turret
-   * @param position the position (degrees) to set the ramp servo to
+   * @brief checks if the lifter is at a specified position
+   * @param positionToCheck the position to compare against the lifter's target position
+   * @return true if the lifter's target is the same as the specified position, false otherwise
    */
-  private void setRampPosition(double position) {
-    rampServo.setPosition(position);
-  }
-
-  /**
-   * @brief checks if the ramp is at a specified position
-   * @param positionToCheck the position to compare against the ramp's target position
-   * @return true if the ramp's target is the same as the specified position, false otherwise
-   */
-  private boolean isRampPosition(double positionToCheck) {
-    return rampServo.getPosition() == positionToCheck;
-  }
-
-  /**
-   * @brief sets the position of the spindex
-   * @param position the position (degrees) to set the spindex servos to
-   */
-  private void setSpindexPosition(double position) {
-    spinServo.setPosition(position);
+  private boolean isLifterPosition(double positionToCheck) {
+    return lifter.getTargetPosition() == positionToCheck;
   }
 
   /**
@@ -380,7 +420,7 @@ public class Spindex {
    *     otherwise
    */
   private boolean isSpindexPosition(double positionToCheck) {
-    return spinServo.getTargetPosition() == positionToCheck;
+    return spinner.getTargetPosition() == positionToCheck;
   }
 
   /**

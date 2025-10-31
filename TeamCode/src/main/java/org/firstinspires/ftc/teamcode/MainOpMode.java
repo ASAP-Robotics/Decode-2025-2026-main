@@ -19,7 +19,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -34,34 +33,12 @@ import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
-import org.firstinspires.ftc.teamcode.hardware.servos.EncoderServo;
-import org.firstinspires.ftc.teamcode.hardware.servos.MonodirectionalDualServo;
+import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 @TeleOp(name = "Main TeliOp", group = "Drive")
 public class MainOpMode extends LinearOpMode {
-  private DcMotorEx frontLeft,
-      frontRight,
-      backLeft,
-      backRight,
-      flywheelMotor,
-      intakeMotor,
-      turretRotator;
-  private Servo rawRampServo, turretHood;
-  private CRServo rawMagServo1, rawMagServo2;
-  private AnalogInput magServoEncoder, rampServoEncoder;
-  private MonodirectionalDualServo magServo;
-  private EncoderServo rampServo;
-  private GoBildaPinpointDriver pinpoint;
-  private ColorSensor colorSensor;
-  private DistanceSensor distanceSensor;
-  private Turret turret;
-  private ActiveIntake intake;
-  private Spindex spindex;
-  private Camera camera;
-  private ScoringSystem mag;
-  private MecanumWheelBase wheelBase;
   private boolean fieldCentric = false; // if control will be field-centric
 
   @Override
@@ -69,19 +46,19 @@ public class MainOpMode extends LinearOpMode {
     BallSequence wantedSequence = BallSequence.PGP; // the sequence we want to shoot
 
     // Initialize motors/servos/sensors
-    frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
-    frontRight = hardwareMap.get(DcMotorEx.class, "rightFront");
-    backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
-    backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
+    DcMotorEx frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
+    DcMotorEx frontRight = hardwareMap.get(DcMotorEx.class, "rightFront");
+    DcMotorEx backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
+    DcMotorEx backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
 
-    turretRotator = hardwareMap.get(DcMotorEx.class, "turretRotator");
-    flywheelMotor = hardwareMap.get(DcMotorEx.class, "flywheel");
-    intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
+    DcMotorEx turretRotator = hardwareMap.get(DcMotorEx.class, "turretRotator");
+    DcMotorEx flywheelMotor = hardwareMap.get(DcMotorEx.class, "flywheel");
+    DcMotorEx intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
 
-    distanceSensor = hardwareMap.get(DistanceSensor.class, "colorSensor");
-    colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+    DistanceSensor distanceSensor = hardwareMap.get(DistanceSensor.class, "colorSensor");
+    ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
 
-    pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+    GoBildaPinpointDriver pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
     // the following is temporary; TODO: remove once Auto code configures stuff
     pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
     pinpoint.setEncoderDirections(
@@ -89,33 +66,39 @@ public class MainOpMode extends LinearOpMode {
         GoBildaPinpointDriver.EncoderDirection.FORWARD);
     pinpoint.resetPosAndIMU(); // TODO: only calibrate IMU once Auto code configures stuff
 
-    turretHood = hardwareMap.get(Servo.class, "turretHood");
-    rawRampServo = hardwareMap.get(Servo.class, "feeder");
+    Servo turretHood = hardwareMap.get(Servo.class, "turretHood");
+    Servo rawLifterServo1 = hardwareMap.get(Servo.class, "lifter1");
+    Servo rawLifterServo2 = hardwareMap.get(Servo.class, "lifter2");
+    Servo rawMagServo1 = hardwareMap.get(Servo.class, "magServo1");
+    Servo rawMagServo2 = hardwareMap.get(Servo.class, "magServo2");
 
-    rawMagServo1 = hardwareMap.get(CRServo.class, "magServo1");
-    rawMagServo2 = hardwareMap.get(CRServo.class, "magServo2");
+    AnalogInput magServoEncoder = hardwareMap.get(AnalogInput.class, "magServoEncoder");
+    AnalogInput lifterServoEncoder = hardwareMap.get(AnalogInput.class, "rampServoEncoder");
 
-    magServoEncoder = hardwareMap.get(AnalogInput.class, "magServoEncoder");
-    rampServoEncoder = hardwareMap.get(AnalogInput.class, "rampServoEncoder");
+    Axon magServo1 = new Axon(rawMagServo1, magServoEncoder);
+    Axon magServo2 = new Axon(rawMagServo2, magServoEncoder);
+    Axon lifterServo1 = new Axon(rawLifterServo1, lifterServoEncoder);
+    Axon lifterServo2 = new Axon(rawLifterServo2, lifterServoEncoder);
 
-    magServo = new MonodirectionalDualServo(rawMagServo1, rawMagServo2, magServoEncoder);
-    rampServo = new EncoderServo(rawRampServo, rampServoEncoder);
+    Turret turret = new Turret(flywheelMotor, turretRotator, turretHood);
 
-    turret = new Turret(flywheelMotor, turretRotator, turretHood);
-    intake = new ActiveIntake(intakeMotor);
-    spindex = new Spindex(magServo, rampServo, colorSensor, distanceSensor);
-    camera =
-        new Camera(
-            hardwareMap,
-            "camera",
-            new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0),
-            AllianceColor.RED); // placeholder TODO: update
+    ActiveIntake intake = new ActiveIntake(intakeMotor);
 
-    mag = new ScoringSystem(intake, turret, spindex, camera, wantedSequence, telemetry);
+    Spindex spindex =
+        new Spindex(magServo1, magServo2, lifterServo1, lifterServo2, colorSensor, distanceSensor);
+
+    Camera camera = new Camera(
+        hardwareMap,
+        "camera",
+        new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0),
+        AllianceColor.RED); // placeholder TODO: update
+
+    ScoringSystem mag =
+        new ScoringSystem(intake, turret, spindex, camera, wantedSequence, telemetry);
     mag.init(false); // initialize scoring systems | after auto, mag is empty
     mag.setTargetDistance(100); // PLACEHOLDER
 
-    wheelBase = new MecanumWheelBase(frontLeft, frontRight, backLeft, backRight);
+    MecanumWheelBase wheelBase = new MecanumWheelBase(frontLeft, frontRight, backLeft, backRight);
 
     waitForStart();
 
