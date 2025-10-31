@@ -110,9 +110,9 @@ public class Spindex {
   private final double lifterExtendedPos =
       0.3; // the position of the lift servo when shooting | TODO: tune
   private final SpindexSlot[] spindex = {
-    new SpindexSlot(0.0, 0.33, 0.165), // slot 0 | TODO: tune
-    new SpindexSlot(0.33, 0.66, 0.495), // slot 1 | TODO: tune
-    new SpindexSlot(0.66, 0.00, 0.835) // slot 2 | TODO: tune
+      new SpindexSlot(0.0, 120.0, 60.0), // slot 0 | TODO: tune
+      new SpindexSlot(120.0, 240.0, 180.0), // slot 1 | TODO: tune
+      new SpindexSlot(240.0, 0.00, 300) // slot 2 | TODO: tune
   };
 
   private SpindexState state; // the current state of the spindex
