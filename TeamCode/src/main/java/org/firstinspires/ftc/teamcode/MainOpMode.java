@@ -62,7 +62,6 @@ public class MainOpMode extends LinearOpMode {
   private Camera camera;
   private ScoringSystem mag;
   private MecanumWheelBase wheelBase;
-  private boolean fieldCentric = false; // if control will be field-centric
 
   @Override
   public void runOpMode() {
@@ -129,28 +128,30 @@ public class MainOpMode extends LinearOpMode {
       // update scoring systems
       mag.update();
 
-      // control mode toggle
-      if (gamepad1.xWasPressed()) { // rising edge
-        fieldCentric = !fieldCentric; // flip the state
-        wheelBase.setFieldCentric(fieldCentric);
+      // emergency eject
+      if (gamepad1.bWasPressed()) {
+        mag.emergencyEject(); // eject intake at full power for a short time
       }
 
       // shoot
-      if (gamepad1.right_trigger > 0.25) {
+      if (gamepad1.rightBumperWasPressed()) {
         mag.shootMag(wantedSequence); // shoot all balls in the mag, in a sequence if possible
       }
 
-      // fil mag
+      // intake
       if (gamepad1.aWasPressed()) {
         mag.fillMagUnsorted(); // fill the mag with any three balls
 
-      } else if (gamepad1.bWasPressed()) {
+      } else if (gamepad1.xWasPressed()) {
         mag.fillMagSorted(); // fill the mag with 1 green and 2 purple balls
+
+      } else if (gamepad1.yWasPressed()) {
+        mag.intakeBall(); // intake one ball into mag
       }
 
       // update wheelbase
       wheelBase.setRotation(location.getHeading(AngleUnit.DEGREES)); // for field-centric control
-      wheelBase.setThrottle(gamepad1.right_stick_x, -gamepad1.right_stick_y, gamepad1.left_stick_x);
+      wheelBase.setThrottle(gamepad1.right_stick_x, gamepad1.right_stick_y, gamepad1.left_stick_x);
 
       // update telemetry
       telemetry.update();
