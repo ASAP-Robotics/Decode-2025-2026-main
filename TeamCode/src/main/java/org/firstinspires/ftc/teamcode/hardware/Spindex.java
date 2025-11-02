@@ -388,7 +388,7 @@ public class Spindex {
    */
   public BallColor getIndexColor(int index) {
     if (index < 0 || index >= spindex.length)
-      return BallColor.UNKNOWN; // return on invalid parameters
+      return BallColor.INVALID; // return on invalid parameters
     return spindex[index].color; // return color of ball at index
   }
 

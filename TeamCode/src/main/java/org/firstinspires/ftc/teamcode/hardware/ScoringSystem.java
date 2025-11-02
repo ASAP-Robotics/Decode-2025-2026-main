@@ -269,7 +269,7 @@ public class ScoringSystem {
       // ^ if the intake is trying to intake a (single) ball
       BallColor intakeColor =
           spindex.getIntakeColor(); // get the color of ball (if any) in the intake position
-      if (intakeColor != BallColor.EMPTY) { // if a ball is in the intake position
+      if (intakeColor.isShootable()) { // if a ball is in the intake position
         intake.stop(); // stop the intake
         spindex.storeIntakeColor(); // record the color of the ball taken in
       }
