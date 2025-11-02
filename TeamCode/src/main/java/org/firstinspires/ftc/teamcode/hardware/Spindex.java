@@ -217,7 +217,7 @@ public class Spindex {
    * @brief moves the specified spindex index to its intake position
    */
   public void moveSpindexIntake(int index) {
-    if (index < 0 || index >= spindex.length) return; // return on invalid parameters
+    if (!isIndexValid(index)) return; // return on invalid parameters
     // retract lifter
     lifter.setPosition(lifterRetractedPos);
     if (lifter.isAtTarget()) { // if lifter is fully retracted
@@ -233,7 +233,7 @@ public class Spindex {
    * @brief moves the specified spindex index to its shooting position
    */
   public void moveSpindexShoot(int index) {
-    if (index < 0 || index >= spindex.length) return; // return on invalid parameters
+    if (!isIndexValid(index)) return; // return on invalid parameters
     // retract lifter
     lifter.setPosition(lifterRetractedPos);
     if (lifter.isAtTarget()) { // if lifter is fully retracted
@@ -250,7 +250,7 @@ public class Spindex {
    * @note idle position is offset by half a slot such that balls cannot exit the spindex
    */
   public void moveSpindexIdle(int index) {
-    if (index < 0 || index >= spindex.length) return; // return on invalid parameters
+    if (!isIndexValid(index)) return; // return on invalid parameters
     // retract lifter
     lifter.setPosition(lifterRetractedPos);
     // if the lifter is fully retracted
@@ -369,6 +369,8 @@ public class Spindex {
    *     mag
    */
   public int getColorIndex(BallColor color) {
+    if (color == null) return NULL; // return on invalid arguments
+
     int toReturn = NULL;
 
     for (int i = 0; i < spindex.length; i++) { // for each spindex slot
@@ -387,8 +389,7 @@ public class Spindex {
    * @return the color of ball in the given index in the spindex
    */
   public BallColor getIndexColor(int index) {
-    if (index < 0 || index >= spindex.length)
-      return BallColor.INVALID; // return on invalid parameters
+    if (!isIndexValid(index)) return BallColor.INVALID; // return on invalid parameters
     return spindex[index].color; // return color of ball at index
   }
 
@@ -397,7 +398,17 @@ public class Spindex {
    * @return true if the spindex is stationary and in shooting mode, false otherwise
    */
   public boolean isReadyToShoot() {
-    return state == SpindexState.SHOOTING && isAtTarget() && currentIndex != NULL;
+    return state == SpindexState.SHOOTING && isAtTarget() && isIndexValid(currentIndex);
+  }
+
+  /**
+   * @brief gets if a spindex index is valid
+   * @param index the spindex index to check
+   * @return true if the index is contained in the spindex, false if the index is invalid
+   * @note this method should always return false if passed -1 (NULL)
+   */
+  public boolean isIndexValid(int index) {
+    return index >= 0 && index < spindex.length;
   }
 
   /**
