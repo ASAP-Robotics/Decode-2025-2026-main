@@ -17,8 +17,19 @@
 package org.firstinspires.ftc.teamcode.types;
 
 public enum BallColor {
-  GREEN,
-  PURPLE,
-  EMPTY,
-  UNKNOWN
+  GREEN(true),
+  PURPLE(true),
+  EMPTY(false),
+  UNKNOWN(false),
+  INVALID(false);
+
+  private final boolean shootable;
+
+  BallColor(boolean shootable) {
+    this.shootable = shootable;
+  }
+
+  public boolean isShootable() {
+    return shootable;
+  }
 }
