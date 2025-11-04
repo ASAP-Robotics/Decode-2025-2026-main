@@ -39,28 +39,6 @@ import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 @TeleOp(name = "Main TeliOp", group = "Drive")
 public class MainOpMode extends LinearOpMode {
-  private DcMotorEx frontLeft,
-      frontRight,
-      backLeft,
-      backRight,
-      flywheelMotor,
-      intakeMotor,
-      turretRotator;
-  private Servo rawRampServo, turretHood;
-  private CRServo rawMagServo1, rawMagServo2;
-  private AnalogInput magServoEncoder, rampServoEncoder;
-  private MonodirectionalDualServo magServo;
-  private EncoderServo rampServo;
-  private GoBildaPinpointDriver pinpoint;
-  private ColorSensor colorSensor;
-  private DistanceSensor distanceSensor;
-  private Turret turret;
-  private ActiveIntake intake;
-  private Spindex spindex;
-  private Camera camera;
-  private ScoringSystem mag;
-  private MecanumWheelBase wheelBase;
-
   @Override
   public void runOpMode() {
     BallSequence wantedSequence = BallSequence.PGP; // the sequence we want to shoot
