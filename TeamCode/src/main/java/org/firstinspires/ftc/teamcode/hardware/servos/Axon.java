@@ -16,10 +16,9 @@
 
 package org.firstinspires.ftc.teamcode.hardware.servos;
 
-import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
-
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -94,7 +93,16 @@ public class Axon {
    * @return the current position of the servo, in degrees (from 0 to 360)
    */
   public double getPosition() {
-    return min(360, max(0, map(360 - ((encoder.getVoltage() / 3.3) * 360), 20, 340, 0, 360))); // 0v = 0 degrees, 3.3v = 360 degrees
+    return min(
+        360,
+        max(
+            0,
+            map(
+                360 - ((encoder.getVoltage() / 3.3) * 360),
+                20,
+                340,
+                0,
+                360))); // 0v = 0 degrees, 3.3v = 360 degrees
   }
 
   /**
