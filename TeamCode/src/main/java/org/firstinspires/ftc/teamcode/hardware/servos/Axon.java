@@ -16,16 +16,19 @@
 
 package org.firstinspires.ftc.teamcode.hardware.servos;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
+
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /**
  * @brief wrapper around the `Servo` class to add encoder feedback
  */
-public class EncoderServo {
+public class Axon {
   private Servo servo; // the servo being controlled
   private AnalogInput encoder; // the encoder of the servo being controlled
-
   private double toleranceDegrees;
 
   /**
@@ -33,8 +36,8 @@ public class EncoderServo {
    * @param servo the servo to control
    * @param encoder the encoder of the servo being controlled
    */
-  public EncoderServo(Servo servo, AnalogInput encoder) {
-    this(servo, encoder, 2.5);
+  public Axon(Servo servo, AnalogInput encoder) {
+    this(servo, encoder, 5);
   }
 
   /**
@@ -44,7 +47,7 @@ public class EncoderServo {
    * @param toleranceDegrees the amount the angle read can differ from the target angle and the
    *     servo still be considered "at target"
    */
-  public EncoderServo(Servo servo, AnalogInput encoder, double toleranceDegrees) {
+  public Axon(Servo servo, AnalogInput encoder, double toleranceDegrees) {
     this.servo = servo;
     this.encoder = encoder;
     this.toleranceDegrees = toleranceDegrees;
@@ -73,7 +76,7 @@ public class EncoderServo {
    * @param degrees
    */
   public void setPosition(double degrees) {
-    servo.setPosition(degrees);
+    servo.setPosition(degrees / 360);
   }
 
   /**
@@ -82,7 +85,7 @@ public class EncoderServo {
    * @note this method doesn't return the *current position*, it returns the *target position*
    */
   public double getTargetPosition() {
-    return servo.getPosition();
+    return servo.getPosition() * 360;
   }
 
   /**
@@ -90,7 +93,16 @@ public class EncoderServo {
    * @return the current position of the servo, in degrees (from 0 to 360)
    */
   public double getPosition() {
-    return (encoder.getVoltage() / 3.3) * 360; // 0v = 0 degrees, 3.3v = 360 degrees
+    return min(
+        360,
+        max(
+            0,
+            map(
+                360 - ((encoder.getVoltage() / 3.3) * 360),
+                20,
+                340,
+                0,
+                360))); // 0v = 0 degrees, 3.3v = 360 degrees
   }
 
   /**

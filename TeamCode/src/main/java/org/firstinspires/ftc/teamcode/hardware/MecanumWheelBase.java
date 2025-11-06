@@ -160,7 +160,7 @@ public class MecanumWheelBase {
    * @note input must be between 1 and -1, values below 0 reverse direction
    */
   public void setThrottleY(double y, boolean update) {
-    rawThrottleY = y;
+    rawThrottleY = -y;
     if (update) update();
   }
 
