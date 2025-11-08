@@ -19,7 +19,6 @@ package org.firstinspires.ftc.teamcode.hardware;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
-import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   protected abstract static class LookupTableItem {
@@ -50,6 +49,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
 
   private final double SPEED_TOLERANCE =
       0.95; // think of as the percentage of the target speed the flywheel needs to reach to be "at
+
   // target speed"
 
   /**
@@ -213,7 +213,8 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   /**
    * @brief sets the distance to the target
    * @param distance the new distance to the target, in arbitrary units
-   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead of distance
+   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   *     of distance
    */
   public void setTargetDistance(double distance) {
     targetDistance = distance; // set the new distance target
@@ -298,7 +299,8 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @brief gets the RPM for a given distance from the lookup table
    * @param distance the target distance to get flywheel RPM for
    * @return the flywheel RPM for the given distance
-   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead of distance
+   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   *     of distance
    */
   protected double getRPMLookup(double distance) {
     int indexOver = LOOKUP_TABLE.length - 1;
@@ -311,7 +313,8 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
       }
     }
 
-    return MathUtils.map(distance,
+    return MathUtils.map(
+        distance,
         LOOKUP_TABLE[indexUnder].getDistance(),
         LOOKUP_TABLE[indexOver].getDistance(),
         LOOKUP_TABLE[indexUnder].getRpm(),

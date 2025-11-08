@@ -410,7 +410,8 @@ public class ScoringSystem {
         spindex.liftBall();
       }
 
-    } else if (spindex.getState() == Spindex.SpindexState.LIFTED || spindex.getIndex() != indexToShoot) {
+    } else if (spindex.getState() == Spindex.SpindexState.LIFTED
+        || spindex.getIndex() != indexToShoot) {
       // ^ spindex is done lifting ball, or hasn't been set yet
       indexToShoot = spindex.getColorIndex(ballSequence.getBallColors()[sequenceIndex++]);
 
@@ -448,7 +449,8 @@ public class ScoringSystem {
       }
 
     } else if (spindex.getState() == Spindex.SpindexState.LIFTED
-        || (spindex.getIndex() != indexToShoot && spindex.getState() != Spindex.SpindexState.SHOOTING)) {
+        || (spindex.getIndex() != indexToShoot
+            && spindex.getState() != Spindex.SpindexState.SHOOTING)) {
       // ^ spindex is done lifting ball, or hasn't been set yet
       if (spindex.isIndexValid(indexToShoot)) {
         // ^ spindex isn't empty

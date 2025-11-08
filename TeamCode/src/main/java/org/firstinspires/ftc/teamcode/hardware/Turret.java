@@ -18,7 +18,6 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 
 public class Turret extends Flywheel<Turret.LookupTableItem> {
@@ -45,6 +44,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
       return angle;
     }
   }
+
   // number of teeth on the gear attached to the turret
   public static final double TURRET_GEAR_TEETH = 121;
   // number of teeth on the gear attached to the motor
@@ -67,10 +67,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.ticksPerDegree = this.rotator.getMotorType().getTicksPerRev() / 360;
   }
 
-  public Turret(
-      DcMotorEx flywheelMotor,
-      DcMotorEx rotator,
-      Servo hoodServo) {
+  public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Servo hoodServo) {
     this(flywheelMotor, rotator, hoodServo, 500);
   }
 
@@ -80,16 +77,16 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    */
   protected LookupTableItem[] fillLookupTable() {
     return new LookupTableItem[] {
-        new LookupTableItem(0.5, 6000, 0),
-        new LookupTableItem(0.45, 5500, 1),
-        new LookupTableItem(0.4, 5000, 2),
-        new LookupTableItem(0.35, 4500, 3),
-        new LookupTableItem(0.3, 4000, 4),
-        new LookupTableItem(0.25, 3500, 5),
-        new LookupTableItem(0.2, 3000, 6),
-        new LookupTableItem(0.15, 2500, 7),
-        new LookupTableItem(0.1, 2000, 8),
-        new LookupTableItem(0.05, 1500, 9),
+      new LookupTableItem(0.5, 6000, 0),
+      new LookupTableItem(0.45, 5500, 1),
+      new LookupTableItem(0.4, 5000, 2),
+      new LookupTableItem(0.35, 4500, 3),
+      new LookupTableItem(0.3, 4000, 4),
+      new LookupTableItem(0.25, 3500, 5),
+      new LookupTableItem(0.2, 3000, 6),
+      new LookupTableItem(0.15, 2500, 7),
+      new LookupTableItem(0.1, 2000, 8),
+      new LookupTableItem(0.05, 1500, 9),
     }; // placeholder values; TODO: tune
   }
 
@@ -108,7 +105,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   /**
    * @brief sets the distance to the target
    * @param distance the new distance to the target, in arbitrary units
-   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead of distance
+   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   *     of distance
    */
   @Override
   public void setTargetDistance(double distance) {
@@ -186,7 +184,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @brief gets the angle for a given distance from the lookup table
    * @param distance the distance to get the angle for
    * @return servo angle for the given distance
-   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead of distance
+   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   *     of distance
    */
   protected double getAngleLookup(double distance) {
     int indexOver = LOOKUP_TABLE.length - 1;
@@ -199,7 +198,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
       }
     }
 
-    return MathUtils.map(distance,
+    return MathUtils.map(
+        distance,
         LOOKUP_TABLE[indexUnder].getDistance(),
         LOOKUP_TABLE[indexOver].getDistance(),
         LOOKUP_TABLE[indexUnder].getAngle(),
