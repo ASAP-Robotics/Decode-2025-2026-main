@@ -166,10 +166,11 @@ public class Spindex {
   public void update() {
     updateIntakeColor();
 
+    if (!isIndexValid(currentIndex)) state = SpindexState.UNINITIALIZED; // shouldn't happen
+
     // do something different depending on the spindex state / mode
     switch (state) {
       case IDLE: // if the spindex is idle
-        if (currentIndex == NULL) break; // nothing can be done without a valid index
         // if the lifter is retracted and the spindex has not been set to the correct position
         if (!isSpindexPosition(spindex[currentIndex].idlePosition) && lifter.isAtTarget()) {
           // move spindex to idle position
@@ -178,7 +179,6 @@ public class Spindex {
         break;
 
       case INTAKING: // if the spindex is intaking
-        if (currentIndex == NULL) break; // nothing can be done without a valid index
         // if the lifter is retracted and the spindex has not been set to the correct position
         if (!isSpindexPosition(spindex[currentIndex].intakePosition) && lifter.isAtTarget()) {
           spinner.setPosition(spindex[currentIndex].intakePosition);
@@ -186,7 +186,6 @@ public class Spindex {
         break;
 
       case SHOOTING: // if the spindex is shooting
-        if (currentIndex == NULL) break; // nothing can be done without a valid index
         // if the lifter is retracted and the spindex has not been set to the correct position
         if (!isSpindexPosition(spindex[currentIndex].shootPosition) && lifter.isAtTarget()) {
           spinner.setPosition(spindex[currentIndex].shootPosition);
@@ -194,7 +193,6 @@ public class Spindex {
         break;
 
       case LIFTING: // if the spindex is lifting
-        if (currentIndex == NULL) break; // nothing can be done without a valid index
         if (lifter.isAtTarget()) { // if lifter is fully extended
           lifter.setPosition(lifterRetractedPos); // retract lifter
           spindex[currentIndex].color = BallColor.EMPTY; // spindex slot is now empty
@@ -292,9 +290,9 @@ public class Spindex {
   }
 
   /**
-   * @brief returns if the spindex is at its target position
+   * @brief returns if the spindex is at its target position (in a "idle" or inactive state)
    * @return true if the spindex is at its target angle and set to the correct target angle for the
-   *     mode the spindex is in, false otherwise
+   *     mode the spindex is in and the lifter is at its target, false otherwise
    */
   public boolean isAtTarget() {
     boolean isSet = true;
@@ -311,9 +309,13 @@ public class Spindex {
       case SHOOTING:
         if (targetPosition != spindex[currentIndex].shootPosition) isSet = false;
         break;
+
+      case LIFTING:
+        isSet = false;
+        break;
     }
 
-    return spinner.isAtTarget() && isSet;
+    return spinner.isAtTarget() && lifter.isAtTarget() && isSet;
   }
 
   /**
@@ -337,7 +339,7 @@ public class Spindex {
    * @brief returns an array of the colors of ball in the spindex
    * @return a newly constructed array of the colors of ball in each slot of the spindex
    */
-  public BallColor[] getSpindexColor() {
+  public BallColor[] getSpindexContents() {
     BallColor[] toReturn = new BallColor[spindex.length];
     for (int i = 0; i < spindex.length; i++) {
       toReturn[i] = spindex[i].color;

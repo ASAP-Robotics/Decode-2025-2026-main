@@ -19,9 +19,22 @@ package org.firstinspires.ftc.teamcode.hardware;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
-import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
-public class Flywheel {
+public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
+  protected abstract static class LookupTableItem {
+    /**
+     * @brief gets the distance associated with this lookup table entry
+     * @return the distance the values in this lookup table entry were tuned for
+     */
+    public abstract double getDistance();
+
+    /**
+     * @brief gets the flywheel rpm associated with this lookup table entry
+     * @return the rpm the flywheel should spin at
+     */
+    public abstract double getRpm();
+  }
+
   private final DcMotorEx flywheel;
   private final double motorTicksPerRev; // ticks per revolution of flywheel motor
   protected boolean isEnabled = false; // if the flywheel is enabled
@@ -31,19 +44,8 @@ public class Flywheel {
   private double currentSpeed = 0; // the latest speed (RPM) of the flywheel
   private double targetDistance = 0; // the distance (inches) to the target
   private boolean containsBall = false; // if the flywheel has a ball in it that it is shooting
-  // timer to keep flywheel on while shooting a ball
-  private final org.firstinspires.ftc.teamcode.utils.SimpleTimer shotTimer;
 
-  // these arrays constitute a lookup table for finding the correct flywheel RPM for a distance
-  // the distance values need to be in ascending order, or things will break
-  // the two array MUST be the same length, or things will break
-  private static final double[] DISTANCES = {
-    5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100
-  }; // placeholder values TODO: tune
-  private static final double[] RPMs = {
-    1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000,
-    5250, 5500, 5750, 6000
-  }; // placeholder values TODO: tune
+  protected T[] LOOKUP_TABLE; // lookup table of distance, rpm, etc.
 
   private final double SPEED_TOLERANCE =
       0.95; // think of as the percentage of the target speed the flywheel needs to reach to be "at
@@ -51,22 +53,14 @@ public class Flywheel {
   // target speed"
 
   /**
-   * @brief makes an object of the Flywheel class with and idle speed of 500 RPM
-   * @param motor the motor used for the flywheel
-   */
-  public Flywheel(DcMotorEx motor) {
-    this(
-        motor, 500,
-        1); // make a Flywheel with an idle speed of 500 RPM and a shot time of one second
-  }
-
-  /**
    * @brief makes an object of the Flywheel class
    * @param motor the motor used for the flywheel
    * @param idleSpeed the speed of the flywheel when idling (RPM)
    */
-  public Flywheel(DcMotorEx motor, double idleSpeed, double shotTimeSeconds) {
+  public Flywheel(DcMotorEx motor, double idleSpeed) {
     this.flywheel = motor;
+    this.idleSpeed = idleSpeed; // set the speed of the flywheel at idle
+    this.LOOKUP_TABLE = fillLookupTable();
     // set motor to use speed-based control
     this.flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     // set motor to spin freely if set to 0% power
@@ -74,9 +68,13 @@ public class Flywheel {
     // set motor to spin forwards
     this.flywheel.setDirection(DcMotor.Direction.FORWARD);
     motorTicksPerRev = this.flywheel.getMotorType().getTicksPerRev(); // get ticks per rev
-    this.idleSpeed = idleSpeed; // set the speed of the flywheel at idle
-    shotTimer = new SimpleTimer(shotTimeSeconds);
   }
+
+  /**
+   * @brief fills the lookup table
+   * @return the full lookup table
+   */
+  protected abstract T[] fillLookupTable();
 
   /**
    * @brief returns if the flywheel is fully up to speed
@@ -92,6 +90,7 @@ public class Flywheel {
    * @return true if a ball is in the flywheel, false if the flywheel is empty
    * @note no actual detection of if the flywheel contains a ball is done
    */
+  @Deprecated
   public boolean containsBall() {
     return containsBall;
   }
@@ -101,8 +100,9 @@ public class Flywheel {
    * @return true if the turret contained a ball, and the shot timer finished since last call
    * @note no actual detection of if the flywheel contains a ball is done
    */
+  @Deprecated
   public boolean ballLeft() {
-    if (containsBall && shotTimer.isFinished()) {
+    if (containsBall) {
       containsBall = false;
       return true;
     }
@@ -114,9 +114,8 @@ public class Flywheel {
    * @brief sets that a ball is in the flywheel
    * @note no actual detection of if the flywheel contains a ball is done
    */
+  @Deprecated
   public void setContainsBall() {
-    // start shot timer if the turret now contains a ball
-    if (!containsBall) shotTimer.start();
     containsBall = true;
   }
 
@@ -213,14 +212,13 @@ public class Flywheel {
 
   /**
    * @brief sets the distance to the target
-   * @param distInches the new distance to the target, in inches
-   * @return the old distance to the target, in inches
+   * @param distance the new distance to the target, in arbitrary units
+   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   *     of distance
    */
-  public double setTargetDistance(double distInches) {
-    double toReturn = targetDistance; // store the old distance target
-    targetDistance = distInches; // set the new distance target
+  public void setTargetDistance(double distance) {
+    targetDistance = distance; // set the new distance target
     update(); // apply any changes
-    return toReturn; // return the old distance target
   }
 
   /**
@@ -274,7 +272,7 @@ public class Flywheel {
    * @note use `setTargetDistance()` to set the distance from the target
    */
   private void startMotor() {
-    double rpm = rpmForDistance(targetDistance);
+    double rpm = getRPMLookup(targetDistance);
     double ticksPerSec = (rpm / 60.0) * motorTicksPerRev;
     targetSpeed = rpm; // store target speed
 
@@ -298,39 +296,28 @@ public class Flywheel {
   }
 
   /**
-   * @brief finds the correct flywheel speed to hit a target a specified distance away
-   * @param Rin the target distance in inches
-   * @return the correct flywheel RPM to hit the target
-   * @note Core math: distance (in) → wheel RPM, including efficiency loss
-   */
-  private double rpmForDistance(double Rin) {
-    return getRPMLookup(Rin);
-  }
-
-  /**
    * @brief gets the RPM for a given distance from the lookup table
-   * @param distanceInches the target distance to get flywheel RPM for
+   * @param distance the target distance to get flywheel RPM for
    * @return the flywheel RPM for the given distance
+   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   *     of distance
    */
-  private double getRPMLookup(double distanceInches) {
-    int indexOver = DISTANCES.length - 1;
+  protected double getRPMLookup(double distance) {
+    int indexOver = LOOKUP_TABLE.length - 1;
     int indexUnder = 0;
-    for (int i = 0; i < DISTANCES.length; i++) {
-      if (DISTANCES[i] >= distanceInches) {
+    for (int i = 0; i < LOOKUP_TABLE.length; i++) {
+      if (LOOKUP_TABLE[i].getDistance() >= distance) {
         indexOver = i;
         indexUnder = indexOver - 1; // assuming values go from low to high
         break;
       }
     }
 
-    double toReturn =
-        MathUtils.map(
-            distanceInches,
-            DISTANCES[indexUnder],
-            DISTANCES[indexOver],
-            RPMs[indexUnder],
-            RPMs[indexOver]);
-
-    return toReturn;
+    return MathUtils.map(
+        distance,
+        LOOKUP_TABLE[indexUnder].getDistance(),
+        LOOKUP_TABLE[indexOver].getDistance(),
+        LOOKUP_TABLE[indexUnder].getRpm(),
+        LOOKUP_TABLE[indexOver].getRpm());
   }
 }
