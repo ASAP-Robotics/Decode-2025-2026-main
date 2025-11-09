@@ -16,6 +16,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -29,6 +30,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
 import org.firstinspires.ftc.teamcode.hardware.Camera;
+import org.firstinspires.ftc.teamcode.hardware.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
@@ -64,7 +66,7 @@ public class MainOpMode extends LinearOpMode {
         GoBildaPinpointDriver.EncoderDirection.FORWARD);
     pinpoint.resetPosAndIMU(); // TODO: only calibrate IMU once Auto code configures stuff
 
-    Servo turretHood = hardwareMap.get(Servo.class, "turretHood");
+    Servo rawTurretHood = hardwareMap.get(Servo.class, "turretHood");
     Servo rawLifterServo1 = hardwareMap.get(Servo.class, "lifter1");
     Servo rawLifterServo2 = hardwareMap.get(Servo.class, "lifter2");
     Servo rawMagServo1 = hardwareMap.get(Servo.class, "magServo1");
@@ -72,11 +74,13 @@ public class MainOpMode extends LinearOpMode {
 
     AnalogInput magServoEncoder = hardwareMap.get(AnalogInput.class, "magServoEncoder");
     AnalogInput lifterServoEncoder = hardwareMap.get(AnalogInput.class, "rampServoEncoder");
+    AnalogInput turretHoodEncoder = hardwareMap.get(AnalogInput.class, "turretHoodEncoder");
 
     Axon magServo1 = new Axon(rawMagServo1, magServoEncoder);
     Axon magServo2 = new Axon(rawMagServo2, magServoEncoder);
     Axon lifterServo1 = new Axon(rawLifterServo1, lifterServoEncoder);
     Axon lifterServo2 = new Axon(rawLifterServo2, lifterServoEncoder);
+    Axon turretHood = new Axon(rawTurretHood, turretHoodEncoder);
 
     Turret turret = new Turret(flywheelMotor, turretRotator, turretHood);
 
@@ -85,17 +89,12 @@ public class MainOpMode extends LinearOpMode {
     Spindex spindex =
         new Spindex(magServo1, magServo2, lifterServo1, lifterServo2, colorSensor, distanceSensor);
 
-    Camera camera =
-        new Camera(
-            hardwareMap,
-            "camera",
-            new YawPitchRollAngles(AngleUnit.DEGREES, 0, 0, 0, 0),
-            AllianceColor.RED); // placeholder TODO: update
+    Limelight3A rawLimelight = hardwareMap.get(Limelight3A.class, "limelight");
+    Limelight limelight = new Limelight(rawLimelight, AllianceColor.RED, false);
 
     ScoringSystem mag =
-        new ScoringSystem(intake, turret, spindex, camera, wantedSequence, telemetry);
+        new ScoringSystem(intake, turret, spindex, limelight, AllianceColor.RED, telemetry);
     mag.init(false); // initialize scoring systems | after auto, mag is empty
-    mag.setTargetDistance(100); // PLACEHOLDER
 
     MecanumWheelBase wheelBase = new MecanumWheelBase(frontLeft, frontRight, backLeft, backRight);
 
@@ -109,6 +108,7 @@ public class MainOpMode extends LinearOpMode {
       Pose2D location = pinpoint.getPosition();
 
       // update scoring systems
+      mag.setRobotRotation(location.getHeading(AngleUnit.DEGREES));
       mag.update();
 
       // emergency eject
@@ -118,7 +118,7 @@ public class MainOpMode extends LinearOpMode {
 
       // shoot
       if (gamepad1.rightBumperWasPressed()) {
-        mag.shootMag(wantedSequence); // shoot all balls in the mag, in a sequence if possible
+        mag.shootMag(); // shoot all balls in the mag, in a sequence if possible
       }
 
       // intake
@@ -135,6 +135,7 @@ public class MainOpMode extends LinearOpMode {
       // update wheelbase
       wheelBase.setRotation(location.getHeading(AngleUnit.DEGREES)); // for field-centric control
       wheelBase.setThrottle(gamepad1.right_stick_x, gamepad1.right_stick_y, gamepad1.left_stick_x);
+      wheelBase.update();
 
       // update telemetry
       telemetry.update();

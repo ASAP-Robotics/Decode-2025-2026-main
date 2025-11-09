@@ -20,6 +20,8 @@ import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
 import java.util.Arrays;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
@@ -32,12 +34,14 @@ public class ScoringSystem {
   private final ActiveIntake intake; // the intake on the robot
   private final Turret turret; // the flywheel on the robot
   private final Spindex spindex; // the spindex on the robot
-  private final Camera camera; // the camera on the turret
+  private final Limelight limelight; // the limelight camera on the turret
   private boolean fillingMag = false; // if the mag is being filled
   private SequenceMode fillingMode = SequenceMode.SORTED; // the mode the mag is being filled in
   private boolean emptyingMag = false; // if a sequence is being shot out of the turret
   private SequenceMode emptyingMode = SequenceMode.SORTED; // the mode the mag is being emptied in
   private BallSequence ballSequence; // the sequence being shot
+  private final AllianceColor allianceColor; // the alliance we are on
+  private double robotRotationDegrees = 0; // how rotated the robot is, in degrees
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private int purplesNeeded = 0; // the number of purples needed to fill the mag
   private int greensNeeded = 0; // the number of greens needed to fill the mag
@@ -49,14 +53,14 @@ public class ScoringSystem {
       ActiveIntake intake,
       Turret turret,
       Spindex spindex,
-      Camera camera,
-      BallSequence sequence,
+      Limelight limelight,
+      AllianceColor allianceColor,
       Telemetry telemetry) {
     this.intake = intake;
     this.turret = turret;
     this.spindex = spindex;
-    this.camera = camera;
-    this.ballSequence = sequence;
+    this.limelight = limelight;
+    this.allianceColor = allianceColor;
     this.telemetry = telemetry;
     this.turret.idle(); // set turret to spin at idle speed
     this.turret.disable(); // don't let the turret spin up
@@ -96,6 +100,8 @@ public class ScoringSystem {
     updateAiming();
     updateShooting();
     updateIntake();
+    limelight.update();
+    ballSequence = limelight.getSequence();
     intake.update();
     turret.update();
     spindex.update();
@@ -103,17 +109,38 @@ public class ScoringSystem {
     telemetry.addData("Shooting", emptyingMag);
     telemetry.addData("Filling", fillingMag);
     telemetry.addData("Intake current", intake.getAverageCurrentAmps());
+    telemetry.addData("Limelight mode", limelight.getMode().toString());
   }
 
   /**
    * @brief updates everything to do with aiming the turret
    */
   private void updateAiming() {
-    // set turret distance to target
-    turret.setTargetDistance(camera.getNavigationAprilTagDistance());
-    // adjust turret angle
-    turret.setHorizontalAngle(
-        turret.getHorizontalAngleDegrees() + camera.getNavigationAprilTagAngleX());
+    if (!limelight.isReadyToNavigate()) {
+      turret.setHorizontalAngle(allianceColor.getObeliskAngle());
+
+    } else if (limelight.isTargetInFrame()) {
+      // set turret distance to target
+      turret.setTargetDistance(limelight.getTargetSize());
+      // adjust turret angle
+      turret.setHorizontalAngle(
+          turret.getHorizontalAngleDegrees() + limelight.getTargetOffsetAngleDegrees());
+
+    } else if (turret.isAtTarget()) {
+      // re-lock onto apriltag
+      double angleMin = allianceColor.getTargetAngleMin();
+      double angleMax = allianceColor.getTargetAngleMax();
+      double range = angleMax - angleMin;
+      double step = range / 9;
+      double angleNow = turret.getTargetHorizontalAngleDegrees() + robotRotationDegrees;
+      double angleToSet = angleNow + step;
+
+      if (angleToSet > angleMax || angleToSet < angleMin) {
+        angleToSet = angleMin;
+      }
+
+      turret.setHorizontalAngle(angleToSet);
+    }
   }
 
   /**
@@ -146,7 +173,7 @@ public class ScoringSystem {
         turret.idle(); // set the flywheel to slow down to idle speeds
         spindex.moveSpindexIdle(spindex.getIndex()); // idle the spindex
 
-      } else if (turret.isUpToSpeed() && spindex.isReadyToShoot()) {
+      } else if (turret.isReadyToShoot() && spindex.isReadyToShoot()) {
         // ^ if the flywheel is spinning fast enough, and the spindex is ready to shoot
         spindex.liftBall(); // lift ball into turret
       } // if (turret.isUpToSpeed() && spindex.isReadyToShoot())
@@ -324,27 +351,22 @@ public class ScoringSystem {
   /**
    * @brief shoots all balls in the mag, in sequence order if possible
    * @return true if the mag contained at least one ball, false if the mag is empty
-   * @note if the balls in the mag are not sorted, they will be shot unsorted. If the mag contains
-   *     exactly one green and two purple balls, the last shot sequence will be shot
    */
   public boolean shootMag() {
-    return shootMag(ballSequence); // default to last shot sequence
+    if (shootSequence()) return true; // try shooting a sequence
+    return shootUnsorted(); // try shooting in any order
   }
 
   /**
-   * @brief shoots all balls in the mag, in sequence order if possible
-   * @return true if the mag contained at least one ball, false if the mag is empty
-   * @note if the balls in the mag are not sorted, they will be shot unsorted. If the mag contains
-   *     exactly one green and two purple balls, the specified sequence will be shot
+   * @brief shoots all balls in the mag in no particular order
+   * @return true if the mag contained at least one ball, false if mag is empty
    */
-  public boolean shootMag(BallSequence sequence) {
-    if (shootSequence(sequence)) return true; // try shooting the last shot sequence
+  public boolean shootUnsorted() {
     // if mag is empty, return false
     if (spindex.getColorIndex(BallColor.PURPLE) == NULL
         && spindex.getColorIndex(BallColor.GREEN) == NULL) return false;
     emptyingMag = true; // the mag is being emptied
     emptyingMode = SequenceMode.UNSORTED; // shooting in any order
-    ballSequence = sequence;
     int index = NULL;
     for (BallColor color : spindex.getSpindexContents()) { // for each spindex slot
       // note: there should always be a non-empty slot in the spindex if the code gets to this point
@@ -359,21 +381,11 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief starts shooting the lsat shot sequence of balls out of the turret
+   * @brief starts shooting a sequence of balls out of the turret
    * @return true if the mag was full, false if the mag isn't full or a sequence is already being
    *     shot
    */
   public boolean shootSequence() {
-    return shootSequence(ballSequence); // use last shot sequence
-  }
-
-  /**
-   * @brief starts shooting a sequence of balls out of the turret
-   * @param sequence the color sequence to shoot
-   * @return true if the mag was full, false if the mag isn't full or a sequence is already being
-   *     shot
-   */
-  public boolean shootSequence(BallSequence sequence) {
     if (emptyingMag) return false;
     int purples = 0;
     int greens = 0;
@@ -385,9 +397,16 @@ public class ScoringSystem {
       return false; // return false if the wrong number of balls are in the mag
     emptyingMag = true; // the mag is being emptied
     emptyingMode = SequenceMode.SORTED; // shooting sorted sequence
-    ballSequence = sequence; // store the requested sequence
     sequenceIndex = 0; // start with the first ball in the sequence
     return emptyMagSorted(); // start emptying mag
+  }
+
+  /**
+   * @brief sets how rotated the robot is relative to the field
+   * @param degrees the angle by which the robot is offset from the field
+   */
+  public void setRobotRotation(double degrees) {
+    robotRotationDegrees = AngleUnit.normalizeDegrees(degrees); // might need to invert
   }
 
   /**
@@ -405,7 +424,7 @@ public class ScoringSystem {
 
     if (spindex.isReadyToShoot()) {
       // ^ spindex is ready for ball to be lifted
-      if (turret.isUpToSpeed()) {
+      if (turret.isReadyToShoot()) {
         // turret is ready for ball to be lifted
         spindex.liftBall();
       }
@@ -443,7 +462,7 @@ public class ScoringSystem {
 
     if (spindex.isReadyToShoot()) {
       // ^ spindex is ready for ball to be lifted
-      if (turret.isUpToSpeed()) {
+      if (turret.isReadyToShoot()) {
         // turret is ready for ball to be lifted
         spindex.liftBall();
       }
@@ -475,8 +494,13 @@ public class ScoringSystem {
     clearingIntake = true; // we are clearing the intake
   }
 
-  public void setTargetDistance(double inches) {
-    turret.setTargetDistance(inches);
+  /**
+   * @brief forces a re-check of the sequence to shoot
+   * @note intended for use in emergency game situations (when something has malfunctioned); not
+   *     intended to be used normally or regularly
+   */
+  public void emergencyRecheckSequence() {
+    limelight.detectSequence();
   }
 
   /**

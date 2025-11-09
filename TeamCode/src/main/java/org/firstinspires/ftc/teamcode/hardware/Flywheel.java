@@ -79,9 +79,9 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   /**
    * @brief returns if the flywheel is fully up to speed
    * @return true if flywheel is at speed, false if flywheel is below target speed
+   * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
    */
-  public boolean isUpToSpeed() {
-    update(); // update flywheel
+  public boolean isReadyToShoot() {
     return currentSpeed >= (targetSpeed * SPEED_TOLERANCE);
   }
 

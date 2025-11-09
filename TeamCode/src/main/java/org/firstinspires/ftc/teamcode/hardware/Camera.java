@@ -22,13 +22,13 @@ import java.util.Set;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.CameraLowLevel;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 /**
  * @brief placeholder class for a camera TODO: actually fill out
  */
+@Deprecated
 public class Camera extends CameraLowLevel {
   private AllianceColor allianceColor;
   private boolean navigationOnly = false;
