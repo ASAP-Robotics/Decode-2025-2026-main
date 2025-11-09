@@ -17,17 +17,18 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.ReadWriteFile;
+import java.io.File;
+import java.util.List;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.io.File;
-import java.util.List;
 
 public class Limelight {
   public enum LimeLightMode {
@@ -49,7 +50,8 @@ public class Limelight {
    * @param limelight the Limelight3A to use
    * @param allianceColor the alliance color of the robot
    * @param search if true, limelight will search for a sequence before switching to navigation
-   * mode, if false it will start navigation immediately and use the stored last detected sequence
+   *     mode, if false it will start navigation immediately and use the stored last detected
+   *     sequence
    * @note search is intended to be true for auto, and false for teliop
    */
   public Limelight(Limelight3A limelight, AllianceColor allianceColor, boolean search) {
@@ -126,7 +128,7 @@ public class Limelight {
   /**
    * @brief gets the size of the apriltag in limelight's view
    * @return the fraction of the latest frame taken up by the apriltag, or 0 if the latest frame was
-   * invalid (tag not visible)
+   *     invalid (tag not visible)
    */
   public double getTargetSize() {
     return isResultValid ? result.getTa() : 0;
@@ -152,7 +154,7 @@ public class Limelight {
   /**
    * @brief gets if limelight is ready to use for navigation
    * @return true if limelight has detected a valid ball sequence and switched to navigation mode,
-   * false otherwise
+   *     false otherwise
    */
   public boolean isReadyToNavigate() {
     return mode == LimeLightMode.NAVIGATION && detectedSequence != null;
@@ -194,7 +196,7 @@ public class Limelight {
 
   /**
    * @brief gets if the pipeline used for the latest result was the correct one (if limelight has
-   * switched yet)
+   *     switched yet)
    * @return true if the pipeline used for the last result matches the mode, false otherwise
    */
   protected boolean isPipelineCorrect() {

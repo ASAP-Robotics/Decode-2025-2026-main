@@ -95,7 +95,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   /**
    * @brief gets if the turret is ready to shoot a ball
    * @return true if the flywheel is up to speed, the turret is at its target rotation, and the hood
-   * is in place, false otherwise
+   *     is in place, false otherwise
    * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
    */
   @Override

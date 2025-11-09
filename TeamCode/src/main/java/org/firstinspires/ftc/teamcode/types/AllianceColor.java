@@ -27,11 +27,12 @@ public enum AllianceColor {
   private final double targetAngleMin;
   private final double targetAngleMax;
 
-  AllianceColor(int aprilTagId,
-                int limelightPipeline,
-                double obeliskAngle,
-                double targetAngleMin,
-                double targetAngleMax) {
+  AllianceColor(
+      int aprilTagId,
+      int limelightPipeline,
+      double obeliskAngle,
+      double targetAngleMin,
+      double targetAngleMax) {
     this.aprilTagId = aprilTagId;
     this.limelightPipeline = limelightPipeline;
     this.obeliskAngle = obeliskAngle;
