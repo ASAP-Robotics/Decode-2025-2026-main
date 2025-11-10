@@ -54,11 +54,13 @@ public class BasicRobot {
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
     Limelight limelight = new Limelight(rawLimelight, allianceColor, false);
 
-    AnalogInput lifterServoEncoder = this.hardwareMap.get(AnalogInput.class, "rampServoEncoder");
+    AnalogInput lifterEncoder1 = this.hardwareMap.get(AnalogInput.class, "lifterEncoder1");
+    AnalogInput lifterEncoder2 = this.hardwareMap.get(AnalogInput.class, "lifterEncoder2");
     Servo rawLifterServo2 = this.hardwareMap.get(Servo.class, "lifter2");
-    Axon lifterServo2 = new Axon(rawLifterServo2, lifterServoEncoder);
+    Axon lifterServo2 = new Axon(rawLifterServo2, lifterEncoder2);
     Servo rawLifterServo1 = this.hardwareMap.get(Servo.class, "lifter1");
-    Axon lifterServo1 = new Axon(rawLifterServo1, lifterServoEncoder);
+    rawLifterServo1.setDirection(Servo.Direction.REVERSE);
+    Axon lifterServo1 = new Axon(rawLifterServo1, lifterEncoder1);
     AnalogInput magServoEncoder = this.hardwareMap.get(AnalogInput.class, "magServoEncoder");
     Servo rawMagServo2 = this.hardwareMap.get(Servo.class, "magServo2");
     Axon magServo2 = new Axon(rawMagServo2, magServoEncoder);
@@ -69,9 +71,7 @@ public class BasicRobot {
     Spindex spindex =
         new Spindex(magServo1, magServo2, lifterServo1, lifterServo2, colorSensor, distanceSensor);
 
-    AnalogInput turretHoodEncoder = this.hardwareMap.get(AnalogInput.class, "turretHoodEncoder");
-    Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
-    Axon turretHood = new Axon(rawTurretHood, turretHoodEncoder);
+    Servo turretHood = this.hardwareMap.get(Servo.class, "turretHood");
     DcMotorEx turretRotator = this.hardwareMap.get(DcMotorEx.class, "turretRotator");
     DcMotorEx flywheelMotor = this.hardwareMap.get(DcMotorEx.class, "flywheel");
     Turret turret = new Turret(flywheelMotor, turretRotator, turretHood);

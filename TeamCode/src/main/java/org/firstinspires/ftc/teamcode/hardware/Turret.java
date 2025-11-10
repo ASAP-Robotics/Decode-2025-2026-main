@@ -16,7 +16,11 @@
 
 package org.firstinspires.ftc.teamcode.hardware;
 
+import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
+
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
@@ -54,12 +58,12 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private static final double HORIZONTAL_HYSTERESIS = 10;
 
   private final DcMotorEx rotator;
-  private final Axon hoodServo;
+  private final Servo hoodServo;
   private final double ticksPerDegree;
   private double targetHorizontalAngleDegrees = 0; // target angle for side-to-side turret movement
   private double targetVerticalAngleDegrees = 5; // target angle for up-and-down turret movement
 
-  public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Axon hoodServo, double idleSpeed) {
+  public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Servo hoodServo, double idleSpeed) {
     super(flywheelMotor, idleSpeed);
     this.rotator = rotator;
     this.hoodServo = hoodServo;
@@ -70,7 +74,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.ticksPerDegree = this.rotator.getMotorType().getTicksPerRev() / 360;
   }
 
-  public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Axon hoodServo) {
+  public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Servo hoodServo) {
     this(flywheelMotor, rotator, hoodServo, 500);
   }
 
@@ -103,7 +107,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    */
   @Override
   public boolean isReadyToShoot() {
-    return super.isReadyToShoot() && hoodServo.isAtTarget() && !rotator.isBusy();
+    return super.isReadyToShoot() && !rotator.isBusy();
   }
 
   /**
@@ -113,7 +117,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   @Override
   public void update() {
     super.update();
-    hoodServo.setPosition(targetVerticalAngleDegrees); // this might need updating
+    hoodServo.setPosition(map(targetVerticalAngleDegrees, 0, 360, 0, 1)); // this might need updating
     double motorDegrees = turretDegreesToMotorDegrees(targetHorizontalAngleDegrees);
     rotator.setTargetPosition((int) (motorDegrees * ticksPerDegree));
   }
@@ -226,7 +230,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
       }
     }
 
-    return MathUtils.map(
+    return map(
         distance,
         LOOKUP_TABLE[indexUnder].getDistance(),
         LOOKUP_TABLE[indexOver].getDistance(),
