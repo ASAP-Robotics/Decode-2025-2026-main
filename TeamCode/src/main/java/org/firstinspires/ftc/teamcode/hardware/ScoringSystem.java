@@ -89,6 +89,7 @@ public class ScoringSystem {
    */
   public void stop() {
     turret.disable(); // stop the flywheel
+    turret.update();
     intake.stop(); // stop the intake
   }
 
@@ -97,11 +98,11 @@ public class ScoringSystem {
    * @note call each loop
    */
   public void update() {
+    limelight.update();
+    ballSequence = limelight.getSequence();
     updateAiming();
     updateShooting();
     updateIntake();
-    limelight.update();
-    ballSequence = limelight.getSequence();
     intake.update();
     turret.update();
     spindex.update();
@@ -128,10 +129,10 @@ public class ScoringSystem {
 
     } else if (turret.isAtTarget()) {
       // re-lock onto apriltag
-      double angleMin = allianceColor.getTargetAngleMin();
-      double angleMax = allianceColor.getTargetAngleMax();
+      double angleMin = allianceColor.getTargetAngleMin() + robotRotationDegrees; // invert?
+      double angleMax = allianceColor.getTargetAngleMax() + robotRotationDegrees; // invert?
       double range = angleMax - angleMin;
-      double step = range / 9;
+      double step = range / 6;
       double angleNow = turret.getTargetHorizontalAngleDegrees() + robotRotationDegrees;
       double angleToSet = angleNow + step;
 

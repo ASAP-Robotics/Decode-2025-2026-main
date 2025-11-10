@@ -50,6 +50,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public static final double TURRET_GEAR_TEETH = 121;
   // number of teeth on the gear attached to the motor
   private static final double MOTOR_GEAR_TEETH = 24;
+  // amount horizontal angle can go over 180 or under -180 degrees before wrapping
+  private static final double HORIZONTAL_HYSTERESIS = 10;
 
   private final DcMotorEx rotator;
   private final Axon hoodServo;
@@ -78,17 +80,18 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    */
   protected LookupTableItem[] fillLookupTable() {
     // TODO: tune lookup table
+    // note: "distance" numbers *MUST* go from low to high (number, not distance)
     return new LookupTableItem[] {
-      new LookupTableItem(0.5, 6000, 0),
-      new LookupTableItem(0.45, 5500, 1),
-      new LookupTableItem(0.4, 5000, 2),
-      new LookupTableItem(0.35, 4500, 3),
-      new LookupTableItem(0.3, 4000, 4),
-      new LookupTableItem(0.25, 3500, 5),
-      new LookupTableItem(0.2, 3000, 6),
-      new LookupTableItem(0.15, 2500, 7),
-      new LookupTableItem(0.1, 2000, 8),
       new LookupTableItem(0.05, 1500, 9),
+      new LookupTableItem(0.1, 2000, 8),
+      new LookupTableItem(0.15, 2500, 7),
+      new LookupTableItem(0.2, 3000, 6),
+      new LookupTableItem(0.25, 3500, 5),
+      new LookupTableItem(0.3, 4000, 4),
+      new LookupTableItem(0.35, 4500, 3),
+      new LookupTableItem(0.4, 5000, 2),
+      new LookupTableItem(0.45, 5500, 1),
+      new LookupTableItem(0.5, 6000, 0)
     }; // placeholder values
   }
 
@@ -120,24 +123,27 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @param distance the new distance to the target, in arbitrary units
    * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
    *     of distance
+   * @note the new value isn't applied until update() is called
    */
   @Override
   public void setTargetDistance(double distance) {
     setVerticalAngle(getAngleLookup(distance));
-    super.setTargetDistance(distance); // this updates
+    super.setTargetDistance(distance);
   }
 
   /**
-   * @brief sets the side-to-side angle of the turret in degrees
    * @param degrees the number of degrees from straight to move the turret
-   * @return the old horizontal angle of the turret
+   * @brief sets the side-to-side angle of the turret in degrees
+   * @note the new value isn't applied until update() is called
    */
-  public double setHorizontalAngle(double degrees) {
-    double toReturn = targetHorizontalAngleDegrees;
-    // angle is wrapped to ensure the turret never turns more than one full rotation
-    targetHorizontalAngleDegrees = AngleUnit.normalizeDegrees(degrees);
-    update();
-    return toReturn;
+  public void setHorizontalAngle(double degrees) {
+    if (degrees > 180 + HORIZONTAL_HYSTERESIS || degrees < -180 - HORIZONTAL_HYSTERESIS) {
+      // angle is wrapped to ensure the turret never turns more than ~one full rotation
+      targetHorizontalAngleDegrees = AngleUnit.normalizeDegrees(degrees);
+
+    } else {
+      targetHorizontalAngleDegrees = degrees;
+    }
   }
 
   /**

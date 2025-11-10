@@ -123,6 +123,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @brief sets if the flywheel is enabled
    * @param isEnabled if the flywheel will be enabled (true = enabled, false = not enabled)
    * @return the previous enabled / disabled state of the flywheel
+   * @note the new value isn't applied until update() is called
    */
   public boolean setEnabled(boolean isEnabled) {
     boolean toReturn = this.isEnabled; // get the old enabled state
@@ -130,7 +131,6 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
     // set motor mode; if enabled, use speed-based control, if disabled, use power-based control
     flywheel.setMode(
         isEnabled ? DcMotor.RunMode.RUN_USING_ENCODER : DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    update(); // apply any changes
     return toReturn; // return the old enabled state
   }
 
@@ -145,6 +145,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   /**
    * @brief enables the flywheel
    * @return the previous enabled / disabled state of the flywheel
+   * @note the new value isn't applied until update() is called
    */
   public boolean enable() {
     return setEnabled(true);
@@ -153,6 +154,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   /**
    * @brief disables the flywheel
    * @return the previous enabled / disabled state of the flywheel
+   * @note the new value isn't applied until update() is called
    */
   public boolean disable() {
     return setEnabled(false);
@@ -170,17 +172,18 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @brief sets if the flywheel is active (as opposed to idling)
    * @param isActive The new activity state, true if active, false if idling
    * @return the old activation state, true if active, false if idling
+   * @note the new value isn't applied until update() is called
    */
   public boolean setActive(boolean isActive) {
     boolean toReturn = this.isActive; // store the old activation state
     this.isActive = isActive; // update if the flywheel is active or idling
-    update(); // apply any changes
     return toReturn; // return the old activation state
   }
 
   /**
    * @brief activate the flywheel (spin it up to full speed from idle speed)
    * @return the old activation state of the flywheel (true if active, false if idle)
+   * @note the new value isn't applied until update() is called
    */
   public boolean activate() {
     return setActive(true);
@@ -189,21 +192,26 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   /**
    * @brief idles the flywheel (lower it to idle speed from full speed)
    * @return the old activation state of the flywheel (true if active, false if idle)
+   * @note the new value isn't applied until update() is called
    */
   public boolean idle() {
     return setActive(false);
   }
 
+  /**
+   * @brief sets the idle speed of the flywheel, in RPM
+   * @param idleSpeed the speed at which the flywheel should idle
+   * @return the old idle speed of the flywheel
+   * @note the new value isn't applied until update() is called
+   */
   public double setIdleSpeed(double idleSpeed) {
     double toReturn = this.idleSpeed; // store the old idle speed
     this.idleSpeed = idleSpeed; // set the new flywheel idle speed
-    update(); // apply any changes
     return toReturn; // return the old idle speed
   }
 
   /**
-   * returns the speed of the flywheel when idle
-   *
+   * @brief returns the speed of the flywheel when idle
    * @return the idle speed of the flywheel, in RPM
    */
   public double getIdleSpeed() {
@@ -215,10 +223,10 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @param distance the new distance to the target, in arbitrary units
    * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
    *     of distance
+   * @note the new value isn't applied until update() is called
    */
   public void setTargetDistance(double distance) {
     targetDistance = distance; // set the new distance target
-    update(); // apply any changes
   }
 
   /**
