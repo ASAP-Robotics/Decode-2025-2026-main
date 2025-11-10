@@ -21,19 +21,29 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Servo set to 0", group = "Testing")
+@TeleOp(name = "Servo test", group = "Testing")
 public class ServoEncoderTest extends LinearOpMode {
   private AnalogInput servoEncoder;
   public void runOpMode() {
-    Servo s1 = hardwareMap.get(Servo.class, "servo1");
-    Servo s2 = hardwareMap.get(Servo.class, "servo2");
+    Servo s1 = hardwareMap.get(Servo.class, "magServo1");
+    Servo s2 = hardwareMap.get(Servo.class, "magServo2");
+    double pos = 0;
 
     waitForStart();
-    s1.setPosition(0);
-    s2.setPosition(0);
 
     while(opModeIsActive()) {
+      if (gamepad1.dpadUpWasPressed()) {
+        pos += 0.01;
 
+      } else if (gamepad1.dpadDownWasPressed()) {
+        pos -= 0.01;
+      }
+
+      s1.setPosition(pos);
+      s2.setPosition(pos);
+
+      telemetry.addData("pos", pos);
+      telemetry.update();
     }
   }
 }
