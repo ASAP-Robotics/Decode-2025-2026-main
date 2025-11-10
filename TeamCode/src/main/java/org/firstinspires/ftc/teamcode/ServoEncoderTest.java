@@ -19,19 +19,21 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Servo encoder test", group = "Testing")
+@TeleOp(name = "Servo set to 0", group = "Testing")
 public class ServoEncoderTest extends LinearOpMode {
   private AnalogInput servoEncoder;
   public void runOpMode() {
-    servoEncoder = hardwareMap.get(AnalogInput.class, "testEncoder");
+    Servo s1 = hardwareMap.get(Servo.class, "servo1");
+    Servo s2 = hardwareMap.get(Servo.class, "servo2");
 
     waitForStart();
+    s1.setPosition(0);
+    s2.setPosition(0);
 
     while(opModeIsActive()) {
-      double voltage = servoEncoder.getVoltage();
-      telemetry.addData("Servo encoder voltage", voltage);
-      telemetry.update();
+
     }
   }
 }
