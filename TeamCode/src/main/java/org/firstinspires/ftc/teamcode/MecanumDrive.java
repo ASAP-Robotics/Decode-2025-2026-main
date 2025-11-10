@@ -36,8 +36,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-
-import java.lang.Math;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -76,7 +74,7 @@ public final class MecanumDrive {
     public double maxProfileAccel = 50;
 
     // turn profile parameters (in radians)
-    public double maxAngVel =   Math.PI; // shared with path
+    public double maxAngVel = Math.PI; // shared with path
     public double maxAngAccel = Math.PI;
 
     // path controller gains

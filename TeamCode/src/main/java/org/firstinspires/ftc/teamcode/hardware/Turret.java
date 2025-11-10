@@ -20,10 +20,7 @@ import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
-import org.firstinspires.ftc.teamcode.utils.MathUtils;
 
 public class Turret extends Flywheel<Turret.LookupTableItem> {
   protected static class LookupTableItem extends Flywheel.LookupTableItem {
@@ -117,7 +114,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   @Override
   public void update() {
     super.update();
-    hoodServo.setPosition(map(targetVerticalAngleDegrees, 0, 360, 0, 1)); // this might need updating
+    hoodServo.setPosition(
+        map(targetVerticalAngleDegrees, 0, 360, 0, 1)); // this might need updating
     double motorDegrees = turretDegreesToMotorDegrees(targetHorizontalAngleDegrees);
     rotator.setTargetPosition((int) (motorDegrees * ticksPerDegree));
   }
