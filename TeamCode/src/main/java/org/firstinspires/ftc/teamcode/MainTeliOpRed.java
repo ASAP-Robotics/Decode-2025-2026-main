@@ -18,14 +18,14 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 @TeleOp(name = "Red TeliOp", group = "Drive")
 public class MainTeliOpRed extends LinearOpMode {
   @Override
   public void runOpMode() {
-    TeliOpRobot robot = new TeliOpRobot(hardwareMap, telemetry, AllianceColor.RED, gamepad1, gamepad2);
+    TeliOpRobot robot =
+        new TeliOpRobot(hardwareMap, telemetry, AllianceColor.RED, gamepad1, gamepad2);
 
     waitForStart();
 

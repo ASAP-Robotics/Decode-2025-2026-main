@@ -19,7 +19,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -35,7 +34,12 @@ public class TeliOpRobot extends BasicRobot {
   protected Gamepad gamepad2;
   public MecanumWheelBase wheelBase;
 
-  public TeliOpRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor, Gamepad gamepad1, Gamepad gamepad2) {
+  public TeliOpRobot(
+      HardwareMap hardwareMap,
+      Telemetry telemetry,
+      AllianceColor allianceColor,
+      Gamepad gamepad1,
+      Gamepad gamepad2) {
     super(hardwareMap, telemetry, allianceColor, false);
 
     this.gamepad1 = gamepad1;

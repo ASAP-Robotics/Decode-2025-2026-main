@@ -42,7 +42,11 @@ public class BasicRobot {
   protected GoBildaPinpointDriver pinpoint;
   public ScoringSystem mag;
 
-  public BasicRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor, boolean preloaded) {
+  public BasicRobot(
+      HardwareMap hardwareMap,
+      Telemetry telemetry,
+      AllianceColor allianceColor,
+      boolean preloaded) {
     this.hardwareMap = hardwareMap;
     this.telemetry = telemetry;
     pinpoint = this.hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
@@ -62,7 +66,8 @@ public class BasicRobot {
     Axon magServo1 = new Axon(rawMagServo1, magServoEncoder);
     ColorSensor colorSensor = this.hardwareMap.get(ColorSensor.class, "colorSensor");
     DistanceSensor distanceSensor = this.hardwareMap.get(DistanceSensor.class, "colorSensor");
-    Spindex spindex = new Spindex(magServo1, magServo2, lifterServo1, lifterServo2, colorSensor, distanceSensor);
+    Spindex spindex =
+        new Spindex(magServo1, magServo2, lifterServo1, lifterServo2, colorSensor, distanceSensor);
 
     AnalogInput turretHoodEncoder = this.hardwareMap.get(AnalogInput.class, "turretHoodEncoder");
     Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
