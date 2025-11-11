@@ -59,6 +59,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private final double ticksPerDegree;
   private double targetHorizontalAngleDegrees = 0; // target angle for side-to-side turret movement
   private double targetVerticalAngleDegrees = 5; // target angle for up-and-down turret movement
+  public double testingAngle = 0;
 
   public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Axon hoodServo, double idleSpeed) {
     super(flywheelMotor, idleSpeed);
@@ -218,6 +219,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    *     of distance
    */
   protected double getAngleLookup(double distance) {
+    return testingAngle; // temporary; TODO: remove after testing
+    /*
     int indexOver = LOOKUP_TABLE.length - 1;
     int indexUnder = 0;
     for (int i = 0; i < LOOKUP_TABLE.length; i++) {
@@ -234,5 +237,6 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
         LOOKUP_TABLE[indexOver].getDistance(),
         LOOKUP_TABLE[indexUnder].getAngle(),
         LOOKUP_TABLE[indexOver].getAngle());
+     */
   }
 }

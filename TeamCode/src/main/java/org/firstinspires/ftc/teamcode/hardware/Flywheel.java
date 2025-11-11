@@ -44,10 +44,11 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   private double currentSpeed = 0; // the latest speed (RPM) of the flywheel
   private double targetDistance = 0; // the distance (inches) to the target
   private boolean containsBall = false; // if the flywheel has a ball in it that it is shooting
+  public double testingSpeed = 0;
 
   protected T[] LOOKUP_TABLE; // lookup table of distance, rpm, etc.
 
-  private final double SPEED_TOLERANCE =
+  private static final double SPEED_TOLERANCE =
       0.95; // think of as the percentage of the target speed the flywheel needs to reach to be "at
 
   // target speed"
@@ -311,6 +312,9 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    *     of distance
    */
   protected double getRPMLookup(double distance) {
+    return testingSpeed; // temporary; TODO: remove once testing is done
+
+    /*
     int indexOver = LOOKUP_TABLE.length - 1;
     int indexUnder = 0;
     for (int i = 0; i < LOOKUP_TABLE.length; i++) {
@@ -327,5 +331,6 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
         LOOKUP_TABLE[indexOver].getDistance(),
         LOOKUP_TABLE[indexUnder].getRpm(),
         LOOKUP_TABLE[indexOver].getRpm());
+    */
   }
 }
