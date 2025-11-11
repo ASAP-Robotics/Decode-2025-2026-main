@@ -89,45 +89,88 @@ public class Limelight {
       isResultValid = false;
       return;
     }
-    if (!isPipelineCorrect()) {
-      limelight.pipelineSwitch(getPipeline());
+
+    if (!isPipelineCorrect()) limelight.pipelineSwitch(getPipeline());
+
+    if (mode == LimeLightMode.IDENTIFICATION) updateIdentification();
+  }
+
+  /**
+   * @brief updates stuff to do with detecting the ball sequence
+   * @note only call if mode is identification
+   */
+  private void updateIdentification() {
+    BallSequence oldSequence = detectedSequence;
+
+    List<LLResultTypes.FiducialResult> apriltags = result.getFiducialResults();
+    int bestId = NULL;
+    if (apriltags.size() == 1) {
+      // ^ if limelight only sees one apriltag
+      bestId = apriltags.get(0).getFiducialId();
+
+    } else if (apriltags.size() == 2) {
+      // if limelight sees two apriltags
+      bestId = getBestId(apriltags);
     }
 
-    if (mode == LimeLightMode.IDENTIFICATION) {
-      BallSequence oldSequence = detectedSequence;
+    for (BallSequence sequence : BallSequence.values()) {
+      // ^ for all possible ball sequences
+      if (sequence.getAprilTagId() == bestId) {
+        // ^ if the tag ID of the sequence matches the best tag
+        detectedSequence = sequence;
+        break;
+      }
+    }
 
-      List<LLResultTypes.FiducialResult> apriltags = result.getFiducialResults();
-      if (apriltags.size() == 1) {
-        // ^ if limelight only sees one apriltag
-        for (BallSequence sequence : BallSequence.values()) {
-          // ^ for each possible ball sequence
-          if (sequence.getAprilTagId() == apriltags.get(0).getFiducialId()) {
-            // ^ if the ID matches
-            detectedSequence = sequence;
-            break;
+    boolean searchFailed = detectionTimer.isFinished();
+
+    if (detectedSequence != oldSequence || searchFailed) {
+      // ^ if a new ball sequence was detected
+      mode = LimeLightMode.NAVIGATION;
+
+      if (searchFailed) {
+        detectedSequence = BallSequence.GPP; // default to GPP if search failed
+      }
+
+      try {
+        config.put("sequence", detectedSequence.name());
+        config.put("search_failed", searchFailed);
+      } catch (JSONException ignored) {
+
+      }
+      ReadWriteFile.writeFile(configFile, config.toString()); // store detected sequence
+    }
+  }
+
+  /**
+   * @brief gets the best of a list of (two) apriltags
+   * @param apriltags the list of apriltags
+   * @return the ID of the tag to use
+   */
+  private int getBestId(List<LLResultTypes.FiducialResult> apriltags) {
+    // assumes far-left is negative, far-right is positive, and center is 0
+    double bestX = allianceColor == AllianceColor.RED ? 180 : -180;
+    int bestId = NULL;
+    for (LLResultTypes.FiducialResult tag : apriltags) {
+      switch (allianceColor) {
+        case RED:
+          if (tag.getTargetXDegrees() < bestX) {
+            // ^ if tag is further left than previous best
+            bestX = tag.getTargetXDegrees();
+            bestId = tag.getFiducialId();
           }
-        }
-      }
+          break;
 
-      boolean searchFailed = detectionTimer.isFinished();
-
-      if (detectedSequence != oldSequence || searchFailed) {
-        // ^ if a new ball sequence was detected
-        mode = LimeLightMode.NAVIGATION;
-
-        if (searchFailed) {
-          detectedSequence = BallSequence.GPP; // default to GPP if search failed
-        }
-
-        try {
-          config.put("sequence", detectedSequence.name());
-          config.put("search_failed", searchFailed);
-        } catch (JSONException ignored) {
-
-        }
-        ReadWriteFile.writeFile(configFile, config.toString()); // store detected sequence
+        case BLUE:
+          if (tag.getTargetXDegrees() > bestX) {
+            // ^ if tag is further right than previous best
+            bestX = tag.getTargetXDegrees();
+            bestId = tag.getFiducialId();
+          }
+          break;
       }
     }
+    return bestId;
   }
 
   /**
