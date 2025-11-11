@@ -17,7 +17,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
@@ -27,10 +26,7 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 public class AutoRobot extends CommonRobot {
   // stuff (variables, etc., see TeliOpRobot) goes here; TODO: update
 
-  public AutoRobot(
-      HardwareMap hardwareMap,
-      Telemetry telemetry,
-      AllianceColor allianceColor) {
+  public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     super(hardwareMap, telemetry, allianceColor, true, true);
 
     // other "Init" setup stuff goes here

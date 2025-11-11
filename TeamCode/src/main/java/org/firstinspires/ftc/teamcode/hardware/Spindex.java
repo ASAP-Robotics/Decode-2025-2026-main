@@ -106,8 +106,8 @@ public class Spindex {
   private final DistanceSensor
       distanceSensor; // the distance sensor at the intake (built into color sensor?)
   // TODO: tune
-  private final static double lifterRetractedPos = 20; // position of lift servos when at rest
-  private final static double lifterExtendedPos = 180; // position of lift servos when shooting
+  private static final double lifterRetractedPos = 20; // position of lift servos when at rest
+  private static final double lifterExtendedPos = 180; // position of lift servos when shooting
   private final SpindexSlot[] spindex = {
     new SpindexSlot(39.6, 39.6, 108), // slot 0
     new SpindexSlot(172.8, 172.8, 237.6), // slot 1
