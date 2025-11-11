@@ -27,9 +27,18 @@ import com.qualcomm.robotcore.hardware.Servo;
  * @brief wrapper around the `Servo` class to add encoder feedback
  */
 public class Axon {
-  private Servo servo; // the servo being controlled
-  private AnalogInput encoder; // the encoder of the servo being controlled
+  private final Servo servo; // the servo being controlled
+  private final AnalogInput encoder; // the encoder of the servo being controlled
+  private final boolean dummy; // if true, the servo will always be "at target"
   private double toleranceDegrees;
+
+  /**
+   * @brief creates a dummy (no encoder) Axon with default parameters
+   * @param servo the servo to control
+   */
+  public Axon(Servo servo) {
+    this(servo, null, 5, true);
+  }
 
   /**
    * @brief creates an object of the `EncoderServo` class with default parameters
@@ -37,7 +46,17 @@ public class Axon {
    * @param encoder the encoder of the servo being controlled
    */
   public Axon(Servo servo, AnalogInput encoder) {
-    this(servo, encoder, 5);
+    this(servo, encoder, 5, false);
+  }
+
+  /**
+   * @brief creates an object of the `EncoderServo` class with default parameters
+   * @param servo the servo to control
+   * @param encoder the encoder of the servo being controlled
+   * @param dummy if true, the servo will always be "at target"
+   */
+  public Axon(Servo servo, AnalogInput encoder, boolean dummy) {
+    this(servo, encoder, 5, dummy);
   }
 
   /**
@@ -47,9 +66,10 @@ public class Axon {
    * @param toleranceDegrees the amount the angle read can differ from the target angle and the
    *     servo still be considered "at target"
    */
-  public Axon(Servo servo, AnalogInput encoder, double toleranceDegrees) {
+  public Axon(Servo servo, AnalogInput encoder, double toleranceDegrees, boolean dummy) {
     this.servo = servo;
     this.encoder = encoder;
+    this.dummy = dummy;
     this.toleranceDegrees = toleranceDegrees;
   }
 
@@ -91,25 +111,21 @@ public class Axon {
   /**
    * @brief reads the current position of the servo
    * @return the current position of the servo, in degrees (from 0 to 360)
+   * @note if this servo is a dummy this will always return 0
    */
   public double getPosition() {
-    return min(
-        360,
-        max(
-            0,
-            map(
-                360 - ((encoder.getVoltage() / 3.3) * 360),
-                20,
-                340,
-                0,
-                360))); // 0v = 0 degrees, 3.3v = 360 degrees
+    if (dummy) return 0; // if dummy we can't get position
+    // 0v = 0 degrees, 3.3v = 360 degrees
+    return min(360, max(0, map(360 - ((encoder.getVoltage() / 3.3) * 360), 20, 340, 0, 360)));
   }
 
   /**
    * @brief gets if the servo is currently within tolerance of its target
    * @return true if the servo is at its target, false if it isn't at its target
+   * @note if this servo is a dummy this will always return true
    */
   public boolean isAtTarget() {
+    if (dummy) return true; // dummy servos are always at target
     double target = getTargetPosition();
     double position = getPosition();
     return position >= (target - toleranceDegrees) && position <= (target + toleranceDegrees);

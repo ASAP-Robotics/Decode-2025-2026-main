@@ -41,6 +41,7 @@ public class ScoringSystem {
   private SequenceMode emptyingMode = SequenceMode.SORTED; // the mode the mag is being emptied in
   private BallSequence ballSequence; // the sequence being shot
   private final AllianceColor allianceColor; // the alliance we are on
+  private boolean turretAimOverride = false; // if the aim of the turret is overridden
   private double robotRotationDegrees = 0; // how rotated the robot is, in degrees
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private int purplesNeeded = 0; // the number of purples needed to fill the mag
@@ -69,18 +70,23 @@ public class ScoringSystem {
   /**
    * @brief initializes the artifact scoring system
    * @param isPreloaded if the spindex is preloaded with balls
+   * @param search if limelight should search for a new ball sequence
    * @note call when OpMode is initialized ("Init" is pressed)
    */
-  public void init(boolean isPreloaded) {
+  public void init(boolean isPreloaded, boolean search) {
     spindex.init(isPreloaded ? BallSequence.GPP : null, isPreloaded);
+    turret.setHorizontalAngle(
+        search ? allianceColor.getObeliskAngle() : allianceColor.getTargetAngleMin());
+    turret.update();
   }
 
   /**
    * @brief starts scoring systems up
    * @note call when OpMode is started ("Start" is pressed)
    */
-  public void start() {
+  public void start(boolean search) {
     turret.enable(); // let the flywheel spin up
+    if (search) limelight.detectSequence();
   }
 
   /**
@@ -111,13 +117,17 @@ public class ScoringSystem {
     telemetry.addData("Filling", fillingMag);
     telemetry.addData("Intake current", intake.getAverageCurrentAmps());
     telemetry.addData("Limelight mode", limelight.getMode().toString());
+    telemetry.addData("Spindex mode", spindex.getState().toString());
   }
 
   /**
    * @brief updates everything to do with aiming the turret
    */
   private void updateAiming() {
-    if (!limelight.isReadyToNavigate()) {
+    if (turretAimOverride) {
+      turret.setHorizontalAngle(0);
+
+    } else if (!limelight.isReadyToNavigate()) {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
 
     } else if (limelight.isTargetInFrame()) {
@@ -502,6 +512,14 @@ public class ScoringSystem {
    */
   public void emergencyRecheckSequence() {
     limelight.detectSequence();
+  }
+
+  /**
+   * @brief sets the turret to 0 degrees
+   * @note intended for use at the end of auto
+   */
+  public void homeTurret() {
+    turretAimOverride = true;
   }
 
   /**

@@ -105,13 +105,13 @@ public class Spindex {
   private final ColorSensor colorSensor; // the color sensor at the intake
   private final DistanceSensor
       distanceSensor; // the distance sensor at the intake (built into color sensor?)
-  private final double lifterRetractedPos =
-      20; // the position of the lift servo when at rest | TODO: tune
-  private final double lifterExtendedPos = 180; // the position of the lift servo when shooting
+  // TODO: tune
+  private final static double lifterRetractedPos = 20; // position of lift servos when at rest
+  private final static double lifterExtendedPos = 180; // position of lift servos when shooting
   private final SpindexSlot[] spindex = {
     new SpindexSlot(39.6, 39.6, 108), // slot 0
     new SpindexSlot(172.8, 172.8, 237.6), // slot 1
-    new SpindexSlot(306, 306, 360) // slot 2
+    new SpindexSlot(306, 306, 237.6) // slot 2
   };
 
   private SpindexState state; // the current state of the spindex

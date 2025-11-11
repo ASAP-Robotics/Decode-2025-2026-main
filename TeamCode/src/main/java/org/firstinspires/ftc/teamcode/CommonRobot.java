@@ -34,33 +34,33 @@ import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 /**
- * @brief class to contain the behavior of the robot, to avoid code duplication
+ * @brief class to contain the configuration of the robot, to avoid code duplication
  */
-public class BasicRobot {
+public class CommonRobot {
   protected HardwareMap hardwareMap;
   protected Telemetry telemetry;
   protected GoBildaPinpointDriver pinpoint;
   public ScoringSystem mag;
 
-  public BasicRobot(
+  public CommonRobot(
       HardwareMap hardwareMap,
       Telemetry telemetry,
       AllianceColor allianceColor,
-      boolean preloaded) {
+      boolean preloaded,
+      boolean search) {
     this.hardwareMap = hardwareMap;
     this.telemetry = telemetry;
     pinpoint = this.hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
-    Limelight limelight = new Limelight(rawLimelight, allianceColor, false);
+    Limelight limelight = new Limelight(rawLimelight, allianceColor, search, 5);
 
-    AnalogInput lifterEncoder1 = this.hardwareMap.get(AnalogInput.class, "lifterEncoder1");
     AnalogInput lifterEncoder2 = this.hardwareMap.get(AnalogInput.class, "lifterEncoder2");
     Servo rawLifterServo2 = this.hardwareMap.get(Servo.class, "lifter2");
     Axon lifterServo2 = new Axon(rawLifterServo2, lifterEncoder2);
     Servo rawLifterServo1 = this.hardwareMap.get(Servo.class, "lifter1");
     rawLifterServo1.setDirection(Servo.Direction.REVERSE);
-    Axon lifterServo1 = new Axon(rawLifterServo1, lifterEncoder1);
+    Axon lifterServo1 = new Axon(rawLifterServo1);
     AnalogInput magServoEncoder = this.hardwareMap.get(AnalogInput.class, "magServoEncoder");
     Servo rawMagServo2 = this.hardwareMap.get(Servo.class, "magServo2");
     Axon magServo2 = new Axon(rawMagServo2, magServoEncoder);
@@ -71,7 +71,9 @@ public class BasicRobot {
     Spindex spindex =
         new Spindex(magServo1, magServo2, lifterServo1, lifterServo2, colorSensor, distanceSensor);
 
-    Servo turretHood = this.hardwareMap.get(Servo.class, "turretHood");
+    AnalogInput turretHoodEncoder = this.hardwareMap.get(AnalogInput.class, "hoodEncoder");
+    Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
+    Axon turretHood = new Axon(rawTurretHood, turretHoodEncoder);
     DcMotorEx turretRotator = this.hardwareMap.get(DcMotorEx.class, "turretRotator");
     DcMotorEx flywheelMotor = this.hardwareMap.get(DcMotorEx.class, "flywheel");
     Turret turret = new Turret(flywheelMotor, turretRotator, turretHood);
@@ -80,6 +82,6 @@ public class BasicRobot {
     ActiveIntake intake = new ActiveIntake(intakeMotor);
 
     mag = new ScoringSystem(intake, turret, spindex, limelight, allianceColor, this.telemetry);
-    mag.init(preloaded); // initialize scoring systems
+    mag.init(preloaded, search); // initialize scoring systems
   }
 }

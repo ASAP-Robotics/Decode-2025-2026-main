@@ -29,7 +29,7 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 /**
  * @brief class to contain the behavior of the robot in TeliOp, to avoid code duplication
  */
-public class TeliOpRobot extends BasicRobot {
+public class TeliOpRobot extends CommonRobot {
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
   public MecanumWheelBase wheelBase;
@@ -40,7 +40,7 @@ public class TeliOpRobot extends BasicRobot {
       AllianceColor allianceColor,
       Gamepad gamepad1,
       Gamepad gamepad2) {
-    super(hardwareMap, telemetry, allianceColor, false);
+    super(hardwareMap, telemetry, allianceColor, false, false);
 
     this.gamepad1 = gamepad1;
     this.gamepad2 = gamepad2;
@@ -50,20 +50,13 @@ public class TeliOpRobot extends BasicRobot {
     DcMotorEx backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
     DcMotorEx backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
     wheelBase = new MecanumWheelBase(frontLeft, frontRight, backLeft, backRight);
-
-    // the following is temporary; TODO: remove once Auto code configures stuff
-    pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-    pinpoint.setEncoderDirections(
-        GoBildaPinpointDriver.EncoderDirection.FORWARD,
-        GoBildaPinpointDriver.EncoderDirection.FORWARD);
-    pinpoint.resetPosAndIMU(); // TODO: only calibrate IMU once Auto code configures stuff
   }
 
   /**
    * @brief to be called once when the "start" button is pressed
    */
   public void start() {
-    mag.start(); // start scoring systems up
+    mag.start(false); // start scoring systems up
   }
 
   /**

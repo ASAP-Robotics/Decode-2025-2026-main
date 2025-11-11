@@ -27,6 +27,7 @@ import java.util.List;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -44,6 +45,7 @@ public class Limelight {
   private LimeLightMode mode;
   private LLResult result;
   private boolean isResultValid = false; // if the latest result is valid (contains a target)
+  private SimpleTimer detectionTimer;
 
   /**
    * @brief makes an object of the Limelight class
@@ -52,14 +54,17 @@ public class Limelight {
    * @param search if true, limelight will search for a sequence before switching to navigation
    *     mode, if false it will start navigation immediately and use the stored last detected
    *     sequence
+   * @param searchTime the maximum amount of time (seconds) to search for a ball sequence for
    * @note search is intended to be true for auto, and false for teliop
    */
-  public Limelight(Limelight3A limelight, AllianceColor allianceColor, boolean search) {
+  public Limelight(Limelight3A limelight, AllianceColor allianceColor, boolean search, double searchTime) {
     this.limelight = limelight;
     this.allianceColor = allianceColor;
     this.mode = search ? LimeLightMode.IDENTIFICATION : LimeLightMode.NAVIGATION;
+    this.detectionTimer = new SimpleTimer(searchTime);
     if (search) {
       this.config = new JSONObject(); // make blank JSON object
+      this.detectionTimer.start();
 
     } else {
       try {
@@ -103,11 +108,19 @@ public class Limelight {
         }
       }
 
-      if (detectedSequence != oldSequence) {
+      boolean searchFailed = detectionTimer.isFinished();
+
+      if (detectedSequence != oldSequence || searchFailed) {
         // ^ if a new ball sequence was detected
         mode = LimeLightMode.NAVIGATION;
+
+        if (searchFailed) {
+          detectedSequence = BallSequence.GPP; // default to GPP if search failed
+        }
+
         try {
           config.put("sequence", detectedSequence.name());
+          config.put("search_failed", searchFailed);
         } catch (JSONException ignored) {
 
         }
@@ -170,10 +183,10 @@ public class Limelight {
 
   /**
    * @brief forces limelight to (re) detect the ball sequence
-   * @note intended only for emergency use by the driver (as a backup if something went wrong)
    */
   public void detectSequence() {
     mode = LimeLightMode.IDENTIFICATION;
+    detectionTimer.start();
   }
 
   /**
