@@ -16,9 +16,11 @@
 
 package org.firstinspires.ftc.teamcode.hardware;
 
+import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
+
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
-import org.firstinspires.ftc.teamcode.utils.MathUtils;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 
 public class Turret extends Flywheel<Turret.LookupTableItem> {
   protected static class LookupTableItem extends Flywheel.LookupTableItem {
@@ -49,14 +51,16 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public static final double TURRET_GEAR_TEETH = 121;
   // number of teeth on the gear attached to the motor
   private static final double MOTOR_GEAR_TEETH = 24;
+  // amount horizontal angle can go over 180 or under -180 degrees before wrapping
+  private static final double HORIZONTAL_HYSTERESIS = 10;
 
   private final DcMotorEx rotator;
-  private final Servo hoodServo;
+  private final Axon hoodServo;
   private final double ticksPerDegree;
-  private double targetHorizontalAngleDegrees; // target angle for side-to-side turret movement
-  private double targetVerticalAngleDegrees; // target angle for up-and-down turret movement
+  private double targetHorizontalAngleDegrees = 0; // target angle for side-to-side turret movement
+  private double targetVerticalAngleDegrees = 5; // target angle for up-and-down turret movement
 
-  public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Servo hoodServo, double idleSpeed) {
+  public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Axon hoodServo, double idleSpeed) {
     super(flywheelMotor, idleSpeed);
     this.rotator = rotator;
     this.hoodServo = hoodServo;
@@ -67,7 +71,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.ticksPerDegree = this.rotator.getMotorType().getTicksPerRev() / 360;
   }
 
-  public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Servo hoodServo) {
+  public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Axon hoodServo) {
     this(flywheelMotor, rotator, hoodServo, 500);
   }
 
@@ -76,18 +80,31 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @return the full lookup table
    */
   protected LookupTableItem[] fillLookupTable() {
+    // TODO: tune lookup table
+    // note: "distance" numbers *MUST* go from low to high (number, not distance)
     return new LookupTableItem[] {
-      new LookupTableItem(0.5, 6000, 0),
-      new LookupTableItem(0.45, 5500, 1),
-      new LookupTableItem(0.4, 5000, 2),
-      new LookupTableItem(0.35, 4500, 3),
-      new LookupTableItem(0.3, 4000, 4),
-      new LookupTableItem(0.25, 3500, 5),
-      new LookupTableItem(0.2, 3000, 6),
-      new LookupTableItem(0.15, 2500, 7),
-      new LookupTableItem(0.1, 2000, 8),
       new LookupTableItem(0.05, 1500, 9),
-    }; // placeholder values; TODO: tune
+      new LookupTableItem(0.1, 2000, 8),
+      new LookupTableItem(0.15, 2500, 7),
+      new LookupTableItem(0.2, 3000, 6),
+      new LookupTableItem(0.25, 3500, 5),
+      new LookupTableItem(0.3, 4000, 4),
+      new LookupTableItem(0.35, 4500, 3),
+      new LookupTableItem(0.4, 5000, 2),
+      new LookupTableItem(0.45, 5500, 1),
+      new LookupTableItem(0.5, 6000, 0)
+    }; // placeholder values
+  }
+
+  /**
+   * @brief gets if the turret is ready to shoot a ball
+   * @return true if the flywheel is up to speed, the turret is at its target rotation, and the hood
+   *     is in place, false otherwise
+   * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
+   */
+  @Override
+  public boolean isReadyToShoot() {
+    return super.isReadyToShoot() && !rotator.isBusy();
   }
 
   /**
@@ -97,7 +114,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   @Override
   public void update() {
     super.update();
-    hoodServo.setPosition(targetVerticalAngleDegrees); // this might need updating
+    hoodServo.setPosition(
+        map(targetVerticalAngleDegrees, 0, 360, 0, 1)); // this might need updating
     double motorDegrees = turretDegreesToMotorDegrees(targetHorizontalAngleDegrees);
     rotator.setTargetPosition((int) (motorDegrees * ticksPerDegree));
   }
@@ -107,23 +125,27 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @param distance the new distance to the target, in arbitrary units
    * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
    *     of distance
+   * @note the new value isn't applied until update() is called
    */
   @Override
   public void setTargetDistance(double distance) {
     setVerticalAngle(getAngleLookup(distance));
-    super.setTargetDistance(distance); // this updates
+    super.setTargetDistance(distance);
   }
 
   /**
-   * @brief sets the side-to-side angle of the turret in degrees
    * @param degrees the number of degrees from straight to move the turret
-   * @return the old horizontal angle of the turret
+   * @brief sets the side-to-side angle of the turret in degrees
+   * @note the new value isn't applied until update() is called
    */
-  public double setHorizontalAngle(double degrees) {
-    double toReturn = targetHorizontalAngleDegrees;
-    targetHorizontalAngleDegrees = degrees;
-    update();
-    return toReturn;
+  public void setHorizontalAngle(double degrees) {
+    if (degrees > 180 + HORIZONTAL_HYSTERESIS || degrees < -180 - HORIZONTAL_HYSTERESIS) {
+      // angle is wrapped to ensure the turret never turns more than ~one full rotation
+      targetHorizontalAngleDegrees = AngleUnit.normalizeDegrees(degrees);
+
+    } else {
+      targetHorizontalAngleDegrees = degrees;
+    }
   }
 
   /**
@@ -142,6 +164,14 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     double ticks = rotator.getCurrentPosition(); // get motor position in ticks
     double motorDegrees = ticks / ticksPerDegree; // convert motor position to degrees
     return motorDegreesToTurretDegrees(motorDegrees); // convert motor position to turret position
+  }
+
+  /**
+   * @brief gets if the turret is at its rotational target or not
+   * @return false if the rotator motor is moving to the target, true if it is at its target
+   */
+  public boolean isAtTarget() {
+    return !rotator.isBusy();
   }
 
   /**
@@ -198,7 +228,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
       }
     }
 
-    return MathUtils.map(
+    return map(
         distance,
         LOOKUP_TABLE[indexUnder].getDistance(),
         LOOKUP_TABLE[indexOver].getDistance(),

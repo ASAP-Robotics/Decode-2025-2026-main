@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import java.util.*;
@@ -32,6 +32,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
  * consider these IDs (null/empty = any) tags.setSelectedId(2); // lock to a single ID (null to
  * clear) // Or cycle at runtime with your buttons, using getLastVisibleIds() to choose.
  */
+@Deprecated
 public class CameraLowLevel {
 
   // --- Construction/config ---
