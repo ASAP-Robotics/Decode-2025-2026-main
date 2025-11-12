@@ -81,20 +81,31 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @return the full lookup table
    */
   protected LookupTableItem[] fillLookupTable() {
-    // TODO: tune lookup table
+    // TODO: fine tune lookup table
     // note: "distance" numbers *MUST* go from low to high (number, not distance)
     return new LookupTableItem[] {
-      new LookupTableItem(0.05, 1500, 9),
-      new LookupTableItem(0.1, 2000, 8),
-      new LookupTableItem(0.15, 2500, 7),
-      new LookupTableItem(0.2, 3000, 6),
-      new LookupTableItem(0.25, 3500, 5),
-      new LookupTableItem(0.3, 4000, 4),
-      new LookupTableItem(0.35, 4500, 3),
-      new LookupTableItem(0.4, 5000, 2),
-      new LookupTableItem(0.45, 5500, 1),
-      new LookupTableItem(0.5, 6000, 0)
-    }; // placeholder values
+      new LookupTableItem(0.1, 3500, 45),
+      new LookupTableItem(0.235, 3450, 45),
+      new LookupTableItem(0.27, 3250, 45),
+      new LookupTableItem(0.29, 3200, 50),
+      new LookupTableItem(0.4, 3000, 40),
+      new LookupTableItem(0.515, 2800, 40),
+      new LookupTableItem(0.635, 2700, 40),
+      new LookupTableItem(0.645, 2700, 55),
+      new LookupTableItem(0.67, 2700, 55),
+      new LookupTableItem(0.765, 2650, 55),
+      new LookupTableItem(0.85, 2600, 60),
+      new LookupTableItem(0.88, 2600, 60),
+      new LookupTableItem(0.99, 2600, 60),
+      new LookupTableItem(1.1, 2500, 60),
+      new LookupTableItem(1.4, 2500, 50),
+      new LookupTableItem(1.85, 2500, 40),
+      new LookupTableItem(2.17, 2450, 40),
+      new LookupTableItem(2.89, 2450, 40),
+      new LookupTableItem(3.85, 2400, 50),
+      new LookupTableItem(4.77, 2300, 65),
+      new LookupTableItem(6, 2100, 90)
+    }; // preliminary values
   }
 
   /**
