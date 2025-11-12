@@ -58,8 +58,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public final Axon hoodServo;
   private final double ticksPerDegree;
   private double targetHorizontalAngleDegrees = 0; // target angle for side-to-side turret movement
-  private double targetVerticalAngleDegrees = 5; // target angle for up-and-down turret movement
-  public double testingAngle = 0;
+  private double targetVerticalAngleDegrees = 45; // target angle for up-and-down turret movement
 
   public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Axon hoodServo, double idleSpeed) {
     super(flywheelMotor, idleSpeed);
@@ -67,13 +66,13 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.hoodServo = hoodServo;
     this.rotator.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
     this.rotator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-    this.rotator.setTargetPosition(0); // placeholder
+    this.rotator.setTargetPosition(0); // placeholder?
     this.rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-    this.ticksPerDegree = this.rotator.getMotorType().getTicksPerRev() / 360;
+    this.ticksPerDegree = this.rotator.getMotorType().getTicksPerRev() / 360; // TODO: change
   }
 
   public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Axon hoodServo) {
-    this(flywheelMotor, rotator, hoodServo, 500);
+    this(flywheelMotor, rotator, hoodServo, 2000);
   }
 
   /**
@@ -126,7 +125,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   @Override
   public void update() {
     super.update();
-    hoodServo.setPosition(testingAngle); // this might need updating
+    hoodServo.setPosition(targetVerticalAngleDegrees); // this might need updating
     double motorDegrees = turretDegreesToMotorDegrees(targetHorizontalAngleDegrees);
     rotator.setTargetPosition((int) (motorDegrees * ticksPerDegree));
   }
@@ -189,8 +188,9 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @brief sets the angle of the servo in degrees
    * @param degrees the number of degrees to move the servo to
    * @note doesn't update the turret
+   * @note do not use externally except for tuning
    */
-  protected void setVerticalAngle(double degrees) {
+  public void setVerticalAngle(double degrees) {
     targetVerticalAngleDegrees = degrees;
   }
 
@@ -199,7 +199,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @return the target vertical angle of the turret
    */
   public double getTargetVerticalAngleDegrees() {
-    return /*targetVerticalAngleDegrees*/testingAngle;
+    return targetVerticalAngleDegrees;
   }
 
   /**

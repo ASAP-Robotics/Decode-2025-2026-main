@@ -23,61 +23,18 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.config.Config;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
+import org.firstinspires.ftc.teamcode.hardware.servos.DualServo;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 @TeleOp(name = "Tuning turret", group = "Tuning")
 @Config
 public class TuningTurret extends LinearOpMode {
-  /**
-   * @brief simple class to control two Axon servos at once
-   */
-  private class DualServo {
-    private final Axon servo1, servo2; // servos
-    private double targetPosition; // the angle to move the servos to
-
-    public DualServo(Axon servo1, Axon servo2) {
-      this.servo1 = servo1;
-      this.servo2 = servo2;
-    }
-
-    /**
-     * @brief sets the position of the servos
-     * @param degrees the angle to turn the servo to
-     */
-    public void setPosition(double degrees) {
-      targetPosition = degrees; // store target position
-      // set servo angles:
-      servo1.setPosition(targetPosition);
-      servo2.setPosition(targetPosition);
-    }
-
-    /**
-     * @brief gets if both servos are at the target
-     * @return true if both servos are at target, false otherwise
-     */
-    public boolean isAtTarget() {
-      return servo1.isAtTarget() && servo2.isAtTarget();
-    }
-
-    /**
-     * @brief gets the target position of the servos
-     * @return the target angle of the servos
-     */
-    public double getTargetPosition() {
-      return targetPosition;
-    }
-  }
   public static double speed = 2000;
   public static double angle = 0;
 
@@ -132,12 +89,12 @@ public class TuningTurret extends LinearOpMode {
       }
 
       turret.testingSpeed = speed;
-      turret.testingAngle = angle;
+      turret.setVerticalAngle(angle);
 
       limelight.update();
       turret.update();
 
-      dashboardTelemetry.addData("Angle", turret.testingAngle);
+      dashboardTelemetry.addData("Angle", turret.getTargetVerticalAngleDegrees());
       dashboardTelemetry.addData("Target Speed", turret.testingSpeed);
       dashboardTelemetry.addData("Speed", turret.flywheel.getVelocity() * 60 / 28);
       dashboardTelemetry.addData("At target speed", turret.isReadyToShoot());

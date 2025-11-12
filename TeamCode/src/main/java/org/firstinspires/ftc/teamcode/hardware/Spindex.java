@@ -23,6 +23,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
+import org.firstinspires.ftc.teamcode.hardware.servos.DualServo;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 
@@ -60,53 +61,12 @@ public class Spindex {
     }
   }
 
-  /**
-   * @brief simple class to control two Axon servos at once
-   */
-  private class DualServo {
-    private final Axon servo1, servo2; // servos
-    private double targetPosition; // the angle to move the servos to
-
-    public DualServo(Axon servo1, Axon servo2) {
-      this.servo1 = servo1;
-      this.servo2 = servo2;
-    }
-
-    /**
-     * @brief sets the position of the servos
-     * @param degrees the angle to turn the servo to
-     */
-    public void setPosition(double degrees) {
-      targetPosition = degrees; // store target position
-      // set servo angles:
-      servo1.setPosition(targetPosition);
-      servo2.setPosition(targetPosition);
-    }
-
-    /**
-     * @brief gets if both servos are at the target
-     * @return true if both servos are at target, false otherwise
-     */
-    public boolean isAtTarget() {
-      return servo1.isAtTarget() && servo2.isAtTarget();
-    }
-
-    /**
-     * @brief gets the target position of the servos
-     * @return the target angle of the servos
-     */
-    public double getTargetPosition() {
-      return targetPosition;
-    }
-  }
-
   private final DualServo spinner; // the servos that rotate the divider in the mag
   private final DualServo lifter; // the servos that lift balls into the shooter turret
   private final ColorSensor colorSensor; // the color sensor at the intake
   private final DistanceSensor
       distanceSensor; // the distance sensor at the intake (built into color sensor?)
-  // TODO: tune
-  private static final double lifterRetractedPos = 20; // position of lift servos when at rest
+  private static final double lifterRetractedPos = 60; // position of lift servos when at rest
   private static final double lifterExtendedPos = 180; // position of lift servos when shooting
   private final SpindexSlot[] spindex = {
     new SpindexSlot(39.6, 39.6, 108), // slot 0

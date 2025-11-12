@@ -106,6 +106,7 @@ public class Limelight {
 
     List<LLResultTypes.FiducialResult> apriltags = result.getFiducialResults();
     int bestId = NULL;
+    // NOTE: limelight *should* always see two tags... TODO: change
     if (apriltags.size() == 1) {
       // ^ if limelight only sees one apriltag
       bestId = apriltags.get(0).getFiducialId();

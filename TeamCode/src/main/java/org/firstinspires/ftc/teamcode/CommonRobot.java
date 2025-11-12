@@ -53,7 +53,7 @@ public class CommonRobot {
     pinpoint = this.hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
-    Limelight limelight = new Limelight(rawLimelight, allianceColor, search, 5);
+    Limelight limelight = new Limelight(rawLimelight, allianceColor, search, 2);
 
     AnalogInput lifterEncoder = this.hardwareMap.get(AnalogInput.class, "lifterEncoder");
     Servo rawLifterServo2 = this.hardwareMap.get(Servo.class, "lifter2");
@@ -71,9 +71,8 @@ public class CommonRobot {
     Spindex spindex =
         new Spindex(magServo1, magServo2, lifterServo1, lifterServo2, colorSensor, distanceSensor);
 
-    AnalogInput turretHoodEncoder = this.hardwareMap.get(AnalogInput.class, "hoodEncoder");
     Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
-    Axon turretHood = new Axon(rawTurretHood, turretHoodEncoder);
+    Axon turretHood = new Axon(rawTurretHood);
     DcMotorEx turretRotator = this.hardwareMap.get(DcMotorEx.class, "turretRotator");
     DcMotorEx flywheelMotor = this.hardwareMap.get(DcMotorEx.class, "flywheel");
     Turret turret = new Turret(flywheelMotor, turretRotator, turretHood);
