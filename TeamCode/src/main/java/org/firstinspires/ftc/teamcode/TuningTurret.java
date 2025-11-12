@@ -88,6 +88,7 @@ public class TuningTurret extends LinearOpMode {
 
     DcMotorEx flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
     DcMotorEx turretRotator = hardwareMap.get(DcMotorEx.class, "turretRotator");
+    DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
     Servo rawTurretHood = hardwareMap.get(Servo.class, "turretHood");
     Servo lifter1 = hardwareMap.get(Servo.class, "lifter1");
     lifter1.setDirection(Servo.Direction.REVERSE);
@@ -105,6 +106,8 @@ public class TuningTurret extends LinearOpMode {
 
     waitForStart();
     lifter.setPosition(60);
+    intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    intake.setPower(-0.5);
 
     while (opModeIsActive()) {
       if (gamepad1.dpadUpWasPressed()) {
