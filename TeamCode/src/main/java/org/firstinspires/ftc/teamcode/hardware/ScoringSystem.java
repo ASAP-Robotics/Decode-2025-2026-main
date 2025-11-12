@@ -42,6 +42,8 @@ public class ScoringSystem {
   private BallSequence ballSequence; // the sequence being shot
   private final AllianceColor allianceColor; // the alliance we are on
   private boolean turretAimOverride = false; // if the aim of the turret is overridden
+  private double horizontalAngleOverride = 0;
+  private double distanceOverride = 1;
   private double robotRotationDegrees = 0; // how rotated the robot is, in degrees
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private int purplesNeeded = 0; // the number of purples needed to fill the mag
@@ -125,7 +127,8 @@ public class ScoringSystem {
    */
   private void updateAiming() {
     if (turretAimOverride) {
-      turret.setHorizontalAngle(0);
+      turret.setHorizontalAngle(horizontalAngleOverride);
+      turret.setTargetDistance(distanceOverride);
 
     } else if (!limelight.isReadyToNavigate()) {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
@@ -520,6 +523,26 @@ public class ScoringSystem {
    */
   public void homeTurret() {
     turretAimOverride = true;
+    horizontalAngleOverride = 0;
+    distanceOverride = 1;
+  }
+
+  /**
+   * @brief overrides aiming, switching control away from limelight
+   * @param distance the distance from the target, as a fraction of limelights view
+   * @param angle the angle to turn the turret to
+   */
+  public void overrideAiming(double distance, double angle) {
+    turretAimOverride = true;
+    distanceOverride = distance;
+    horizontalAngleOverride = angle;
+  }
+
+  /**
+   * @brief switches aiming control back to limelight (from manual override)
+   */
+  public void autoAim() {
+    turretAimOverride = false;
   }
 
   /**
