@@ -18,6 +18,9 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 
 public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
@@ -35,8 +38,8 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
     public abstract double getRpm();
   }
 
-  private final DcMotorEx flywheel;
-  private final double motorTicksPerRev; // ticks per revolution of flywheel motor
+  public final DcMotorEx flywheel;
+  public final double motorTicksPerRev; // ticks per revolution of flywheel motor
   protected boolean isEnabled = false; // if the flywheel is enabled
   protected boolean isActive = true; // if the flywheel is active (as opposed to idling)
   private double idleSpeed; // the speed (RPM) of the flywheel when idle
@@ -44,7 +47,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   private double currentSpeed = 0; // the latest speed (RPM) of the flywheel
   private double targetDistance = 0; // the distance (inches) to the target
   private boolean containsBall = false; // if the flywheel has a ball in it that it is shooting
-  public double testingSpeed = 0;
+  public double testingSpeed = 2000;
 
   protected T[] LOOKUP_TABLE; // lookup table of distance, rpm, etc.
 
@@ -67,8 +70,9 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
     // set motor to spin freely if set to 0% power
     this.flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     // set motor to spin forwards
-    this.flywheel.setDirection(DcMotor.Direction.FORWARD);
-    motorTicksPerRev = this.flywheel.getMotorType().getTicksPerRev(); // get ticks per rev
+    this.flywheel.setDirection(DcMotor.Direction.REVERSE);
+    this.flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(10, 3, 5, 16));
+    motorTicksPerRev = 28; // get ticks per rev
   }
 
   /**
@@ -285,14 +289,10 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
     double ticksPerSec = (rpm / 60.0) * motorTicksPerRev;
     targetSpeed = rpm; // store target speed
 
-    if (currentSpeed <= rpm) { // if flywheel is going too slow
-      flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
-      flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
-
-    } else { // if flywheel is going too fast
-      flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
-      flywheel.setPower(0); // spin freely
-    }
+    //flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use speed-based control
+    flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
+    //flywheel.setPower(testingSpeed);
   }
 
   /**

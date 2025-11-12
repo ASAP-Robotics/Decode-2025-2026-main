@@ -16,55 +16,134 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.dashboard.config.Config;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
+@TeleOp(name = "Tuning turret", group = "Tuning")
+@Config
 public class TuningTurret extends LinearOpMode {
+  /**
+   * @brief simple class to control two Axon servos at once
+   */
+  private class DualServo {
+    private final Axon servo1, servo2; // servos
+    private double targetPosition; // the angle to move the servos to
+
+    public DualServo(Axon servo1, Axon servo2) {
+      this.servo1 = servo1;
+      this.servo2 = servo2;
+    }
+
+    /**
+     * @brief sets the position of the servos
+     * @param degrees the angle to turn the servo to
+     */
+    public void setPosition(double degrees) {
+      targetPosition = degrees; // store target position
+      // set servo angles:
+      servo1.setPosition(targetPosition);
+      servo2.setPosition(targetPosition);
+    }
+
+    /**
+     * @brief gets if both servos are at the target
+     * @return true if both servos are at target, false otherwise
+     */
+    public boolean isAtTarget() {
+      return servo1.isAtTarget() && servo2.isAtTarget();
+    }
+
+    /**
+     * @brief gets the target position of the servos
+     * @return the target angle of the servos
+     */
+    public double getTargetPosition() {
+      return targetPosition;
+    }
+  }
+  public static double speed = 2000;
+  public static double angle = 0;
 
   @Override
   public void runOpMode() {
+    FtcDashboard dashboard = FtcDashboard.getInstance();
+    Telemetry dashboardTelemetry = dashboard.getTelemetry();
+
     DcMotorEx flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
     DcMotorEx turretRotator = hardwareMap.get(DcMotorEx.class, "turretRotator");
     Servo rawTurretHood = hardwareMap.get(Servo.class, "turretHood");
+    Servo lifter1 = hardwareMap.get(Servo.class, "lifter1");
+    lifter1.setDirection(Servo.Direction.REVERSE);
+    Servo lifter2 = hardwareMap.get(Servo.class, "lifter2");
+    AnalogInput lifterEncoder = hardwareMap.get(AnalogInput.class, "lifterEncoder");
     Axon turretHood = new Axon(rawTurretHood);
+    Axon l1 = new Axon(lifter1);
+    Axon l2 = new Axon(lifter2, lifterEncoder);
+    DualServo lifter = new DualServo(l1, l2);
     Turret turret = new Turret(flywheel, turretRotator, turretHood);
     Limelight3A rawLimelight = hardwareMap.get(Limelight3A.class, "limelight");
     Limelight limelight = new Limelight(rawLimelight, AllianceColor.BLUE, false, 2);
-    turret.idle();
-    turret.disable();
+    turret.activate();
+    turret.enable();
 
     waitForStart();
+    lifter.setPosition(60);
 
     while (opModeIsActive()) {
       if (gamepad1.dpadUpWasPressed()) {
-        turret.testingSpeed += 100;
+        speed += 100;
 
       } else if (gamepad1.dpadDownWasPressed()) {
-        turret.testingSpeed -= 100;
+        speed -= 100;
 
       } else if (gamepad1.dpadRightWasPressed()) {
-        turret.testingAngle += 5;
+        angle += 5;
 
       } else if (gamepad1.dpadLeftWasPressed()) {
-        turret.testingAngle -= 5;
+        angle -= 5;
       }
+
+      if (lifter.isAtTarget() && lifter.getTargetPosition() == 180) {
+        lifter.setPosition(60);
+      }
+
+      if (gamepad1.rightBumperWasPressed()) {
+        lifter.setPosition(180);
+      }
+
+      turret.testingSpeed = speed;
+      turret.testingAngle = angle;
 
       limelight.update();
       turret.update();
 
-      telemetry.addData("Limelight locked", limelight.isTargetInFrame());
-      telemetry.addData("Target size", limelight.getTargetSize());
-      telemetry.addData("Angle", turret.testingAngle);
-      telemetry.addData("Speed", turret.testingSpeed);
-      telemetry.addData("Up to speed", turret.isReadyToShoot());
-      telemetry.update();
+      dashboardTelemetry.addData("Angle", turret.testingAngle);
+      dashboardTelemetry.addData("Target Speed", turret.testingSpeed);
+      dashboardTelemetry.addData("Speed", turret.flywheel.getVelocity() * 60 / 28);
+      dashboardTelemetry.addData("At target speed", turret.isReadyToShoot());
+      dashboardTelemetry.addData("Lifter at target", lifter.isAtTarget());
+      dashboardTelemetry.addData("Target size", limelight.getTargetSize());
+      dashboardTelemetry.addData("Limelight locked", limelight.isTargetInFrame());
+      dashboardTelemetry.addData("Result valid", limelight.isResultValid);
+
+      dashboardTelemetry.update();
     }
   }
 }

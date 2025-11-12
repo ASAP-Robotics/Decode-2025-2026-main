@@ -55,9 +55,9 @@ public class CommonRobot {
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
     Limelight limelight = new Limelight(rawLimelight, allianceColor, search, 5);
 
-    AnalogInput lifterEncoder2 = this.hardwareMap.get(AnalogInput.class, "lifterEncoder2");
+    AnalogInput lifterEncoder = this.hardwareMap.get(AnalogInput.class, "lifterEncoder");
     Servo rawLifterServo2 = this.hardwareMap.get(Servo.class, "lifter2");
-    Axon lifterServo2 = new Axon(rawLifterServo2, lifterEncoder2);
+    Axon lifterServo2 = new Axon(rawLifterServo2, lifterEncoder);
     Servo rawLifterServo1 = this.hardwareMap.get(Servo.class, "lifter1");
     rawLifterServo1.setDirection(Servo.Direction.REVERSE);
     Axon lifterServo1 = new Axon(rawLifterServo1);

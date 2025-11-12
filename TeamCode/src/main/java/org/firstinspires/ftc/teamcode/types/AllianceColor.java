@@ -18,8 +18,8 @@ package org.firstinspires.ftc.teamcode.types;
 
 public enum AllianceColor {
   // TODO: tune obelisk and target angles
-  RED(24, 1, -30, 0, 90),
-  BLUE(20, 2, 30, -90, 0);
+  RED(24, 2, -30, 0, 90),
+  BLUE(20, 1, 30, -90, 0);
 
   private final int aprilTagId;
   private final int limelightPipeline;
