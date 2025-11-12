@@ -19,7 +19,6 @@ package org.firstinspires.ftc.teamcode.hardware;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 
 public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
@@ -44,8 +43,10 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   private double targetSpeed = 0; // the speed (RPM) the flywheel is targeting
   private double currentSpeed = 0; // the latest speed (RPM) of the flywheel
   private double targetDistance = 0; // the distance (inches) to the target
+
   @Deprecated
   private boolean containsBall = false; // if the flywheel has a ball in it that it is shooting
+
   public double testingSpeed = 2000;
   public final boolean testing;
   public final double MOTOR_TICKS_PER_REV = 28; // ticks per revolution of flywheel motor
