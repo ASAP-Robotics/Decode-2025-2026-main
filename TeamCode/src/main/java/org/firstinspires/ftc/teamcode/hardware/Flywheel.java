@@ -18,6 +18,7 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 
 public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
@@ -35,19 +36,24 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
     public abstract double getRpm();
   }
 
-  private final DcMotorEx flywheel;
-  private final double motorTicksPerRev; // ticks per revolution of flywheel motor
+  public final DcMotorEx flywheel;
   protected boolean isEnabled = false; // if the flywheel is enabled
   protected boolean isActive = true; // if the flywheel is active (as opposed to idling)
   private double idleSpeed; // the speed (RPM) of the flywheel when idle
   private double targetSpeed = 0; // the speed (RPM) the flywheel is targeting
   private double currentSpeed = 0; // the latest speed (RPM) of the flywheel
   private double targetDistance = 0; // the distance (inches) to the target
+
+  @Deprecated
   private boolean containsBall = false; // if the flywheel has a ball in it that it is shooting
+
+  public double testingSpeed = 2000;
+  public final boolean testing;
+  public final double MOTOR_TICKS_PER_REV = 28; // ticks per revolution of flywheel motor
 
   protected T[] LOOKUP_TABLE; // lookup table of distance, rpm, etc.
 
-  private final double SPEED_TOLERANCE =
+  private static final double SPEED_TOLERANCE =
       0.95; // think of as the percentage of the target speed the flywheel needs to reach to be "at
 
   // target speed"
@@ -58,16 +64,29 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @param idleSpeed the speed of the flywheel when idling (RPM)
    */
   public Flywheel(DcMotorEx motor, double idleSpeed) {
+    this(motor, idleSpeed, false);
+  }
+
+  /**
+   * @brief makes an object of the Flywheel class
+   * @param motor the motor used for the flywheel
+   * @param idleSpeed the speed of the flywheel when idling (RPM)
+   * @param testing if the flywheel will be tested (pass false for normal use)
+   */
+  public Flywheel(DcMotorEx motor, double idleSpeed, boolean testing) {
     this.flywheel = motor;
     this.idleSpeed = idleSpeed; // set the speed of the flywheel at idle
+    this.testing = testing;
     this.LOOKUP_TABLE = fillLookupTable();
     // set motor to use speed-based control
     this.flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     // set motor to spin freely if set to 0% power
     this.flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-    // set motor to spin forwards
-    this.flywheel.setDirection(DcMotor.Direction.FORWARD);
-    motorTicksPerRev = this.flywheel.getMotorType().getTicksPerRev(); // get ticks per rev
+    // set motor to spin the right way
+    this.flywheel.setDirection(DcMotor.Direction.REVERSE);
+    // quick-and-dirty tuning values, could be updated:
+    this.flywheel.setPIDFCoefficients(
+        DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(10, 3, 5, 16));
   }
 
   /**
@@ -244,7 +263,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   public void update() {
     double ticksPerSec =
         this.flywheel.getVelocity(); // get the speed of the motor in ticks per second
-    currentSpeed = (ticksPerSec * 60.0) / motorTicksPerRev; // convert to RPM, store
+    currentSpeed = (ticksPerSec * 60.0) / MOTOR_TICKS_PER_REV; // convert to RPM, store
 
     if (isEnabled) { // if flywheel is enabled
       if (isActive) { // if flywheel is active
@@ -264,12 +283,12 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @note use setIdleSpeed() to set the idle speed
    */
   private void idleMotor() {
-    if (currentSpeed <= idleSpeed) { // if flywheel is going too slow
-      double ticksPerSec = (idleSpeed / 60.0) * motorTicksPerRev;
+    if (currentSpeed - 300 <= idleSpeed) {
+      double ticksPerSec = (idleSpeed / 60.0) * MOTOR_TICKS_PER_REV;
       flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
       flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
 
-    } else { // if flywheel is going too fast
+    } else { // if flywheel is going much too fast
       flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
       flywheel.setPower(0); // spin freely
     }
@@ -281,17 +300,11 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    */
   private void startMotor() {
     double rpm = getRPMLookup(targetDistance);
-    double ticksPerSec = (rpm / 60.0) * motorTicksPerRev;
+    double ticksPerSec = (rpm / 60.0) * MOTOR_TICKS_PER_REV;
     targetSpeed = rpm; // store target speed
 
-    if (currentSpeed <= rpm) { // if flywheel is going too slow
-      flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
-      flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
-
-    } else { // if flywheel is going too fast
-      flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
-      flywheel.setPower(0); // spin freely
-    }
+    flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
+    flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PIDF controller
   }
 
   /**
@@ -299,7 +312,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    */
   private void stopMotor() {
     flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
-    flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT); // brake if zero power
+    flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT); // float if zero power
     flywheel.setPower(0);
   }
 
@@ -311,6 +324,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    *     of distance
    */
   protected double getRPMLookup(double distance) {
+    if (testing) return testingSpeed; // used for tuning lookup table
     int indexOver = LOOKUP_TABLE.length - 1;
     int indexUnder = 0;
     for (int i = 0; i < LOOKUP_TABLE.length; i++) {

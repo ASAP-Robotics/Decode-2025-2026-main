@@ -39,12 +39,12 @@ public class Limelight {
 
   File configFile = AppUtil.getInstance().getSettingsFile("ball_sequence.json");
   JSONObject config;
-  private final Limelight3A limelight;
+  public final Limelight3A limelight;
   private final AllianceColor allianceColor;
   private BallSequence detectedSequence;
   private LimeLightMode mode;
-  private LLResult result;
-  private boolean isResultValid = false; // if the latest result is valid (contains a target)
+  public LLResult result;
+  public boolean isResultValid = false; // if the latest result is valid (contains a target)
   private SimpleTimer detectionTimer;
 
   /**
@@ -88,6 +88,8 @@ public class Limelight {
     if (result == null || !result.isValid()) {
       isResultValid = false;
       return;
+    } else {
+      isResultValid = true;
     }
 
     if (!isPipelineCorrect()) limelight.pipelineSwitch(getPipeline());
@@ -104,6 +106,7 @@ public class Limelight {
 
     List<LLResultTypes.FiducialResult> apriltags = result.getFiducialResults();
     int bestId = NULL;
+    // NOTE: limelight *should* always see two tags... TODO: change
     if (apriltags.size() == 1) {
       // ^ if limelight only sees one apriltag
       bestId = apriltags.get(0).getFiducialId();
