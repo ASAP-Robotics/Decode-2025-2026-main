@@ -24,6 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class ScoringSystem {
   private enum SequenceMode {
@@ -41,6 +42,8 @@ public class ScoringSystem {
   private SequenceMode emptyingMode = SequenceMode.SORTED; // the mode the mag is being emptied in
   private BallSequence ballSequence; // the sequence being shot
   private final AllianceColor allianceColor; // the alliance we are on
+  private final SimpleTimer targetLockTimer;
+  private boolean targetVisible = true;
   private boolean turretAimOverride = false; // if the aim of the turret is overridden
   private double horizontalAngleOverride = 0;
   private double distanceOverride = 1;
@@ -64,6 +67,7 @@ public class ScoringSystem {
     this.spindex = spindex;
     this.limelight = limelight;
     this.allianceColor = allianceColor;
+    this.targetLockTimer = new SimpleTimer(1); // TODO: tune
     this.telemetry = telemetry;
     this.turret.idle(); // set turret to spin at idle speed
     this.turret.disable(); // don't let the turret spin up
@@ -132,15 +136,26 @@ public class ScoringSystem {
 
     } else if (!limelight.isReadyToNavigate()) {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
+      return;
+    }
 
-    } else if (limelight.isTargetInFrame()) {
+    boolean targetWasVisible = targetVisible;
+    targetVisible = limelight.isTargetInFrame();
+
+    if (targetWasVisible && !targetVisible) {
+      // ^ if limelight just lost sight of the target
+      targetLockTimer.start(); // start timer
+    }
+
+    if (limelight.isTargetInFrame()) {
       // set turret distance to target
       turret.setTargetDistance(limelight.getTargetSize());
       // adjust turret angle
       turret.setHorizontalAngle(
           turret.getHorizontalAngleDegrees() + limelight.getTargetOffsetAngleDegrees());
 
-    } else if (turret.isAtTarget()) {
+    } else if (targetLockTimer.isFinished() && turret.isAtTarget()) {
+      // ^ if turret is moved and limelight hasn't seen the target for long enough
       // re-lock onto apriltag
       double angleMin = allianceColor.getTargetAngleMin() + robotRotationDegrees; // invert?
       double angleMax = allianceColor.getTargetAngleMax() + robotRotationDegrees; // invert?
