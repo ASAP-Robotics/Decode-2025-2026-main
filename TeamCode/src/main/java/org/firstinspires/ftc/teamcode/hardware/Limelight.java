@@ -55,8 +55,7 @@ public class Limelight {
    * @param searchTime the maximum amount of time (seconds) to search for a ball sequence for
    * @note search is intended to be true for auto, and false for teliop
    */
-  public Limelight(
-      Limelight3A limelight, AllianceColor allianceColor, double searchTime) {
+  public Limelight(Limelight3A limelight, AllianceColor allianceColor, double searchTime) {
     this.limelight = limelight;
     this.allianceColor = allianceColor;
     this.mode = LimeLightMode.UNINITIALIZED;
@@ -66,8 +65,8 @@ public class Limelight {
   /**
    * @brief initializes limelight
    * @param search if true, limelight will search for a sequence before switching to navigation
-   * mode, if false it will start navigation immediately and use the stored last detected
-   * sequence
+   *     mode, if false it will start navigation immediately and use the stored last detected
+   *     sequence
    */
   public void init(boolean search) {
     mode = search ? LimeLightMode.IDENTIFICATION : LimeLightMode.NAVIGATION;

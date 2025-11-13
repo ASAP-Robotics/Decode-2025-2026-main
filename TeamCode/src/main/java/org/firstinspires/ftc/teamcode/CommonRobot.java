@@ -42,10 +42,7 @@ public abstract class CommonRobot {
   protected GoBildaPinpointDriver pinpoint;
   public ScoringSystem mag;
 
-  public CommonRobot(
-      HardwareMap hardwareMap,
-      Telemetry telemetry,
-      AllianceColor allianceColor) {
+  public CommonRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     this.hardwareMap = hardwareMap;
     this.telemetry = telemetry;
     pinpoint = this.hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
