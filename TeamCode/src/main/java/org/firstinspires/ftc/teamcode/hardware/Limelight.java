@@ -106,12 +106,14 @@ public class Limelight {
 
     List<LLResultTypes.FiducialResult> apriltags = result.getFiducialResults();
     int bestId = NULL;
-    // NOTE: limelight *should* always see two tags... TODO: change
+    // NOTE: limelight *should* always see two tags...
+    /*
     if (apriltags.size() == 1) {
       // ^ if limelight only sees one apriltag
       bestId = apriltags.get(0).getFiducialId();
 
-    } else if (apriltags.size() == 2) {
+    } else */
+    if (apriltags.size() == 2) {
       // if limelight sees two apriltags
       bestId = getBestId(apriltags);
     }
@@ -200,7 +202,7 @@ public class Limelight {
    * @note intended to be used as the amount the turret needs to be turned to point at the target
    */
   public double getTargetOffsetAngleDegrees() {
-    return isResultValid ? result.getTx() : 0; // might need to invert
+    return isResultValid ? result.getTx() : 0; // might need to invert, TODO: check
   }
 
   /**
