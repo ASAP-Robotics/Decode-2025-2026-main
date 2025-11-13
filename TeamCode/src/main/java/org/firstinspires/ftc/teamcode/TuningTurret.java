@@ -57,7 +57,9 @@ public class TuningTurret extends LinearOpMode {
     DualServo lifter = new DualServo(l1, l2);
     Turret turret = new Turret(flywheel, turretRotator, turretHood);
     Limelight3A rawLimelight = hardwareMap.get(Limelight3A.class, "limelight");
-    Limelight limelight = new Limelight(rawLimelight, AllianceColor.BLUE, false, 2);
+    Limelight limelight = new Limelight(rawLimelight, AllianceColor.BLUE, 2);
+    limelight.init(false);
+    limelight.start();
     turret.activate();
     turret.enable();
 

@@ -40,7 +40,7 @@ public class TeliOpRobot extends CommonRobot {
       AllianceColor allianceColor,
       Gamepad gamepad1,
       Gamepad gamepad2) {
-    super(hardwareMap, telemetry, allianceColor, false, false);
+    super(hardwareMap, telemetry, allianceColor);
 
     this.gamepad1 = gamepad1;
     this.gamepad2 = gamepad2;
@@ -53,7 +53,21 @@ public class TeliOpRobot extends CommonRobot {
   }
 
   /**
-   * @brief to be called once when the "start" button is pressed
+   * @brief to be called once, when the opMode is initialized
+   */
+  public void init() {
+    mag.init(false, false); // initialize scoring systems
+  }
+
+  /**
+   * @brief to be called repeatedly, while the opMode is in init
+   */
+  public void initLoop() {
+    mag.initLoop();
+  }
+
+  /**
+   * @brief to be called once when the opMode is started
    */
   public void start() {
     mag.start(false); // start scoring systems up

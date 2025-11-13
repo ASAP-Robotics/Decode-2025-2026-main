@@ -112,9 +112,7 @@ public class Spindex {
       }
     }
 
-    // move spindex slot 0 to intake
-    spinner.setPosition(spindex[0].intakePosition);
-    this.state = SpindexState.INTAKING; // spindex in intaking mode
+    this.state = isPreloaded ? SpindexState.IDLE : SpindexState.INTAKING;
     this.currentIndex = 0; // spindex at index 0
     this.lifter.setPosition(lifterRetractedPos); // move lifting mechanism to rest position
   }

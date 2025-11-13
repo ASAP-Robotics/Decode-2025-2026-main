@@ -80,10 +80,16 @@ public class ScoringSystem {
    * @note call when OpMode is initialized ("Init" is pressed)
    */
   public void init(boolean isPreloaded, boolean search) {
-    spindex.init(isPreloaded ? BallSequence.GPP : null, isPreloaded);
-    turret.setHorizontalAngle(
-        search ? allianceColor.getObeliskAngle() : allianceColor.getTargetAngleMin());
-    turret.update();
+    spindex.init(BallSequence.GPP, isPreloaded);
+    turret.init(search ? allianceColor.getObeliskAngle() : allianceColor.getTargetAngleMin());
+    limelight.init(search);
+  }
+
+  /**
+   * @brief to be called repeatedly while the robot is in init
+   */
+  public void initLoop() {
+    spindex.update();
   }
 
   /**
@@ -92,6 +98,7 @@ public class ScoringSystem {
    */
   public void start(boolean search) {
     turret.enable(); // let the flywheel spin up
+    limelight.start();
     if (search) limelight.detectSequence();
   }
 
