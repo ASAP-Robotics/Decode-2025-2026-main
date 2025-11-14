@@ -188,7 +188,8 @@ public class Spindex {
    * @brief moves the specified spindex index to its shooting position
    */
   public void moveSpindexShoot(int index) {
-    if (!isIndexValid(index) || state == SpindexState.SHOOTING || state == SpindexState.LIFTING) return; // return on invalid parameters
+    if (!isIndexValid(index) || state == SpindexState.SHOOTING || state == SpindexState.LIFTING)
+      return; // return on invalid parameters
     // retract lifter
     lifter.setPosition(lifterRetractedPos);
     if (lifter.isAtTarget()) { // if lifter is fully retracted
