@@ -81,7 +81,7 @@ public class ScoringSystem {
    */
   public void init(boolean isPreloaded, boolean search) {
     spindex.init(BallSequence.GPP, isPreloaded);
-    turret.init(search ? allianceColor.getObeliskAngle() : allianceColor.getTargetAngleMin());
+    turret.init(0/*search ? allianceColor.getObeliskAngle() : allianceColor.getTargetAngleMin()*/);
     limelight.init(search);
   }
 
@@ -131,6 +131,7 @@ public class ScoringSystem {
     telemetry.addData("Intake current", intake.getAverageCurrentAmps());
     telemetry.addData("Limelight mode", limelight.getMode().toString());
     telemetry.addData("Spindex mode", spindex.getState().toString());
+    telemetry.addData("Spinner at target", spindex.spinner.isAtTarget());
   }
 
   /**
@@ -140,6 +141,7 @@ public class ScoringSystem {
     if (turretAimOverride) {
       turret.setHorizontalAngle(horizontalAngleOverride);
       turret.setTargetDistance(distanceOverride);
+      return;
 
     } else if (!limelight.isReadyToNavigate()) {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
@@ -231,6 +233,7 @@ public class ScoringSystem {
       emergencyEject(); // eject the intake to clear the blockage
 
     } else if (fillingMag) {
+      telemetry.addData("We are filling mag", true);
       // ^ if we are filling the magazine
       if (intake.isIntaking() && spindex.getIsIntakeColorNew() && spindex.isAtTarget()) {
         // ^ if intaking a ball, the spindex is stationary, and a new color of ball is in the intake
@@ -281,6 +284,7 @@ public class ScoringSystem {
       }
 
     } else if (intake.isIntaking() && !intake.isIdling()) {
+      telemetry.addData("We are intaking a ball", true);
       // ^ if the intake is trying to intake a (single) ball
       BallColor intakeColor =
           spindex.getIntakeColor(); // get the color of ball (if any) in the intake position
@@ -375,8 +379,7 @@ public class ScoringSystem {
   private boolean intakeIndex(int index) {
     // return false if given index contains a ball
     // spindex will return BallColor.INVALID on invalid indexes
-    if (spindex.getIndexColor(index) == BallColor.EMPTY
-        || spindex.getIndexColor(index) == BallColor.UNKNOWN) return false;
+    if (spindex.getIndexColor(index).isShootable()) return false;
 
     spindex.moveSpindexIntake(index); // move spindex to correct position
     intake.intake(); // start the intake spinning

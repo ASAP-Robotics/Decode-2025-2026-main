@@ -80,6 +80,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public void init(double horizontalAngle) {
     rotator.setTargetPosition((int) turretDegreesToMotorDegrees(horizontalAngle));
     rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+    rotator.setPower(0.5);
     hoodServo.setPosition(targetVerticalAngleDegrees);
   }
 

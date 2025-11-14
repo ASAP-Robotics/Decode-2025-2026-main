@@ -61,13 +61,13 @@ public class Spindex {
     }
   }
 
-  private final DualServo spinner; // the servos that rotate the divider in the mag
-  private final DualServo lifter; // the servos that lift balls into the shooter turret
+  public final DualServo spinner; // the servos that rotate the divider in the mag
+  public final DualServo lifter; // the servos that lift balls into the shooter turret
   private final ColorSensor colorSensor; // the color sensor at the intake
   private final DistanceSensor
       distanceSensor; // the distance sensor at the intake (built into color sensor?)
-  private static final double lifterRetractedPos = 60; // position of lift servos when at rest
-  private static final double lifterExtendedPos = 180; // position of lift servos when shooting
+  private static final double lifterRetractedPos = 0; // position of lift servos when at rest
+  private static final double lifterExtendedPos = 100; // position of lift servos when shooting
   private final SpindexSlot[] spindex = {
     new SpindexSlot(39.6, 39.6, 108), // slot 0
     new SpindexSlot(172.8, 172.8, 237.6), // slot 1
@@ -112,9 +112,9 @@ public class Spindex {
       }
     }
 
-    this.state = isPreloaded ? SpindexState.IDLE : SpindexState.INTAKING;
-    this.currentIndex = 0; // spindex at index 0
-    this.lifter.setPosition(lifterRetractedPos); // move lifting mechanism to rest position
+    state = isPreloaded ? SpindexState.IDLE : SpindexState.INTAKING;
+    currentIndex = 0; // spindex at index 0
+    lifter.setPosition(lifterRetractedPos); // move lifting mechanism to rest position
   }
 
   /**
@@ -409,18 +409,20 @@ public class Spindex {
     int green = colorSensor.green();
     int blue = colorSensor.blue();
     float[] hsv = new float[3];
+    double distance = distanceSensor.getDistance(DistanceUnit.INCH);
     Color.RGBToHSV(red * 8, green * 8, blue * 8, hsv);
     float h = hsv[0];
     float s = hsv[1];
     float v = hsv[2];
 
-    if (s > 0.6 && v > 40 && h >= 150 && h <= 170) { // green
-      intakeColor = BallColor.GREEN; // intake has a green ball in it
-    } else if (s > 0.3 && v > 40 && h >= 220 && h <= 240) { // purple
-      intakeColor = BallColor.PURPLE; // intake has a purple ball in it
-    } else { // color can't be determined
-      double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-      if (distance <= 1.0) { // if a ball is in the intake
+    if (distance < 1) {
+      if (h >= 145 && h <= 165) { // green
+        intakeColor = BallColor.GREEN; // intake has a green ball in it
+
+      } else if (h >= 185 && h <= 205) { // purple
+        intakeColor = BallColor.PURPLE; // intake has a purple ball in it
+
+      } else { // color can't be determined
         intakeColor = BallColor.UNKNOWN; // intake has an unknown ball in it
       }
     }
