@@ -4,6 +4,9 @@ import android.graphics.Color;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class ColorSensorTest extends LinearOpMode {
     @Override
@@ -11,7 +14,9 @@ public class ColorSensorTest extends LinearOpMode {
 
 
         // Get the color sensor from the configuration
-        ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "color");
+        ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+        DistanceSensor distanceSensor = hardwareMap.get(DistanceSensor.class, "colorSensor");
+
 
         // Array to store HSV values
         float[] hsvValues = new float[3];
@@ -34,7 +39,7 @@ public class ColorSensorTest extends LinearOpMode {
             telemetry.addData("Hue", hsvValues[0]);
             telemetry.addData("Saturation", hsvValues[1]);
             telemetry.addData("Value", hsvValues[2]);
-
+            telemetry.addData("Distance", distanceSensor.getDistance(DistanceUnit.INCH));
             telemetry.update();
         }
 
