@@ -81,7 +81,7 @@ public class ScoringSystem {
    */
   public void init(boolean isPreloaded, boolean search) {
     spindex.init(BallSequence.GPP, isPreloaded);
-    turret.init(0/*search ? allianceColor.getObeliskAngle() : allianceColor.getTargetAngleMin()*/);
+    turret.init(0 /*search ? allianceColor.getObeliskAngle() : allianceColor.getTargetAngleMin()*/);
     limelight.init(search);
   }
 
