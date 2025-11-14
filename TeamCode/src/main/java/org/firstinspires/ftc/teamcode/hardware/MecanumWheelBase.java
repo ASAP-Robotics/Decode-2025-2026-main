@@ -59,7 +59,7 @@ public class MecanumWheelBase {
 
   public MecanumWheelBase(
       DcMotorEx frontLeft, DcMotorEx frontRight, DcMotorEx backLeft, DcMotorEx backRight) {
-    this(frontLeft, frontRight, backLeft, backRight, 1, 2);
+    this(frontLeft, frontRight, backLeft, backRight, 0.001, 2);
   }
 
   /**

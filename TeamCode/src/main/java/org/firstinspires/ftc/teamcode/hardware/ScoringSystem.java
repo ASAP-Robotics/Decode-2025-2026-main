@@ -375,8 +375,8 @@ public class ScoringSystem {
   private boolean intakeIndex(int index) {
     // return false if given index contains a ball
     // spindex will return BallColor.INVALID on invalid indexes
-    if (spindex.getIndexColor(index) != BallColor.EMPTY
-        && spindex.getIndexColor(index) != BallColor.UNKNOWN) return false;
+    if (spindex.getIndexColor(index) == BallColor.EMPTY
+        || spindex.getIndexColor(index) == BallColor.UNKNOWN) return false;
 
     spindex.moveSpindexIntake(index); // move spindex to correct position
     intake.intake(); // start the intake spinning

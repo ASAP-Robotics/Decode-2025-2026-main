@@ -107,8 +107,8 @@ public class Spindex {
       }
 
     } else { // if the spindex is empty
-      for (SpindexSlot slot : spindex) { // for each slot
-        slot.color = BallColor.EMPTY; // slot is empty
+      for (SpindexSlot spindexSlot : spindex) { // for each slot
+        spindexSlot.color = BallColor.EMPTY; // slot is empty
       }
     }
 
@@ -129,7 +129,7 @@ public class Spindex {
     switch (state) {
       case IDLE: // if the spindex is idle
         // if the lifter is retracted and the spindex has not been set to the correct position
-        if (!isSpindexPosition(spindex[currentIndex].idlePosition) && lifter.isAtTarget()) {
+        if (lifter.isAtTarget()) {
           // move spindex to idle position
           spinner.setPosition(spindex[currentIndex].idlePosition);
         }
@@ -137,14 +137,14 @@ public class Spindex {
 
       case INTAKING: // if the spindex is intaking
         // if the lifter is retracted and the spindex has not been set to the correct position
-        if (!isSpindexPosition(spindex[currentIndex].intakePosition) && lifter.isAtTarget()) {
+        if (lifter.isAtTarget()) {
           spinner.setPosition(spindex[currentIndex].intakePosition);
         }
         break;
 
       case SHOOTING: // if the spindex is shooting
         // if the lifter is retracted and the spindex has not been set to the correct position
-        if (!isSpindexPosition(spindex[currentIndex].shootPosition) && lifter.isAtTarget()) {
+        if (lifter.isAtTarget()) {
           spinner.setPosition(spindex[currentIndex].shootPosition);
         }
         break;

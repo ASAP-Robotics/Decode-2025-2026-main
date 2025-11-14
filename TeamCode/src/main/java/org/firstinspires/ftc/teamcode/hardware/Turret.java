@@ -66,7 +66,6 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.hoodServo = hoodServo;
     this.rotator.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
     this.rotator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-    this.rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
     this.ticksPerDegree = 145.1 / 360;
   }
 
@@ -80,6 +79,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    */
   public void init(double horizontalAngle) {
     rotator.setTargetPosition((int) turretDegreesToMotorDegrees(horizontalAngle));
+    rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
     hoodServo.setPosition(targetVerticalAngleDegrees);
   }
 
