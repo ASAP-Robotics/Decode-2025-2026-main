@@ -21,6 +21,8 @@ import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 import android.graphics.Color;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.hardware.servos.DualServo;
@@ -66,7 +68,7 @@ public class Spindex {
   private final ColorSensor colorSensor; // the color sensor at the intake
   private final DistanceSensor
       distanceSensor; // the distance sensor at the intake (built into color sensor?)
-  private static final double lifterRetractedPos = 0; // position of lift servos when at rest
+  private static final double lifterRetractedPos = 7; // position of lift servos when at rest
   private static final double lifterExtendedPos = 100; // position of lift servos when shooting
   private final SpindexSlot[] spindex = {
     new SpindexSlot(39.6, 39.6, 108), // slot 0
@@ -413,11 +415,9 @@ public class Spindex {
     double distance = distanceSensor.getDistance(DistanceUnit.INCH);
     Color.RGBToHSV(red * 8, green * 8, blue * 8, hsv);
     float h = hsv[0];
-    float s = hsv[1];
-    float v = hsv[2];
 
-    if (distance < 1) {
-      if (h >= 145 && h <= 165) { // green
+    if (distance < 1.5) {
+      if (h >= 145 && h <= 170) { // green
         intakeColor = BallColor.GREEN; // intake has a green ball in it
 
       } else if (h >= 185 && h <= 205) { // purple
