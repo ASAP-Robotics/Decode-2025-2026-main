@@ -50,7 +50,7 @@ public class TuningTurret extends LinearOpMode {
 
     DcMotorEx flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
     flywheel.setPIDFCoefficients(
-            DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(70, 10, 20, 17));
+        DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(70, 10, 20, 17));
     DcMotorEx turretRotator = hardwareMap.get(DcMotorEx.class, "turretRotator");
     DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
     Servo rawTurretHood = hardwareMap.get(Servo.class, "turretHood");
@@ -99,7 +99,8 @@ public class TuningTurret extends LinearOpMode {
 
       turret.testingSpeed = speed;
       turret.setVerticalAngle(angle);
-      turret.flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
+      turret.flywheel.setPIDFCoefficients(
+          DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
 
       limelight.update();
       turret.update();

@@ -18,7 +18,6 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 
 public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
@@ -299,7 +298,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @note use `setTargetDistance()` to set the distance from the target
    */
   private void startMotor() {
-    //double rpm = getRPMLookup(targetDistance);
+    // double rpm = getRPMLookup(targetDistance);
     double rpm = testingSpeed;
     double ticksPerSec = (rpm / 60.0) * MOTOR_TICKS_PER_REV;
     targetSpeed = rpm; // store target speed
