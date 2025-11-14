@@ -131,7 +131,6 @@ public class ScoringSystem {
     telemetry.addData("Intake current", intake.getAverageCurrentAmps());
     telemetry.addData("Limelight mode", limelight.getMode().toString());
     telemetry.addData("Spindex mode", spindex.getState().toString());
-    telemetry.addData("Spinner at target", spindex.spinner.isAtTarget());
   }
 
   /**
@@ -461,6 +460,8 @@ public class ScoringSystem {
       return false; // done shooting sequence
     }
 
+    shootIndex(indexToShoot);
+
     if (spindex.isReadyToShoot()) {
       // ^ spindex is ready for ball to be lifted
       if (turret.isReadyToShoot()) {
@@ -468,10 +469,13 @@ public class ScoringSystem {
         spindex.liftBall();
       }
 
-    } else if (spindex.getState() == Spindex.SpindexState.LIFTED
-        || spindex.getIndex() != indexToShoot) {
+    } else if (spindex.getState() == Spindex.SpindexState.LIFTED) {
       // ^ spindex is done lifting ball, or hasn't been set yet
-      indexToShoot = spindex.getColorIndex(ballSequence.getBallColors()[sequenceIndex++]);
+      try {
+        indexToShoot = spindex.getColorIndex(ballSequence.getBallColors()[++sequenceIndex]);
+      } catch (IndexOutOfBoundsException e) {
+        return false; // done shooting sequence
+      }
 
       if (spindex.isIndexValid(indexToShoot)) {
         // ^ spindex isn't empty

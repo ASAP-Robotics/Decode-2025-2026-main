@@ -61,8 +61,8 @@ public class Spindex {
     }
   }
 
-  public final DualServo spinner; // the servos that rotate the divider in the mag
-  public final DualServo lifter; // the servos that lift balls into the shooter turret
+  private final DualServo spinner; // the servos that rotate the divider in the mag
+  private final DualServo lifter; // the servos that lift balls into the shooter turret
   private final ColorSensor colorSensor; // the color sensor at the intake
   private final DistanceSensor
       distanceSensor; // the distance sensor at the intake (built into color sensor?)
@@ -188,7 +188,7 @@ public class Spindex {
    * @brief moves the specified spindex index to its shooting position
    */
   public void moveSpindexShoot(int index) {
-    if (!isIndexValid(index)) return; // return on invalid parameters
+    if (!isIndexValid(index) || state == SpindexState.SHOOTING || state == SpindexState.LIFTING) return; // return on invalid parameters
     // retract lifter
     lifter.setPosition(lifterRetractedPos);
     if (lifter.isAtTarget()) { // if lifter is fully retracted

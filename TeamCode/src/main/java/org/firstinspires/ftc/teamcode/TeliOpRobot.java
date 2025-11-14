@@ -83,7 +83,7 @@ public class TeliOpRobot extends CommonRobot {
 
     // update scoring systems
     mag.setRobotRotation(0 /*location.getHeading(AngleUnit.DEGREES)*/);
-    mag.overrideAiming(1, 0);
+    //mag.overrideAiming(1, 0);
     mag.update();
 
     // emergency eject
@@ -93,8 +93,8 @@ public class TeliOpRobot extends CommonRobot {
 
     // shoot
     if (gamepad1.rightBumperWasPressed()) {
-      // mag.shootMag(); // shoot all balls in the mag, in a sequence if possible
-      mag.shootUnsorted();
+      mag.shootMag(); // shoot all balls in the mag, in a sequence if possible
+      //mag.shootUnsorted();
     }
 
     // intake

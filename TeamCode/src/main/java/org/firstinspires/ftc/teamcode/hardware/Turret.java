@@ -18,7 +18,10 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 
@@ -78,9 +81,11 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @param horizontalAngle the angle to start the turret at
    */
   public void init(double horizontalAngle) {
+    rotator.setVelocityPIDFCoefficients(35, 2, 1, 16);
+    rotator.setPositionPIDFCoefficients(3.5);
     rotator.setTargetPosition((int) turretDegreesToMotorDegrees(horizontalAngle));
     rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-    rotator.setPower(0.5);
+    rotator.setPower(1);
     hoodServo.setPosition(targetVerticalAngleDegrees);
   }
 

@@ -220,7 +220,7 @@ public class Limelight {
    * @note intended to be used as the amount the turret needs to be turned to point at the target
    */
   public double getTargetOffsetAngleDegrees() {
-    return isResultValid ? result.getTx() : 0; // might need to invert, TODO: check
+    return isResultValid ? -result.getTx() : 0; // might need to invert, TODO: check
   }
 
   /**
