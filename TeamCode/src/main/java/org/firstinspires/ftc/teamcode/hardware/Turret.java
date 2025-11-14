@@ -48,7 +48,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   }
 
   // number of teeth on the gear attached to the turret
-  public static final double TURRET_GEAR_TEETH = 121;
+  public static final double TURRET_GEAR_TEETH = 120;
   // number of teeth on the gear attached to the motor
   private static final double MOTOR_GEAR_TEETH = 24;
   // amount horizontal angle can go over 180 or under -180 degrees before wrapping
@@ -58,7 +58,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public final Axon hoodServo;
   private final double ticksPerDegree;
   private double targetHorizontalAngleDegrees = 0; // target angle for side-to-side turret movement
-  private double targetVerticalAngleDegrees = 45; // target angle for up-and-down turret movement
+  private double targetVerticalAngleDegrees = 90; // target angle for up-and-down turret movement
 
   public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Axon hoodServo, double idleSpeed) {
     super(flywheelMotor, idleSpeed);
@@ -66,13 +66,24 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.hoodServo = hoodServo;
     this.rotator.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
     this.rotator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-    this.rotator.setTargetPosition(0); // placeholder?
-    this.rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-    this.ticksPerDegree = this.rotator.getMotorType().getTicksPerRev() / 360; // TODO: change
+    this.ticksPerDegree = 145.1 / 360;
   }
 
   public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Axon hoodServo) {
-    this(flywheelMotor, rotator, hoodServo, 2000);
+    this(flywheelMotor, rotator, hoodServo, 1500);
+  }
+
+  /**
+   * @brief initializes the turret
+   * @param horizontalAngle the angle to start the turret at
+   */
+  public void init(double horizontalAngle) {
+    rotator.setVelocityPIDFCoefficients(35, 2, 1, 16);
+    rotator.setPositionPIDFCoefficients(3.5);
+    rotator.setTargetPosition((int) turretDegreesToMotorDegrees(horizontalAngle));
+    rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+    rotator.setPower(1);
+    hoodServo.setPosition(targetVerticalAngleDegrees);
   }
 
   /**

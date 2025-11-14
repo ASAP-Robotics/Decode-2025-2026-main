@@ -18,7 +18,6 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 
 public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
@@ -54,7 +53,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   protected T[] LOOKUP_TABLE; // lookup table of distance, rpm, etc.
 
   private static final double SPEED_TOLERANCE =
-      0.95; // think of as the percentage of the target speed the flywheel needs to reach to be "at
+      0.015; // think of as the percentage of the target speed the flywheel needs to reach to be "at
 
   // target speed"
 
@@ -78,6 +77,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
     this.idleSpeed = idleSpeed; // set the speed of the flywheel at idle
     this.testing = testing;
     this.LOOKUP_TABLE = fillLookupTable();
+    this.flywheel.setVelocityPIDFCoefficients(70, 10, 20, 17);
     // set motor to use speed-based control
     this.flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     // set motor to spin freely if set to 0% power
@@ -85,8 +85,6 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
     // set motor to spin the right way
     this.flywheel.setDirection(DcMotor.Direction.REVERSE);
     // quick-and-dirty tuning values, could be updated:
-    this.flywheel.setPIDFCoefficients(
-        DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(10, 3, 5, 16));
   }
 
   /**
@@ -101,7 +99,8 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
    */
   public boolean isReadyToShoot() {
-    return currentSpeed >= (targetSpeed * SPEED_TOLERANCE);
+    return currentSpeed >= (targetSpeed * (1 - SPEED_TOLERANCE))
+        && currentSpeed <= (targetSpeed * (1 + SPEED_TOLERANCE));
   }
 
   /**
@@ -299,7 +298,8 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @note use `setTargetDistance()` to set the distance from the target
    */
   private void startMotor() {
-    double rpm = getRPMLookup(targetDistance);
+    // double rpm = getRPMLookup(targetDistance);
+    double rpm = testingSpeed;
     double ticksPerSec = (rpm / 60.0) * MOTOR_TICKS_PER_REV;
     targetSpeed = rpm; // store target speed
 

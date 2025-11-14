@@ -27,9 +27,23 @@ public class AutoRobot extends CommonRobot {
   // stuff (variables, etc., see TeliOpRobot) goes here; TODO: update
 
   public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
-    super(hardwareMap, telemetry, allianceColor, true, true);
+    super(hardwareMap, telemetry, allianceColor);
 
     // other "Init" setup stuff goes here
+  }
+
+  /**
+   * @brief to be called once, when the opMode is initialized
+   */
+  public void init() {
+    mag.init(true, true);
+  }
+
+  /**
+   * @brief to be called repeatedly, while the opMode is in init
+   */
+  public void initLoop() {
+    mag.initLoop();
   }
 
   /**

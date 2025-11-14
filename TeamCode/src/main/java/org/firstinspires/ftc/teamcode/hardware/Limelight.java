@@ -34,49 +34,67 @@ import org.json.JSONObject;
 public class Limelight {
   public enum LimeLightMode {
     NAVIGATION,
-    IDENTIFICATION
+    IDENTIFICATION,
+    UNINITIALIZED
   }
 
   File configFile = AppUtil.getInstance().getSettingsFile("ball_sequence.json");
-  JSONObject config;
+  JSONObject config = new JSONObject(); // by default, config is blank
   public final Limelight3A limelight;
   private final AllianceColor allianceColor;
   private BallSequence detectedSequence;
   private LimeLightMode mode;
   public LLResult result;
   public boolean isResultValid = false; // if the latest result is valid (contains a target)
-  private SimpleTimer detectionTimer;
+  private final SimpleTimer detectionTimer;
 
   /**
    * @brief makes an object of the Limelight class
    * @param limelight the Limelight3A to use
    * @param allianceColor the alliance color of the robot
-   * @param search if true, limelight will search for a sequence before switching to navigation
-   *     mode, if false it will start navigation immediately and use the stored last detected
-   *     sequence
    * @param searchTime the maximum amount of time (seconds) to search for a ball sequence for
    * @note search is intended to be true for auto, and false for teliop
    */
-  public Limelight(
-      Limelight3A limelight, AllianceColor allianceColor, boolean search, double searchTime) {
+  public Limelight(Limelight3A limelight, AllianceColor allianceColor, double searchTime) {
     this.limelight = limelight;
     this.allianceColor = allianceColor;
-    this.mode = search ? LimeLightMode.IDENTIFICATION : LimeLightMode.NAVIGATION;
+    this.mode = LimeLightMode.UNINITIALIZED;
     this.detectionTimer = new SimpleTimer(searchTime);
-    if (search) {
-      this.config = new JSONObject(); // make blank JSON object
-      this.detectionTimer.start();
+  }
 
-    } else {
-      try {
-        this.config = new JSONObject(ReadWriteFile.readFile(configFile)); // get stored sequence
-        this.detectedSequence = BallSequence.valueOf(config.getString("sequence"));
-      } catch (JSONException ignored) {
-        this.config = new JSONObject(); // make blank JSON object
-      }
+  /**
+   * @brief initializes limelight
+   * @param search if true, limelight will search for a sequence before switching to navigation
+   *     mode, if false it will start navigation immediately and use the stored last detected
+   *     sequence
+   */
+  public void init(boolean search) {
+    mode = search ? LimeLightMode.IDENTIFICATION : LimeLightMode.NAVIGATION;
+
+    switch (mode) {
+      case IDENTIFICATION:
+        detectionTimer.start();
+        break;
+
+      case NAVIGATION:
+        try {
+          config = new JSONObject(ReadWriteFile.readFile(configFile)); // get stored sequence
+          detectedSequence = BallSequence.valueOf(config.getString("sequence"));
+        } catch (JSONException ignored) {
+          // fail silently if config read failed
+        }
+        break;
     }
-    this.limelight.pipelineSwitch(getPipeline());
-    this.limelight.start();
+
+    limelight.pipelineSwitch(getPipeline());
+    limelight.setPollRateHz(60);
+  }
+
+  /**
+   * @brief starts limelight up
+   */
+  public void start() {
+    limelight.start();
   }
 
   /**
@@ -106,12 +124,14 @@ public class Limelight {
 
     List<LLResultTypes.FiducialResult> apriltags = result.getFiducialResults();
     int bestId = NULL;
-    // NOTE: limelight *should* always see two tags... TODO: change
+    // NOTE: limelight *should* always see two tags...
+    /*
     if (apriltags.size() == 1) {
       // ^ if limelight only sees one apriltag
       bestId = apriltags.get(0).getFiducialId();
 
-    } else if (apriltags.size() == 2) {
+    } else */
+    if (apriltags.size() == 2) {
       // if limelight sees two apriltags
       bestId = getBestId(apriltags);
     }
@@ -200,7 +220,7 @@ public class Limelight {
    * @note intended to be used as the amount the turret needs to be turned to point at the target
    */
   public double getTargetOffsetAngleDegrees() {
-    return isResultValid ? result.getTx() : 0; // might need to invert
+    return isResultValid ? -result.getTx() : 0; // might need to invert, TODO: check
   }
 
   /**

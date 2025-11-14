@@ -27,6 +27,12 @@ public class MainTeliOpBlue extends LinearOpMode {
     TeliOpRobot robot =
         new TeliOpRobot(hardwareMap, telemetry, AllianceColor.BLUE, gamepad1, gamepad2);
 
+    robot.init();
+
+    while (opModeInInit()) {
+      robot.initLoop();
+    }
+
     waitForStart();
 
     robot.start();

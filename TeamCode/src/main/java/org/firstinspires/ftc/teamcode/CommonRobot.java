@@ -36,24 +36,19 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 /**
  * @brief class to contain the configuration of the robot, to avoid code duplication
  */
-public class CommonRobot {
+public abstract class CommonRobot {
   protected HardwareMap hardwareMap;
   protected Telemetry telemetry;
   protected GoBildaPinpointDriver pinpoint;
   public ScoringSystem mag;
 
-  public CommonRobot(
-      HardwareMap hardwareMap,
-      Telemetry telemetry,
-      AllianceColor allianceColor,
-      boolean preloaded,
-      boolean search) {
+  public CommonRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     this.hardwareMap = hardwareMap;
     this.telemetry = telemetry;
     pinpoint = this.hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
-    Limelight limelight = new Limelight(rawLimelight, allianceColor, search, 2);
+    Limelight limelight = new Limelight(rawLimelight, allianceColor, 2);
 
     AnalogInput lifterEncoder = this.hardwareMap.get(AnalogInput.class, "lifterEncoder");
     Servo rawLifterServo2 = this.hardwareMap.get(Servo.class, "lifter2");
@@ -81,6 +76,30 @@ public class CommonRobot {
     ActiveIntake intake = new ActiveIntake(intakeMotor);
 
     mag = new ScoringSystem(intake, turret, spindex, limelight, allianceColor, this.telemetry);
-    mag.init(preloaded, search); // initialize scoring systems
   }
+
+  /**
+   * @brief to be called once, when the opMode is initialized
+   */
+  public abstract void init();
+
+  /**
+   * @brief to be called repeatedly, while the opMode is in init
+   */
+  public abstract void initLoop();
+
+  /**
+   * @brief to be called once, when the opMode is started
+   */
+  public abstract void start();
+
+  /**
+   * @brief to be called repeatedly, while the opMode is running
+   */
+  public abstract void loop();
+
+  /**
+   * @brief to be called once, when the opMode is stopped
+   */
+  public abstract void stop();
 }

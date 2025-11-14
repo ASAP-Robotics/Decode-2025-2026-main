@@ -24,6 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class ScoringSystem {
   private enum SequenceMode {
@@ -41,6 +42,8 @@ public class ScoringSystem {
   private SequenceMode emptyingMode = SequenceMode.SORTED; // the mode the mag is being emptied in
   private BallSequence ballSequence; // the sequence being shot
   private final AllianceColor allianceColor; // the alliance we are on
+  private final SimpleTimer targetLockTimer;
+  private boolean targetVisible = true;
   private boolean turretAimOverride = false; // if the aim of the turret is overridden
   private double horizontalAngleOverride = 0;
   private double distanceOverride = 1;
@@ -64,6 +67,7 @@ public class ScoringSystem {
     this.spindex = spindex;
     this.limelight = limelight;
     this.allianceColor = allianceColor;
+    this.targetLockTimer = new SimpleTimer(1); // TODO: tune
     this.telemetry = telemetry;
     this.turret.idle(); // set turret to spin at idle speed
     this.turret.disable(); // don't let the turret spin up
@@ -76,10 +80,16 @@ public class ScoringSystem {
    * @note call when OpMode is initialized ("Init" is pressed)
    */
   public void init(boolean isPreloaded, boolean search) {
-    spindex.init(isPreloaded ? BallSequence.GPP : null, isPreloaded);
-    turret.setHorizontalAngle(
-        search ? allianceColor.getObeliskAngle() : allianceColor.getTargetAngleMin());
-    turret.update();
+    spindex.init(BallSequence.GPP, isPreloaded);
+    turret.init(0 /*search ? allianceColor.getObeliskAngle() : allianceColor.getTargetAngleMin()*/);
+    limelight.init(search);
+  }
+
+  /**
+   * @brief to be called repeatedly while the robot is in init
+   */
+  public void initLoop() {
+    spindex.update();
   }
 
   /**
@@ -88,6 +98,7 @@ public class ScoringSystem {
    */
   public void start(boolean search) {
     turret.enable(); // let the flywheel spin up
+    limelight.start();
     if (search) limelight.detectSequence();
   }
 
@@ -129,18 +140,30 @@ public class ScoringSystem {
     if (turretAimOverride) {
       turret.setHorizontalAngle(horizontalAngleOverride);
       turret.setTargetDistance(distanceOverride);
+      return;
 
     } else if (!limelight.isReadyToNavigate()) {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
+      return;
+    }
 
-    } else if (limelight.isTargetInFrame()) {
+    boolean targetWasVisible = targetVisible;
+    targetVisible = limelight.isTargetInFrame();
+
+    if (targetWasVisible && !targetVisible) {
+      // ^ if limelight just lost sight of the target
+      targetLockTimer.start(); // start timer
+    }
+
+    if (limelight.isTargetInFrame()) {
       // set turret distance to target
       turret.setTargetDistance(limelight.getTargetSize());
       // adjust turret angle
       turret.setHorizontalAngle(
           turret.getHorizontalAngleDegrees() + limelight.getTargetOffsetAngleDegrees());
 
-    } else if (turret.isAtTarget()) {
+    } else if (targetLockTimer.isFinished() && turret.isAtTarget()) {
+      // ^ if turret is moved and limelight hasn't seen the target for long enough
       // re-lock onto apriltag
       double angleMin = allianceColor.getTargetAngleMin() + robotRotationDegrees; // invert?
       double angleMax = allianceColor.getTargetAngleMax() + robotRotationDegrees; // invert?
@@ -209,6 +232,7 @@ public class ScoringSystem {
       emergencyEject(); // eject the intake to clear the blockage
 
     } else if (fillingMag) {
+      telemetry.addData("We are filling mag", true);
       // ^ if we are filling the magazine
       if (intake.isIntaking() && spindex.getIsIntakeColorNew() && spindex.isAtTarget()) {
         // ^ if intaking a ball, the spindex is stationary, and a new color of ball is in the intake
@@ -259,6 +283,7 @@ public class ScoringSystem {
       }
 
     } else if (intake.isIntaking() && !intake.isIdling()) {
+      telemetry.addData("We are intaking a ball", true);
       // ^ if the intake is trying to intake a (single) ball
       BallColor intakeColor =
           spindex.getIntakeColor(); // get the color of ball (if any) in the intake position
@@ -353,8 +378,7 @@ public class ScoringSystem {
   private boolean intakeIndex(int index) {
     // return false if given index contains a ball
     // spindex will return BallColor.INVALID on invalid indexes
-    if (spindex.getIndexColor(index) != BallColor.EMPTY
-        && spindex.getIndexColor(index) != BallColor.UNKNOWN) return false;
+    if (spindex.getIndexColor(index).isShootable()) return false;
 
     spindex.moveSpindexIntake(index); // move spindex to correct position
     intake.intake(); // start the intake spinning
@@ -436,6 +460,8 @@ public class ScoringSystem {
       return false; // done shooting sequence
     }
 
+    shootIndex(indexToShoot);
+
     if (spindex.isReadyToShoot()) {
       // ^ spindex is ready for ball to be lifted
       if (turret.isReadyToShoot()) {
@@ -443,10 +469,13 @@ public class ScoringSystem {
         spindex.liftBall();
       }
 
-    } else if (spindex.getState() == Spindex.SpindexState.LIFTED
-        || spindex.getIndex() != indexToShoot) {
+    } else if (spindex.getState() == Spindex.SpindexState.LIFTED) {
       // ^ spindex is done lifting ball, or hasn't been set yet
-      indexToShoot = spindex.getColorIndex(ballSequence.getBallColors()[sequenceIndex++]);
+      try {
+        indexToShoot = spindex.getColorIndex(ballSequence.getBallColors()[++sequenceIndex]);
+      } catch (IndexOutOfBoundsException e) {
+        return false; // done shooting sequence
+      }
 
       if (spindex.isIndexValid(indexToShoot)) {
         // ^ spindex isn't empty

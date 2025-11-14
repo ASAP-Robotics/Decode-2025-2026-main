@@ -24,6 +24,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Limelight;
@@ -37,6 +38,10 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 public class TuningTurret extends LinearOpMode {
   public static double speed = 2000;
   public static double angle = 0;
+  public static double kP = 70;
+  public static double kI = 10;
+  public static double kD = 20;
+  public static double kF = 17;
 
   @Override
   public void runOpMode() {
@@ -44,6 +49,8 @@ public class TuningTurret extends LinearOpMode {
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
     DcMotorEx flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
+    flywheel.setPIDFCoefficients(
+        DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(70, 10, 20, 17));
     DcMotorEx turretRotator = hardwareMap.get(DcMotorEx.class, "turretRotator");
     DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
     Servo rawTurretHood = hardwareMap.get(Servo.class, "turretHood");
@@ -57,14 +64,16 @@ public class TuningTurret extends LinearOpMode {
     DualServo lifter = new DualServo(l1, l2);
     Turret turret = new Turret(flywheel, turretRotator, turretHood);
     Limelight3A rawLimelight = hardwareMap.get(Limelight3A.class, "limelight");
-    Limelight limelight = new Limelight(rawLimelight, AllianceColor.BLUE, false, 2);
+    Limelight limelight = new Limelight(rawLimelight, AllianceColor.BLUE, 2);
+    limelight.init(false);
+    limelight.start();
     turret.activate();
     turret.enable();
 
     waitForStart();
-    lifter.setPosition(60);
+    lifter.setPosition(7);
     intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    intake.setPower(-0.5);
+    intake.setPower(0.5);
 
     while (opModeIsActive()) {
       if (gamepad1.dpadUpWasPressed()) {
@@ -81,15 +90,17 @@ public class TuningTurret extends LinearOpMode {
       }
 
       if (lifter.isAtTarget() && lifter.getTargetPosition() == 180) {
-        lifter.setPosition(60);
+        lifter.setPosition(7);
       }
 
       if (gamepad1.rightBumperWasPressed()) {
-        lifter.setPosition(180);
+        lifter.setPosition(100);
       }
 
       turret.testingSpeed = speed;
       turret.setVerticalAngle(angle);
+      turret.flywheel.setPIDFCoefficients(
+          DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
 
       limelight.update();
       turret.update();
