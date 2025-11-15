@@ -16,8 +16,14 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 /**
@@ -25,6 +31,10 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
  */
 public class AutoRobot extends CommonRobot {
   // stuff (variables, etc., see TeliOpRobot) goes here; TODO: update
+  ElapsedTime timer = new ElapsedTime();
+  boolean move = true;
+  boolean move1 = false;
+  boolean done = false;
 
   public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     super(hardwareMap, telemetry, allianceColor);
@@ -36,7 +46,7 @@ public class AutoRobot extends CommonRobot {
    * @brief to be called once, when the opMode is initialized
    */
   public void init() {
-    mag.init(true, true);
+    mag.init(true, false);
   }
 
   /**
@@ -50,23 +60,64 @@ public class AutoRobot extends CommonRobot {
    * @brief to be called once when the "start" button is pressed
    */
   public void start() {
-    mag.start(true); // start scoring systems up
+    mag.start(false); // start scoring systems up
+    timer.reset();
   }
 
   /**
    * @brief to be called repeatedly, every loop
    */
-  public void loop() {
-    // other stuff goes here; TODO: fill out
-
+  public void loop(MecanumDrive drive) {
     // update scoring systems
     mag.setRobotRotation(0);
     mag.update();
 
-    // update telemetry
-    telemetry.update();
+    if (!done) {
+      // other stuff goes here; TODO: fill out
+      if (move && timer.seconds() > 3) {
+        Actions.runBlocking(
+                drive
+                        .actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
+                        .splineToLinearHeading(
+                                new Pose2d(30, 0, Math.toRadians(0)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(80.0))
 
-    mag.shootMag();
+                        .build());
+
+        move = false;
+      }
+
+      if (move1) {
+        Actions.runBlocking(
+                drive
+                        .actionBuilder(new Pose2d(30, 0, Math.toRadians(0)))
+                        .splineToLinearHeading(
+                                new Pose2d(35, 20, Math.toRadians(0)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(80.0))
+
+                        .build());
+
+        move1 = false;
+        done = true;
+        mag.homeTurret();
+      }
+
+      // update telemetry
+      telemetry.update();
+
+      if (!move && !move1) {
+        mag.shootMag();
+        if (mag.spindex.getState() == Spindex.SpindexState.IDLE) {
+          move1 = true;
+        }
+      }
+    }
+  }
+
+  public void loop() {
+
   }
 
   /**

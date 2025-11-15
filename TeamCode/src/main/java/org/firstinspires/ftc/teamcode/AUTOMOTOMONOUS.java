@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.teamcode.tuning.TuningOpModes;
+import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 @Autonomous(name = "AUTOMOTOMONOUS")
 public class AUTOMOTOMONOUS extends LinearOpMode {
@@ -25,18 +26,20 @@ public class AUTOMOTOMONOUS extends LinearOpMode {
         Pose2d beginPose = new Pose2d(0, 0, 0);
         if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
             MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
+            AutoRobot robot = new AutoRobot(hardwareMap, telemetry, AllianceColor.RED);
+
+            robot.init();
+
+            while (opModeInInit()) {
+                robot.initLoop();
+            }
 
             waitForStart();
 
-            Actions.runBlocking(
-                    drive
-                            .actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
-                            .splineToLinearHeading(
-                                    new Pose2d(20, 0, Math.toRadians(0)),
-                                    Math.PI / 4,
-                                    new TranslationalVelConstraint(80.0))
+            robot.start();
 
-                            .build());
-
+            while (opModeIsActive()) {
+                robot.loop(drive);
+            }
         }
     }}
