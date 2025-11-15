@@ -141,6 +141,7 @@ public class ScoringSystem {
    * @brief updates everything to do with aiming the turret
    */
   private void updateAiming() {
+    /*
     if (tuning) {
       turret.testingSpeed = rpmOverride;
       turret.setVerticalAngle(verticalAngleOverride);
@@ -150,7 +151,8 @@ public class ScoringSystem {
       turret.setTargetDistance(distanceOverride);
       return;
 
-    } else if (!limelight.isReadyToNavigate()) {
+    } else */
+    if (!limelight.isReadyToNavigate()) {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
       return;
     }

@@ -86,7 +86,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     // rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
     // rotator.setPower(1);
     rotator.resetEncoder();
-    rotator.setPositionCoefficient(0.01); // tuned (for now)
+    rotator.setPositionCoefficient(0.025); // tuned (for now)
     rotator.setTargetPosition(
         (int) (turretDegreesToMotorDegrees(horizontalAngle) * ticksPerDegree));
     rotator.setPositionTolerance(turretDegreesToMotorDegrees(5) * ticksPerDegree); // TODO: tune
@@ -146,7 +146,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     hoodServo.setPosition(targetVerticalAngleDegrees); // this might need updating
     double motorDegrees = turretDegreesToMotorDegrees(targetHorizontalAngleDegrees);
     rotator.setTargetPosition((int) (motorDegrees * ticksPerDegree));
-    rotator.set(0.1); // tuned (for now)
+    rotator.set(0.3); // tuned (for now)
   }
 
   public void tune(double kP, double power) {

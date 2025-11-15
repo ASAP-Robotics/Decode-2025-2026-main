@@ -323,7 +323,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    *     of distance
    */
   protected double getRPMLookup(double distance) {
-    if (testing) return testingSpeed; // used for tuning lookup table
+    //if (testing) return testingSpeed; // used for tuning lookup table
     int indexOver = LOOKUP_TABLE.length - 1;
     int indexUnder = 0;
     for (int i = 0; i < LOOKUP_TABLE.length; i++) {
