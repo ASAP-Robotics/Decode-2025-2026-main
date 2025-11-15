@@ -178,7 +178,7 @@ public class ScoringSystem {
       double angleMin = allianceColor.getTargetAngleMin() + robotRotationDegrees; // invert?
       double angleMax = allianceColor.getTargetAngleMax() + robotRotationDegrees; // invert?
       double range = angleMax - angleMin;
-      double step = range / 6;
+      double step = range / 12;
       double angleNow = turret.getTargetHorizontalAngleDegrees() + robotRotationDegrees;
       double angleToSet = angleNow + step;
 
