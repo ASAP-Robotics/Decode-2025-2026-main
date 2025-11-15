@@ -98,30 +98,30 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @return the full lookup table
    */
   protected LookupTableItem[] fillLookupTable() {
-    // TODO: fine tune lookup table
+    // TODO: fine tune lookup table?
     // note: "distance" numbers *MUST* go from low to high (number, not distance)
     return new LookupTableItem[] {
-      new LookupTableItem(0.1, 3500, 45),
-      new LookupTableItem(0.235, 3450, 45),
-      new LookupTableItem(0.27, 3250, 45),
-      new LookupTableItem(0.29, 3200, 50),
-      new LookupTableItem(0.4, 3000, 40),
-      new LookupTableItem(0.515, 2800, 40),
-      new LookupTableItem(0.635, 2700, 40),
-      new LookupTableItem(0.645, 2700, 55),
-      new LookupTableItem(0.67, 2700, 55),
-      new LookupTableItem(0.765, 2650, 55),
-      new LookupTableItem(0.85, 2600, 60),
-      new LookupTableItem(0.88, 2600, 60),
-      new LookupTableItem(0.99, 2600, 60),
-      new LookupTableItem(1.1, 2500, 60),
-      new LookupTableItem(1.4, 2500, 50),
-      new LookupTableItem(1.85, 2500, 40),
-      new LookupTableItem(2.17, 2450, 40),
-      new LookupTableItem(2.89, 2450, 40),
-      new LookupTableItem(3.85, 2400, 50),
-      new LookupTableItem(4.77, 2300, 65),
-      new LookupTableItem(6, 2100, 90)
+      new LookupTableItem(0.1, 3600, 35),
+      new LookupTableItem(0.215, 3450, 35),
+      new LookupTableItem(0.25, 3400, 40),
+      new LookupTableItem(0.265, 3300, 45),
+      new LookupTableItem(0.273, 3350, 45),
+      new LookupTableItem(0.275, 3300, 47),
+      new LookupTableItem(0.28, 3270, 50),
+      new LookupTableItem(0.297, 3250, 50),
+      new LookupTableItem(0.302, 3250, 50),
+      new LookupTableItem(0.413, 3100, 50),
+      new LookupTableItem(0.494, 2900, 50),
+      new LookupTableItem(0.64, 2800, 50),
+      new LookupTableItem(0.817, 2700, 50),
+      new LookupTableItem(1.02, 2600, 50),
+      new LookupTableItem(1.275, 2550, 50),
+      new LookupTableItem(1.805, 2400, 50),
+      new LookupTableItem(2.421, 2350, 50),
+      new LookupTableItem(3.32, 2300, 50),
+      new LookupTableItem(4.22, 2300, 50),
+      new LookupTableItem(5.31, 2200, 66),
+      new LookupTableItem(6, 2150, 70)
     }; // preliminary values
   }
 
