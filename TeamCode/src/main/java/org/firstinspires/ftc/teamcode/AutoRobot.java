@@ -101,7 +101,6 @@ public class AutoRobot extends CommonRobot {
 
         move1 = false;
         done = true;
-        mag.homeTurret();
       }
 
       // update telemetry
@@ -113,6 +112,8 @@ public class AutoRobot extends CommonRobot {
           move1 = true;
         }
       }
+    } else {
+      mag.fillMagUnsorted();
     }
   }
 
