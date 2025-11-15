@@ -18,6 +18,7 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
 
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
@@ -54,23 +55,23 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   // amount horizontal angle can go over 180 or under -180 degrees before wrapping
   private static final double HORIZONTAL_HYSTERESIS = 10;
 
-  private final DcMotorEx rotator;
+  public final Motor rotator;
   public final Axon hoodServo;
   private final double ticksPerDegree;
   private double targetHorizontalAngleDegrees = 0; // target angle for side-to-side turret movement
   private double targetVerticalAngleDegrees = 90; // target angle for up-and-down turret movement
 
-  public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Axon hoodServo, double idleSpeed) {
-    super(flywheelMotor, idleSpeed);
+  public Turret(DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo, double idleSpeed, boolean testing) {
+    super(flywheelMotor, idleSpeed, testing);
     this.rotator = rotator;
     this.hoodServo = hoodServo;
-    this.rotator.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-    this.rotator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+    this.rotator.setRunMode(Motor.RunMode.PositionControl);
+    this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
     this.ticksPerDegree = 145.1 / 360;
   }
 
-  public Turret(DcMotorEx flywheelMotor, DcMotorEx rotator, Axon hoodServo) {
-    this(flywheelMotor, rotator, hoodServo, 1500);
+  public Turret(DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo) {
+    this(flywheelMotor, rotator, hoodServo, 1500, false);
   }
 
   /**
@@ -78,11 +79,15 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @param horizontalAngle the angle to start the turret at
    */
   public void init(double horizontalAngle) {
-    rotator.setVelocityPIDFCoefficients(35, 2, 1, 16);
-    rotator.setPositionPIDFCoefficients(3.5);
-    rotator.setTargetPosition((int) turretDegreesToMotorDegrees(horizontalAngle));
-    rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-    rotator.setPower(1);
+    //rotator.setVelocityPIDFCoefficients(35, 2, 1, 16);
+    //rotator.setPositionPIDFCoefficients(3.5);
+    //rotator.setTargetPosition((int) turretDegreesToMotorDegrees(horizontalAngle));
+    //rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+    //rotator.setPower(1);
+    rotator.resetEncoder();
+    rotator.setPositionCoefficient(0.01); // tuned (for now)
+    rotator.setTargetPosition((int) (turretDegreesToMotorDegrees(horizontalAngle) * ticksPerDegree));
+    rotator.setPositionTolerance(turretDegreesToMotorDegrees(5) * ticksPerDegree); // TODO: tune
     hoodServo.setPosition(targetVerticalAngleDegrees);
   }
 
@@ -126,7 +131,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    */
   @Override
   public boolean isReadyToShoot() {
-    return super.isReadyToShoot() && !rotator.isBusy();
+    return super.isReadyToShoot() && rotator.atTargetPosition();
   }
 
   /**
@@ -139,6 +144,12 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     hoodServo.setPosition(targetVerticalAngleDegrees); // this might need updating
     double motorDegrees = turretDegreesToMotorDegrees(targetHorizontalAngleDegrees);
     rotator.setTargetPosition((int) (motorDegrees * ticksPerDegree));
+    rotator.set(0.1); // tuned (for now)
+  }
+
+  public void tune(double kP, double power) {
+    rotator.setPositionCoefficient(kP);
+    rotator.set(power); // TODO: tune
   }
 
   /**
@@ -192,7 +203,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @return false if the rotator motor is moving to the target, true if it is at its target
    */
   public boolean isAtTarget() {
-    return !rotator.isBusy();
+    return rotator.atTargetPosition();
   }
 
   /**

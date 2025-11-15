@@ -83,7 +83,6 @@ public class TeliOpRobot extends CommonRobot {
 
     // update scoring systems
     mag.setRobotRotation(0 /*location.getHeading(AngleUnit.DEGREES)*/);
-    // mag.overrideAiming(1, 0);
     mag.update();
 
     // emergency eject
