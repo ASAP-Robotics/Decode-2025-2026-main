@@ -32,9 +32,9 @@ public class AUTOMOTOMONOUS extends LinearOpMode {
                     drive
                             .actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
                             .splineToLinearHeading(
-                                    new Pose2d(35, 0, Math.toRadians(-120)),
+                                    new Pose2d(20, 0, Math.toRadians(0)),
                                     Math.PI / 4,
-                                    new TranslationalVelConstraint(140.0))
+                                    new TranslationalVelConstraint(80.0))
 
                             .build());
 

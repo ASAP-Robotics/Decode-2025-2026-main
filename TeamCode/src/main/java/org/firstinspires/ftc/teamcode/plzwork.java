@@ -16,11 +16,12 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
-@TeleOp(name = "BlueAuto", group = "autonomous")
+@Autonomous(name = "BlueAuto", group = "autonomous")
 public class plzwork extends LinearOpMode {
     @Override
     public void runOpMode() {

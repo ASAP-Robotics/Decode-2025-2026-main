@@ -40,7 +40,7 @@ public class ScoringSystem {
   private SequenceMode fillingMode = SequenceMode.SORTED; // the mode the mag is being filled in
   private boolean emptyingMag = false; // if a sequence is being shot out of the turret
   private SequenceMode emptyingMode = SequenceMode.SORTED; // the mode the mag is being emptied in
-  private BallSequence ballSequence; // the sequence being shot
+  private BallSequence ballSequence = BallSequence.PPG; // the sequence being shot
   private final AllianceColor allianceColor; // the alliance we are on
   private final SimpleTimer targetLockTimer;
   private boolean targetVisible = true;
@@ -135,7 +135,7 @@ public class ScoringSystem {
     telemetry.addData("Limelight mode", limelight.getMode().toString());
     telemetry.addData("Spindex mode", spindex.getState().toString());
     telemetry.addData("Target size", limelight.getTargetSize());
-    telemetry.addData("Sequence", ballSequence.toString());
+    //telemetry.addData("Sequence", ballSequence.toString());
   }
 
   /**
@@ -473,7 +473,7 @@ public class ScoringSystem {
 
     try {
       indexToShoot = spindex.getColorIndex(ballSequence.getBallColors()[sequenceIndex]);
-    } catch (IndexOutOfBoundsException e) {
+    } catch (Exception e) {
       return false; // done shooting sequence
     }
 
