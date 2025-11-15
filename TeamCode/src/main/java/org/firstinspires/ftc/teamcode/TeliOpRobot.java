@@ -85,25 +85,23 @@ public class TeliOpRobot extends CommonRobot {
     mag.setRobotRotation(0 /*location.getHeading(AngleUnit.DEGREES)*/);
     mag.update();
 
-    // emergency eject
-    if (gamepad1.bWasPressed()) {
-      mag.emergencyEject(); // eject intake at full power for a short time
-    }
-
     // shoot
-    if (gamepad1.rightBumperWasPressed()) {
-      mag.shootMag(); // shoot all balls in the mag, in a sequence if possible
-      // mag.shootUnsorted();
+    if (gamepad2.right_trigger > 0.5) {
+      // mag.shootMag(); // shoot all balls in the mag, in a sequence if possible
+      mag.shootUnsorted();
+
+    } else if (gamepad2.rightBumperWasPressed()) {
+      mag.shootSequence();
     }
 
     // intake
-    if (gamepad1.aWasPressed()) {
+    if (gamepad2.left_trigger > 0.5) {
       mag.fillMagUnsorted(); // fill the mag with any three balls
 
-    } else if (gamepad1.xWasPressed()) {
-      mag.fillMagSorted(); // fill the mag with 1 green and 2 purple balls
+    } else if (gamepad2.leftBumperWasPressed()) {
+      mag.emergencyEject();
 
-    } else if (gamepad1.yWasPressed()) {
+    } else if (gamepad2.yWasPressed()) {
       mag.intakeBall(); // intake one ball into mag
     }
 
