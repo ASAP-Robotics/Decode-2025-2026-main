@@ -135,6 +135,7 @@ public class ScoringSystem {
     telemetry.addData("Limelight mode", limelight.getMode().toString());
     telemetry.addData("Spindex mode", spindex.getState().toString());
     telemetry.addData("Target size", limelight.getTargetSize());
+    telemetry.addData("Sequence", ballSequence.toString());
   }
 
   /**
@@ -175,6 +176,7 @@ public class ScoringSystem {
     } else if (targetLockTimer.isFinished() && turret.isAtTarget()) {
       // ^ if turret is moved and limelight hasn't seen the target for long enough
       // re-lock onto apriltag
+      /*
       double angleMin = allianceColor.getTargetAngleMin() + robotRotationDegrees; // invert?
       double angleMax = allianceColor.getTargetAngleMax() + robotRotationDegrees; // invert?
       double range = angleMax - angleMin;
@@ -187,6 +189,8 @@ public class ScoringSystem {
       }
 
       turret.setHorizontalAngle(angleToSet);
+      */
+      turret.setHorizontalAngle(0); // test
     }
   }
 
@@ -454,6 +458,10 @@ public class ScoringSystem {
    */
   public void setRobotRotation(double degrees) {
     robotRotationDegrees = AngleUnit.normalizeDegrees(degrees); // might need to invert
+  }
+
+  public void setBallSequence(BallSequence sequence) {
+    ballSequence = sequence;
   }
 
   /**

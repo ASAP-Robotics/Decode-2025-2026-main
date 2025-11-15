@@ -86,7 +86,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     // rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
     // rotator.setPower(1);
     rotator.resetEncoder();
-    rotator.setPositionCoefficient(0.03); // tuned (for now)
+    rotator.setPositionCoefficient(0.035); // tuned (for now)
     rotator.setTargetPosition(
         (int) (turretDegreesToMotorDegrees(horizontalAngle) * ticksPerDegree));
     rotator.setPositionTolerance(turretDegreesToMotorDegrees(5) * ticksPerDegree); // TODO: tune
