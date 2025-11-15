@@ -27,7 +27,7 @@ public class AutoRobot extends CommonRobot {
   // stuff (variables, etc., see TeliOpRobot) goes here; TODO: update
 
   public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
-    super(hardwareMap, telemetry, allianceColor);
+    super(hardwareMap, telemetry, allianceColor, true, true);
 
     // other "Init" setup stuff goes here
   }
@@ -60,11 +60,13 @@ public class AutoRobot extends CommonRobot {
     // other stuff goes here; TODO: fill out
 
     // update scoring systems
-    mag.setRobotRotation(0 /* placeholder; TODO: use real rotation*/);
+    mag.setRobotRotation(0);
     mag.update();
 
     // update telemetry
     telemetry.update();
+
+    mag.shootMag();
   }
 
   /**
