@@ -20,9 +20,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
-/**
- * @brief class to contain the behavior of the robot in Auto, to avoid code duplication
- */
 public class AutoRobot extends CommonRobot {
   // stuff (variables, etc., see TeliOpRobot) goes here; TODO: update
 
@@ -30,33 +27,33 @@ public class AutoRobot extends CommonRobot {
     super(hardwareMap, telemetry, allianceColor, true, true);
 
     // other "Init" setup stuff goes here
+
   }
 
-  /**
-   * @brief to be called once when the "start" button is pressed
-   */
+
   public void start() {
+
     mag.start(true); // start scoring systems up
+
   }
 
-  /**
-   * @brief to be called repeatedly, every loop
-   */
+
   public void loop() {
     // other stuff goes here; TODO: fill out
 
     // update scoring systems
-    mag.setRobotRotation(0 /* placeholder; TODO: use real rotation*/);
+    mag.setRobotRotation(0);
     mag.update();
 
     // update telemetry
     telemetry.update();
+
+    mag.shootMag();
   }
 
-  /**
-   * @brief to be called once, when the "stop" button is pressed
-   */
+
   public void stop() {
+
     mag.stop(); // stop all powered movement in scoring systems
   }
 }
