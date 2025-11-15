@@ -61,7 +61,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private double targetHorizontalAngleDegrees = 0; // target angle for side-to-side turret movement
   private double targetVerticalAngleDegrees = 90; // target angle for up-and-down turret movement
 
-  public Turret(DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo, double idleSpeed, boolean testing) {
+  public Turret(
+      DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo, double idleSpeed, boolean testing) {
     super(flywheelMotor, idleSpeed, testing);
     this.rotator = rotator;
     this.hoodServo = hoodServo;
@@ -79,14 +80,15 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @param horizontalAngle the angle to start the turret at
    */
   public void init(double horizontalAngle) {
-    //rotator.setVelocityPIDFCoefficients(35, 2, 1, 16);
-    //rotator.setPositionPIDFCoefficients(3.5);
-    //rotator.setTargetPosition((int) turretDegreesToMotorDegrees(horizontalAngle));
-    //rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-    //rotator.setPower(1);
+    // rotator.setVelocityPIDFCoefficients(35, 2, 1, 16);
+    // rotator.setPositionPIDFCoefficients(3.5);
+    // rotator.setTargetPosition((int) turretDegreesToMotorDegrees(horizontalAngle));
+    // rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+    // rotator.setPower(1);
     rotator.resetEncoder();
     rotator.setPositionCoefficient(0.01); // tuned (for now)
-    rotator.setTargetPosition((int) (turretDegreesToMotorDegrees(horizontalAngle) * ticksPerDegree));
+    rotator.setTargetPosition(
+        (int) (turretDegreesToMotorDegrees(horizontalAngle) * ticksPerDegree));
     rotator.setPositionTolerance(turretDegreesToMotorDegrees(5) * ticksPerDegree); // TODO: tune
     hoodServo.setPosition(targetVerticalAngleDegrees);
   }

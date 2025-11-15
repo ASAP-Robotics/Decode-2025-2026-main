@@ -408,7 +408,8 @@ public class ScoringSystem {
   public boolean shootUnsorted() {
     // if mag is empty, return false
     if ((spindex.getColorIndex(BallColor.PURPLE) == NULL
-        && spindex.getColorIndex(BallColor.GREEN) == NULL) || fillingMag) return false;
+            && spindex.getColorIndex(BallColor.GREEN) == NULL)
+        || fillingMag) return false;
     emptyingMag = true; // the mag is being emptied
     emptyingMode = SequenceMode.UNSORTED; // shooting in any order
     int index = NULL;

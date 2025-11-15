@@ -25,7 +25,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Limelight;
@@ -37,7 +36,7 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 @TeleOp(name = "Tuning turret", group = "Tuning")
 @Config
 public class TuningTurret extends LinearOpMode {
-  //public static double speed = 2000;
+  // public static double speed = 2000;
   public static double angle = 0;
   public static double speed = 0.1;
 
@@ -47,8 +46,8 @@ public class TuningTurret extends LinearOpMode {
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
     DcMotorEx flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
-    //flywheel.setPIDFCoefficients(
-        //DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(70, 10, 20, 17));
+    // flywheel.setPIDFCoefficients(
+    // DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(70, 10, 20, 17));
     Motor turretRotator = new Motor(hardwareMap, "turretRotator", Motor.GoBILDA.RPM_1150);
     DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
     Servo rawTurretHood = hardwareMap.get(Servo.class, "turretHood");
@@ -102,10 +101,10 @@ public class TuningTurret extends LinearOpMode {
       limelight.update();
       turret.update();
 
-      //dashboardTelemetry.addData("Angle", turret.getTargetVerticalAngleDegrees());
-      //dashboardTelemetry.addData("Target Speed", turret.testingSpeed);
-      //dashboardTelemetry.addData("Speed", turret.flywheel.getVelocity() * 60 / 28);
-      //dashboardTelemetry.addData("At target speed", turret.isReadyToShoot());
+      // dashboardTelemetry.addData("Angle", turret.getTargetVerticalAngleDegrees());
+      // dashboardTelemetry.addData("Target Speed", turret.testingSpeed);
+      // dashboardTelemetry.addData("Speed", turret.flywheel.getVelocity() * 60 / 28);
+      // dashboardTelemetry.addData("At target speed", turret.isReadyToShoot());
       dashboardTelemetry.addData("Lifter at target", lifter.isAtTarget());
       dashboardTelemetry.addData("Target size", limelight.getTargetSize());
       dashboardTelemetry.addData("Limelight locked", limelight.isTargetInFrame());
