@@ -65,6 +65,8 @@ public class AutoRobot extends CommonRobot {
 
     // update telemetry
     telemetry.update();
+
+    mag.shootMag();
   }
 
   /**
