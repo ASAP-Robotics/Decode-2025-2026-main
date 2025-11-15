@@ -27,7 +27,7 @@ public class AutoRobot extends CommonRobot {
   // stuff (variables, etc., see TeliOpRobot) goes here; TODO: update
 
   public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
-    super(hardwareMap, telemetry, allianceColor, true, true);
+    super(hardwareMap, telemetry, allianceColor);
 
     // other "Init" setup stuff goes here
   }

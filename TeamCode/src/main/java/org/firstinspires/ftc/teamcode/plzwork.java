@@ -27,6 +27,12 @@ public class plzwork extends LinearOpMode {
         AutoRobot robot =
                 new AutoRobot(hardwareMap, telemetry, AllianceColor.BLUE);
 
+        robot.init();
+
+        while (opModeInInit()) {
+            robot.initLoop();
+        }
+
         waitForStart();
 
         robot.start();
