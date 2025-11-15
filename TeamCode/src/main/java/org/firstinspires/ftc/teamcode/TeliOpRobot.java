@@ -87,7 +87,7 @@ public class TeliOpRobot extends CommonRobot {
 
     // shoot
     if (gamepad2.right_trigger > 0.5) {
-      //mag.shootMag(); // shoot all balls in the mag, in a sequence if possible
+      // mag.shootMag(); // shoot all balls in the mag, in a sequence if possible
       mag.shootUnsorted();
 
     } else if (gamepad2.rightBumperWasPressed()) {
