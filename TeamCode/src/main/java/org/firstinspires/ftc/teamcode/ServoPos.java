@@ -1,4 +1,3 @@
 package org.firstinspires.ftc.teamcode;
 
-public class ServoPos {
-}
+public class ServoPos {}

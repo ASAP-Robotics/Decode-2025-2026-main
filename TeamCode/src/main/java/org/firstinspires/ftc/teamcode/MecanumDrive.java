@@ -36,8 +36,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-
-import java.lang.Math;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -62,7 +60,7 @@ public final class MecanumDrive {
 
     // drive model parameters
     public double inPerTick = 0.001968667109;
-    public double lateralInPerTick = inPerTick;//0.0013282019289399974
+    public double lateralInPerTick = inPerTick; // 0.0013282019289399974
     public double trackWidthTicks = 7266.810600141345;
 
     // feedforward parameters (in tick units)
