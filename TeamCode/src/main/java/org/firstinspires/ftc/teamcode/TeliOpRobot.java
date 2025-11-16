@@ -25,6 +25,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
+import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 /**
  * @brief class to contain the behavior of the robot in TeliOp, to avoid code duplication
@@ -84,6 +85,16 @@ public class TeliOpRobot extends CommonRobot {
     // update scoring systems
     mag.setRobotRotation(0 /*location.getHeading(AngleUnit.DEGREES)*/);
     mag.update();
+
+    if (gamepad2.dpadDownWasPressed()) {
+      mag.setBallSequence(BallSequence.PGP);
+
+    } else if (gamepad2.dpadLeftWasPressed()) {
+      mag.setBallSequence(BallSequence.GPP);
+
+    } else if (gamepad2.dpadRightWasPressed()) {
+      mag.setBallSequence(BallSequence.PPG);
+    }
 
     // shoot
     if (gamepad2.right_trigger > 0.5) {

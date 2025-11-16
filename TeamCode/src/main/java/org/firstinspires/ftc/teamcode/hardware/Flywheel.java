@@ -324,21 +324,25 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    */
   protected double getRPMLookup(double distance) {
     // if (testing) return testingSpeed; // used for tuning lookup table
-    int indexOver = LOOKUP_TABLE.length - 1;
-    int indexUnder = 0;
-    for (int i = 0; i < LOOKUP_TABLE.length; i++) {
-      if (LOOKUP_TABLE[i].getDistance() >= distance) {
-        indexOver = i;
-        indexUnder = indexOver - 1; // assuming values go from low to high
-        break;
+    try {
+      int indexOver = LOOKUP_TABLE.length - 1;
+      int indexUnder = 0;
+      for (int i = 0; i < LOOKUP_TABLE.length; i++) {
+        if (LOOKUP_TABLE[i].getDistance() >= distance) {
+          indexOver = i;
+          indexUnder = indexOver - 1; // assuming values go from low to high
+          break;
+        }
       }
-    }
 
-    return MathUtils.map(
-        distance,
-        LOOKUP_TABLE[indexUnder].getDistance(),
-        LOOKUP_TABLE[indexOver].getDistance(),
-        LOOKUP_TABLE[indexUnder].getRpm(),
-        LOOKUP_TABLE[indexOver].getRpm());
+      return MathUtils.map(
+          distance,
+          LOOKUP_TABLE[indexUnder].getDistance(),
+          LOOKUP_TABLE[indexOver].getDistance(),
+          LOOKUP_TABLE[indexUnder].getRpm(),
+          LOOKUP_TABLE[indexOver].getRpm());
+    } catch (Exception e) {
+      return 0;
+    }
   }
 }
