@@ -34,13 +34,13 @@ public class ScoringSystem {
 
   private final ActiveIntake intake; // the intake on the robot
   public final Turret turret; // the flywheel on the robot
-  private final Spindex spindex; // the spindex on the robot
+  public final Spindex spindex; // the spindex on the robot
   private final Limelight limelight; // the limelight camera on the turret
   private boolean fillingMag = false; // if the mag is being filled
   private SequenceMode fillingMode = SequenceMode.SORTED; // the mode the mag is being filled in
   private boolean emptyingMag = false; // if a sequence is being shot out of the turret
   private SequenceMode emptyingMode = SequenceMode.SORTED; // the mode the mag is being emptied in
-  private BallSequence ballSequence; // the sequence being shot
+  private BallSequence ballSequence = BallSequence.PPG; // the sequence being shot
   private final AllianceColor allianceColor; // the alliance we are on
   private final SimpleTimer targetLockTimer;
   private boolean targetVisible = true;
@@ -131,10 +131,12 @@ public class ScoringSystem {
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("Shooting", emptyingMag);
     telemetry.addData("Filling", fillingMag);
-    telemetry.addData("Intake current", intake.getAverageCurrentAmps());
-    telemetry.addData("Limelight mode", limelight.getMode().toString());
+    // telemetry.addData("Intake current", intake.getAverageCurrentAmps());
+    // telemetry.addData("Limelight mode", limelight.getMode().toString());
     telemetry.addData("Spindex mode", spindex.getState().toString());
     telemetry.addData("Target size", limelight.getTargetSize());
+    telemetry.addData("Locked", limelight.isTargetInFrame() && turret.isAtTarget());
+    // telemetry.addData("Sequence", ballSequence.toString());
   }
 
   /**
@@ -175,6 +177,7 @@ public class ScoringSystem {
     } else if (targetLockTimer.isFinished() && turret.isAtTarget()) {
       // ^ if turret is moved and limelight hasn't seen the target for long enough
       // re-lock onto apriltag
+      /*
       double angleMin = allianceColor.getTargetAngleMin() + robotRotationDegrees; // invert?
       double angleMax = allianceColor.getTargetAngleMax() + robotRotationDegrees; // invert?
       double range = angleMax - angleMin;
@@ -187,6 +190,8 @@ public class ScoringSystem {
       }
 
       turret.setHorizontalAngle(angleToSet);
+      */
+      turret.setHorizontalAngle(0); // test
     }
   }
 
@@ -456,6 +461,10 @@ public class ScoringSystem {
     robotRotationDegrees = AngleUnit.normalizeDegrees(degrees); // might need to invert
   }
 
+  public void setBallSequence(BallSequence sequence) {
+    ballSequence = sequence;
+  }
+
   /**
    * @brief the internal logic for emptying the mag in a sorted manner (shooting a sequence)
    * @return true if the mag is being emptied, false if the mag is empty
@@ -465,7 +474,7 @@ public class ScoringSystem {
 
     try {
       indexToShoot = spindex.getColorIndex(ballSequence.getBallColors()[sequenceIndex]);
-    } catch (IndexOutOfBoundsException e) {
+    } catch (Exception e) {
       return false; // done shooting sequence
     }
 

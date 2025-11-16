@@ -20,7 +20,6 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
@@ -28,14 +27,13 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 /**
  * @brief class to contain the behavior of the robot in Auto, to avoid code duplication
  */
-public class AutoRobot extends CommonRobot {
+public class plzwork extends CommonRobot {
   // stuff (variables, etc., see TeliOpRobot) goes here; TODO: update
-  ElapsedTime timer = new ElapsedTime();
   boolean move = true;
   boolean move1 = false;
   boolean done = false;
 
-  public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
+  public plzwork(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     super(hardwareMap, telemetry, allianceColor);
 
     // other "Init" setup stuff goes here
@@ -60,58 +58,56 @@ public class AutoRobot extends CommonRobot {
    */
   public void start() {
     mag.start(false); // start scoring systems up
-    timer.reset();
   }
 
   /**
    * @brief to be called repeatedly, every loop
    */
   public void loop(MecanumDrive drive) {
+    // other stuff goes here; TODO: fill out
+    if (move) {
+      Actions.runBlocking(
+          drive
+              .actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
+              .splineToLinearHeading(
+                  new Pose2d(20, 0, Math.toRadians(0)),
+                  Math.PI / 4,
+                  new TranslationalVelConstraint(80.0))
+              .build());
+
+      move = false;
+    }
+
+    if (move1) {
+      Actions.runBlocking(
+          drive
+              .actionBuilder(new Pose2d(20, 0, Math.toRadians(0)))
+              .splineToLinearHeading(
+                  new Pose2d(50, 0, Math.toRadians(0)),
+                  Math.PI / 4,
+                  new TranslationalVelConstraint(80.0))
+              .build());
+
+      move1 = false;
+      done = true;
+    }
+
     // update scoring systems
     mag.setRobotRotation(0);
     mag.update();
 
-    if (!done) {
-      // other stuff goes here; TODO: fill out
-      if (move && timer.seconds() > 3) {
-        Actions.runBlocking(
-            drive
-                .actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
-                .splineToLinearHeading(
-                    new Pose2d(30, 0, Math.toRadians(0)),
-                    Math.PI / 4,
-                    new TranslationalVelConstraint(80.0))
-                .build());
+    // update telemetry
+    telemetry.update();
 
-        move = false;
+    if (!move && !move1) {
+      mag.shootMag();
+      if (mag.spindex.getState() == Spindex.SpindexState.IDLE) {
+        move1 = true;
       }
-
-      if (move1) {
-        Actions.runBlocking(
-            drive
-                .actionBuilder(new Pose2d(30, 0, Math.toRadians(0)))
-                .splineToLinearHeading(
-                    new Pose2d(35, 20, Math.toRadians(0)),
-                    Math.PI / 4,
-                    new TranslationalVelConstraint(80.0))
-                .build());
-
-        move1 = false;
-        done = true;
-      }
-
-      // update telemetry
-      telemetry.update();
-
-      if (!move && !move1) {
-        mag.shootMag();
-        if (mag.spindex.getState() == Spindex.SpindexState.IDLE) {
-          move1 = true;
-        }
-      }
-    } else {
-      mag.fillMagUnsorted();
     }
+
+    while (done)
+      ;
   }
 
   public void loop() {}
