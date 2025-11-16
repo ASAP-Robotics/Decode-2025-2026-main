@@ -1,45 +1,33 @@
 package org.firstinspires.ftc.teamcode;
 
-import androidx.annotation.NonNull;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.TranslationalVelConstraint;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
-
 import org.firstinspires.ftc.teamcode.tuning.TuningOpModes;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 @Autonomous(name = "AUTOMOTOMONOUS")
 public class AUTOMOTOMONOUS extends LinearOpMode {
-    @Override
-    public void runOpMode() throws InterruptedException {
-        Pose2d beginPose = new Pose2d(0, 0, 0);
-        if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
-            MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
-            AutoRobot robot = new AutoRobot(hardwareMap, telemetry, AllianceColor.RED);
+  @Override
+  public void runOpMode() throws InterruptedException {
+    Pose2d beginPose = new Pose2d(0, 0, 0);
+    if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
+      MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
+      AutoRobot robot = new AutoRobot(hardwareMap, telemetry, AllianceColor.RED);
 
-            robot.init();
+      robot.init();
 
-            while (opModeInInit()) {
-                robot.initLoop();
-            }
+      while (opModeInInit()) {
+        robot.initLoop();
+      }
 
-            waitForStart();
+      waitForStart();
 
-            robot.start();
+      robot.start();
 
-            while (opModeIsActive()) {
-                robot.loop(drive);
-            }
-        }
-    }}
+      while (opModeIsActive()) {
+        robot.loop(drive);
+      }
+    }
+  }
+}

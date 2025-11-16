@@ -131,12 +131,12 @@ public class ScoringSystem {
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("Shooting", emptyingMag);
     telemetry.addData("Filling", fillingMag);
-    //telemetry.addData("Intake current", intake.getAverageCurrentAmps());
-    //telemetry.addData("Limelight mode", limelight.getMode().toString());
+    // telemetry.addData("Intake current", intake.getAverageCurrentAmps());
+    // telemetry.addData("Limelight mode", limelight.getMode().toString());
     telemetry.addData("Spindex mode", spindex.getState().toString());
     telemetry.addData("Target size", limelight.getTargetSize());
     telemetry.addData("Locked", limelight.isTargetInFrame() && turret.isAtTarget());
-    //telemetry.addData("Sequence", ballSequence.toString());
+    // telemetry.addData("Sequence", ballSequence.toString());
   }
 
   /**

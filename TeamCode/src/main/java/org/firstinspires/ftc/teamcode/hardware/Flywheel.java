@@ -336,11 +336,11 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
       }
 
       return MathUtils.map(
-              distance,
-              LOOKUP_TABLE[indexUnder].getDistance(),
-              LOOKUP_TABLE[indexOver].getDistance(),
-              LOOKUP_TABLE[indexUnder].getRpm(),
-              LOOKUP_TABLE[indexOver].getRpm());
+          distance,
+          LOOKUP_TABLE[indexUnder].getDistance(),
+          LOOKUP_TABLE[indexOver].getDistance(),
+          LOOKUP_TABLE[indexUnder].getRpm(),
+          LOOKUP_TABLE[indexOver].getRpm());
     } catch (Exception e) {
       return 0;
     }

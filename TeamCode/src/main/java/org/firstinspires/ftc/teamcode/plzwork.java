@@ -28,97 +28,94 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
  * @brief class to contain the behavior of the robot in Auto, to avoid code duplication
  */
 public class plzwork extends CommonRobot {
-    // stuff (variables, etc., see TeliOpRobot) goes here; TODO: update
-    boolean move = true;
-    boolean move1 = false;
-    boolean done = false;
+  // stuff (variables, etc., see TeliOpRobot) goes here; TODO: update
+  boolean move = true;
+  boolean move1 = false;
+  boolean done = false;
 
-    public plzwork(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
-        super(hardwareMap, telemetry, allianceColor);
+  public plzwork(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
+    super(hardwareMap, telemetry, allianceColor);
 
-        // other "Init" setup stuff goes here
+    // other "Init" setup stuff goes here
+  }
+
+  /**
+   * @brief to be called once, when the opMode is initialized
+   */
+  public void init() {
+    mag.init(true, false);
+  }
+
+  /**
+   * @brief to be called repeatedly, while the opMode is in init
+   */
+  public void initLoop() {
+    mag.initLoop();
+  }
+
+  /**
+   * @brief to be called once when the "start" button is pressed
+   */
+  public void start() {
+    mag.start(false); // start scoring systems up
+  }
+
+  /**
+   * @brief to be called repeatedly, every loop
+   */
+  public void loop(MecanumDrive drive) {
+    // other stuff goes here; TODO: fill out
+    if (move) {
+      Actions.runBlocking(
+          drive
+              .actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
+              .splineToLinearHeading(
+                  new Pose2d(20, 0, Math.toRadians(0)),
+                  Math.PI / 4,
+                  new TranslationalVelConstraint(80.0))
+              .build());
+
+      move = false;
     }
 
-    /**
-     * @brief to be called once, when the opMode is initialized
-     */
-    public void init() {
-        mag.init(true, false);
+    if (move1) {
+      Actions.runBlocking(
+          drive
+              .actionBuilder(new Pose2d(20, 0, Math.toRadians(0)))
+              .splineToLinearHeading(
+                  new Pose2d(50, 0, Math.toRadians(0)),
+                  Math.PI / 4,
+                  new TranslationalVelConstraint(80.0))
+              .build());
+
+      move1 = false;
+      done = true;
     }
 
-    /**
-     * @brief to be called repeatedly, while the opMode is in init
-     */
-    public void initLoop() {
-        mag.initLoop();
+    // update scoring systems
+    mag.setRobotRotation(0);
+    mag.update();
+
+    // update telemetry
+    telemetry.update();
+
+    if (!move && !move1) {
+      mag.shootMag();
+      if (mag.spindex.getState() == Spindex.SpindexState.IDLE) {
+        move1 = true;
+      }
     }
 
-    /**
-     * @brief to be called once when the "start" button is pressed
-     */
-    public void start() {
-        mag.start(false); // start scoring systems up
-    }
+    while (done)
+      ;
+  }
 
-    /**
-     * @brief to be called repeatedly, every loop
-     */
-    public void loop(MecanumDrive drive) {
-        // other stuff goes here; TODO: fill out
-        if (move) {
-            Actions.runBlocking(
-                    drive
-                            .actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
-                            .splineToLinearHeading(
-                                    new Pose2d(20, 0, Math.toRadians(0)),
-                                    Math.PI / 4,
-                                    new TranslationalVelConstraint(80.0))
+  public void loop() {}
 
-                            .build());
-
-            move = false;
-        }
-
-        if (move1) {
-            Actions.runBlocking(
-                    drive
-                            .actionBuilder(new Pose2d(20, 0, Math.toRadians(0)))
-                            .splineToLinearHeading(
-                                    new Pose2d(50, 0, Math.toRadians(0)),
-                                    Math.PI / 4,
-                                    new TranslationalVelConstraint(80.0))
-
-                            .build());
-
-            move1 = false;
-            done = true;
-        }
-
-        // update scoring systems
-        mag.setRobotRotation(0);
-        mag.update();
-
-        // update telemetry
-        telemetry.update();
-
-        if (!move && !move1) {
-            mag.shootMag();
-            if (mag.spindex.getState() == Spindex.SpindexState.IDLE) {
-                move1 = true;
-            }
-        }
-
-        while (done);
-    }
-
-    public void loop() {
-
-    }
-
-    /**
-     * @brief to be called once, when the "stop" button is pressed
-     */
-    public void stop() {
-        mag.stop(); // stop all powered movement in scoring systems
-    }
+  /**
+   * @brief to be called once, when the "stop" button is pressed
+   */
+  public void stop() {
+    mag.stop(); // stop all powered movement in scoring systems
+  }
 }

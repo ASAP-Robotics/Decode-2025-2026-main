@@ -21,7 +21,6 @@ import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
@@ -76,28 +75,26 @@ public class AutoRobot extends CommonRobot {
       // other stuff goes here; TODO: fill out
       if (move && timer.seconds() > 3) {
         Actions.runBlocking(
-                drive
-                        .actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
-                        .splineToLinearHeading(
-                                new Pose2d(30, 0, Math.toRadians(0)),
-                                Math.PI / 4,
-                                new TranslationalVelConstraint(80.0))
-
-                        .build());
+            drive
+                .actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
+                .splineToLinearHeading(
+                    new Pose2d(30, 0, Math.toRadians(0)),
+                    Math.PI / 4,
+                    new TranslationalVelConstraint(80.0))
+                .build());
 
         move = false;
       }
 
       if (move1) {
         Actions.runBlocking(
-                drive
-                        .actionBuilder(new Pose2d(30, 0, Math.toRadians(0)))
-                        .splineToLinearHeading(
-                                new Pose2d(35, 20, Math.toRadians(0)),
-                                Math.PI / 4,
-                                new TranslationalVelConstraint(80.0))
-
-                        .build());
+            drive
+                .actionBuilder(new Pose2d(30, 0, Math.toRadians(0)))
+                .splineToLinearHeading(
+                    new Pose2d(35, 20, Math.toRadians(0)),
+                    Math.PI / 4,
+                    new TranslationalVelConstraint(80.0))
+                .build());
 
         move1 = false;
         done = true;
@@ -117,9 +114,7 @@ public class AutoRobot extends CommonRobot {
     }
   }
 
-  public void loop() {
-
-  }
+  public void loop() {}
 
   /**
    * @brief to be called once, when the "stop" button is pressed
