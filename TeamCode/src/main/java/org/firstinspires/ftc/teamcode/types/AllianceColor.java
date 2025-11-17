@@ -16,6 +16,8 @@
 
 package org.firstinspires.ftc.teamcode.types;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+
 public enum AllianceColor {
   // TODO: tune obelisk and target angles
   RED(24, 2, -30, -40, 40),
@@ -24,7 +26,11 @@ public enum AllianceColor {
   private final int aprilTagId;
   private final int limelightPipeline;
   private final double obeliskAngle;
+  private Pose2D targetLocation;
+
+  @Deprecated
   private final double targetAngleMin;
+  @Deprecated
   private final double targetAngleMax;
 
   AllianceColor(

@@ -68,7 +68,6 @@ public class AutoRobot extends CommonRobot {
    */
   public void loop(MecanumDrive drive) {
     // update scoring systems
-    mag.setRobotRotation(0);
     mag.update();
 
     if (!done) {
@@ -105,7 +104,7 @@ public class AutoRobot extends CommonRobot {
 
       if (!move && !move1) {
         mag.shootMag();
-        if (mag.spindex.getState() == Spindex.SpindexState.IDLE) {
+        if (mag.isIdle()) {
           move1 = true;
         }
       }

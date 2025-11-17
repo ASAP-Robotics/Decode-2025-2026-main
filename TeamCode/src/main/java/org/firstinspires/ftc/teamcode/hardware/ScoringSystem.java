@@ -21,6 +21,8 @@ import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 import java.util.Arrays;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -33,8 +35,8 @@ public class ScoringSystem {
   }
 
   private final ActiveIntake intake; // the intake on the robot
-  public final Turret turret; // the flywheel on the robot
-  public final Spindex spindex; // the spindex on the robot
+  private final Turret turret; // the flywheel on the robot
+  private final Spindex spindex; // the spindex on the robot
   private final Limelight limelight; // the limelight camera on the turret
   private boolean fillingMag = false; // if the mag is being filled
   private SequenceMode fillingMode = SequenceMode.SORTED; // the mode the mag is being filled in
@@ -50,7 +52,8 @@ public class ScoringSystem {
   private double verticalAngleOverride = 60;
   private double rpmOverride = 2000;
   private double distanceOverride = 1;
-  private double robotRotationDegrees = 0; // how rotated the robot is, in degrees
+  private final Pose2D targetPosition;
+  private Pose2D robotPosition = new Pose2D(DistanceUnit.CM, 0, 0, AngleUnit.DEGREES, 0);
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private int purplesNeeded = 0; // the number of purples needed to fill the mag
   private int greensNeeded = 0; // the number of greens needed to fill the mag
@@ -143,9 +146,8 @@ public class ScoringSystem {
    * @brief updates everything to do with aiming the turret
    */
   private void updateAiming() {
-    /*
     if (tuning) {
-      turret.testingSpeed = rpmOverride;
+      turret.tuneRpm(rpmOverride);
       turret.setVerticalAngle(verticalAngleOverride);
 
     } else if (turretAimOverride) {
@@ -153,8 +155,7 @@ public class ScoringSystem {
       turret.setTargetDistance(distanceOverride);
       return;
 
-    } else */
-    if (!limelight.isReadyToNavigate()) {
+    } else if (!limelight.isReadyToNavigate()) {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
       return;
     }
@@ -176,21 +177,7 @@ public class ScoringSystem {
 
     } else if (targetLockTimer.isFinished() && turret.isAtTarget()) {
       // ^ if turret is moved and limelight hasn't seen the target for long enough
-      // re-lock onto apriltag
-      /*
-      double angleMin = allianceColor.getTargetAngleMin() + robotRotationDegrees; // invert?
-      double angleMax = allianceColor.getTargetAngleMax() + robotRotationDegrees; // invert?
-      double range = angleMax - angleMin;
-      double step = range / 12;
-      double angleNow = turret.getTargetHorizontalAngleDegrees() + robotRotationDegrees;
-      double angleToSet = angleNow + step;
-
-      if (angleToSet > angleMax || angleToSet < angleMin) {
-        angleToSet = angleMin;
-      }
-
-      turret.setHorizontalAngle(angleToSet);
-      */
+      // home turret
       turret.setHorizontalAngle(0); // test
     }
   }
@@ -454,11 +441,20 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief sets how rotated the robot is relative to the field
-   * @param degrees the angle by which the robot is offset from the field
+   * @brief gets if the scoring system is idle
+   * @return true if the scoring system is idle, false if intaking or shooting
    */
-  public void setRobotRotation(double degrees) {
-    robotRotationDegrees = AngleUnit.normalizeDegrees(degrees); // might need to invert
+  public boolean isIdle() {
+    return !fillingMag && !emptyingMag;
+  }
+
+  /**
+   * @brief updates the current position of the robot on the field
+   * @param position the current position of the robot on the field
+   * @note intended to be called every loop
+   */
+  public void setRobotPosition(Pose2D position) {
+    robotPosition = position;
   }
 
   public void setBallSequence(BallSequence sequence) {
@@ -544,6 +540,10 @@ public class ScoringSystem {
     return true;
   }
 
+  protected double getTargetDistance() {
+
+  }
+
   /**
    * @brief sets the intake to eject at full speed (for some amount of time)
    * @note intended for use in emergency game situations (when something has malfunctioned); not
@@ -585,6 +585,11 @@ public class ScoringSystem {
     horizontalAngleOverride = angle;
   }
 
+  /**
+   * @brief intended for use when tuning the lookup table, providing manual control
+   * @param RPM the RPM to spin the flywheel at
+   * @param angle the angle to move the flap to
+   */
   public void tuneAiming(double RPM, double angle) {
     tuning = true;
     rpmOverride = RPM;

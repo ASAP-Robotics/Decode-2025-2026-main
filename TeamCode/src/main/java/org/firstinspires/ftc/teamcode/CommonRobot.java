@@ -71,7 +71,7 @@ public abstract class CommonRobot {
     Axon turretHood = new Axon(rawTurretHood);
     Motor turretRotator = new Motor(hardwareMap, "turretRotator", Motor.GoBILDA.RPM_1150);
     DcMotorEx flywheelMotor = this.hardwareMap.get(DcMotorEx.class, "flywheel");
-    Turret turret = new Turret(flywheelMotor, turretRotator, turretHood, 1500, false);
+    Turret turret = new Turret(flywheelMotor, turretRotator, turretHood, 1500);
 
     DcMotorEx intakeMotor = this.hardwareMap.get(DcMotorEx.class, "intake");
     ActiveIntake intake = new ActiveIntake(intakeMotor);

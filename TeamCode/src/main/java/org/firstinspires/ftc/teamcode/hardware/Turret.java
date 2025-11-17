@@ -49,30 +49,33 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   }
 
   // number of teeth on the gear attached to the turret
-  public static final double TURRET_GEAR_TEETH = 120;
+  private static final double TURRET_GEAR_TEETH = 120;
   // number of teeth on the gear attached to the motor
   private static final double MOTOR_GEAR_TEETH = 24;
   // amount horizontal angle can go over 180 or under -180 degrees before wrapping
   private static final double HORIZONTAL_HYSTERESIS = 10;
+  private static final double DEFAULT_VERTICAL_ANGLE = 50; // default angle for flap
 
-  public final Motor rotator;
-  public final Axon hoodServo;
+  private final Motor rotator;
+  private final Axon hoodServo;
   private final double ticksPerDegree;
-  private double targetHorizontalAngleDegrees = 0; // target angle for side-to-side turret movement
-  private double targetVerticalAngleDegrees = 90; // target angle for up-and-down turret movement
+  // target angle for side-to-side turret movement
+  private double targetHorizontalAngleDegrees = 0;
+  // target angle for servo moving flap
+  private double targetVerticalAngleDegrees = DEFAULT_VERTICAL_ANGLE;
 
   public Turret(
-      DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo, double idleSpeed, boolean testing) {
-    super(flywheelMotor, idleSpeed, testing);
+      DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo, double idleSpeed) {
+    super(flywheelMotor, idleSpeed);
     this.rotator = rotator;
     this.hoodServo = hoodServo;
     this.rotator.setRunMode(Motor.RunMode.PositionControl);
     this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-    this.ticksPerDegree = 145.1 / 360;
+    this.ticksPerDegree = this.rotator.getCPR() / 360;
   }
 
   public Turret(DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo) {
-    this(flywheelMotor, rotator, hoodServo, 1500, false);
+    this(flywheelMotor, rotator, hoodServo, 1500);
   }
 
   /**
@@ -80,11 +83,6 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @param horizontalAngle the angle to start the turret at
    */
   public void init(double horizontalAngle) {
-    // rotator.setVelocityPIDFCoefficients(35, 2, 1, 16);
-    // rotator.setPositionPIDFCoefficients(3.5);
-    // rotator.setTargetPosition((int) turretDegreesToMotorDegrees(horizontalAngle));
-    // rotator.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-    // rotator.setPower(1);
     rotator.resetEncoder();
     rotator.setPositionCoefficient(0.035); // tuned (for now)
     rotator.setTargetPosition(
@@ -146,12 +144,28 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     hoodServo.setPosition(targetVerticalAngleDegrees); // this might need updating
     double motorDegrees = turretDegreesToMotorDegrees(targetHorizontalAngleDegrees);
     rotator.setTargetPosition((int) (motorDegrees * ticksPerDegree));
-    rotator.set(0.2); // tuned (for now)
+    if (!testing) rotator.set(0.2); // TODO: change
   }
 
-  public void tune(double kP, double power) {
+  /**
+   * @brief used to tune the horizontal rotation of the turret
+   * @param kP the proportional constant for the rotator
+   * @param power the max power of the rotator
+   * TODO: change rotator to propper PID controller
+   */
+  public void tuneHorizontalMotion(double kP, double power) {
     rotator.setPositionCoefficient(kP);
-    rotator.set(power); // TODO: tune
+    rotator.set(power);
+  }
+
+  /**
+   * @brief used for tuning the lookup table, provides manual control of the turret
+   * @param rpm the rpm to spin the flywheel at
+   * @param angle the angle to move the hood servo to
+   */
+  public void tuneShooting(double rpm, double angle) {
+    tuneRpm(rpm);
+    setVerticalAngle(angle);
   }
 
   /**
@@ -253,21 +267,25 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    *     of distance
    */
   protected double getAngleLookup(double distance) {
-    int indexOver = LOOKUP_TABLE.length - 1;
-    int indexUnder = 0;
-    for (int i = 0; i < LOOKUP_TABLE.length; i++) {
-      if (LOOKUP_TABLE[i].getDistance() >= distance) {
-        indexOver = i;
-        indexUnder = indexOver - 1; // assuming values go from low to high
-        break;
+    try {
+      int indexOver = LOOKUP_TABLE.length - 1;
+      int indexUnder = 0;
+      for (int i = 0; i < LOOKUP_TABLE.length; i++) {
+        if (LOOKUP_TABLE[i].getDistance() >= distance) {
+          indexOver = i;
+          indexUnder = indexOver - 1; // assuming values go from low to high
+          break;
+        }
       }
-    }
 
-    return map(
-        distance,
-        LOOKUP_TABLE[indexUnder].getDistance(),
-        LOOKUP_TABLE[indexOver].getDistance(),
-        LOOKUP_TABLE[indexUnder].getAngle(),
-        LOOKUP_TABLE[indexOver].getAngle());
+      return map(
+          distance,
+          LOOKUP_TABLE[indexUnder].getDistance(),
+          LOOKUP_TABLE[indexOver].getDistance(),
+          LOOKUP_TABLE[indexUnder].getAngle(),
+          LOOKUP_TABLE[indexOver].getAngle());
+    } catch (Exception e) {
+      return 50; // placeholder angle if distance outside of table
+    }
   }
 }
