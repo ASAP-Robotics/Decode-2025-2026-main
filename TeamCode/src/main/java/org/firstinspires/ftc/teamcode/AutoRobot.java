@@ -22,6 +22,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 /**
@@ -103,7 +104,7 @@ public class AutoRobot extends CommonRobot {
 
       if (!move && !move1) {
         scoringSystem.shootMag();
-        if (scoringSystem.isIdle()) {
+        if (scoringSystem.getState() == ScoringSystem.State.INTAKING) {
           move1 = true;
         }
       }

@@ -31,10 +31,9 @@ public class ScoringSystem {
   public enum State {
     UNINITIALISED,
     WAITING_FOR_START,
-    EMPTY,
     FULL,
-    FILLING,
-    EMPTYING
+    INTAKING,
+    SHOOTING
   }
 
   protected enum SequenceMode {
@@ -60,10 +59,7 @@ public class ScoringSystem {
   private Pose2D robotPosition =
       new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0); // the position of the robot
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
-  private int purplesNeeded = 0; // the number of purples needed to fill the mag
-  private int greensNeeded = 0; // the number of greens needed to fill the mag
-  private boolean clearingIntake =
-      false; // if the intake is being reversed to clear a blockage causing a stall
+  private boolean clearingIntake = false; // if the intake is being reversed to clear a blockage
   private final Telemetry telemetry;
 
   public ScoringSystem(
@@ -112,7 +108,7 @@ public class ScoringSystem {
     turret.enable(); // let the flywheel spin up
     limelight.start();
     if (search) limelight.detectSequence();
-    state = isPreloaded ? State.FULL : State.EMPTY;
+    state = isPreloaded ? State.FULL : State.INTAKING;
   }
 
   /**
@@ -170,24 +166,22 @@ public class ScoringSystem {
    * @brief updates everything to do with shooting balls out of the turret
    */
   private void updateShooting() {
-    if (state != State.EMPTYING) return;
+    if (state != State.SHOOTING) return;
     // ^ only do this logic if emptying
 
-    boolean emptying = false;
+    boolean empty = false;
     switch (sequenceMode) {
       case UNSORTED:
-        emptying = emptyMagUnsorted();
+        empty = emptyMagUnsorted();
         break;
 
       case SORTED:
-        emptying = emptyMagSorted();
+        empty = emptyMagSorted();
         break;
     }
 
-    if (!emptying) {
-      state = State.EMPTY; // we are no longer emptying the mag
-      turret.idle(); // let flywheel slow down to idle speed
-      spindex.moveSpindexIdle(spindex.getIndex()); // idle the spindex
+    if (!empty) {
+      fillMag();
     }
   } // updateShooting()
 
@@ -209,7 +203,7 @@ public class ScoringSystem {
             intake.ejectIdle();
             return;
 
-          case EMPTYING:
+          case SHOOTING:
             intake.intakeIdle();
             return;
 
@@ -238,37 +232,17 @@ public class ScoringSystem {
           clearIntake();
         break;
 
-      case EMPTY:
-        fillMag();
-        break;
-
-      case FILLING:
+      case INTAKING:
         if (spindex.getIsIntakeColorNew() && spindex.isAtTarget()) {
           // ^ if intaking a ball, the spindex is stationary, and a new color of ball is in the intake
-          if (spindex.getIntakeColor() == BallColor.PURPLE) {
-            // ^ if a purple is in the intake
-            if (purplesNeeded >= 1) { // if we need a purple
-              spindex.storeIntakeColor(); // record the color of the ball taken in
-
-            } else { // if we don't need a purple
-              clearIntake();
-            }
-
-          } else if (spindex.getIntakeColor() == BallColor.GREEN) {
-            // ^ if a green is in the intake
-            if (greensNeeded >= 1) { // if we need a green
-              spindex.storeIntakeColor(); // record the color of the ball taken in
-
-            } else { // if we don't need a green
-              clearIntake();
-            }
+          if (spindex.getIntakeColor().isShootable()) {
+            // ^ if intake contains a shootable ball
+            spindex.storeIntakeColor(); // record the color of the ball taken in
           }
         }
 
         if (!fillMag()) {
-          state = State.FULL;
-          intake.intakeIdle(); // start intake up to keep balls in the mag
-          spindex.moveSpindexIdle(spindex.getIndex()); // move spindex to idle position
+          switchModeToFull();
         }
 
         break;
@@ -276,28 +250,30 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief starts filling the mag with two purple balls and one green ball
-   * @return true if mag had empty slots, false if mag is full or contains more than 2 purples or 1
-   *     green
+   * @brief switches the scoring system's mode to "full"
    */
-  @Deprecated
-  public boolean fillMagSorted() {
-    if (spindex.getColorIndex(BallColor.EMPTY) == NULL ||
-        (state != State.EMPTY && state != State.FILLING)) return false;
-    // ^ if mag isn't empty or being filled, or there are no empty slots in the mag, return false
-    purplesNeeded = 2; // if all slots are empty, we need 2 purples
-    greensNeeded = 1; // if all slots are empty, we need 1 green
-    for (BallColor color : spindex.getSpindexContents()) {
-      if (color == BallColor.PURPLE)
-        purplesNeeded--; // if slot contains purple, decrease number of purples needed by one
-      if (color == BallColor.GREEN)
-        greensNeeded--; // if slot contains green, decrease number of greens needed by one
-    }
-    // if mag contains more than 2 purples or 1 green, return false
-    if (purplesNeeded < 0 || greensNeeded < 0) return false;
-    state = State.FILLING;
-    sequenceMode = SequenceMode.SORTED; // fill the mag with sorted balls
-    return intakeIndex(spindex.getColorIndex(BallColor.EMPTY)); // start intaking balls
+  protected void switchModeToFull() {
+    state = State.FULL;
+    intake.intakeIdle(); // start intake up to keep balls in the mag
+    spindex.moveSpindexIdle(spindex.getIndex()); // move spindex to idle position
+  }
+
+  /**
+   * @brief switches the scoring system's mode to "intaking"
+   */
+  protected void switchModeToIntaking() {
+    state = State.INTAKING;
+    spindex.moveSpindexIntake(spindex.getColorIndex(BallColor.EMPTY)); // move spindex to empty slot
+    intake.intake(); // start the intake spinning
+  }
+
+  /**
+   * @brief switches the scoring system's mode to "shooting"
+   * @note does not do all that needs to be done when switching the mode to shooting
+   */
+  protected void switchModeToShooting(SequenceMode sequenceMode) {
+    state = State.SHOOTING;
+    this.sequenceMode = sequenceMode;
   }
 
   /**
@@ -305,42 +281,12 @@ public class ScoringSystem {
    * @return true if the mag had empty slots, false if the mag is full
    */
   public boolean fillMag() {
-    if (spindex.getColorIndex(BallColor.EMPTY) == NULL ||
-        (state != State.EMPTY && state != State.FILLING)) return false;
-    // ^ if mag isn't empty or being filled, or there are no empty slots in the mag, return false
-    state = State.EMPTYING;
-    sequenceMode = SequenceMode.UNSORTED; // fill the mag with unsorted balls
-    purplesNeeded = 3; // we could intake up to 3 greens
-    greensNeeded = 3; // we could intake up to 3 purples
-    return intakeIndex(spindex.getColorIndex(BallColor.EMPTY)); // start intaking balls
-  }
+    if (spindex.getColorIndex(BallColor.EMPTY) == NULL) return false;
+    // ^ if there are no empty slots in the mag, return false
 
-  /**
-   * @brief intakes a single ball of any color to the first empty intake index in the spindex
-   * @return true if a ball was taken in, false if the mag was full or intake is busy
-   */
-  @Deprecated
-  public boolean intakeBall() {
-    // intakeBallIndex() will handle returning false if mag is full
-    // intake ball to first empty index
-    return intakeIndex(spindex.getColorIndex(BallColor.EMPTY));
-  }
+    switchModeToIntaking();
 
-  /**
-   * @brief intakes a ball at a specified index in the spindex
-   * @param index the index in the spindex to put the ball in
-   * @return true if given index was empty, false if a ball was already in the given index
-   */
-  private boolean intakeIndex(int index) {
-    // return false if given index contains a ball or shooting / full
-    // spindex will return BallColor.INVALID on invalid indexes
-    if (spindex.getIndexColor(index).isShootable() ||
-        (state != State.EMPTY && state != State.FILLING)) return false;
-
-    spindex.moveSpindexIntake(index); // move spindex to correct position
-    intake.intake(); // start the intake spinning
-
-    return true;
+    return true; // start intaking balls
   }
 
   /**
@@ -357,19 +303,17 @@ public class ScoringSystem {
    * @return true if the mag contained at least one ball, false if mag is empty
    */
   public boolean shootUnsorted() {
-    // if mag is empty, return false
-    if ((spindex.getColorIndex(BallColor.PURPLE) == NULL
-        && spindex.getColorIndex(BallColor.GREEN) == NULL) || state != State.FULL) return false;
-    state = State.EMPTYING; // the mag is being emptied
-    sequenceMode = SequenceMode.UNSORTED; // shooting in any order
     int index = NULL;
     for (BallColor color : spindex.getSpindexContents()) { // for each spindex slot
-      // note: there should always be a non-empty slot in the spindex if the code gets to this point
-      if (color != BallColor.EMPTY) { // if slot isn't empty
+      if (color.isShootable()) { // if slot has a ball in it
         index = spindex.getColorIndex(color); // get index of slot
         break; // don't keep looking for full slots
       }
     }
+
+    if (index == NULL) return false; // if spindex is empty, return false
+
+    switchModeToShooting(SequenceMode.UNSORTED);
     shootIndex(index); // shoot a ball from the non-empty slot
 
     return true; // we are emptying the mag; return true
@@ -381,27 +325,17 @@ public class ScoringSystem {
    *     shot
    */
   public boolean shootSequence() {
-    if (state != State.FULL) return false;
     int purples = 0;
     int greens = 0;
     for (BallColor color : spindex.getSpindexContents()) {
       if (color == BallColor.PURPLE) purples++;
       if (color == BallColor.GREEN) greens++;
     }
-    if ((purples != 2) || (greens != 1))
-      return false; // return false if the wrong number of balls are in the mag
-    state = State.EMPTYING; // the mag is being emptied
-    sequenceMode = SequenceMode.SORTED; // shooting sorted sequence
+    if ((purples != 2) || (greens != 1)) return false;
+    // ^ return false if the wrong number of balls are in the mag
+    switchModeToShooting(SequenceMode.SORTED);
     sequenceIndex = 0; // start with the first ball in the sequence
     return emptyMagSorted(); // start emptying mag
-  }
-
-  /**
-   * @brief gets if the scoring system is idle
-   * @return true if the scoring system is idle, false if intaking or shooting
-   */
-  public boolean isIdle() {
-    return state == State.EMPTY;
   }
 
   /**
@@ -410,6 +344,26 @@ public class ScoringSystem {
    */
   public State getState() {
     return state;
+  }
+
+  /**
+   * @brief gets the number of full slots in the spindex
+   * @return the number of slots in the spindex that contain a ball
+   */
+  public int getFullSpindexSlots() {
+    int toReturn = 0;
+    for (BallColor slot : spindex.getSpindexContents()) {
+      if (slot.isShootable()) toReturn++;
+    }
+    return toReturn;
+  }
+
+  /**
+   * @brief gets if the spindex is empty
+   * @return true if no slots contain a ball, false if any slots contain a ball
+   */
+  public boolean isSpindexEmpty() {
+    return getFullSpindexSlots() == 0;
   }
 
   /**
@@ -481,6 +435,8 @@ public class ScoringSystem {
       }
     }
 
+    if (!spindex.isIndexValid(indexToShoot)) return false; // if mag is empty, return false
+
     if (spindex.isReadyToShoot()) {
       // ^ spindex is ready for ball to be lifted
       if (turret.isReadyToShoot()) {
@@ -488,17 +444,8 @@ public class ScoringSystem {
         spindex.liftBall();
       }
 
-    } else if (spindex.getState() == Spindex.SpindexState.LIFTED
-        || (spindex.getIndex() != indexToShoot
-            && spindex.getState() != Spindex.SpindexState.SHOOTING)) {
-      // ^ spindex is done lifting ball, or hasn't been set yet
-      if (spindex.isIndexValid(indexToShoot)) {
-        // ^ spindex isn't empty
-        shootIndex(indexToShoot);
-
-      } else {
-        return false; // mag empty
-      }
+    } else {
+      shootIndex(indexToShoot);
     }
 
     return true;

@@ -17,14 +17,11 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.hardware.Spindex;
+import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 /**
@@ -104,7 +101,7 @@ public class plzwork extends CommonRobot {
 
     if (!move && !move1) {
       scoringSystem.shootMag();
-      if (scoringSystem.isIdle()) {
+      if (scoringSystem.getState() == ScoringSystem.State.INTAKING) {
         move1 = true;
       }
     }
