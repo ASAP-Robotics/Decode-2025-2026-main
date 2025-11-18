@@ -24,6 +24,11 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 import java.io.File;
 import java.util.List;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -206,10 +211,24 @@ public class Limelight {
   }
 
   /**
+   * @brief gets the position of limelight on the field, using FTC coordinates
+   * @return the 2D position of limelight on the field
+   */
+  public Pose2D getPosition() {
+    if (!isResultValid) return null;
+    Pose3D cameraPos = result.getBotpose();
+    double x = cameraPos.getPosition().toUnit(DistanceUnit.INCH).x;
+    double y = cameraPos.getPosition().toUnit(DistanceUnit.INCH).y;
+    double heading = cameraPos.getOrientation().getYaw(AngleUnit.DEGREES);
+    return new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading);
+  }
+
+  /**
    * @brief gets the size of the apriltag in limelight's view
    * @return the fraction of the latest frame taken up by the apriltag, or 0 if the latest frame was
    *     invalid (tag not visible)
    */
+  @Deprecated
   public double getTargetSize() {
     return isResultValid ? result.getTa() : 0;
   }
@@ -219,6 +238,7 @@ public class Limelight {
    * @return the x angle of the target, or 0 if the latest frame was invalid (tag not visible)
    * @note intended to be used as the amount the turret needs to be turned to point at the target
    */
+  @Deprecated
   public double getTargetOffsetAngleDegrees() {
     return isResultValid ? result.getTx() : 0; // might need to invert, TODO: check
   }

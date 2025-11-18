@@ -30,12 +30,13 @@ import org.firstinspires.ftc.teamcode.types.BallSequence;
 /**
  * @brief class to contain the behavior of the robot in TeliOp, to avoid code duplication
  */
-public class TeliOpRobot extends CommonRobot {
+public class TeleOpRobot extends CommonRobot {
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
   public MecanumWheelBase wheelBase;
+  protected GoBildaPinpointDriver pinpoint;
 
-  public TeliOpRobot(
+  public TeleOpRobot(
       HardwareMap hardwareMap,
       Telemetry telemetry,
       AllianceColor allianceColor,
@@ -43,13 +44,15 @@ public class TeliOpRobot extends CommonRobot {
       Gamepad gamepad2) {
     super(hardwareMap, telemetry, allianceColor);
 
+    pinpoint = this.hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+
     this.gamepad1 = gamepad1;
     this.gamepad2 = gamepad2;
 
-    DcMotorEx frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
-    DcMotorEx frontRight = hardwareMap.get(DcMotorEx.class, "rightFront");
-    DcMotorEx backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
-    DcMotorEx backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
+    DcMotorEx frontLeft = this.hardwareMap.get(DcMotorEx.class, "leftFront");
+    DcMotorEx frontRight = this.hardwareMap.get(DcMotorEx.class, "rightFront");
+    DcMotorEx backLeft = this.hardwareMap.get(DcMotorEx.class, "leftBack");
+    DcMotorEx backRight = this.hardwareMap.get(DcMotorEx.class, "rightBack");
     wheelBase = new MecanumWheelBase(frontLeft, frontRight, backLeft, backRight);
   }
 
@@ -57,64 +60,62 @@ public class TeliOpRobot extends CommonRobot {
    * @brief to be called once, when the opMode is initialized
    */
   public void init() {
-    mag.init(false, false); // initialize scoring systems
+    scoringSystem.init(false, false); // initialize scoring systems
   }
 
   /**
    * @brief to be called repeatedly, while the opMode is in init
    */
   public void initLoop() {
-    mag.initLoop();
+    scoringSystem.initLoop();
   }
 
   /**
    * @brief to be called once when the opMode is started
    */
   public void start() {
-    mag.start(false); // start scoring systems up
+    scoringSystem.start(false, false); // start scoring systems up
   }
 
   /**
    * @brief to be called repeatedly, every loop
    */
   public void loop() {
-    // get robot position
-    pinpoint.update(GoBildaPinpointDriver.ReadData.ONLY_UPDATE_HEADING);
-    Pose2D location = pinpoint.getPosition();
-
-    // update scoring systems
-    //mag.setRobotRotation(0 /*location.getHeading(AngleUnit.DEGREES)*/);
-    mag.update();
-
     if (gamepad2.dpadDownWasPressed()) {
-      mag.setBallSequence(BallSequence.PGP);
+      scoringSystem.setBallSequence(BallSequence.PGP);
 
     } else if (gamepad2.dpadLeftWasPressed()) {
-      mag.setBallSequence(BallSequence.GPP);
+      scoringSystem.setBallSequence(BallSequence.GPP);
 
     } else if (gamepad2.dpadRightWasPressed()) {
-      mag.setBallSequence(BallSequence.PPG);
+      scoringSystem.setBallSequence(BallSequence.PPG);
     }
 
     // shoot
     if (gamepad2.right_trigger > 0.5) {
       // mag.shootMag(); // shoot all balls in the mag, in a sequence if possible
-      mag.shootUnsorted();
+      scoringSystem.shootUnsorted();
 
     } else if (gamepad2.rightBumperWasPressed()) {
-      mag.shootSequence();
+      scoringSystem.shootSequence();
     }
 
     // intake
     if (gamepad2.left_trigger > 0.5) {
-      mag.fillMagUnsorted(); // fill the mag with any three balls
+      scoringSystem.fillMag(); // fill the mag with any three balls
 
     } else if (gamepad2.leftBumperWasPressed()) {
-      mag.emergencyEject();
+      scoringSystem.clearIntake();
 
-    } else if (gamepad2.yWasPressed()) {
-      mag.intakeBall(); // intake one ball into mag
     }
+
+    // get robot position
+    pinpoint.update(GoBildaPinpointDriver.ReadData.ONLY_UPDATE_HEADING);
+    Pose2D location = pinpoint.getPosition();
+
+    // update scoring systems
+    scoringSystem.setRobotPosition(location);
+    scoringSystem.update();
 
     // update wheelbase
     wheelBase.setRotation(location.getHeading(AngleUnit.DEGREES)); // for field-centric control
@@ -129,7 +130,7 @@ public class TeliOpRobot extends CommonRobot {
    * @brief to be called once, when the "stop" button is pressed
    */
   public void stop() {
-    mag.stop(); // stop all powered movement in scoring systems
+    scoringSystem.stop(); // stop all powered movement in scoring systems
     wheelBase.stop(); // stop all powered movement in wheels
   }
 }

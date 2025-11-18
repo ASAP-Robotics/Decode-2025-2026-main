@@ -17,10 +17,13 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
@@ -28,7 +31,7 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
  * @brief class to contain the behavior of the robot in Auto, to avoid code duplication
  */
 public class plzwork extends CommonRobot {
-  // stuff (variables, etc., see TeliOpRobot) goes here; TODO: update
+  // stuff (variables, etc., see TeleOpRobot) goes here; TODO: update
   boolean move = true;
   boolean move1 = false;
   boolean done = false;
@@ -43,21 +46,21 @@ public class plzwork extends CommonRobot {
    * @brief to be called once, when the opMode is initialized
    */
   public void init() {
-    mag.init(true, false);
+    scoringSystem.init(true, false);
   }
 
   /**
    * @brief to be called repeatedly, while the opMode is in init
    */
   public void initLoop() {
-    mag.initLoop();
+    scoringSystem.initLoop();
   }
 
   /**
    * @brief to be called once when the "start" button is pressed
    */
   public void start() {
-    mag.start(false); // start scoring systems up
+    scoringSystem.start(false); // start scoring systems up
   }
 
   /**
@@ -93,15 +96,15 @@ public class plzwork extends CommonRobot {
     }
 
     // update scoring systems
-    mag.setRobotRotation(0);
-    mag.update();
+    //scoringSystem.setRobotPosition(); // TODO: fill out
+    scoringSystem.update();
 
     // update telemetry
     telemetry.update();
 
     if (!move && !move1) {
-      mag.shootMag();
-      if (mag.spindex.getState() == Spindex.SpindexState.IDLE) {
+      scoringSystem.shootMag();
+      if (scoringSystem.isIdle()) {
         move1 = true;
       }
     }
@@ -116,6 +119,6 @@ public class plzwork extends CommonRobot {
    * @brief to be called once, when the "stop" button is pressed
    */
   public void stop() {
-    mag.stop(); // stop all powered movement in scoring systems
+    scoringSystem.stop(); // stop all powered movement in scoring systems
   }
 }
