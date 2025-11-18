@@ -16,17 +16,19 @@
 
 package org.firstinspires.ftc.teamcode.types;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public enum AllianceColor {
   // TODO: tune obelisk and target angles
-  RED(24, 2, -30, -40, 40),
-  BLUE(20, 1, 30, -40, 40);
+  RED(24, 2, -30, -40, 40, new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0)),
+  BLUE(20, 1, 30, -40, 40, new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
 
   private final int aprilTagId;
   private final int limelightPipeline;
   private final double obeliskAngle;
-  private Pose2D targetLocation;
+  private final Pose2D targetLocation;
 
   @Deprecated
   private final double targetAngleMin;
@@ -38,12 +40,14 @@ public enum AllianceColor {
       int limelightPipeline,
       double obeliskAngle,
       double targetAngleMin,
-      double targetAngleMax) {
+      double targetAngleMax,
+      Pose2D targetLocation) {
     this.aprilTagId = aprilTagId;
     this.limelightPipeline = limelightPipeline;
     this.obeliskAngle = obeliskAngle;
     this.targetAngleMin = targetAngleMin;
     this.targetAngleMax = targetAngleMax;
+    this.targetLocation = targetLocation;
   }
 
   /**
@@ -84,5 +88,13 @@ public enum AllianceColor {
    */
   public double getTargetAngleMax() {
     return targetAngleMax;
+  }
+
+  /**
+   * @brief gets the location of the target for the aliance color
+   * @return this alliance's target location
+   */
+  public Pose2D getTargetLocation() {
+    return targetLocation;
   }
 }

@@ -53,7 +53,7 @@ public class ScoringSystem {
   private double rpmOverride = 2000;
   private double distanceOverride = 1;
   private final Pose2D targetPosition;
-  private Pose2D robotPosition = new Pose2D(DistanceUnit.CM, 0, 0, AngleUnit.DEGREES, 0);
+  private Pose2D robotPosition = new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private int purplesNeeded = 0; // the number of purples needed to fill the mag
   private int greensNeeded = 0; // the number of greens needed to fill the mag
@@ -75,6 +75,7 @@ public class ScoringSystem {
     this.allianceColor = allianceColor;
     this.targetLockTimer = new SimpleTimer(1); // TODO: tune
     this.telemetry = telemetry;
+    this.targetPosition = this.allianceColor.getTargetLocation();
     this.turret.idle(); // set turret to spin at idle speed
     this.turret.disable(); // don't let the turret spin up
   }
@@ -540,8 +541,33 @@ public class ScoringSystem {
     return true;
   }
 
+  /**
+   * @brief gets the distance to the target (from the robot), in inches
+   * @return the number of inches from the robot to the target
+   */
   protected double getTargetDistance() {
+    double distX = targetPosition.getX(DistanceUnit.INCH) - robotPosition.getX(DistanceUnit.INCH);
+    double distY = targetPosition.getY(DistanceUnit.INCH) - robotPosition.getY(DistanceUnit.INCH);
+    return Math.hypot(Math.abs(distX), Math.abs(distY));
+  }
 
+  /**
+   * @brief gets the absolute angle from the robot to the target, not accounting for the robots rotation
+   * @return the absolute angle from the robot to the target, in degrees
+   */
+  protected double getAbsoluteTargetAngle() {
+    double distX = robotPosition.getX(DistanceUnit.INCH) - targetPosition.getX(DistanceUnit.INCH);
+    double distY = robotPosition.getY(DistanceUnit.INCH) - targetPosition.getY(DistanceUnit.INCH);
+
+    return AngleUnit.DEGREES.fromRadians(Math.asin(distY / distX)); // might need to invert things
+  }
+
+  /**
+   * @brief gets the angle to the target relative to the robot, in degrees
+   * @return the angle of the target relative to the robot
+   */
+  protected double getRelativeTargetAngle() {
+    return getAbsoluteTargetAngle() - robotPosition.getHeading(AngleUnit.DEGREES);
   }
 
   /**

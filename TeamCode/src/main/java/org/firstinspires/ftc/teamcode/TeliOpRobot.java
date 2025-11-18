@@ -83,7 +83,7 @@ public class TeliOpRobot extends CommonRobot {
     Pose2D location = pinpoint.getPosition();
 
     // update scoring systems
-    mag.setRobotRotation(0 /*location.getHeading(AngleUnit.DEGREES)*/);
+    //mag.setRobotRotation(0 /*location.getHeading(AngleUnit.DEGREES)*/);
     mag.update();
 
     if (gamepad2.dpadDownWasPressed()) {
