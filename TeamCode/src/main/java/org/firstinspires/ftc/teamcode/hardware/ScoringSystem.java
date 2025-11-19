@@ -256,6 +256,7 @@ public class ScoringSystem {
     state = State.FULL;
     intake.intakeIdle(); // start intake up to keep balls in the mag
     spindex.moveSpindexIdle(spindex.getIndex()); // move spindex to idle position
+    turret.activate(); // get ready to shoot at any time
   }
 
   /**
@@ -265,6 +266,7 @@ public class ScoringSystem {
     state = State.INTAKING;
     spindex.moveSpindexIntake(spindex.getColorIndex(BallColor.EMPTY)); // move spindex to empty slot
     intake.intake(); // start the intake spinning
+    turret.idle(); // flywheel doesn't need to at full speed
   }
 
   /**
@@ -274,6 +276,7 @@ public class ScoringSystem {
   protected void switchModeToShooting(SequenceMode sequenceMode) {
     state = State.SHOOTING;
     this.sequenceMode = sequenceMode;
+    turret.activate(); // just in case; *should* already be active
   }
 
   /**
@@ -515,17 +518,6 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief sets the turret to 0 degrees
-   * @note intended for use at the end of auto
-   */
-  @Deprecated
-  public void homeTurret() {
-    turretAimOverride = true;
-    horizontalAngleOverride = 0;
-    distanceOverride = 0;
-  }
-
-  /**
    * @brief overrides aiming, switching control away from pinpoint / limelight
    * @param distance the distance from the target, in inches
    * @param angle the angle to turn the turret to
@@ -571,8 +563,6 @@ public class ScoringSystem {
    * @param index the ball from the spindex to be shot
    */
   private void shootIndex(int index) {
-    // NOTE: assumes that the servos will move in the time it takes the flywheel to spin up
-    turret.activate(); // spin flywheel up to speed
     intake.intakeIdle(); // start intake up to keep balls in the mag
     spindex.moveSpindexShoot(index); // move spindex to correct position
   }

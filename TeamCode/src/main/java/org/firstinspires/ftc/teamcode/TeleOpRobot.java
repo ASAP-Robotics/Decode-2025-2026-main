@@ -81,6 +81,7 @@ public class TeleOpRobot extends CommonRobot {
    * @brief to be called repeatedly, every loop
    */
   public void loop() {
+    // manual sequence setting
     if (gamepad2.dpadDownWasPressed()) {
       scoringSystem.setBallSequence(BallSequence.PGP);
 
@@ -106,7 +107,11 @@ public class TeleOpRobot extends CommonRobot {
 
     } else if (gamepad2.leftBumperWasPressed()) {
       scoringSystem.clearIntake();
+    }
 
+    // miscellaneous backup manual controls
+    if (gamepad2.bWasPressed()) {
+      scoringSystem.overrideAiming(50, 0); // TODO: tune distance
     }
 
     // get robot position
