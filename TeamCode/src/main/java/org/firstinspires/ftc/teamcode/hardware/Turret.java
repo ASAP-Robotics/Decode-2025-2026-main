@@ -18,6 +18,7 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
 
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -57,6 +58,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private static final double DEFAULT_VERTICAL_ANGLE = 50; // default angle for flap
 
   private final Motor rotator;
+  private final PIDController rotatorController;
+  // ^ PID controller for horizontal rotation of turret, uses motor degrees as units
   private final Axon hoodServo;
   private final double ticksPerDegree;
   // target angle for side-to-side turret movement
@@ -69,9 +72,11 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     super(flywheelMotor, idleSpeed);
     this.rotator = rotator;
     this.hoodServo = hoodServo;
-    this.rotator.setRunMode(Motor.RunMode.PositionControl);
-    this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
     this.ticksPerDegree = this.rotator.getCPR() / 360;
+    this.rotator.setRunMode(Motor.RunMode.RawPower);
+    this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+    this.rotatorController = new PIDController(0, 0, 0); // TODO: tune
+    rotatorController.setTolerance(turretDegreesToMotorDegrees(1)); // TODO: tune
   }
 
   public Turret(DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo) {
@@ -84,11 +89,16 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    */
   public void init(double horizontalAngle) {
     rotator.resetEncoder();
-    rotator.setPositionCoefficient(0.035); // tuned (for now)
-    rotator.setTargetPosition(
-        (int) (turretDegreesToMotorDegrees(horizontalAngle) * ticksPerDegree));
-    rotator.setPositionTolerance(turretDegreesToMotorDegrees(5) * ticksPerDegree); // TODO: tune
+    rotatorController.setSetPoint(turretDegreesToMotorDegrees(horizontalAngle));
+    rotator.set(0);
     hoodServo.setPosition(targetVerticalAngleDegrees);
+  }
+
+  /**
+   * @brief to be called repeatedly, while the opMode is in init
+   */
+  public void initLoop() {
+    update();
   }
 
   /**
@@ -96,10 +106,10 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @return the full lookup table
    */
   protected LookupTableItem[] fillLookupTable() {
-    // TODO: fine tune lookup table?
-    // note: "distance" numbers *MUST* go from low to high (number, not distance)
+    // TODO: retune lookup table to use inches instead of frame percentage
+    // note: "distance" numbers *MUST* go from low to high
     return new LookupTableItem[] {
-      new LookupTableItem(0.1, 3600, 35),
+      new LookupTableItem(0.1, 3600, 35), // "just in case" added value
       new LookupTableItem(0.215, 3450, 35),
       new LookupTableItem(0.25, 3400, 40),
       new LookupTableItem(0.265, 3300, 45),
@@ -119,7 +129,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
       new LookupTableItem(3.32, 2300, 50),
       new LookupTableItem(4.22, 2300, 50),
       new LookupTableItem(5.31, 2200, 66),
-      new LookupTableItem(6, 2150, 70)
+      new LookupTableItem(6, 2150, 70) // "just in case" added value
     }; // preliminary values
   }
 
@@ -143,19 +153,18 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     super.update();
     hoodServo.setPosition(targetVerticalAngleDegrees); // this might need updating
     double motorDegrees = turretDegreesToMotorDegrees(targetHorizontalAngleDegrees);
-    rotator.setTargetPosition((int) (motorDegrees * ticksPerDegree));
-    if (!testing) rotator.set(0.2); // TODO: change
+    rotatorController.setSetPoint(motorDegrees);
+    rotator.set(rotatorController.calculate(getRotatorDegrees())); // might need updating
   }
 
   /**
    * @brief used to tune the horizontal rotation of the turret
    * @param kP the proportional constant for the rotator
-   * @param power the max power of the rotator
-   * TODO: change rotator to propper PID controller
+   * @param kI the integral constant for the rotator
+   * @param kD the derivative constant for the rotator
    */
-  public void tuneHorizontalMotion(double kP, double power) {
-    rotator.setPositionCoefficient(kP);
-    rotator.set(power);
+  public void tuneHorizontalMotion(double kP, double kI, double kD) {
+    rotatorController.setPID(kP, kI, kD);
   }
 
   /**
@@ -164,7 +173,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @param angle the angle to move the hood servo to
    */
   public void tuneShooting(double rpm, double angle) {
-    tuneRpm(rpm);
+    overrideRpm(rpm);
     setVerticalAngle(angle);
   }
 
@@ -209,9 +218,13 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @return the current horizontal angle of the turret
    */
   public double getHorizontalAngleDegrees() {
+    return motorDegreesToTurretDegrees(getRotatorDegrees());
+  }
+
+
+  protected double getRotatorDegrees() {
     double ticks = rotator.getCurrentPosition(); // get motor position in ticks
-    double motorDegrees = ticks / ticksPerDegree; // convert motor position to degrees
-    return motorDegreesToTurretDegrees(motorDegrees); // convert motor position to turret position
+    return ticks / ticksPerDegree; // convert motor position to degrees
   }
 
   /**

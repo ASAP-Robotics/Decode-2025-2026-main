@@ -96,7 +96,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @brief manually sets RPM, use to tune lookup table
    * @param rpm the speed to spin the flywheel at
    */
-  public void tuneRpm(double rpm) {
+  public void overrideRpm(double rpm) {
     testing = true;
     testingSpeed = rpm;
   }

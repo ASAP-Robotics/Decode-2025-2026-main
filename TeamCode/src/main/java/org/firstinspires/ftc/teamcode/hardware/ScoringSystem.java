@@ -145,7 +145,7 @@ public class ScoringSystem {
    */
   private void updateAiming() {
     if (tuning) {
-      turret.tuneRpm(rpmOverride);
+      turret.overrideRpm(rpmOverride);
       turret.setVerticalAngle(verticalAngleOverride);
 
     } else if (turretAimOverride) {
