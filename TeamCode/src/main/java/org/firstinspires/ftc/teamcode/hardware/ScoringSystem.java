@@ -510,10 +510,12 @@ public class ScoringSystem {
   public Pose2D getRobotPosition() {
     Pose2D limelightPosition = limelight.getPosition();
     if (limelightPosition == null) return null;
-    double x = limelightPosition.getX(DistanceUnit.INCH);
-    double y = limelightPosition.getY(DistanceUnit.INCH);
+    double rotationDegrees = turret.getHorizontalAngleDegrees();
+    double rotationRadians = AngleUnit.RADIANS.fromDegrees(rotationDegrees);
+    double x = limelightPosition.getX(DistanceUnit.INCH) + (6.2 * Math.cos(rotationRadians));
+    double y = limelightPosition.getY(DistanceUnit.INCH) + (6.2 * Math.sin(rotationRadians));
     double heading =
-        limelightPosition.getHeading(AngleUnit.DEGREES) + turret.getHorizontalAngleDegrees();
+        limelightPosition.getHeading(AngleUnit.DEGREES) + rotationDegrees;
     return new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading);
   }
 

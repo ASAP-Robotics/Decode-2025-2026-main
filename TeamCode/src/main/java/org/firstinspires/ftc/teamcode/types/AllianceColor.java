@@ -22,31 +22,22 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public enum AllianceColor {
   // TODO: tune obelisk and target angles
-  RED(24, 2, -30, -40, 40, new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0)),
-  BLUE(20, 1, 30, -40, 40, new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0));
+  RED(24, 2, -30, new Pose2D(DistanceUnit.INCH, -66, -66, AngleUnit.DEGREES, 0)),
+  BLUE(20, 1, 30, new Pose2D(DistanceUnit.INCH, -66, 66, AngleUnit.DEGREES, 0));
 
   private final int aprilTagId;
   private final int limelightPipeline;
   private final double obeliskAngle;
   private final Pose2D targetLocation;
 
-  @Deprecated
-  private final double targetAngleMin;
-  @Deprecated
-  private final double targetAngleMax;
-
   AllianceColor(
       int aprilTagId,
       int limelightPipeline,
       double obeliskAngle,
-      double targetAngleMin,
-      double targetAngleMax,
       Pose2D targetLocation) {
     this.aprilTagId = aprilTagId;
     this.limelightPipeline = limelightPipeline;
     this.obeliskAngle = obeliskAngle;
-    this.targetAngleMin = targetAngleMin;
-    this.targetAngleMax = targetAngleMax;
     this.targetLocation = targetLocation;
   }
 
@@ -72,22 +63,6 @@ public enum AllianceColor {
    */
   public double getObeliskAngle() {
     return obeliskAngle;
-  }
-
-  /**
-   * @brief gets the lower end of the range of angles to look for target in
-   * @return the smallest angle the target could be visible at
-   */
-  public double getTargetAngleMin() {
-    return targetAngleMin;
-  }
-
-  /**
-   * @brief gets the upper end of the range of angles to look for target in
-   * @return the largest angle the target could be visible at
-   */
-  public double getTargetAngleMax() {
-    return targetAngleMax;
   }
 
   /**
