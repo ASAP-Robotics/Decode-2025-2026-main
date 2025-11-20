@@ -26,6 +26,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.jetbrains.annotations.TestOnly;
 
 public class ScoringSystem {
   public enum State {
@@ -60,6 +61,7 @@ public class ScoringSystem {
       new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0); // the position of the robot
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private boolean clearingIntake = false; // if the intake is being reversed to clear a blockage
+  private static final double LIMELIGHT_OFFSET_INCHES = 6.2; // distance from limelight to robot center
   private final Telemetry telemetry;
 
   public ScoringSystem(
@@ -156,6 +158,16 @@ public class ScoringSystem {
     } else if (!limelight.isReadyToNavigate()) {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
       return;
+    }
+
+    Pose2D limelightPosition = limelight.getPosition();
+    if (limelightPosition != null && turret.isAtTarget()) {
+      double targetLimelightHeading =
+          robotPosition.getHeading(AngleUnit.DEGREES) + turret.getHorizontalAngleDegrees();
+      double limelightHeading = limelightPosition.getHeading(AngleUnit.DEGREES);
+      double headingError = targetLimelightHeading - limelightHeading;
+      if (Math.abs(headingError) >= 1)
+        turret.changeHorizontalAngleOffsetDegrees(headingError);
     }
 
     turret.setHorizontalAngle(getRelativeTargetAngle());
@@ -505,15 +517,19 @@ public class ScoringSystem {
 
   /**
    * @brief gets the 2D position of the robot on the field according to limelight
-   * @return the position of the robot, or null if target isn't visible
+   * @return the position of the robot, or null if either the target isn't visible or the camera
+   * isn't still
+   * @note this returns null under normal operation conditions, be careful
    */
   public Pose2D getRobotPosition() {
     Pose2D limelightPosition = limelight.getPosition();
-    if (limelightPosition == null) return null;
+    if (limelightPosition == null || !turret.isAtTarget()) return null;
     double rotationDegrees = turret.getHorizontalAngleDegrees();
     double rotationRadians = AngleUnit.RADIANS.fromDegrees(rotationDegrees);
-    double x = limelightPosition.getX(DistanceUnit.INCH) + (6.2 * Math.cos(rotationRadians));
-    double y = limelightPosition.getY(DistanceUnit.INCH) + (6.2 * Math.sin(rotationRadians));
+    double x = limelightPosition.getX(DistanceUnit.INCH) +
+        (LIMELIGHT_OFFSET_INCHES * Math.cos(rotationRadians));
+    double y = limelightPosition.getY(DistanceUnit.INCH) +
+        (LIMELIGHT_OFFSET_INCHES * Math.sin(rotationRadians));
     double heading =
         limelightPosition.getHeading(AngleUnit.DEGREES) + rotationDegrees;
     return new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading);
@@ -535,6 +551,7 @@ public class ScoringSystem {
    * @param RPM the RPM to spin the flywheel at
    * @param angle the angle to move the flap to
    */
+  @TestOnly
   public void tuneAiming(double RPM, double angle) {
     tuning = true;
     rpmOverride = RPM;
@@ -553,6 +570,7 @@ public class ScoringSystem {
    * @param color the color to be shot
    * @return true if ball shot, false if no balls of requested color are in mag
    */
+  @Deprecated
   public boolean shootColor(BallColor color) {
     int index = spindex.getColorIndex(color); // find index in the spindex of requested color
     if (index == NULL) return false;

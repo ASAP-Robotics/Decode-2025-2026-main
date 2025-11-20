@@ -23,6 +23,7 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
+import org.jetbrains.annotations.TestOnly;
 
 public class Turret extends Flywheel<Turret.LookupTableItem> {
   protected static class LookupTableItem extends Flywheel.LookupTableItem {
@@ -64,6 +65,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private final double ticksPerDegree;
   // target angle for side-to-side turret movement
   private double targetHorizontalAngleDegrees = 0;
+  // offset applied to horizontal angle to adjust for detected belt slippage
+  private double horizontalAngleOffsetDegrees = 0;
   // target angle for servo moving flap
   private double targetVerticalAngleDegrees = DEFAULT_VERTICAL_ANGLE;
 
@@ -73,6 +76,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.rotator = rotator;
     this.hoodServo = hoodServo;
     this.ticksPerDegree = this.rotator.getCPR() / 360;
+    this.rotator.setInverted(true);
     this.rotator.setRunMode(Motor.RunMode.RawPower);
     this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
     this.rotatorController = new PIDController(0.015, 0.005, 0.0001); // TODO: tune
@@ -152,7 +156,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public void update() {
     super.update();
     hoodServo.setPosition(targetVerticalAngleDegrees); // this might need updating
-    double motorDegrees = turretDegreesToMotorDegrees(targetHorizontalAngleDegrees);
+    double motorDegrees =
+        turretDegreesToMotorDegrees(targetHorizontalAngleDegrees + horizontalAngleOffsetDegrees);
     rotatorController.setSetPoint(motorDegrees);
     rotator.set(rotatorController.calculate(getRotatorDegrees())); // might need updating
   }
@@ -163,6 +168,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @param kI the integral constant for the rotator
    * @param kD the derivative constant for the rotator
    */
+  @TestOnly
   public void tuneHorizontalMotion(double kP, double kI, double kD) {
     rotatorController.setPID(kP, kI, kD);
   }
@@ -172,6 +178,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @param rpm the rpm to spin the flywheel at
    * @param angle the angle to move the hood servo to
    */
+  @TestOnly
   public void tuneShooting(double rpm, double angle) {
     overrideRpm(rpm);
     setVerticalAngle(angle);
@@ -216,15 +223,44 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   /**
    * @brief returns the current side-to-side angle of the turret
    * @return the current horizontal angle of the turret
+   * @note returned value is adjusted using the horizontal angle offset
    */
   public double getHorizontalAngleDegrees() {
-    return motorDegreesToTurretDegrees(getRotatorDegrees());
+    return motorDegreesToTurretDegrees(getRotatorDegrees()) - horizontalAngleOffsetDegrees;
   }
 
-
+  /**
+   * @brief gets the current position of the rotator motor in degrees
+   * @return the position of the rotator motor, according to its encoder, in degrees
+   * @note this value is not adjusted using the horizontal angle offset
+   */
   protected double getRotatorDegrees() {
     double ticks = rotator.getCurrentPosition(); // get motor position in ticks
     return ticks / ticksPerDegree; // convert motor position to degrees
+  }
+
+  /**
+   * @brief changes the horizontal angle offset for the turret, to account for belt slippage
+   * @param deltaDegrees the amount to change the horizontal angle offset by, in degrees
+   */
+  public void changeHorizontalAngleOffsetDegrees(double deltaDegrees) {
+    horizontalAngleOffsetDegrees += deltaDegrees;
+  }
+
+  /**
+   * @brief sets the horizontal angle offset for the turret, to account for belt slippage
+   * @param offsetDegrees the angle to offset the turret angle by, in degrees
+   */
+  public void setHorizontalAngleOffsetDegrees(double offsetDegrees) {
+    horizontalAngleOffsetDegrees = offsetDegrees;
+  }
+
+  /**
+   * @brief gets the horizontal angle offset for the turret, used to account for belt slippage
+   * @return the horizontal angle offset, in degrees
+   */
+  public double getHorizontalAngleOffsetDegrees() {
+    return horizontalAngleOffsetDegrees;
   }
 
   /**

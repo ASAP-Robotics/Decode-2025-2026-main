@@ -19,6 +19,7 @@ package org.firstinspires.ftc.teamcode.hardware;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
+import org.jetbrains.annotations.TestOnly;
 
 public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   protected abstract static class LookupTableItem {
@@ -96,6 +97,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @brief manually sets RPM, use to tune lookup table
    * @param rpm the speed to spin the flywheel at
    */
+  @TestOnly
   public void overrideRpm(double rpm) {
     testing = true;
     testingSpeed = rpm;

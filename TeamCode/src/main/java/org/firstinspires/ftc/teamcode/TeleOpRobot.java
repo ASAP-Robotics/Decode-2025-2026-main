@@ -21,11 +21,13 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 /**
  * @brief class to contain the behavior of the robot in TeliOp, to avoid code duplication
@@ -33,8 +35,9 @@ import org.firstinspires.ftc.teamcode.types.BallSequence;
 public class TeleOpRobot extends CommonRobot {
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
-  public MecanumWheelBase wheelBase;
+  protected MecanumWheelBase wheelBase;
   protected GoBildaPinpointDriver pinpoint;
+  protected SimpleTimer odometryResetTimer = new SimpleTimer(6.7);
 
   public TeleOpRobot(
       HardwareMap hardwareMap,
@@ -82,6 +85,7 @@ public class TeleOpRobot extends CommonRobot {
    */
   public void start() {
     scoringSystem.start(false, false); // start scoring systems up
+    odometryResetTimer.start();
   }
 
   /**
@@ -122,12 +126,24 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // get robot position
-    pinpoint.update(GoBildaPinpointDriver.ReadData.ONLY_UPDATE_HEADING);
+    pinpoint.update();
     Pose2D location = pinpoint.getPosition();
+    double velocity = Math.hypot(
+        Math.abs(pinpoint.getVelX(DistanceUnit.INCH)),
+        Math.abs(pinpoint.getVelY(DistanceUnit.INCH)));
+    // ^ directionless velocity of the robot, in inches per second
 
     // update scoring systems
     scoringSystem.setRobotPosition(location);
     scoringSystem.update();
+
+    if (odometryResetTimer.isFinished() && velocity < 1.0) { // might need to tune
+      Pose2D limelightPose = scoringSystem.getRobotPosition();
+      if (limelightPose != null) {
+        pinpoint.setPosition(limelightPose);
+        odometryResetTimer.start();
+      }
+    }
 
     // update wheelbase
     wheelBase.setRotation(location.getHeading(AngleUnit.DEGREES)); // for field-centric control
