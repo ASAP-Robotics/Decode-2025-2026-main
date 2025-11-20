@@ -37,8 +37,13 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 @Config
 public class TuningTurret extends LinearOpMode {
   // public static double speed = 2000;
+  //public static double angle = 0;
+  //public static double speed = 0.1;
+
   public static double angle = 0;
-  public static double speed = 0.1;
+  public static double kP = 0;
+  public static double kI = 0;
+  public static double kD = 0;
 
   @Override
   public void runOpMode() {
@@ -46,8 +51,6 @@ public class TuningTurret extends LinearOpMode {
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
     DcMotorEx flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
-    // flywheel.setPIDFCoefficients(
-    // DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(70, 10, 20, 17));
     Motor turretRotator = new Motor(hardwareMap, "turretRotator", Motor.GoBILDA.RPM_1150);
     DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
     Servo rawTurretHood = hardwareMap.get(Servo.class, "turretHood");
@@ -73,6 +76,7 @@ public class TuningTurret extends LinearOpMode {
     intake.setPower(1);
 
     while (opModeIsActive()) {
+      /*
       if (gamepad1.dpadUpWasPressed()) {
         speed += 50;
 
@@ -85,6 +89,7 @@ public class TuningTurret extends LinearOpMode {
       } else if (gamepad1.dpadLeftWasPressed()) {
         angle -= 5;
       }
+       */
 
       if (lifter.isAtTarget() && lifter.getTargetPosition() == 100) {
         lifter.setPosition(7);
@@ -97,16 +102,18 @@ public class TuningTurret extends LinearOpMode {
       turret.setHorizontalAngle(0);
 
       limelight.update();
+      turret.tuneShooting(0, 0);
+      turret.setHorizontalAngle(angle);
+      turret.tuneHorizontalMotion(kP, kI, kD);
       turret.update();
-      turret.tuneShooting(speed, angle);
 
       // dashboardTelemetry.addData("Angle", turret.getTargetVerticalAngleDegrees());
       // dashboardTelemetry.addData("Target Speed", turret.testingSpeed);
       // dashboardTelemetry.addData("Speed", turret.flywheel.getVelocity() * 60 / 28);
       // dashboardTelemetry.addData("At target speed", turret.isReadyToShoot());
-      dashboardTelemetry.addData("Lifter at target", lifter.isAtTarget());
-      dashboardTelemetry.addData("Target size", limelight.getTargetSize());
-      dashboardTelemetry.addData("Limelight locked", limelight.isTargetInFrame());
+      //dashboardTelemetry.addData("Lifter at target", lifter.isAtTarget());
+      //dashboardTelemetry.addData("Target size", limelight.getTargetSize());
+      //dashboardTelemetry.addData("Limelight locked", limelight.isTargetInFrame());
       dashboardTelemetry.addData("At target", turret.isAtTarget());
       dashboardTelemetry.addData("Angle", turret.getHorizontalAngleDegrees());
       dashboardTelemetry.addData("Target angle", turret.getTargetHorizontalAngleDegrees());

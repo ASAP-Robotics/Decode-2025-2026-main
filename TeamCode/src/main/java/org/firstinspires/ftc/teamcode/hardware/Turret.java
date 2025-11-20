@@ -75,7 +75,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.ticksPerDegree = this.rotator.getCPR() / 360;
     this.rotator.setRunMode(Motor.RunMode.RawPower);
     this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-    this.rotatorController = new PIDController(0, 0, 0); // TODO: tune
+    this.rotatorController = new PIDController(0.015, 0.005, 0.0001); // TODO: tune
     rotatorController.setTolerance(turretDegreesToMotorDegrees(1)); // TODO: tune
   }
 

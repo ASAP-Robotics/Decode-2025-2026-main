@@ -60,6 +60,13 @@ public class TeleOpRobot extends CommonRobot {
    * @brief to be called once, when the opMode is initialized
    */
   public void init() {
+    // temporary
+    pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+    pinpoint.setEncoderDirections(
+            GoBildaPinpointDriver.EncoderDirection.REVERSED,
+            GoBildaPinpointDriver.EncoderDirection.REVERSED);
+    pinpoint.resetPosAndIMU();
+
     scoringSystem.init(false, false); // initialize scoring systems
   }
 
