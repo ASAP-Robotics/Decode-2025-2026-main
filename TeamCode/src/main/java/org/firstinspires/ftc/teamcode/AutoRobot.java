@@ -103,7 +103,7 @@ public class AutoRobot extends CommonRobot {
       telemetry.update();
 
       if (!move && !move1) {
-        scoringSystem.shootMag();
+        scoringSystem.shootHalfSorted();
         if (scoringSystem.getState() == ScoringSystem.State.INTAKING) {
           move1 = true;
         }

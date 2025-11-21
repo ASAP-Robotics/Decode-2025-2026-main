@@ -31,7 +31,6 @@ import org.jetbrains.annotations.TestOnly;
 public class ScoringSystem {
   public enum State {
     UNINITIALISED,
-    WAITING_FOR_START,
     FULL,
     INTAKING,
     SHOOTING
@@ -39,6 +38,7 @@ public class ScoringSystem {
 
   protected enum SequenceMode {
     SORTED,
+    HALF_SORT,
     UNSORTED
   }
 
@@ -61,8 +61,6 @@ public class ScoringSystem {
       new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0); // the position of the robot
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private boolean clearingIntake = false; // if the intake is being reversed to clear a blockage
-  private static final double LIMELIGHT_OFFSET_INCHES =
-      6.2; // distance from limelight to robot center
   private final Telemetry telemetry;
 
   public ScoringSystem(
@@ -92,8 +90,9 @@ public class ScoringSystem {
   public void init(boolean isPreloaded, boolean search) {
     spindex.init(BallSequence.GPP, isPreloaded);
     turret.init(search ? allianceColor.getObeliskAngle() : getRelativeTargetAngle());
+    turret.setActive(!isPreloaded);
+    turret.enable();
     limelight.init(search);
-    state = State.WAITING_FOR_START;
   }
 
   /**
@@ -142,6 +141,7 @@ public class ScoringSystem {
     telemetry.addData("Locked", limelight.isTargetInFrame() && turret.isAtTarget());
     telemetry.addData("Sequence", ballSequence.toString());
     telemetry.addData("Position", robotPosition);
+    telemetry.addData("Target Angle", turret.getTargetHorizontalAngleDegrees());
   }
 
   /**
@@ -192,6 +192,10 @@ public class ScoringSystem {
         empty = emptyMagUnsorted();
         break;
 
+      case HALF_SORT:
+        empty = emptyMagHalfSorted();
+        break;
+
       case SORTED:
         empty = emptyMagSorted();
         break;
@@ -213,7 +217,6 @@ public class ScoringSystem {
         clearingIntake = false;
         switch (state) {
           case UNINITIALISED:
-          case WAITING_FOR_START:
             return;
 
           case FULL:
@@ -241,7 +244,6 @@ public class ScoringSystem {
 
     switch (state) {
       case UNINITIALISED:
-      case WAITING_FOR_START:
         break;
 
       case FULL:
@@ -312,10 +314,12 @@ public class ScoringSystem {
   /**
    * @brief shoots all balls in the mag, in sequence order if possible
    * @return true if the mag contained at least one ball, false if the mag is empty
+   * @note use shootHalfSorted() instead
    */
+  @Deprecated
   public boolean shootMag() {
     if (shootSequence()) return true; // try shooting a sequence
-    return shootUnsorted(); // try shooting in any order
+    return shootHalfSorted(); // try shooting in any order
   }
 
   /**
@@ -335,6 +339,33 @@ public class ScoringSystem {
 
     switchModeToShooting(SequenceMode.UNSORTED);
     shootIndex(index); // shoot a ball from the non-empty slot
+
+    return true; // we are emptying the mag; return true
+  }
+
+  /**
+   * @brief starts shooting all balls in the mag in such a way that as many as possible match the sequence
+   * @return true if the mag contained at least one ball, false if the mag is empty
+   * @note this method does not require there to be two purples and one green in the mag
+   */
+  public boolean shootHalfSorted() {
+    int index = NULL;
+    for (BallColor color : spindex.getSpindexContents()) {
+      if (color.isShootable()) {
+        // ^ if spindex isn't empty
+        index = spindex.getColorIndex(color);
+        break; // don't keep looking
+      }
+    }
+
+    if (!spindex.isIndexValid(index)) return false; // if spindex is empty, return false
+
+    int correctColorIndex = spindex.getColorIndex(ballSequence.getBallColors()[0]);
+    if (spindex.isIndexValid(correctColorIndex)) index = correctColorIndex;
+
+    switchModeToShooting(SequenceMode.HALF_SORT);
+    sequenceIndex = 0;
+    shootIndex(index); // shoot a ball
 
     return true; // we are emptying the mag; return true
   }
@@ -442,6 +473,61 @@ public class ScoringSystem {
   }
 
   /**
+   * @brief the internal logic for emptying the mag in a half sorted manner
+   * @return true if the mag is being emptied, false if the mag is empty
+   */
+  protected boolean emptyMagHalfSorted() {
+    int indexToShoot;
+
+    try {
+      indexToShoot = spindex.getColorIndex(ballSequence.getBallColors()[sequenceIndex]);
+    } catch (Exception e) {
+      return false; // done shooting sequence
+    }
+
+    if (!spindex.isIndexValid(indexToShoot)) {
+      // ^ if the next ball in the sequence isn't in the mag
+      indexToShoot = spindex.getShootableIndex();
+      if (!spindex.isIndexValid(indexToShoot)) {
+        return false; // mag empty
+      }
+    }
+
+    shootIndex(indexToShoot);
+
+    if (spindex.isReadyToShoot()) {
+      // ^ spindex is ready for ball to be lifted
+      if (turret.isReadyToShoot()) {
+        // turret is ready for ball to be lifted
+        spindex.liftBall();
+      }
+
+    } else if (spindex.getState() == Spindex.SpindexState.LIFTED) {
+      // ^ spindex is done lifting ball, or hasn't been set yet
+      try {
+        indexToShoot = spindex.getColorIndex(ballSequence.getBallColors()[++sequenceIndex]);
+      } catch (Exception e) {
+        return false; // done shooting sequence
+      }
+
+      if (!spindex.isIndexValid(indexToShoot)) {
+        // ^ if the next ball in the sequence isn't in the mag
+        indexToShoot = spindex.getShootableIndex();
+      }
+
+      if (spindex.isIndexValid(indexToShoot)) {
+        // ^ spindex isn't empty
+        shootIndex(indexToShoot);
+
+      } else {
+        return false; // mag empty
+      }
+    }
+
+    return true; // emptying mag
+  }
+
+  /**
    * @brief the internal logic for emptying the mag in a unsorted manner
    * @return true if the mag is being emptied, false if the mag is empty
    */
@@ -457,15 +543,11 @@ public class ScoringSystem {
 
     if (!spindex.isIndexValid(indexToShoot)) return false; // if mag is empty, return false
 
-    if (spindex.isReadyToShoot()) {
-      // ^ spindex is ready for ball to be lifted
-      if (turret.isReadyToShoot()) {
-        // turret is ready for ball to be lifted
-        spindex.liftBall();
-      }
+    shootIndex(indexToShoot);
 
-    } else {
-      shootIndex(indexToShoot);
+    if (spindex.isReadyToShoot() && turret.isReadyToShoot()) {
+      // ^ if spindex and turret are ready for ball to be lifted
+      spindex.liftBall();
     }
 
     return true;
@@ -531,13 +613,8 @@ public class ScoringSystem {
     Pose2D limelightPosition = limelight.getPosition();
     if (limelightPosition == null || !turret.isAtTarget()) return null;
     double rotationDegrees = turret.getHorizontalAngleDegrees();
-    double rotationRadians = AngleUnit.RADIANS.fromDegrees(rotationDegrees);
-    double x =
-        limelightPosition.getX(DistanceUnit.INCH)
-            + (LIMELIGHT_OFFSET_INCHES * Math.cos(rotationRadians));
-    double y =
-        limelightPosition.getY(DistanceUnit.INCH)
-            + (LIMELIGHT_OFFSET_INCHES * Math.sin(rotationRadians));
+    double x = limelightPosition.getX(DistanceUnit.INCH);
+    double y = limelightPosition.getY(DistanceUnit.INCH);
     double heading = limelightPosition.getHeading(AngleUnit.DEGREES) + rotationDegrees;
     return new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading);
   }
@@ -570,19 +647,6 @@ public class ScoringSystem {
    */
   public void autoAim() {
     turretAimOverride = false;
-  }
-
-  /**
-   * @brief shoots a requested color, if possible
-   * @param color the color to be shot
-   * @return true if ball shot, false if no balls of requested color are in mag
-   */
-  @Deprecated
-  public boolean shootColor(BallColor color) {
-    int index = spindex.getColorIndex(color); // find index in the spindex of requested color
-    if (index == NULL) return false;
-    shootIndex(index);
-    return true;
   }
 
   /**

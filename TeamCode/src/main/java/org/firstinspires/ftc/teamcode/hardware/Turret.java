@@ -154,21 +154,21 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   @Override
   public void update() {
     super.update();
-    hoodServo.setPosition(targetVerticalAngleDegrees); // this might need updating
+    hoodServo.setPosition(targetVerticalAngleDegrees);
     double motorDegrees =
         turretDegreesToMotorDegrees(targetHorizontalAngleDegrees + horizontalAngleOffsetDegrees);
     rotatorController.setSetPoint(motorDegrees);
-    rotator.set(rotatorController.calculate(getRotatorDegrees())); // might need updating
+    rotator.set(isEnabled ? rotatorController.calculate(getRotatorDegrees()) : 0);
   }
 
   /**
-   * @brief used to tune the horizontal rotation of the turret
+   * @brief used to tune the PID for the horizontal rotation of the turret
    * @param kP the proportional constant for the rotator
    * @param kI the integral constant for the rotator
    * @param kD the derivative constant for the rotator
    */
   @TestOnly
-  public void tuneHorizontalMotion(double kP, double kI, double kD) {
+  public void tuneHorizontalPID(double kP, double kI, double kD) {
     rotatorController.setPID(kP, kI, kD);
   }
 
