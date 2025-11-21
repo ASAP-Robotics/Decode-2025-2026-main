@@ -19,6 +19,7 @@ package org.firstinspires.ftc.teamcode.hardware;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
+import org.jetbrains.annotations.TestOnly;
 
 public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   protected abstract static class LookupTableItem {
@@ -43,12 +44,9 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   private double currentSpeed = 0; // the latest speed (RPM) of the flywheel
   private double targetDistance = 0; // the distance (inches) to the target
 
-  @Deprecated
-  private boolean containsBall = false; // if the flywheel has a ball in it that it is shooting
-
-  public double testingSpeed = 2000;
-  public final boolean testing;
-  public final double MOTOR_TICKS_PER_REV = 28; // ticks per revolution of flywheel motor
+  private double testingSpeed = 2000;
+  protected boolean testing = false;
+  private final double MOTOR_TICKS_PER_REV = 28; // ticks per revolution of flywheel motor
 
   protected T[] LOOKUP_TABLE; // lookup table of distance, rpm, etc.
 
@@ -63,21 +61,10 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @param idleSpeed the speed of the flywheel when idling (RPM)
    */
   public Flywheel(DcMotorEx motor, double idleSpeed) {
-    this(motor, idleSpeed, false);
-  }
-
-  /**
-   * @brief makes an object of the Flywheel class
-   * @param motor the motor used for the flywheel
-   * @param idleSpeed the speed of the flywheel when idling (RPM)
-   * @param testing if the flywheel will be tested (pass false for normal use)
-   */
-  public Flywheel(DcMotorEx motor, double idleSpeed, boolean testing) {
     this.flywheel = motor;
     this.idleSpeed = idleSpeed; // set the speed of the flywheel at idle
-    this.testing = testing;
     this.LOOKUP_TABLE = fillLookupTable();
-    this.flywheel.setVelocityPIDFCoefficients(70, 10, 20, 17);
+    this.flywheel.setVelocityPIDFCoefficients(70, 10, 20, 17); // TODO: use real PIDF
     // set motor to use speed-based control
     this.flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     // set motor to spin freely if set to 0% power
@@ -104,52 +91,25 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   }
 
   /**
-   * @brief returns if a ball is in the flywheel
-   * @return true if a ball is in the flywheel, false if the flywheel is empty
-   * @note no actual detection of if the flywheel contains a ball is done
+   * @brief manually sets RPM, use to tune lookup table
+   * @param rpm the speed to spin the flywheel at
    */
-  @Deprecated
-  public boolean containsBall() {
-    return containsBall;
+  @TestOnly
+  public void overrideRpm(double rpm) {
+    testing = true;
+    testingSpeed = rpm;
   }
 
   /**
-   * @brief returns if the ball has left the flywheel since the last check
-   * @return true if the turret contained a ball, and the shot timer finished since last call
-   * @note no actual detection of if the flywheel contains a ball is done
-   */
-  @Deprecated
-  public boolean ballLeft() {
-    if (containsBall) {
-      containsBall = false;
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * @brief sets that a ball is in the flywheel
-   * @note no actual detection of if the flywheel contains a ball is done
-   */
-  @Deprecated
-  public void setContainsBall() {
-    containsBall = true;
-  }
-
-  /**
-   * @brief sets if the flywheel is enabled
    * @param isEnabled if the flywheel will be enabled (true = enabled, false = not enabled)
-   * @return the previous enabled / disabled state of the flywheel
+   * @brief sets if the flywheel is enabled
    * @note the new value isn't applied until update() is called
    */
-  public boolean setEnabled(boolean isEnabled) {
-    boolean toReturn = this.isEnabled; // get the old enabled state
+  public void setEnabled(boolean isEnabled) {
     this.isEnabled = isEnabled; // set the new enabled state
     // set motor mode; if enabled, use speed-based control, if disabled, use power-based control
     flywheel.setMode(
         isEnabled ? DcMotor.RunMode.RUN_USING_ENCODER : DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    return toReturn; // return the old enabled state
   }
 
   /**
@@ -162,20 +122,18 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
 
   /**
    * @brief enables the flywheel
-   * @return the previous enabled / disabled state of the flywheel
    * @note the new value isn't applied until update() is called
    */
-  public boolean enable() {
-    return setEnabled(true);
+  public void enable() {
+    setEnabled(true);
   }
 
   /**
    * @brief disables the flywheel
-   * @return the previous enabled / disabled state of the flywheel
    * @note the new value isn't applied until update() is called
    */
-  public boolean disable() {
-    return setEnabled(false);
+  public void disable() {
+    setEnabled(false);
   }
 
   /**
@@ -187,33 +145,28 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   }
 
   /**
-   * @brief sets if the flywheel is active (as opposed to idling)
    * @param isActive The new activity state, true if active, false if idling
-   * @return the old activation state, true if active, false if idling
+   * @brief sets if the flywheel is active (as opposed to idling)
    * @note the new value isn't applied until update() is called
    */
-  public boolean setActive(boolean isActive) {
-    boolean toReturn = this.isActive; // store the old activation state
+  public void setActive(boolean isActive) {
     this.isActive = isActive; // update if the flywheel is active or idling
-    return toReturn; // return the old activation state
   }
 
   /**
    * @brief activate the flywheel (spin it up to full speed from idle speed)
-   * @return the old activation state of the flywheel (true if active, false if idle)
    * @note the new value isn't applied until update() is called
    */
-  public boolean activate() {
-    return setActive(true);
+  public void activate() {
+    setActive(true);
   }
 
   /**
    * @brief idles the flywheel (lower it to idle speed from full speed)
-   * @return the old activation state of the flywheel (true if active, false if idle)
    * @note the new value isn't applied until update() is called
    */
-  public boolean idle() {
-    return setActive(false);
+  public void idle() {
+    setActive(false);
   }
 
   /**
@@ -298,7 +251,8 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @note use `setTargetDistance()` to set the distance from the target
    */
   private void startMotor() {
-    double rpm = getRPMLookup(targetDistance);
+    // double rpm = getRPMLookup(targetDistance);
+    double rpm = 3000;
     double ticksPerSec = (rpm / 60.0) * MOTOR_TICKS_PER_REV;
     targetSpeed = rpm; // store target speed
 
@@ -323,7 +277,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    *     of distance
    */
   protected double getRPMLookup(double distance) {
-    // if (testing) return testingSpeed; // used for tuning lookup table
+    if (testing) return testingSpeed; // used for tuning lookup table
     try {
       int indexOver = LOOKUP_TABLE.length - 1;
       int indexUnder = 0;
@@ -341,7 +295,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
           LOOKUP_TABLE[indexOver].getDistance(),
           LOOKUP_TABLE[indexUnder].getRpm(),
           LOOKUP_TABLE[indexOver].getRpm());
-    } catch (Exception e) {
+    } catch (Exception e) { // most probably if distance is outside of lookup table
       return 0;
     }
   }

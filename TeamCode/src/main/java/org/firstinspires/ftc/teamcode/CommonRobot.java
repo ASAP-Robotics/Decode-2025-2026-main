@@ -25,7 +25,6 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
 import org.firstinspires.ftc.teamcode.hardware.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
@@ -40,13 +39,11 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 public abstract class CommonRobot {
   protected HardwareMap hardwareMap;
   protected Telemetry telemetry;
-  protected GoBildaPinpointDriver pinpoint;
-  public ScoringSystem mag;
+  public ScoringSystem scoringSystem;
 
   public CommonRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     this.hardwareMap = hardwareMap;
     this.telemetry = telemetry;
-    pinpoint = this.hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
     Limelight limelight = new Limelight(rawLimelight, allianceColor, 2);
@@ -71,12 +68,13 @@ public abstract class CommonRobot {
     Axon turretHood = new Axon(rawTurretHood);
     Motor turretRotator = new Motor(hardwareMap, "turretRotator", Motor.GoBILDA.RPM_1150);
     DcMotorEx flywheelMotor = this.hardwareMap.get(DcMotorEx.class, "flywheel");
-    Turret turret = new Turret(flywheelMotor, turretRotator, turretHood, 1500, false);
+    Turret turret = new Turret(flywheelMotor, turretRotator, turretHood, 1500);
 
     DcMotorEx intakeMotor = this.hardwareMap.get(DcMotorEx.class, "intake");
     ActiveIntake intake = new ActiveIntake(intakeMotor);
 
-    mag = new ScoringSystem(intake, turret, spindex, limelight, allianceColor, this.telemetry);
+    scoringSystem =
+        new ScoringSystem(intake, turret, spindex, limelight, allianceColor, this.telemetry);
   }
 
   /**

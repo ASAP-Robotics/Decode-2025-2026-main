@@ -323,6 +323,23 @@ public class Spindex {
   }
 
   /**
+   * @brief gets an index containing a shootable ball
+   * @return the index of a slot containing a ball, or -1 if the spindex is empty
+   */
+  public int getShootableIndex() {
+    int toReturn = NULL;
+
+    for (SpindexSlot slot : spindex) {
+      if (slot.color.isShootable()) {
+        toReturn = getColorIndex(slot.color);
+        break;
+      }
+    }
+
+    return toReturn;
+  }
+
+  /**
    * @brief finds an index in the spindex containing a given color
    * @param color the color wanted
    * @return the index in the spindex where that color is located, or -1 if that color isn't in the

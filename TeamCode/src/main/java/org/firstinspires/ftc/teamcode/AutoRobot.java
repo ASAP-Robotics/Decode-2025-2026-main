@@ -22,14 +22,14 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.hardware.Spindex;
+import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 /**
  * @brief class to contain the behavior of the robot in Auto, to avoid code duplication
  */
 public class AutoRobot extends CommonRobot {
-  // stuff (variables, etc., see TeliOpRobot) goes here; TODO: update
+  // stuff (variables, etc., see TeleOpRobot) goes here; TODO: update
   ElapsedTime timer = new ElapsedTime();
   boolean move = true;
   boolean move1 = false;
@@ -45,21 +45,21 @@ public class AutoRobot extends CommonRobot {
    * @brief to be called once, when the opMode is initialized
    */
   public void init() {
-    mag.init(true, false);
+    scoringSystem.init(true, false);
   }
 
   /**
    * @brief to be called repeatedly, while the opMode is in init
    */
   public void initLoop() {
-    mag.initLoop();
+    scoringSystem.initLoop();
   }
 
   /**
    * @brief to be called once when the "start" button is pressed
    */
   public void start() {
-    mag.start(false); // start scoring systems up
+    scoringSystem.start(true, true); // start scoring systems up
     timer.reset();
   }
 
@@ -68,8 +68,7 @@ public class AutoRobot extends CommonRobot {
    */
   public void loop(MecanumDrive drive) {
     // update scoring systems
-    mag.setRobotRotation(0);
-    mag.update();
+    scoringSystem.update();
 
     if (!done) {
       // other stuff goes here; TODO: fill out
@@ -104,13 +103,13 @@ public class AutoRobot extends CommonRobot {
       telemetry.update();
 
       if (!move && !move1) {
-        mag.shootMag();
-        if (mag.spindex.getState() == Spindex.SpindexState.IDLE) {
+        scoringSystem.shootHalfSorted();
+        if (scoringSystem.getState() == ScoringSystem.State.INTAKING) {
           move1 = true;
         }
       }
     } else {
-      mag.fillMagUnsorted();
+      scoringSystem.fillMag();
     }
   }
 
@@ -120,6 +119,6 @@ public class AutoRobot extends CommonRobot {
    * @brief to be called once, when the "stop" button is pressed
    */
   public void stop() {
-    mag.stop(); // stop all powered movement in scoring systems
+    scoringSystem.stop(); // stop all powered movement in scoring systems
   }
 }
