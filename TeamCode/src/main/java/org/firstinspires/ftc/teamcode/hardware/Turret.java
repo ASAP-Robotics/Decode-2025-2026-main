@@ -94,7 +94,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     rotator.resetEncoder();
     rotatorController.setSetPoint(turretDegreesToMotorDegrees(horizontalAngle));
     rotator.set(0);
-    //hoodServo.setPosition(targetVerticalAngleDegrees);
+    // hoodServo.setPosition(targetVerticalAngleDegrees);
   }
 
   /**
@@ -154,7 +154,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   @Override
   public void update() {
     super.update();
-    //hoodServo.setPosition(targetVerticalAngleDegrees);
+    // hoodServo.setPosition(targetVerticalAngleDegrees);
     double motorDegrees =
         turretDegreesToMotorDegrees(targetHorizontalAngleDegrees + horizontalAngleOffsetDegrees);
     rotatorController.setSetPoint(motorDegrees);

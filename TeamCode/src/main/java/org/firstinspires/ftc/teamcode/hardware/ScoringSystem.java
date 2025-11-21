@@ -77,8 +77,8 @@ public class ScoringSystem {
     this.allianceColor = allianceColor;
     this.telemetry = telemetry;
     this.targetPosition = this.allianceColor.getTargetLocation();
-    //this.turret.idle(); // set turret to spin at idle speed
-    //this.turret.disable(); // don't let the turret spin up
+    // this.turret.idle(); // set turret to spin at idle speed
+    // this.turret.disable(); // don't let the turret spin up
   }
 
   /**
@@ -176,9 +176,9 @@ public class ScoringSystem {
     }
      */
 
-    //turret.tuneShooting(0, 0);
+    // turret.tuneShooting(0, 0);
     turret.setHorizontalAngle(getRelativeTargetAngle());
-    //turret.setTargetDistance(getTargetDistance());
+    // turret.setTargetDistance(getTargetDistance());
 
     telemetry.addData("Relative angle", getRelativeTargetAngle());
     telemetry.addData("Absolute angle", getAbsoluteTargetAngle());
@@ -578,7 +578,8 @@ public class ScoringSystem {
     double distX = robotPosition.getX(DistanceUnit.INCH) - targetPosition.getX(DistanceUnit.INCH);
     double distY = robotPosition.getY(DistanceUnit.INCH) - targetPosition.getY(DistanceUnit.INCH);
 
-    double angle = AngleUnit.DEGREES.fromRadians(Math.atan(distY / distX)); // might need to invert things
+    double angle =
+        AngleUnit.DEGREES.fromRadians(Math.atan(distY / distX)); // might need to invert things
 
     return Double.isNaN(angle) ? 0 : angle; // just in case
   }
@@ -588,9 +589,9 @@ public class ScoringSystem {
    * @return the angle of the target relative to the robot
    */
   protected double getRelativeTargetAngle() {
-    double relativeAngle = AngleUnit.normalizeDegrees(
-        getAbsoluteTargetAngle() - robotPosition.getHeading(AngleUnit.DEGREES) + 180);
-
+    double relativeAngle =
+        AngleUnit.normalizeDegrees(
+            getAbsoluteTargetAngle() - robotPosition.getHeading(AngleUnit.DEGREES) + 180);
 
     return relativeAngle;
   }
