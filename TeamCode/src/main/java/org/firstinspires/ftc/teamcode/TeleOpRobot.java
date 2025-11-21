@@ -138,6 +138,7 @@ public class TeleOpRobot extends CommonRobot {
     scoringSystem.setRobotPosition(location);
     scoringSystem.update();
 
+    /*
     if (odometryResetTimer.isFinished() && velocity < 1.0) { // might need to tune
       Pose2D limelightPose = scoringSystem.getRobotPosition();
       if (limelightPose != null) {
@@ -145,6 +146,7 @@ public class TeleOpRobot extends CommonRobot {
         odometryResetTimer.start();
       }
     }
+     */
 
     // update wheelbase
     wheelBase.setRotation(location.getHeading(AngleUnit.DEGREES)); // for field-centric control

@@ -141,12 +141,14 @@ public class ScoringSystem {
     telemetry.addData("State", state.toString());
     telemetry.addData("Locked", limelight.isTargetInFrame() && turret.isAtTarget());
     telemetry.addData("Sequence", ballSequence.toString());
+    telemetry.addData("Position", robotPosition);
   }
 
   /**
    * @brief updates everything to do with aiming the turret
    */
   private void updateAiming() {
+    /*
     if (tuning) {
       turret.overrideRpm(rpmOverride);
       turret.setVerticalAngle(verticalAngleOverride);
@@ -160,7 +162,9 @@ public class ScoringSystem {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
       return;
     }
+     */
 
+    /*
     Pose2D limelightPosition = limelight.getPosition();
     if (limelightPosition != null && turret.isAtTarget()) {
       double targetLimelightHeading =
@@ -169,6 +173,7 @@ public class ScoringSystem {
       double headingError = targetLimelightHeading - limelightHeading;
       if (Math.abs(headingError) >= 1) turret.changeHorizontalAngleOffsetDegrees(headingError);
     }
+     */
 
     turret.setHorizontalAngle(getRelativeTargetAngle());
     turret.setTargetDistance(getTargetDistance());
