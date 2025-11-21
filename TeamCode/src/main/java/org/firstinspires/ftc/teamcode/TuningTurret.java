@@ -104,7 +104,7 @@ public class TuningTurret extends LinearOpMode {
       limelight.update();
       turret.tuneShooting(0, 0);
       turret.setHorizontalAngle(angle);
-      turret.tuneHorizontalMotion(kP, kI, kD);
+      //turret.tuneHorizontalMotion(kP, kI, kD);
       turret.update();
 
       // dashboardTelemetry.addData("Angle", turret.getTargetVerticalAngleDegrees());
