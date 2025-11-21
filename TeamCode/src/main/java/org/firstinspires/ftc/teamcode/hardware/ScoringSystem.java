@@ -344,7 +344,8 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief starts shooting all balls in the mag in such a way that as many as possible match the sequence
+   * @brief starts shooting all balls in the mag in such a way that as many as possible match the
+   *     sequence
    * @return true if the mag contained at least one ball, false if the mag is empty
    * @note this method does not require there to be two purples and one green in the mag
    */
