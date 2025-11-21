@@ -37,8 +37,8 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 @Config
 public class TuningTurret extends LinearOpMode {
   // public static double speed = 2000;
-  //public static double angle = 0;
-  //public static double speed = 0.1;
+  // public static double angle = 0;
+  // public static double speed = 0.1;
 
   public static double angle = 0;
   public static double kP = 0;
@@ -104,16 +104,16 @@ public class TuningTurret extends LinearOpMode {
       limelight.update();
       turret.tuneShooting(0, 0);
       turret.setHorizontalAngle(angle);
-      //turret.tuneHorizontalMotion(kP, kI, kD);
+      // turret.tuneHorizontalMotion(kP, kI, kD);
       turret.update();
 
       // dashboardTelemetry.addData("Angle", turret.getTargetVerticalAngleDegrees());
       // dashboardTelemetry.addData("Target Speed", turret.testingSpeed);
       // dashboardTelemetry.addData("Speed", turret.flywheel.getVelocity() * 60 / 28);
       // dashboardTelemetry.addData("At target speed", turret.isReadyToShoot());
-      //dashboardTelemetry.addData("Lifter at target", lifter.isAtTarget());
-      //dashboardTelemetry.addData("Target size", limelight.getTargetSize());
-      //dashboardTelemetry.addData("Limelight locked", limelight.isTargetInFrame());
+      // dashboardTelemetry.addData("Lifter at target", lifter.isAtTarget());
+      // dashboardTelemetry.addData("Target size", limelight.getTargetSize());
+      // dashboardTelemetry.addData("Limelight locked", limelight.isTargetInFrame());
       dashboardTelemetry.addData("At target", turret.isAtTarget());
       dashboardTelemetry.addData("Angle", turret.getHorizontalAngleDegrees());
       dashboardTelemetry.addData("Target angle", turret.getTargetHorizontalAngleDegrees());

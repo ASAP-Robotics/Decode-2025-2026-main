@@ -70,8 +70,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   // target angle for servo moving flap
   private double targetVerticalAngleDegrees = DEFAULT_VERTICAL_ANGLE;
 
-  public Turret(
-      DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo, double idleSpeed) {
+  public Turret(DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo, double idleSpeed) {
     super(flywheelMotor, idleSpeed);
     this.rotator = rotator;
     this.hoodServo = hoodServo;

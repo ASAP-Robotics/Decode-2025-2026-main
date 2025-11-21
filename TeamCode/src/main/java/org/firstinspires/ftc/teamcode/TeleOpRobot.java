@@ -66,8 +66,8 @@ public class TeleOpRobot extends CommonRobot {
     // temporary
     pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
     pinpoint.setEncoderDirections(
-            GoBildaPinpointDriver.EncoderDirection.REVERSED,
-            GoBildaPinpointDriver.EncoderDirection.REVERSED);
+        GoBildaPinpointDriver.EncoderDirection.REVERSED,
+        GoBildaPinpointDriver.EncoderDirection.REVERSED);
     pinpoint.resetPosAndIMU();
 
     scoringSystem.init(false, false); // initialize scoring systems
@@ -128,9 +128,10 @@ public class TeleOpRobot extends CommonRobot {
     // get robot position
     pinpoint.update();
     Pose2D location = pinpoint.getPosition();
-    double velocity = Math.hypot(
-        Math.abs(pinpoint.getVelX(DistanceUnit.INCH)),
-        Math.abs(pinpoint.getVelY(DistanceUnit.INCH)));
+    double velocity =
+        Math.hypot(
+            Math.abs(pinpoint.getVelX(DistanceUnit.INCH)),
+            Math.abs(pinpoint.getVelY(DistanceUnit.INCH)));
     // ^ directionless velocity of the robot, in inches per second
 
     // update scoring systems

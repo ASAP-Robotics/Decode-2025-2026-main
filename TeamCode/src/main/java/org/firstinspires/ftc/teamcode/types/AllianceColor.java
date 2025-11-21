@@ -30,11 +30,7 @@ public enum AllianceColor {
   private final double obeliskAngle;
   private final Pose2D targetLocation;
 
-  AllianceColor(
-      int aprilTagId,
-      int limelightPipeline,
-      double obeliskAngle,
-      Pose2D targetLocation) {
+  AllianceColor(int aprilTagId, int limelightPipeline, double obeliskAngle, Pose2D targetLocation) {
     this.aprilTagId = aprilTagId;
     this.limelightPipeline = limelightPipeline;
     this.obeliskAngle = obeliskAngle;

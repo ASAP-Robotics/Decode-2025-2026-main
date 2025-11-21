@@ -44,7 +44,8 @@ public class ActiveIntake {
   private double stallCurrent; // current at or above which intake is considered stalled
   private double readingTime; // time span (seconds) to take current reading average over
   private final ElapsedTime timeSinceStart; // timer to track time since object creation
-  private final LinkedList<CurrentReading> currentReadings; // list of current readings and timestamps
+  private final LinkedList<CurrentReading>
+      currentReadings; // list of current readings and timestamps
   public org.firstinspires.ftc.teamcode.utils.SimpleTimer timer = new SimpleTimer(1);
 
   public ActiveIntake(DcMotorEx intakeMotor) {

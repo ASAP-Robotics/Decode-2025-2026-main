@@ -73,7 +73,8 @@ public abstract class CommonRobot {
     DcMotorEx intakeMotor = this.hardwareMap.get(DcMotorEx.class, "intake");
     ActiveIntake intake = new ActiveIntake(intakeMotor);
 
-    scoringSystem = new ScoringSystem(intake, turret, spindex, limelight, allianceColor, this.telemetry);
+    scoringSystem =
+        new ScoringSystem(intake, turret, spindex, limelight, allianceColor, this.telemetry);
   }
 
   /**

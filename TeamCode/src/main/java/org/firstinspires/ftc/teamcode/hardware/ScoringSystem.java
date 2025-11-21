@@ -61,7 +61,8 @@ public class ScoringSystem {
       new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0); // the position of the robot
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private boolean clearingIntake = false; // if the intake is being reversed to clear a blockage
-  private static final double LIMELIGHT_OFFSET_INCHES = 6.2; // distance from limelight to robot center
+  private static final double LIMELIGHT_OFFSET_INCHES =
+      6.2; // distance from limelight to robot center
   private final Telemetry telemetry;
 
   public ScoringSystem(
@@ -166,8 +167,7 @@ public class ScoringSystem {
           robotPosition.getHeading(AngleUnit.DEGREES) + turret.getHorizontalAngleDegrees();
       double limelightHeading = limelightPosition.getHeading(AngleUnit.DEGREES);
       double headingError = targetLimelightHeading - limelightHeading;
-      if (Math.abs(headingError) >= 1)
-        turret.changeHorizontalAngleOffsetDegrees(headingError);
+      if (Math.abs(headingError) >= 1) turret.changeHorizontalAngleOffsetDegrees(headingError);
     }
 
     turret.setHorizontalAngle(getRelativeTargetAngle());
@@ -240,13 +240,13 @@ public class ScoringSystem {
         break;
 
       case FULL:
-        if (spindex.isAtTarget() && intake.isIntaking())
-          clearIntake();
+        if (spindex.isAtTarget() && intake.isIntaking()) clearIntake();
         break;
 
       case INTAKING:
         if (spindex.getIsIntakeColorNew() && spindex.isAtTarget()) {
-          // ^ if intaking a ball, the spindex is stationary, and a new color of ball is in the intake
+          // ^ if intaking a ball, the spindex is stationary, and a new color of ball is in the
+          // intake
           if (spindex.getIntakeColor().isShootable()) {
             // ^ if intake contains a shootable ball
             spindex.storeIntakeColor(); // record the color of the ball taken in
@@ -477,7 +477,8 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief gets the absolute angle from the robot to the target, not accounting for the robots rotation
+   * @brief gets the absolute angle from the robot to the target, not accounting for the robots
+   *     rotation
    * @return the absolute angle from the robot to the target, in degrees
    */
   protected double getAbsoluteTargetAngle() {
@@ -518,7 +519,7 @@ public class ScoringSystem {
   /**
    * @brief gets the 2D position of the robot on the field according to limelight
    * @return the position of the robot, or null if either the target isn't visible or the camera
-   * isn't still
+   *     isn't still
    * @note this returns null under normal operation conditions, be careful
    */
   public Pose2D getRobotPosition() {
@@ -526,12 +527,13 @@ public class ScoringSystem {
     if (limelightPosition == null || !turret.isAtTarget()) return null;
     double rotationDegrees = turret.getHorizontalAngleDegrees();
     double rotationRadians = AngleUnit.RADIANS.fromDegrees(rotationDegrees);
-    double x = limelightPosition.getX(DistanceUnit.INCH) +
-        (LIMELIGHT_OFFSET_INCHES * Math.cos(rotationRadians));
-    double y = limelightPosition.getY(DistanceUnit.INCH) +
-        (LIMELIGHT_OFFSET_INCHES * Math.sin(rotationRadians));
-    double heading =
-        limelightPosition.getHeading(AngleUnit.DEGREES) + rotationDegrees;
+    double x =
+        limelightPosition.getX(DistanceUnit.INCH)
+            + (LIMELIGHT_OFFSET_INCHES * Math.cos(rotationRadians));
+    double y =
+        limelightPosition.getY(DistanceUnit.INCH)
+            + (LIMELIGHT_OFFSET_INCHES * Math.sin(rotationRadians));
+    double heading = limelightPosition.getHeading(AngleUnit.DEGREES) + rotationDegrees;
     return new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading);
   }
 
