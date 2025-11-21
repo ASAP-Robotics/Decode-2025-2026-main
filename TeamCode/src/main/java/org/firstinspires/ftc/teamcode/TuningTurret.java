@@ -73,7 +73,7 @@ public class TuningTurret extends LinearOpMode {
     waitForStart();
     lifter.setPosition(7);
     intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    intake.setPower(1);
+    intake.setPower(0);
 
     while (opModeIsActive()) {
       /*
@@ -99,10 +99,10 @@ public class TuningTurret extends LinearOpMode {
         lifter.setPosition(100);
       }
 
-      turret.setHorizontalAngle(0);
+      //turret.setHorizontalAngle(0);
 
       limelight.update();
-      turret.tuneShooting(0, 0);
+      //turret.tuneShooting(0, 0);
       turret.setHorizontalAngle(angle);
       // turret.tuneHorizontalMotion(kP, kI, kD);
       turret.update();

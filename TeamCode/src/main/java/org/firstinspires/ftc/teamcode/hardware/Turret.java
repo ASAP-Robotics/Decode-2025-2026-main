@@ -94,7 +94,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     rotator.resetEncoder();
     rotatorController.setSetPoint(turretDegreesToMotorDegrees(horizontalAngle));
     rotator.set(0);
-    hoodServo.setPosition(targetVerticalAngleDegrees);
+    //hoodServo.setPosition(targetVerticalAngleDegrees);
   }
 
   /**
@@ -154,7 +154,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   @Override
   public void update() {
     super.update();
-    hoodServo.setPosition(targetVerticalAngleDegrees);
+    //hoodServo.setPosition(targetVerticalAngleDegrees);
     double motorDegrees =
         turretDegreesToMotorDegrees(targetHorizontalAngleDegrees + horizontalAngleOffsetDegrees);
     rotatorController.setSetPoint(motorDegrees);
@@ -202,6 +202,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @note the new value isn't applied until update() is called
    */
   public void setHorizontalAngle(double degrees) {
+    if (Double.isNaN(degrees)) return;
+
     if (degrees > 180 + HORIZONTAL_HYSTERESIS || degrees < -180 - HORIZONTAL_HYSTERESIS) {
       // angle is wrapped to ensure the turret never turns more than ~one full rotation
       targetHorizontalAngleDegrees = AngleUnit.normalizeDegrees(degrees);

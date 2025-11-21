@@ -251,7 +251,8 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @note use `setTargetDistance()` to set the distance from the target
    */
   private void startMotor() {
-    double rpm = getRPMLookup(targetDistance);
+    //double rpm = getRPMLookup(targetDistance);
+    double rpm = 3000;
     double ticksPerSec = (rpm / 60.0) * MOTOR_TICKS_PER_REV;
     targetSpeed = rpm; // store target speed
 
