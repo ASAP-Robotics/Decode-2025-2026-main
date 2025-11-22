@@ -149,7 +149,6 @@ public class ScoringSystem {
    * @brief updates everything to do with aiming the turret
    */
   private void updateAiming() {
-    /*
     if (tuning) {
       turret.overrideRpm(rpmOverride);
       turret.setVerticalAngle(verticalAngleOverride);
@@ -163,7 +162,6 @@ public class ScoringSystem {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
       return;
     }
-     */
 
     /*
     Pose2D limelightPosition = limelight.getPosition();
@@ -176,9 +174,8 @@ public class ScoringSystem {
     }
      */
 
-    // turret.tuneShooting(0, 0);
     turret.setHorizontalAngle(getRelativeTargetAngle());
-    // turret.setTargetDistance(getTargetDistance());
+    turret.setTargetDistance(getTargetDistance());
 
     telemetry.addData("Relative angle", getRelativeTargetAngle());
     telemetry.addData("Absolute angle", getAbsoluteTargetAngle());
@@ -566,7 +563,8 @@ public class ScoringSystem {
   protected double getTargetDistance() {
     double distX = targetPosition.getX(DistanceUnit.INCH) - robotPosition.getX(DistanceUnit.INCH);
     double distY = targetPosition.getY(DistanceUnit.INCH) - robotPosition.getY(DistanceUnit.INCH);
-    return Math.hypot(Math.abs(distX), Math.abs(distY));
+    double dist = Math.hypot(Math.abs(distX), Math.abs(distY));
+    return Double.isNaN(dist) ? 0 : dist;
   }
 
   /**
@@ -578,8 +576,7 @@ public class ScoringSystem {
     double distX = robotPosition.getX(DistanceUnit.INCH) - targetPosition.getX(DistanceUnit.INCH);
     double distY = robotPosition.getY(DistanceUnit.INCH) - targetPosition.getY(DistanceUnit.INCH);
 
-    double angle =
-        AngleUnit.DEGREES.fromRadians(Math.atan(distY / distX)); // might need to invert things
+    double angle = AngleUnit.DEGREES.fromRadians(Math.atan(distY / distX));
 
     return Double.isNaN(angle) ? 0 : angle; // just in case
   }
@@ -625,7 +622,7 @@ public class ScoringSystem {
   public Pose2D getRobotPosition() {
     Pose2D limelightPosition = limelight.getPosition();
     if (limelightPosition == null || !turret.isAtTarget()) return null;
-    double rotationDegrees = turret.getHorizontalAngleDegrees();
+    double rotationDegrees = AngleUnit.normalizeDegrees(turret.getHorizontalAngleDegrees() - 180);
     double x = limelightPosition.getX(DistanceUnit.INCH);
     double y = limelightPosition.getY(DistanceUnit.INCH);
     double heading = limelightPosition.getHeading(AngleUnit.DEGREES) + rotationDegrees;
