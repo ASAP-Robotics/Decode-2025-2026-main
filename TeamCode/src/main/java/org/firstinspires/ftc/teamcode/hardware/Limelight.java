@@ -116,6 +116,7 @@ public class Limelight {
    */
   public void start() {
     limelight.start();
+    timeSinceStart.reset();
   }
 
   /**
@@ -132,11 +133,16 @@ public class Limelight {
     }
 
     double now = timeSinceStart.time();
-    // only add result if it is valid
-    if (isResultValid) results.add(new Result(result, now));
-    // remove old results
-    while (!results.isEmpty() && now - results.getFirst().timestamp > AVERAGE_TIME) {
-      results.removeFirst();
+    try {
+      // only add result if it is valid
+      if (isResultValid) results.add(new Result(result, now));
+
+      // remove old results
+      while (!results.isEmpty() && now - results.getFirst().timestamp > AVERAGE_TIME) {
+        results.removeFirst();
+      }
+    } catch (Exception ignored) {
+
     }
 
     if (!isPipelineCorrect()) limelight.pipelineSwitch(getPipeline());
@@ -369,6 +375,10 @@ public class Limelight {
    * @return true if the pipeline used for the last result matches the mode, false otherwise
    */
   protected boolean isPipelineCorrect() {
-    return results.getLast().result.getPipelineIndex() == getPipeline();
+    try {
+      return results.getLast().result.getPipelineIndex() == getPipeline();
+    } catch (Exception e) {
+      return true;
+    }
   }
 }

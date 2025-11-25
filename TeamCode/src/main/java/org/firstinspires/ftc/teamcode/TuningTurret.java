@@ -63,11 +63,7 @@ public class TuningTurret extends LinearOpMode {
     Axon l2 = new Axon(lifter2, lifterEncoder);
     DualServo lifter = new DualServo(l1, l2);
     Turret turret = new Turret(flywheel, turretRotator, turretHood, 1500);
-    Limelight3A rawLimelight = hardwareMap.get(Limelight3A.class, "limelight");
-    Limelight limelight = new Limelight(rawLimelight, AllianceColor.BLUE, 2);
-    limelight.init(false);
-    limelight.start();
-    turret.activate();
+    turret.idle();
     turret.enable();
 
     waitForStart();
@@ -100,11 +96,9 @@ public class TuningTurret extends LinearOpMode {
       }
 
       // turret.setHorizontalAngle(0);
-
-      limelight.update();
       // turret.tuneShooting(0, 0);
       turret.setHorizontalAngle(angle);
-      // turret.tuneHorizontalMotion(kP, kI, kD);
+      turret.tuneHorizontalPID(kP, kI, kD);
       turret.update();
 
       // dashboardTelemetry.addData("Angle", turret.getTargetVerticalAngleDegrees());

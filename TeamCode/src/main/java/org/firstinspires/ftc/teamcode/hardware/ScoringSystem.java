@@ -100,7 +100,7 @@ public class ScoringSystem {
    */
   public void initLoop() {
     spindex.update();
-    turret.update();
+    turret.initLoop();
   }
 
   /**
@@ -139,7 +139,7 @@ public class ScoringSystem {
     spindex.update();
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("State", state.toString());
-    telemetry.addData("Locked", limelight.isTargetInFrame() && turret.isAtTarget());
+    telemetry.addData("At Target", turret.isAtTarget());
     telemetry.addData("Sequence", ballSequence.toString());
     telemetry.addData("Position", robotPosition);
     telemetry.addData("Target Angle", turret.getTargetHorizontalAngleDegrees());
@@ -149,6 +149,7 @@ public class ScoringSystem {
    * @brief updates everything to do with aiming the turret
    */
   private void updateAiming() {
+    /*
     if (tuning) {
       turret.overrideRpm(rpmOverride);
       turret.setVerticalAngle(verticalAngleOverride);
@@ -162,6 +163,7 @@ public class ScoringSystem {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
       return;
     }
+     */
 
     /*
     Pose2D limelightPosition = limelight.getPosition();

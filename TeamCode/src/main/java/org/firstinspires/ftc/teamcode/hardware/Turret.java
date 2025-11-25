@@ -78,7 +78,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.rotator.setInverted(true);
     this.rotator.setRunMode(Motor.RunMode.RawPower);
     this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-    this.rotatorController = new PIDController(0.015, 0.005, 0.0001); // TODO: tune
+    this.rotatorController = new PIDController(0.015, 0.005, 0.0); // TODO: tune
     rotatorController.setTolerance(turretDegreesToMotorDegrees(1)); // TODO: tune
   }
 
@@ -92,6 +92,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    */
   public void init(double horizontalAngle) {
     rotator.resetEncoder();
+    //rotatorController.setPID(0.015, 0.005, 0.0);
     rotatorController.setSetPoint(turretDegreesToMotorDegrees(horizontalAngle));
     rotator.set(0);
     // hoodServo.setPosition(targetVerticalAngleDegrees);
@@ -164,6 +165,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public void update() {
     super.update();
     // hoodServo.setPosition(targetVerticalAngleDegrees);
+    //rotatorController.setPID(0.015, 0.005, 0.0);
     double motorDegrees =
         turretDegreesToMotorDegrees(targetHorizontalAngleDegrees + horizontalAngleOffsetDegrees);
     rotatorController.setSetPoint(motorDegrees);
@@ -278,7 +280,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @return false if the rotator motor is moving to the target, true if it is at its target
    */
   public boolean isAtTarget() {
-    return rotator.atTargetPosition();
+    return rotatorController.atSetPoint();
   }
 
   /**
