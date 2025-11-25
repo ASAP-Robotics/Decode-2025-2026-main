@@ -77,8 +77,6 @@ public class ScoringSystem {
     this.allianceColor = allianceColor;
     this.telemetry = telemetry;
     this.targetPosition = this.allianceColor.getTargetLocation();
-    // this.turret.idle(); // set turret to spin at idle speed
-    // this.turret.disable(); // don't let the turret spin up
   }
 
   /**
@@ -91,7 +89,6 @@ public class ScoringSystem {
     spindex.init(BallSequence.GPP, isPreloaded);
     turret.init(search ? allianceColor.getObeliskAngle() : getRelativeTargetAngle());
     turret.setActive(!isPreloaded);
-    turret.enable();
     limelight.init(search);
   }
 
@@ -586,13 +583,10 @@ public class ScoringSystem {
   /**
    * @brief gets the angle to the target relative to the robot, in degrees
    * @return the angle of the target relative to the robot
+   * @note this value isn't normalized between -180 and 180 degrees
    */
   protected double getRelativeTargetAngle() {
-    double relativeAngle =
-        AngleUnit.normalizeDegrees(
-            getAbsoluteTargetAngle() - robotPosition.getHeading(AngleUnit.DEGREES) + 180);
-
-    return relativeAngle;
+    return getAbsoluteTargetAngle() - robotPosition.getHeading(AngleUnit.DEGREES) + 180;
   }
 
   /**
