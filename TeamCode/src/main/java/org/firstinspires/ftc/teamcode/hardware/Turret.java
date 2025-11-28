@@ -59,8 +59,6 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private static final double MOTOR_GEAR_TEETH = 24;
   // amount horizontal angle can go over 180 or under -180 degrees before wrapping
   private static final double HORIZONTAL_HYSTERESIS = 10;
-  // time to change PID controller setpoint by one degree
-  private static final double SECONDS_PER_DEGREE = 0.006;
 
   private final Motor rotator;
   private final PIDController rotatorController;
@@ -68,11 +66,9 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private final Axon hoodServo;
   private final double ticksPerDegree;
   private double targetHorizontalAngleDegrees = 0;
-  private double workingTargetHorizontalAngleDegrees = 0;
   private double horizontalAngleOffsetDegrees = 0;
   // target angle for servo moving flap
   private double targetVerticalAngleDegrees = 50;
-  private ElapsedTime loopTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
   public Turret(DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo, double idleSpeed) {
     super(flywheelMotor, idleSpeed);
@@ -82,7 +78,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.rotator.setInverted(true);
     this.rotator.setRunMode(Motor.RunMode.RawPower);
     this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-    this.rotatorController = new PIDController(0.025, 0.01, 0.0003);
+    this.rotatorController = new PIDController(0.006, 0.001, 0.0002);
     rotatorController.setTolerance(turretDegreesToMotorDegrees(1));
   }
 
@@ -97,10 +93,9 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public void init(double horizontalAngle) {
     rotator.stopAndResetEncoder();
     setHorizontalAngle(horizontalAngle);
-    rotatorController.setSetPoint(turretDegreesToMotorDegrees(workingTargetHorizontalAngleDegrees));
+    rotatorController.setSetPoint(turretDegreesToMotorDegrees(targetHorizontalAngleDegrees));
     rotator.set(0);
     // hoodServo.setPosition(targetVerticalAngleDegrees);
-    loopTimer.reset();
   }
 
   /**
@@ -170,15 +165,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public void update() {
     super.update();
     // hoodServo.setPosition(targetVerticalAngleDegrees);
-    double maxChange = loopTimer.seconds() / SECONDS_PER_DEGREE;
-    loopTimer.reset();
-    double setPointError = AngleUnit.normalizeDegrees(
-        targetHorizontalAngleDegrees - workingTargetHorizontalAngleDegrees);
-    workingTargetHorizontalAngleDegrees += MathUtils.clamp(setPointError, -maxChange, maxChange);
-
     double motorDegrees = turretDegreesToMotorDegrees(
-        workingTargetHorizontalAngleDegrees
-        + horizontalAngleOffsetDegrees);
+        targetHorizontalAngleDegrees + horizontalAngleOffsetDegrees);
     rotatorController.setSetPoint(motorDegrees);
     rotator.set(rotatorController.calculate(getRotatorDegrees()));
   }
@@ -291,8 +279,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @return false if the rotator motor is moving to the target, true if it is at its target
    */
   public boolean isAtTarget() {
-    return rotatorController.atSetPoint()
-        && workingTargetHorizontalAngleDegrees == targetHorizontalAngleDegrees;
+    return rotatorController.atSetPoint();
   }
 
   /**
