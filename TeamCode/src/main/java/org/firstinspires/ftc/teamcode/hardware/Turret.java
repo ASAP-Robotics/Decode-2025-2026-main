@@ -56,19 +56,16 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private static final double MOTOR_GEAR_TEETH = 24;
   // amount horizontal angle can go over 180 or under -180 degrees before wrapping
   private static final double HORIZONTAL_HYSTERESIS = 10;
-  private static final double DEFAULT_VERTICAL_ANGLE = 50; // default angle for flap
 
   private final Motor rotator;
   private final PIDController rotatorController;
   // ^ PID controller for horizontal rotation of turret, uses motor degrees as units
   private final Axon hoodServo;
   private final double ticksPerDegree;
-  // target angle for side-to-side turret movement
   private double targetHorizontalAngleDegrees = 0;
-  // offset applied to horizontal angle to adjust for detected belt slippage
   private double horizontalAngleOffsetDegrees = 0;
   // target angle for servo moving flap
-  private double targetVerticalAngleDegrees = DEFAULT_VERTICAL_ANGLE;
+  private double targetVerticalAngleDegrees = 50;
 
   public Turret(DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo, double idleSpeed) {
     super(flywheelMotor, idleSpeed);
@@ -78,8 +75,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.rotator.setInverted(true);
     this.rotator.setRunMode(Motor.RunMode.RawPower);
     this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-    this.rotatorController = new PIDController(0.015, 0.005, 0.0001); // TODO: tune
-    rotatorController.setTolerance(turretDegreesToMotorDegrees(1)); // TODO: tune
+    this.rotatorController = new PIDController(0.006, 0.001, 0.0002);
+    rotatorController.setTolerance(turretDegreesToMotorDegrees(1));
   }
 
   public Turret(DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo) {
@@ -91,8 +88,9 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @param horizontalAngle the angle to start the turret at
    */
   public void init(double horizontalAngle) {
-    rotator.resetEncoder();
-    rotatorController.setSetPoint(turretDegreesToMotorDegrees(horizontalAngle));
+    rotator.stopAndResetEncoder();
+    setHorizontalAngle(horizontalAngle);
+    rotatorController.setSetPoint(turretDegreesToMotorDegrees(targetHorizontalAngleDegrees));
     rotator.set(0);
     // hoodServo.setPosition(targetVerticalAngleDegrees);
   }
@@ -112,27 +110,36 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     // TODO: retune lookup table to use inches instead of frame percentage
     // note: "distance" numbers *MUST* go from low to high
     return new LookupTableItem[] {
-      new LookupTableItem(0.1, 3600, 35), // "just in case" added value
-      new LookupTableItem(0.215, 3450, 35),
-      new LookupTableItem(0.25, 3400, 40),
-      new LookupTableItem(0.265, 3300, 45),
-      new LookupTableItem(0.273, 3350, 45),
-      new LookupTableItem(0.275, 3300, 47),
-      new LookupTableItem(0.28, 3270, 50),
-      new LookupTableItem(0.297, 3250, 50),
-      new LookupTableItem(0.302, 3250, 50),
-      new LookupTableItem(0.413, 3100, 50),
-      new LookupTableItem(0.494, 2900, 50),
-      new LookupTableItem(0.64, 2800, 50),
-      new LookupTableItem(0.817, 2700, 50),
-      new LookupTableItem(1.02, 2600, 50),
-      new LookupTableItem(1.275, 2550, 50),
-      new LookupTableItem(1.805, 2400, 50),
-      new LookupTableItem(2.421, 2350, 50),
-      new LookupTableItem(3.32, 2300, 50),
-      new LookupTableItem(4.22, 2300, 50),
-      new LookupTableItem(5.31, 2200, 66),
-      new LookupTableItem(6, 2150, 70) // "just in case" added value
+      new LookupTableItem(0, 2150, 70),
+      new LookupTableItem(6, 2200, 66),
+      new LookupTableItem(12, 2300, 50),
+      new LookupTableItem(18, 2300, 50),
+      new LookupTableItem(24, 2350, 50),
+      new LookupTableItem(30, 2400, 50),
+      new LookupTableItem(36, 2550, 50),
+      new LookupTableItem(42, 2600, 50),
+      new LookupTableItem(48, 2700, 50),
+      new LookupTableItem(54, 2800, 50),
+      new LookupTableItem(60, 2900, 50),
+      new LookupTableItem(66, 3100, 50),
+      new LookupTableItem(72, 3250, 50),
+      new LookupTableItem(78, 3250, 50),
+      new LookupTableItem(84, 3270, 50),
+      new LookupTableItem(90, 3300, 47),
+      new LookupTableItem(96, 3350, 45),
+      new LookupTableItem(102, 3300, 45),
+      new LookupTableItem(108, 3400, 40),
+      new LookupTableItem(114, 3450, 35),
+      new LookupTableItem(120, 3600, 35),
+      new LookupTableItem(126, 3600, 35),
+      new LookupTableItem(132, 3600, 35),
+      new LookupTableItem(138, 3600, 35),
+      new LookupTableItem(144, 3600, 35),
+      new LookupTableItem(150, 3600, 35),
+      new LookupTableItem(156, 3600, 35),
+      new LookupTableItem(162, 3600, 35),
+      new LookupTableItem(168, 3600, 35),
+      new LookupTableItem(172, 3600, 35)
     }; // preliminary values
   }
 
@@ -158,7 +165,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     double motorDegrees =
         turretDegreesToMotorDegrees(targetHorizontalAngleDegrees + horizontalAngleOffsetDegrees);
     rotatorController.setSetPoint(motorDegrees);
-    rotator.set(isEnabled ? rotatorController.calculate(getRotatorDegrees()) : 0);
+    rotator.set(rotatorController.calculate(getRotatorDegrees()));
   }
 
   /**
@@ -269,7 +276,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @return false if the rotator motor is moving to the target, true if it is at its target
    */
   public boolean isAtTarget() {
-    return rotator.atTargetPosition();
+    return rotatorController.atSetPoint();
   }
 
   /**

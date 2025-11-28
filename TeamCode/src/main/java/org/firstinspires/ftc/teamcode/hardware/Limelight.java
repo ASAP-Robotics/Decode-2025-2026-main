@@ -21,8 +21,10 @@ import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -36,21 +38,36 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Limelight {
+  protected class Result {
+    public LLResult result;
+    public double timestamp;
+
+    public Result(LLResult result, double timestamp) {
+      this.result = result;
+      this.timestamp = timestamp;
+    }
+  }
+
   public enum LimeLightMode {
     NAVIGATION,
     IDENTIFICATION,
     UNINITIALIZED
   }
 
+  private static final double AVERAGE_TIME = 2; // time period to average location over, seconds
+  private static final double MAX_POSITION_DEVIATION = 2; // for average, inches
+  private static final double MAX_ANGLE_DEVIATION = 5; // for average, degrees
+  private static final double OUTLIER_PERCENTAGE = 0.2; // the percent of values to trim as outliers
   File configFile = AppUtil.getInstance().getSettingsFile("ball_sequence.json");
   JSONObject config = new JSONObject(); // by default, config is blank
-  public final Limelight3A limelight;
+  private final Limelight3A limelight;
   private final AllianceColor allianceColor;
   private BallSequence detectedSequence;
   private LimeLightMode mode;
-  public LLResult result;
-  public boolean isResultValid = false; // if the latest result is valid (contains a target)
+  private LinkedList<Result> results;
+  private boolean isResultValid = false; // if the latest result is valid (contains a target)
   private final SimpleTimer detectionTimer;
+  private final ElapsedTime timeSinceStart; // timer to track time since object creation
 
   /**
    * @brief makes an object of the Limelight class
@@ -64,6 +81,7 @@ public class Limelight {
     this.allianceColor = allianceColor;
     this.mode = LimeLightMode.UNINITIALIZED;
     this.detectionTimer = new SimpleTimer(searchTime);
+    this.timeSinceStart = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   }
 
   /**
@@ -99,6 +117,7 @@ public class Limelight {
    */
   public void start() {
     limelight.start();
+    timeSinceStart.reset();
   }
 
   /**
@@ -106,12 +125,25 @@ public class Limelight {
    * @note call every loop
    */
   public void update() {
-    result = limelight.getLatestResult();
+    LLResult result = limelight.getLatestResult();
     if (result == null || !result.isValid()) {
       isResultValid = false;
       return;
     } else {
       isResultValid = true;
+    }
+
+    double now = timeSinceStart.time();
+    try {
+      // only add result if it is valid
+      if (isResultValid) results.add(new Result(result, now));
+
+      // remove old results
+      while (!results.isEmpty() && now - results.getFirst().timestamp > AVERAGE_TIME) {
+        results.removeFirst();
+      }
+    } catch (Exception ignored) {
+
     }
 
     if (!isPipelineCorrect()) limelight.pipelineSwitch(getPipeline());
@@ -126,15 +158,8 @@ public class Limelight {
   private void updateIdentification() {
     BallSequence oldSequence = detectedSequence;
 
-    List<LLResultTypes.FiducialResult> apriltags = result.getFiducialResults();
+    List<LLResultTypes.FiducialResult> apriltags = results.getLast().result.getFiducialResults();
     int bestId = NULL;
-    // NOTE: limelight *should* always see two tags...
-    /*
-    if (apriltags.size() == 1) {
-      // ^ if limelight only sees one apriltag
-      bestId = apriltags.get(0).getFiducialId();
-
-    } else */
     if (apriltags.size() == 2) {
       // if limelight sees two apriltags
       bestId = getBestId(apriltags);
@@ -211,35 +236,86 @@ public class Limelight {
 
   /**
    * @brief gets the position of limelight on the field, using FTC coordinates
-   * @return the 2D position of limelight on the field
+   * @return the 2D position of limelight on the field, or null if invalid
    */
   public Pose2D getPosition() {
-    if (!isResultValid) return null;
-    Pose3D cameraPos = result.getBotpose();
-    double x = cameraPos.getPosition().toUnit(DistanceUnit.INCH).x;
-    double y = cameraPos.getPosition().toUnit(DistanceUnit.INCH).y;
-    double heading = cameraPos.getOrientation().getYaw(AngleUnit.DEGREES);
-    return new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading);
+    if (!isResultValid || results.isEmpty()) return null;
+
+    // lists for individual values
+    List<Double> xs = new LinkedList<>();
+    List<Double> ys = new LinkedList<>();
+    List<Double> hs = new LinkedList<>();
+
+    // extract individual values
+    for (Result res : results) {
+      Pose3D pose = res.result.getBotpose();
+      double x = pose.getPosition().toUnit(DistanceUnit.INCH).x;
+      double y = pose.getPosition().toUnit(DistanceUnit.INCH).y;
+      double h = pose.getOrientation().getYaw(AngleUnit.DEGREES);
+      xs.add(x);
+      ys.add(y);
+      hs.add(h);
+    }
+
+    // get average values, discarding outliers
+    Double avgX = trimmedAverage(xs);
+    Double avgY = trimmedAverage(ys);
+    Double avgH = trimmedAverage(hs);
+
+    // if any dimension cannot be averaged, return null
+    if (avgX == null || avgY == null || avgH == null) return null;
+
+    // if spread is too large, return null
+    if (isSpreadTooLarge(xs, MAX_POSITION_DEVIATION)
+        || isSpreadTooLarge(ys, MAX_POSITION_DEVIATION)
+        || isSpreadTooLarge(hs, MAX_ANGLE_DEVIATION)) {
+      return null;
+    }
+
+    return new Pose2D(DistanceUnit.INCH, avgX, avgY, AngleUnit.DEGREES, avgH);
   }
 
   /**
-   * @brief gets the size of the apriltag in limelight's view
-   * @return the fraction of the latest frame taken up by the apriltag, or 0 if the latest frame was
-   *     invalid (tag not visible)
+   * @param data a list of doubles
+   * @return the average of the list, excluding extreme values, or null if not enough data
+   * @brief trims the most extreme n% items from a list and returns the average of those remaining
    */
-  @Deprecated
-  public double getTargetSize() {
-    return isResultValid ? result.getTa() : 0;
+  private Double trimmedAverage(List<Double> data) {
+    if (data.size() < 3) return null; // must have enough points
+
+    List<Double> sorted = new LinkedList<>(data);
+    sorted.sort(Double::compare);
+
+    int start = (int) (sorted.size() * Limelight.OUTLIER_PERCENTAGE);
+    int end = sorted.size() - start;
+
+    if (start >= end) return null; // this shouldn't be necessary, but just in case
+
+    double sum = 0;
+    int count = 0;
+    for (int i = start; i < end; i++) {
+      sum += sorted.get(i);
+      count++;
+    }
+
+    return count == 0 ? null : sum / count;
   }
 
   /**
-   * @brief gets the left-to-right offset angle of the apriltag, in degrees
-   * @return the x angle of the target, or 0 if the latest frame was invalid (tag not visible)
-   * @note intended to be used as the amount the turret needs to be turned to point at the target
+   * @brief checks if the spread or difference between max an min values in a list is too large
+   * @param data a list of doubles to check
+   * @param maxSpread the maximum allowed spread
+   * @return true if the spread is above the given threshold, false otherwise
    */
-  @Deprecated
-  public double getTargetOffsetAngleDegrees() {
-    return isResultValid ? result.getTx() : 0; // might need to invert, TODO: check
+  private boolean isSpreadTooLarge(List<Double> data, double maxSpread) {
+    if (data.isEmpty()) return true;
+    double min = Double.MAX_VALUE;
+    double max = -Double.MAX_VALUE;
+    for (double v : data) {
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+    return (max - min) > maxSpread;
   }
 
   /**
@@ -299,6 +375,10 @@ public class Limelight {
    * @return true if the pipeline used for the last result matches the mode, false otherwise
    */
   protected boolean isPipelineCorrect() {
-    return result.getPipelineIndex() == getPipeline();
+    try {
+      return results.getLast().result.getPipelineIndex() == getPipeline();
+    } catch (Exception e) {
+      return true;
+    }
   }
 }
