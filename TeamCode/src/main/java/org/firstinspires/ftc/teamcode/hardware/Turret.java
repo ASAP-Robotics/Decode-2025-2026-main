@@ -21,11 +21,8 @@ import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
-import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.jetbrains.annotations.TestOnly;
 
 public class Turret extends Flywheel<Turret.LookupTableItem> {
@@ -165,8 +162,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public void update() {
     super.update();
     // hoodServo.setPosition(targetVerticalAngleDegrees);
-    double motorDegrees = turretDegreesToMotorDegrees(
-        targetHorizontalAngleDegrees + horizontalAngleOffsetDegrees);
+    double motorDegrees =
+        turretDegreesToMotorDegrees(targetHorizontalAngleDegrees + horizontalAngleOffsetDegrees);
     rotatorController.setSetPoint(motorDegrees);
     rotator.set(rotatorController.calculate(getRotatorDegrees()));
   }

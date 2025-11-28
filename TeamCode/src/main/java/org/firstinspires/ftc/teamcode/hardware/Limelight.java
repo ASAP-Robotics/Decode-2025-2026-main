@@ -47,6 +47,7 @@ public class Limelight {
       this.timestamp = timestamp;
     }
   }
+
   public enum LimeLightMode {
     NAVIGATION,
     IDENTIFICATION,
@@ -265,9 +266,9 @@ public class Limelight {
     if (avgX == null || avgY == null || avgH == null) return null;
 
     // if spread is too large, return null
-    if (isSpreadTooLarge(xs, MAX_POSITION_DEVIATION) ||
-        isSpreadTooLarge(ys, MAX_POSITION_DEVIATION) ||
-        isSpreadTooLarge(hs, MAX_ANGLE_DEVIATION)) {
+    if (isSpreadTooLarge(xs, MAX_POSITION_DEVIATION)
+        || isSpreadTooLarge(ys, MAX_POSITION_DEVIATION)
+        || isSpreadTooLarge(hs, MAX_ANGLE_DEVIATION)) {
       return null;
     }
 
@@ -288,7 +289,7 @@ public class Limelight {
     int start = (int) (sorted.size() * Limelight.OUTLIER_PERCENTAGE);
     int end = sorted.size() - start;
 
-    if (start >= end) return null;  // this shouldn't be necessary, but just in case
+    if (start >= end) return null; // this shouldn't be necessary, but just in case
 
     double sum = 0;
     int count = 0;
@@ -316,7 +317,6 @@ public class Limelight {
     }
     return (max - min) > maxSpread;
   }
-
 
   /**
    * @brief gets if a valid target is in frame (the latest frame/result was valid)
