@@ -77,4 +77,8 @@ public final class PinpointLocalizer implements Localizer {
     }
     return new PoseVelocity2d(new Vector2d(0, 0), 0);
   }
+
+  public void recalibrate() {
+    driver.recalibrateIMU();
+  }
 }

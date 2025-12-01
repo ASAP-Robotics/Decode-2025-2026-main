@@ -16,6 +16,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -36,8 +38,10 @@ public class TeleOpRobot extends CommonRobot {
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
   protected MecanumWheelBase wheelBase;
-  protected GoBildaPinpointDriver pinpoint;
+  protected PinpointLocalizer pinpoint;
   protected SimpleTimer odometryResetTimer = new SimpleTimer(6.7);
+  protected SimpleTimer calibrateTimer = new SimpleTimer(3); // jank, fix
+  protected boolean calibrated = false;
 
   public TeleOpRobot(
       HardwareMap hardwareMap,
@@ -47,7 +51,7 @@ public class TeleOpRobot extends CommonRobot {
       Gamepad gamepad2) {
     super(hardwareMap, telemetry, allianceColor);
 
-    pinpoint = this.hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+    pinpoint = new PinpointLocalizer(hardwareMap, 0.001968667109, new Pose2d(0, 0, 0));
 
     this.gamepad1 = gamepad1;
     this.gamepad2 = gamepad2;
@@ -63,14 +67,8 @@ public class TeleOpRobot extends CommonRobot {
    * @brief to be called once, when the opMode is initialized
    */
   public void init() {
-    // temporary
-    pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-    pinpoint.setEncoderDirections(
-        GoBildaPinpointDriver.EncoderDirection.REVERSED,
-        GoBildaPinpointDriver.EncoderDirection.REVERSED);
-    pinpoint.resetPosAndIMU();
-
     scoringSystem.init(false, false); // initialize scoring systems
+    calibrateTimer.start();
   }
 
   /**
@@ -78,6 +76,10 @@ public class TeleOpRobot extends CommonRobot {
    */
   public void initLoop() {
     scoringSystem.initLoop();
+    if (calibrateTimer.isFinished() && !calibrated) {
+      pinpoint.recalibrate();
+      calibrated = true;
+    }
   }
 
   /**
@@ -123,16 +125,16 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // get robot position
-    pinpoint.update();
-    Pose2D location = pinpoint.getPosition();
+    PoseVelocity2d velocityPose = pinpoint.update();
+    Pose2d location = pinpoint.getPose();
     double velocity =
         Math.hypot(
-            Math.abs(pinpoint.getVelX(DistanceUnit.INCH)),
-            Math.abs(pinpoint.getVelY(DistanceUnit.INCH)));
+            Math.abs(velocityPose.linearVel.x),
+            Math.abs(velocityPose.linearVel.y));
     // ^ directionless velocity of the robot, in inches per second
 
     // update scoring systems
-    scoringSystem.setRobotPosition(location);
+    scoringSystem.setRobotPosition(new Pose2D(DistanceUnit.INCH, location.position.x, location.position.y, AngleUnit.RADIANS, location.heading.toDouble()));
     scoringSystem.update();
 
     /*
@@ -146,7 +148,7 @@ public class TeleOpRobot extends CommonRobot {
      */
 
     // update wheelbase
-    wheelBase.setRotation(location.getHeading(AngleUnit.DEGREES)); // for field-centric control
+    wheelBase.setRotation(AngleUnit.DEGREES.fromRadians(location.heading.toDouble())); // for field-centric control
     wheelBase.setThrottle(gamepad1.right_stick_x, gamepad1.right_stick_y, gamepad1.left_stick_x);
     wheelBase.update();
 
