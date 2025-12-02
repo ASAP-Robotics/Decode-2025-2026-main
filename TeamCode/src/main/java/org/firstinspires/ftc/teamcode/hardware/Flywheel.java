@@ -41,10 +41,10 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   protected boolean isActive = true; // if the flywheel is active (as opposed to idling)
   private double idleSpeed; // the speed (RPM) of the flywheel when idle
   private double targetSpeed = 0; // the speed (RPM) the flywheel is targeting
-  private double currentSpeed = 0; // the latest speed (RPM) of the flywheel
+  public double currentSpeed = 0; // the latest speed (RPM) of the flywheel
   private double targetDistance = 0; // the distance (inches) to the target
 
-  private double testingSpeed = 2000;
+  public double testingSpeed = 2000;
   protected boolean testing = false;
   private final double MOTOR_TICKS_PER_REV = 28; // ticks per revolution of flywheel motor
 
@@ -64,7 +64,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
     this.flywheel = motor;
     this.idleSpeed = idleSpeed; // set the speed of the flywheel at idle
     this.LOOKUP_TABLE = fillLookupTable();
-    this.flywheel.setVelocityPIDFCoefficients(70, 10, 20, 17); // TODO: use real PIDF
+    this.flywheel.setVelocityPIDFCoefficients(300, 1, 0, 16);
     // set motor to use speed-based control
     this.flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     // set motor to spin freely if set to 0% power
@@ -251,8 +251,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @note use `setTargetDistance()` to set the distance from the target
    */
   private void startMotor() {
-    // double rpm = getRPMLookup(targetDistance);
-    double rpm = 3000;
+    double rpm = getRPMLookup(targetDistance);
     double ticksPerSec = (rpm / 60.0) * MOTOR_TICKS_PER_REV;
     targetSpeed = rpm; // store target speed
 
