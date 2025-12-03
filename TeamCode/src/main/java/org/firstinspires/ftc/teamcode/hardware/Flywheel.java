@@ -235,7 +235,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @note use setIdleSpeed() to set the idle speed
    */
   private void idleMotor() {
-    if (currentSpeed - 300 <= idleSpeed) {
+    if (currentSpeed - 200 <= idleSpeed) {
       double ticksPerSec = (idleSpeed / 60.0) * MOTOR_TICKS_PER_REV;
       flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
       flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller

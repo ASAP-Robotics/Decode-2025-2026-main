@@ -41,7 +41,7 @@ public class TeleOpRobot extends CommonRobot {
   protected PinpointLocalizer pinpoint;
   protected SimpleTimer odometryResetTimer = new SimpleTimer(6.7);
   protected SimpleTimer calibrateTimer = new SimpleTimer(3); // jank, fix
-  protected boolean calibrated = false;
+  protected boolean calibrated = false; // jank, fix
 
   public TeleOpRobot(
       HardwareMap hardwareMap,
