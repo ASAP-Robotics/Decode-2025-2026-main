@@ -66,6 +66,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private double horizontalAngleOffsetDegrees = 0;
   // target angle for servo moving flap
   private double targetVerticalAngleDegrees = 50;
+  private boolean rotationEnabled = true; // if turret can move side to side
 
   public Turret(DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo, double idleSpeed) {
     super(flywheelMotor, idleSpeed);
@@ -86,12 +87,14 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   /**
    * @brief initializes the turret
    * @param horizontalAngle the angle to start the turret at
+   * @note if angle is zero, the turret will not move
    */
   public void init(double horizontalAngle) {
     rotator.stopAndResetEncoder();
     setHorizontalAngle(horizontalAngle);
     rotatorController.setSetPoint(turretDegreesToMotorDegrees(targetHorizontalAngleDegrees));
     rotator.set(0);
+    if (horizontalAngle == 0) rotationEnabled = false;
     hoodServo.setPosition(targetVerticalAngleDegrees);
   }
 
@@ -139,7 +142,12 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
       new LookupTableItem(156, 3600, 35),
       new LookupTableItem(162, 3600, 35),
       new LookupTableItem(168, 3600, 35),
-      new LookupTableItem(172, 3600, 35)
+      new LookupTableItem(174, 3600, 35),
+      new LookupTableItem(180, 3600, 35),
+      new LookupTableItem(186, 3600, 35),
+      new LookupTableItem(192, 3600, 35),
+      new LookupTableItem(198, 3600, 35),
+      new LookupTableItem(204, 3600, 35)
     }; // preliminary values
   }
 
@@ -155,6 +163,13 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   }
 
   /**
+   * @brief to be called once, when the program is started
+   */
+  public void start() {
+    rotationEnabled = true;
+  }
+
+  /**
    * @brief updates the turret
    * @note call every loop
    */
@@ -165,7 +180,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     double motorDegrees =
         turretDegreesToMotorDegrees(targetHorizontalAngleDegrees + horizontalAngleOffsetDegrees);
     rotatorController.setSetPoint(motorDegrees);
-    rotator.set(rotatorController.calculate(getRotatorDegrees()));
+    rotator.set(rotationEnabled ? rotatorController.calculate(getRotatorDegrees()) : 0);
   }
 
   /**

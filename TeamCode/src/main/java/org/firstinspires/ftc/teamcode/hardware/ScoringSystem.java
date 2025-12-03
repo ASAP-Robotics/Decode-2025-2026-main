@@ -49,7 +49,7 @@ public class ScoringSystem {
   protected State state = State.UNINITIALISED; // the state of the scoring system
   protected SequenceMode sequenceMode = SequenceMode.UNSORTED; // the mode used for shooting
   private BallSequence ballSequence = BallSequence.PPG; // the sequence being shot
-  private final AllianceColor allianceColor; // the alliance we are on
+  public final AllianceColor allianceColor; // the alliance we are on
   private boolean turretAimOverride = false; // if the aim of the turret is overridden
   private double horizontalAngleOverride = 0;
   private boolean tuning = false;
@@ -82,14 +82,14 @@ public class ScoringSystem {
   /**
    * @brief initializes the artifact scoring system
    * @param isPreloaded if the spindex is preloaded with balls
-   * @param search if limelight should search for a new ball sequence
+   * @param auto if limelight should search for a new ball sequence (opMode is auto)
    * @note call when OpMode is initialized ("Init" is pressed)
    */
-  public void init(boolean isPreloaded, boolean search) {
+  public void init(boolean isPreloaded, boolean auto) {
     spindex.init(BallSequence.GPP, isPreloaded);
-    turret.init(search ? allianceColor.getObeliskAngle() : getRelativeTargetAngle());
+    turret.init(auto ? allianceColor.getObeliskAngle() : 0);
     turret.setActive(!isPreloaded);
-    limelight.init(search);
+    limelight.init(auto);
   }
 
   /**
@@ -106,6 +106,7 @@ public class ScoringSystem {
    */
   public void start(boolean isPreloaded, boolean search) {
     turret.enable(); // let the flywheel spin up
+    turret.start();
     limelight.start();
     if (search) limelight.detectSequence();
     state = isPreloaded ? State.FULL : State.INTAKING;
@@ -136,10 +137,10 @@ public class ScoringSystem {
     spindex.update();
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("State", state.toString());
-    telemetry.addData("At Target", turret.isAtTarget());
     telemetry.addData("Sequence", ballSequence.toString());
     telemetry.addData("Position", robotPosition);
     telemetry.addData("Target Angle", turret.getTargetHorizontalAngleDegrees());
+    telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
   }
 
   /**
@@ -608,6 +609,14 @@ public class ScoringSystem {
    */
   public void emergencyRecheckSequence() {
     limelight.detectSequence();
+  }
+
+  /**
+   * @brief adjusts the turret's horizontal angle offset by a given amount
+   * @param offsetDegrees the amount, in degrees, to adjust the turret's horizontal angle offset by
+   */
+  public void adjustTurretAngleOffset(double offsetDegrees) {
+    turret.changeHorizontalAngleOffsetDegrees(offsetDegrees);
   }
 
   /**
