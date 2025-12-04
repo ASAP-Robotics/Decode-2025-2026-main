@@ -24,6 +24,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
@@ -33,14 +34,11 @@ import org.firstinspires.ftc.teamcode.hardware.servos.DualServo;
 @TeleOp(name = "Tuning turret", group = "Tuning")
 @Config
 public class TuningTurret extends LinearOpMode {
-  // public static double speed = 2000;
-  // public static double angle = 0;
-  // public static double speed = 0.1;
-
-  public static double angle = 0;
+  public static double speed = 2000;
   public static double kP = 0;
   public static double kI = 0;
   public static double kD = 0;
+  public static double kF = 0;
 
   @Override
   public void runOpMode() {
@@ -60,7 +58,7 @@ public class TuningTurret extends LinearOpMode {
     Axon l2 = new Axon(lifter2, lifterEncoder);
     DualServo lifter = new DualServo(l1, l2);
     Turret turret = new Turret(flywheel, turretRotator, turretHood, 1500);
-    turret.idle();
+    turret.activate();
     turret.enable();
 
     waitForStart();
@@ -92,22 +90,22 @@ public class TuningTurret extends LinearOpMode {
         lifter.setPosition(100);
       }
 
-      // turret.setHorizontalAngle(0);
-      // turret.tuneShooting(0, 0);
-      turret.setHorizontalAngle(angle);
-      turret.tuneHorizontalPID(kP, kI, kD);
+      turret.tuneShooting(speed, 60);
+      turret.setHorizontalAngle(0);
+      turret.flywheel.setPIDFCoefficients(
+          DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
       turret.update();
 
       // dashboardTelemetry.addData("Angle", turret.getTargetVerticalAngleDegrees());
-      // dashboardTelemetry.addData("Target Speed", turret.testingSpeed);
-      // dashboardTelemetry.addData("Speed", turret.flywheel.getVelocity() * 60 / 28);
+      dashboardTelemetry.addData("Target Speed", turret.testingSpeed);
+      dashboardTelemetry.addData("Speed", turret.currentSpeed);
       // dashboardTelemetry.addData("At target speed", turret.isReadyToShoot());
       // dashboardTelemetry.addData("Lifter at target", lifter.isAtTarget());
       // dashboardTelemetry.addData("Target size", limelight.getTargetSize());
       // dashboardTelemetry.addData("Limelight locked", limelight.isTargetInFrame());
-      dashboardTelemetry.addData("At target", turret.isAtTarget());
-      dashboardTelemetry.addData("Angle", turret.getHorizontalAngleDegrees());
-      dashboardTelemetry.addData("Target angle", turret.getTargetHorizontalAngleDegrees());
+      // dashboardTelemetry.addData("At target", turret.isAtTarget());
+      // dashboardTelemetry.addData("Angle", turret.getHorizontalAngleDegrees());
+      // dashboardTelemetry.addData("Target angle", turret.getTargetHorizontalAngleDegrees());
 
       dashboardTelemetry.update();
     }

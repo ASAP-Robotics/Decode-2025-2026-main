@@ -22,19 +22,36 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public enum AllianceColor {
   // TODO: tune obelisk and target angles
-  RED(24, 2, -30, new Pose2D(DistanceUnit.INCH, -66, 66, AngleUnit.DEGREES, 0)),
-  BLUE(20, 1, 30, new Pose2D(DistanceUnit.INCH, -66, -66, AngleUnit.DEGREES, 0));
+  RED(
+      24,
+      2,
+      -30,
+      new Pose2D(DistanceUnit.INCH, -66, 66, AngleUnit.DEGREES, 0),
+      new Pose2D(DistanceUnit.INCH, 63, -63, AngleUnit.DEGREES, 0)),
+  BLUE(
+      20,
+      1,
+      30,
+      new Pose2D(DistanceUnit.INCH, -66, -66, AngleUnit.DEGREES, 0),
+      new Pose2D(DistanceUnit.INCH, 63, 63, AngleUnit.DEGREES, 0));
 
   private final int aprilTagId;
   private final int limelightPipeline;
   private final double obeliskAngle;
   private final Pose2D targetLocation;
+  private final Pose2D resetLocation;
 
-  AllianceColor(int aprilTagId, int limelightPipeline, double obeliskAngle, Pose2D targetLocation) {
+  AllianceColor(
+      int aprilTagId,
+      int limelightPipeline,
+      double obeliskAngle,
+      Pose2D targetLocation,
+      Pose2D resetLocation) {
     this.aprilTagId = aprilTagId;
     this.limelightPipeline = limelightPipeline;
     this.obeliskAngle = obeliskAngle;
     this.targetLocation = targetLocation;
+    this.resetLocation = resetLocation;
   }
 
   /**
@@ -67,5 +84,13 @@ public enum AllianceColor {
    */
   public Pose2D getTargetLocation() {
     return targetLocation;
+  }
+
+  /**
+   * @brief gets the location of the robot when it's location is reset
+   * @return this alliance's reset location
+   */
+  public Pose2D getResetLocation() {
+    return resetLocation;
   }
 }
