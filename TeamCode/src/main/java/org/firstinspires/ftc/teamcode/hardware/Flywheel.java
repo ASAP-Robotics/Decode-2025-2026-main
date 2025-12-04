@@ -91,7 +91,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @param rpm the speed to spin the flywheel at
    */
   @TestOnly
-  public void overrideRpm(double rpm) {
+  protected void overrideRpm(double rpm) {
     testing = true;
     testingSpeed = rpm;
   }

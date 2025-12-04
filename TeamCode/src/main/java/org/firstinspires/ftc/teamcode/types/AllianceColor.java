@@ -21,7 +21,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public enum AllianceColor {
-  // TODO: tune obelisk and target angles
+  // TODO: tune obelisk angle
   RED(
       24,
       2,
