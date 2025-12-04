@@ -23,10 +23,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 public enum AllianceColor {
   // TODO: tune obelisk and target angles
   RED(
-      24, 2, -30, new Pose2D(DistanceUnit.INCH, -66, 66, AngleUnit.DEGREES, 0),
+      24,
+      2,
+      -30,
+      new Pose2D(DistanceUnit.INCH, -66, 66, AngleUnit.DEGREES, 0),
       new Pose2D(DistanceUnit.INCH, 63, -63, AngleUnit.DEGREES, 0)),
   BLUE(
-      20, 1, 30, new Pose2D(DistanceUnit.INCH, -66, -66, AngleUnit.DEGREES, 0),
+      20,
+      1,
+      30,
+      new Pose2D(DistanceUnit.INCH, -66, -66, AngleUnit.DEGREES, 0),
       new Pose2D(DistanceUnit.INCH, 63, 63, AngleUnit.DEGREES, 0));
 
   private final int aprilTagId;

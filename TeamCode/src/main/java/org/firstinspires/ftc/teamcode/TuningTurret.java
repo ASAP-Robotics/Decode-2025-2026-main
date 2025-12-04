@@ -92,7 +92,8 @@ public class TuningTurret extends LinearOpMode {
 
       turret.tuneShooting(speed, 60);
       turret.setHorizontalAngle(0);
-      turret.flywheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
+      turret.flywheel.setPIDFCoefficients(
+          DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
       turret.update();
 
       // dashboardTelemetry.addData("Angle", turret.getTargetVerticalAngleDegrees());

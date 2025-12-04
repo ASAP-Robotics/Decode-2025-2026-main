@@ -140,10 +140,10 @@ public class TeleOpRobot extends CommonRobot {
     PoseVelocity2d velocityPose = pinpoint.update();
     boolean faulted = pinpoint.isFaulted();
     if (!faulted) pinpointErrorTimer.start();
-    Pose2d location = faulted && pinpointErrorTimer.isFinished() ? new Pose2d(0, 0, 0) : pinpoint.getPose();
-    double velocity = Math.hypot(
-        Math.abs(velocityPose.linearVel.x),
-        Math.abs(velocityPose.linearVel.y));
+    Pose2d location =
+        faulted && pinpointErrorTimer.isFinished() ? new Pose2d(0, 0, 0) : pinpoint.getPose();
+    double velocity =
+        Math.hypot(Math.abs(velocityPose.linearVel.x), Math.abs(velocityPose.linearVel.y));
     // ^ directionless velocity of the robot, in inches per second
 
     // update scoring systems
@@ -167,7 +167,8 @@ public class TeleOpRobot extends CommonRobot {
      */
 
     // update wheelbase
-    wheelBase.setRotation(AngleUnit.DEGREES.fromRadians(location.heading.toDouble())); // for field-centric control
+    wheelBase.setRotation(
+        AngleUnit.DEGREES.fromRadians(location.heading.toDouble())); // for field-centric control
     wheelBase.setThrottle(gamepad1.right_stick_x, gamepad1.right_stick_y, gamepad1.left_stick_x);
     wheelBase.update();
 

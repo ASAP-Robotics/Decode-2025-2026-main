@@ -19,15 +19,20 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 @Config
-public class TuningLookupTableRobot extends TeleOpRobot{
+public class TuningLookupTableRobot extends TeleOpRobot {
   public static double RPM = 0;
   public static double angle = 60;
-  public TuningLookupTableRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor, Gamepad gamepad1, Gamepad gamepad2) {
+
+  public TuningLookupTableRobot(
+      HardwareMap hardwareMap,
+      Telemetry telemetry,
+      AllianceColor allianceColor,
+      Gamepad gamepad1,
+      Gamepad gamepad2) {
     super(hardwareMap, telemetry, allianceColor, gamepad1, gamepad2);
   }
 
