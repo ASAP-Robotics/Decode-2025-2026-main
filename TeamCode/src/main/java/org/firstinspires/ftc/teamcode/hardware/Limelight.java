@@ -104,6 +104,7 @@ public class Limelight {
           detectedSequence = BallSequence.valueOf(config.getString("sequence"));
         } catch (JSONException ignored) {
           // fail silently if config read failed
+          detectedSequence = BallSequence.PPG;
         }
         break;
     }
@@ -308,7 +309,12 @@ public class Limelight {
    * @return true if the spread is above the given threshold, false otherwise
    */
   private boolean isSpreadTooLarge(List<Double> data, double maxSpread) {
-    if (data.isEmpty()) return true;
+    try {
+      if (data.isEmpty()) return true;
+    } catch (Exception ignored) {
+      return true;
+    }
+
     double min = Double.MAX_VALUE;
     double max = -Double.MAX_VALUE;
     for (double v : data) {

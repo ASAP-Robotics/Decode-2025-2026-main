@@ -139,6 +139,12 @@ public class ScoringSystem {
     telemetry.addData("State", state.toString());
     telemetry.addData("Sequence", ballSequence.toString());
     telemetry.addData("Position", robotPosition);
+    try {
+      telemetry.addData("Limelight Position", limelight.getPosition().toString());
+    } catch (Exception e) {
+      telemetry.addData("Limelight Exception", e.toString());
+    }
+
     telemetry.addData("Target Angle", turret.getTargetHorizontalAngleDegrees());
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
     telemetry.addData("Distance", turret.getTargetDistance());
