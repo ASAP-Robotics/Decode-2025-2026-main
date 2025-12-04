@@ -63,9 +63,9 @@ public class Spindex {
   private static final double lifterRetractedPos = 7; // position of lift servos when at rest
   private static final double lifterExtendedPos = 100; // position of lift servos when shooting
   private final SpindexSlot[] spindex = {
-      new SpindexSlot(39.6, 39.6, 108), // slot 0
-      new SpindexSlot(172.8, 172.8, 237.6), // slot 1
-      new SpindexSlot(306, 306, 237.6) // slot 2
+    new SpindexSlot(39.6, 39.6, 108), // slot 0
+    new SpindexSlot(172.8, 172.8, 237.6), // slot 1
+    new SpindexSlot(306, 306, 237.6) // slot 2
   };
 
   private SpindexState state; // the current state of the spindex
@@ -213,7 +213,7 @@ public class Spindex {
 
   /**
    * @brief stores the color of ball detected in the intake as the color of ball in the spindex
-   * index at the intake position
+   *     index at the intake position
    * @note uses the stored intake color, call update() to update
    */
   public void storeIntakeColor() {

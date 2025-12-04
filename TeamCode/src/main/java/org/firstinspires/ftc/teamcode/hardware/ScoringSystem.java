@@ -255,7 +255,9 @@ public class ScoringSystem {
         break;
 
       case INTAKING:
-        if (spindex.getIsIntakeColorNew() && spindex.isAtTarget() && spindex.getIntakeColor().isShootable()) {
+        if (spindex.getIsIntakeColorNew()
+            && spindex.isAtTarget()
+            && spindex.getIntakeColor().isShootable()) {
           // ^ if intaking a ball, the spindex is stationary, and a new color of (shootable) ball is
           // in the intake
           spindex.storeIntakeColor(); // record the color of the ball taken in
