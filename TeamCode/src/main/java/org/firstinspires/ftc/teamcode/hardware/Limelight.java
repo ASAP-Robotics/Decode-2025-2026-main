@@ -38,7 +38,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Limelight {
-  protected class Result {
+  protected static class Result {
     public LLResult result;
     public double timestamp;
 
@@ -237,12 +237,14 @@ public class Limelight {
 
   /**
    * @brief gets the position of limelight on the field, using FTC coordinates
-   * @return the 2D position of limelight on the field, or null if invalid
+   * @return the 2D position of limelight on the field, or 0 if invalid
    */
   public Pose2D getPosition() {
-    if (!isResultValid || results.isEmpty()) return null;
+    if (results == null || !isResultValid || results.isEmpty()) {
+      return new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
+    }
 
-    // lists for individual values
+    // lists for raw individual values
     List<Double> xs = new LinkedList<>();
     List<Double> ys = new LinkedList<>();
     List<Double> hs = new LinkedList<>();
@@ -258,31 +260,33 @@ public class Limelight {
       hs.add(h);
     }
 
-    // get average values, discarding outliers
-    Double avgX = trimmedAverage(xs);
-    Double avgY = trimmedAverage(ys);
-    Double avgH = trimmedAverage(hs);
-
-    // if any dimension cannot be averaged, return null
-    if (avgX == null || avgY == null || avgH == null) return null;
+    // lists for trimmed individual values
+    List<Double> xt = trimOutliers(xs);
+    List<Double> yt = trimOutliers(ys);
+    List<Double> ht = trimOutliers(hs);
 
     // if spread is too large, return null
-    if (isSpreadTooLarge(xs, MAX_POSITION_DEVIATION)
-        || isSpreadTooLarge(ys, MAX_POSITION_DEVIATION)
-        || isSpreadTooLarge(hs, MAX_ANGLE_DEVIATION)) {
-      return null;
+    if (isSpreadTooLarge(xt, MAX_POSITION_DEVIATION)
+        || isSpreadTooLarge(yt, MAX_POSITION_DEVIATION)
+        || isSpreadTooLarge(ht, MAX_ANGLE_DEVIATION)) {
+      return new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
     }
+
+    // get average values
+    Double avgX = average(xt);
+    Double avgY = average(yt);
+    Double avgH = average(ht);
 
     return new Pose2D(DistanceUnit.INCH, avgX, avgY, AngleUnit.DEGREES, avgH);
   }
 
   /**
-   * @param data a list of doubles
-   * @return the average of the list, excluding extreme values, or null if not enough data
-   * @brief trims the most extreme n% items from a list and returns the average of those remaining
+   * @brief trims the outliers from a list of Doubles
+   * @param data the list to trim
+   * @return the trimmed list
    */
-  private Double trimmedAverage(List<Double> data) {
-    if (data.size() < 3) return null; // must have enough points
+  private List<Double> trimOutliers(List<Double> data) {
+    if (data.size() < 3) return data; // must have enough points
 
     List<Double> sorted = new LinkedList<>(data);
     sorted.sort(Double::compare);
@@ -290,16 +294,29 @@ public class Limelight {
     int start = (int) (sorted.size() * Limelight.OUTLIER_PERCENTAGE);
     int end = sorted.size() - start;
 
-    if (start >= end) return null; // this shouldn't be necessary, but just in case
+    if (start >= end) return data; // this shouldn't be necessary, but just in case
 
-    double sum = 0;
-    int count = 0;
-    for (int i = start; i < end; i++) {
-      sum += sorted.get(i);
-      count++;
+    return sorted.subList(start, end);
+  }
+
+  /**
+   * @param data a list of doubles
+   * @return the average of the list
+   * @note if for some reason the list can't be averaged, 0 will be returned
+   */
+  private Double average(List<Double> data) {
+    try {
+      double sum = 0;
+      int count = 0;
+      for (int i = 0; i < data.size(); i++) {
+        sum += data.get(i);
+        count++;
+      }
+
+      return count == 0 ? 0 : sum / count;
+    } catch (Exception ignored) {
+      return 0.0;
     }
-
-    return count == 0 ? null : sum / count;
   }
 
   /**

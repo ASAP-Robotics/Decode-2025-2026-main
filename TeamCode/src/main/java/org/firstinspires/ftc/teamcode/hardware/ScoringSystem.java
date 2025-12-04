@@ -139,12 +139,7 @@ public class ScoringSystem {
     telemetry.addData("State", state.toString());
     telemetry.addData("Sequence", ballSequence.toString());
     telemetry.addData("Position", robotPosition);
-    try {
-      telemetry.addData("Limelight Position", limelight.getPosition().toString());
-    } catch (Exception e) {
-      telemetry.addData("Limelight Exception", e.toString());
-    }
-
+    telemetry.addData("Limelight Position", limelight.getPosition().toString());
     telemetry.addData("Target Angle", turret.getTargetHorizontalAngleDegrees());
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
     telemetry.addData("Distance", turret.getTargetDistance());
@@ -260,13 +255,10 @@ public class ScoringSystem {
         break;
 
       case INTAKING:
-        if (spindex.getIsIntakeColorNew() && spindex.isAtTarget()) {
-          // ^ if intaking a ball, the spindex is stationary, and a new color of ball is in the
-          // intake
-          if (spindex.getIntakeColor().isShootable()) {
-            // ^ if intake contains a shootable ball
-            spindex.storeIntakeColor(); // record the color of the ball taken in
-          }
+        if (spindex.getIsIntakeColorNew() && spindex.isAtTarget() && spindex.getIntakeColor().isShootable()) {
+          // ^ if intaking a ball, the spindex is stationary, and a new color of (shootable) ball is
+          // in the intake
+          spindex.storeIntakeColor(); // record the color of the ball taken in
         }
 
         if (!fillMag()) {
