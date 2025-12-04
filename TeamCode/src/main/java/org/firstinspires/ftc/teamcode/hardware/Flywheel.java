@@ -50,9 +50,6 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
 
   protected T[] LOOKUP_TABLE; // lookup table of distance, rpm, etc.
 
-  private static final double SPEED_TOLERANCE =
-      0.015; // think of as the percentage of the target speed the flywheel needs to reach to be "at
-
   // target speed"
 
   /**
@@ -86,8 +83,8 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
    */
   public boolean isReadyToShoot() {
-    return currentSpeed >= (targetSpeed * (1 - SPEED_TOLERANCE))
-        && currentSpeed <= (targetSpeed * (1 + SPEED_TOLERANCE));
+    return currentSpeed >= (targetSpeed - 25)
+        && currentSpeed <= (targetSpeed + 25);
   }
 
   /**
