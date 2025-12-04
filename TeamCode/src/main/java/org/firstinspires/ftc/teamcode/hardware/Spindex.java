@@ -18,10 +18,6 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
-import android.graphics.Color;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.hardware.servos.DualServo;
 import org.firstinspires.ftc.teamcode.types.BallColor;
@@ -43,7 +39,7 @@ public class Spindex {
   /**
    * @brief simple class to store info tied to each spindex slot
    */
-  private class SpindexSlot {
+  private static class SpindexSlot {
     // the color of ball in the spindex slot
     public BallColor color;
     // the position to move the spindex to to intake a ball into this slot
@@ -63,15 +59,13 @@ public class Spindex {
 
   private final DualServo spinner; // the servos that rotate the divider in the mag
   private final DualServo lifter; // the servos that lift balls into the shooter turret
-  private final ColorSensor colorSensor; // the color sensor at the intake
-  private final DistanceSensor
-      distanceSensor; // the distance sensor at the intake (built into color sensor?)
+  private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private static final double lifterRetractedPos = 7; // position of lift servos when at rest
   private static final double lifterExtendedPos = 100; // position of lift servos when shooting
   private final SpindexSlot[] spindex = {
-    new SpindexSlot(39.6, 39.6, 108), // slot 0
-    new SpindexSlot(172.8, 172.8, 237.6), // slot 1
-    new SpindexSlot(306, 306, 237.6) // slot 2
+      new SpindexSlot(39.6, 39.6, 108), // slot 0
+      new SpindexSlot(172.8, 172.8, 237.6), // slot 1
+      new SpindexSlot(306, 306, 237.6) // slot 2
   };
 
   private SpindexState state; // the current state of the spindex
@@ -86,13 +80,10 @@ public class Spindex {
       Axon spinServo2,
       Axon liftServo1,
       Axon liftServo2,
-      ColorSensor colorSensor,
-      DistanceSensor distanceSensor) {
+      ColorSensorV3 colorSensor) {
     this.spinner = new DualServo(spinServo1, spinServo2);
     this.lifter = new DualServo(liftServo1, liftServo2);
     this.colorSensor = colorSensor;
-    this.distanceSensor = distanceSensor;
-    this.colorSensor.enableLed(true);
     this.state = SpindexState.UNINITIALIZED;
   }
 
@@ -121,7 +112,9 @@ public class Spindex {
    * @brief updates everything to do with the spindex
    */
   public void update() {
-    updateIntakeColor();
+    colorSensor.update();
+    oldIntakeColor = intakeColor; // store old intake color
+    intakeColor = colorSensor.getColor(); // update intake color
 
     if (!isIndexValid(currentIndex)) state = SpindexState.UNINITIALIZED; // shouldn't happen
 
@@ -220,31 +213,27 @@ public class Spindex {
 
   /**
    * @brief stores the color of ball detected in the intake as the color of ball in the spindex
-   *     index at the intake position
+   * index at the intake position
    * @note uses the stored intake color, call update() to update
-   * @return true if the color was stored, false if the spindex wasn't stationary at an intake
-   *     position
    */
-  public boolean storeIntakeColor() {
+  public void storeIntakeColor() {
     // if spindex isn't stationary at an intake position, return false
-    if (state != SpindexState.INTAKING || !isAtTarget()) return false;
+    if (state != SpindexState.INTAKING || !isAtTarget()) return;
 
     setSpindexIndexColor(currentIndex, intakeColor);
-    return true;
   }
 
   /**
    * @brief starts lifting a ball into the turret
    */
-  public boolean liftBall() {
+  public void liftBall() {
     // if the spindex is not stationary at a valid shooting position, or the lifter is not
     // retracted, we cannot lift a ball
-    if (state != SpindexState.SHOOTING || currentIndex == NULL || !isAtTarget()) return false;
+    if (state != SpindexState.SHOOTING || currentIndex == NULL || !isAtTarget()) return;
 
     lifter.setPosition(lifterExtendedPos);
 
     state = SpindexState.LIFTING; // spindex in lifting mode
-    return true; // we can lift (and are lifting) a ball
   }
 
   /**
@@ -414,33 +403,5 @@ public class Spindex {
    */
   private void setSpindexIndexColor(int index, BallColor color) {
     spindex[index].color = color;
-  }
-
-  /**
-   * @brief reads and stores the color of ball that is in the intake
-   */
-  private void updateIntakeColor() {
-    oldIntakeColor = intakeColor; // store old intake ball color
-    intakeColor = BallColor.EMPTY; // default to an empty intake
-
-    int red = colorSensor.red();
-    int green = colorSensor.green();
-    int blue = colorSensor.blue();
-    float[] hsv = new float[3];
-    double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-    Color.RGBToHSV(red * 8, green * 8, blue * 8, hsv);
-    float h = hsv[0];
-
-    if (distance < 1.5) {
-      if (h >= 145 && h <= 170) { // green
-        intakeColor = BallColor.GREEN; // intake has a green ball in it
-
-      } else if (h >= 185 && h <= 205) { // purple
-        intakeColor = BallColor.PURPLE; // intake has a purple ball in it
-
-      } else { // color can't be determined
-        intakeColor = BallColor.UNKNOWN; // intake has an unknown ball in it
-      }
-    }
   }
 }
