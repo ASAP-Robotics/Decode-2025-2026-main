@@ -38,6 +38,7 @@ public class TeleOpRobot extends CommonRobot {
   protected Gamepad gamepad2;
   protected MecanumWheelBase wheelBase;
   protected PinpointLocalizer pinpoint;
+  protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
   protected SimpleTimer odometryResetTimer = new SimpleTimer(6.7);
 
   public TeleOpRobot(
@@ -80,6 +81,7 @@ public class TeleOpRobot extends CommonRobot {
    */
   public void start() {
     scoringSystem.start(false, false); // start scoring systems up
+    pinpointErrorTimer.start(); // maybe change
     odometryResetTimer.start();
   }
 
@@ -136,7 +138,9 @@ public class TeleOpRobot extends CommonRobot {
 
     // get robot position
     PoseVelocity2d velocityPose = pinpoint.update();
-    Pose2d location = pinpoint.isFaulted() ? new Pose2d(0, 0, 0) : pinpoint.getPose();
+    boolean faulted = pinpoint.isFaulted();
+    if (!faulted) pinpointErrorTimer.start();
+    Pose2d location = faulted && pinpointErrorTimer.isFinished() ? new Pose2d(0, 0, 0) : pinpoint.getPose();
     double velocity = Math.hypot(
         Math.abs(velocityPose.linearVel.x),
         Math.abs(velocityPose.linearVel.y));

@@ -141,6 +141,7 @@ public class ScoringSystem {
     telemetry.addData("Position", robotPosition);
     telemetry.addData("Target Angle", turret.getTargetHorizontalAngleDegrees());
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
+    telemetry.addData("Distance", turret.getTargetDistance());
   }
 
   /**
@@ -148,8 +149,7 @@ public class ScoringSystem {
    */
   private void updateAiming() {
     if (tuning) {
-      turret.overrideRpm(rpmOverride);
-      turret.setVerticalAngle(verticalAngleOverride);
+      turret.tuneShooting(rpmOverride, verticalAngleOverride);
 
     } else if (turretAimOverride) {
       turret.setHorizontalAngle(horizontalAngleOverride);

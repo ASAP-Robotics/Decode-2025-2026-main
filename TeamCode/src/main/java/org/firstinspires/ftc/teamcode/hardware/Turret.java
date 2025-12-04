@@ -66,6 +66,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private double horizontalAngleOffsetDegrees = 0;
   // target angle for servo moving flap
   private double targetVerticalAngleDegrees = 50;
+  private double testingVerticalAngleDegrees = 50;
   private boolean rotationEnabled = true; // if turret can move side to side
 
   public Turret(DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo, double idleSpeed) {
@@ -176,7 +177,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   @Override
   public void update() {
     super.update();
-    hoodServo.setPosition(targetVerticalAngleDegrees);
+    hoodServo.setPosition(testing ? testingVerticalAngleDegrees : targetVerticalAngleDegrees);
     double motorDegrees =
         turretDegreesToMotorDegrees(targetHorizontalAngleDegrees + horizontalAngleOffsetDegrees);
     rotatorController.setSetPoint(motorDegrees);
@@ -202,7 +203,16 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   @TestOnly
   public void tuneShooting(double rpm, double angle) {
     overrideRpm(rpm);
-    setVerticalAngle(angle);
+    overrideVerticalAngle(angle);
+  }
+
+  /**
+   * @brief used for tuning, overrides the vertical angle
+   * @param angleDegrees the angle to set the flap at
+   */
+  protected void overrideVerticalAngle(double angleDegrees) {
+    testing = true;
+    testingVerticalAngleDegrees = angleDegrees;
   }
 
   /**
