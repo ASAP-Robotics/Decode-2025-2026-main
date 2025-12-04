@@ -28,12 +28,18 @@ public class Spindex {
    * @brief simple enum to track the spindex's mode / state
    */
   public enum SpindexState {
-    UNINITIALIZED,
-    IDLE,
-    INTAKING,
-    SHOOTING,
-    LIFTING,
-    LIFTED
+    UNINITIALIZED(false),
+    IDLE(false),
+    INTAKING(true),
+    SHOOTING(false),
+    LIFTING(false),
+    LIFTED(false);
+
+    public final boolean checkSensor;
+
+    SpindexState(boolean checkSensor) {
+      this.checkSensor = checkSensor;
+    }
   }
 
   /**
@@ -112,10 +118,6 @@ public class Spindex {
    * @brief updates everything to do with the spindex
    */
   public void update() {
-    colorSensor.update();
-    oldIntakeColor = intakeColor; // store old intake color
-    intakeColor = colorSensor.getColor(); // update intake color
-
     if (!isIndexValid(currentIndex)) state = SpindexState.UNINITIALIZED; // shouldn't happen
 
     // do something different depending on the spindex state / mode
@@ -157,6 +159,14 @@ public class Spindex {
       case UNINITIALIZED: // if the spindex is uninitialized
         // nothing needs to be done
         break;
+    }
+
+    oldIntakeColor = intakeColor; // store old intake color
+    if (state.checkSensor && isAtTarget()) {
+      colorSensor.update();
+      intakeColor = colorSensor.getColor(); // update intake color
+    } else {
+      intakeColor = BallColor.INVALID;
     }
   }
 

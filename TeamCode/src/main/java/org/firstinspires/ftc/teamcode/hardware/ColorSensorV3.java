@@ -30,8 +30,8 @@ public class ColorSensorV3 {
   protected final DistanceSensor distanceSensor;
   protected BallColor color = BallColor.INVALID;
   protected ElapsedTime timeSinceBallDetected = new ElapsedTime();
-  protected SimpleTimer colorReadTimer = new SimpleTimer(0.1);
-  protected static final double BALL_DETECTION_TIME = 0.5; // seconds
+  protected SimpleTimer colorReadTimer = new SimpleTimer(0.01);
+  protected static final double BALL_DETECTION_TIME = 0.1; // seconds
   protected static final double BALL_DISTANCE_THRESHOLD = 1.5; // inches
 
   public ColorSensorV3(HardwareMap hardwareMap, String deviceName) {
