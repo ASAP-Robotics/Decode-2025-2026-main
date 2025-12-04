@@ -36,8 +36,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-
-import java.lang.Math;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -260,7 +258,7 @@ public final class MecanumDrive {
 
     voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
-    localizer = new PinpointLocalizer(hardwareMap, PARAMS.inPerTick, pose);
+    localizer = new PinpointLocalizer(hardwareMap, pose);
 
     FlightRecorder.write("MECANUM_PARAMS", PARAMS);
   }
