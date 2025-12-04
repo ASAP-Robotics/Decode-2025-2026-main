@@ -111,44 +111,26 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @return the full lookup table
    */
   protected LookupTableItem[] fillLookupTable() {
-    // TODO: retune lookup table to use inches instead of frame percentage
     // note: "distance" numbers *MUST* go from low to high
     return new LookupTableItem[] {
-      new LookupTableItem(0, 2150, 70),
-      new LookupTableItem(6, 2200, 66),
-      new LookupTableItem(12, 2300, 50),
-      new LookupTableItem(18, 2300, 50),
-      new LookupTableItem(24, 2350, 50),
-      new LookupTableItem(30, 2400, 50),
-      new LookupTableItem(36, 2550, 50),
-      new LookupTableItem(42, 2600, 50),
-      new LookupTableItem(48, 2700, 50),
-      new LookupTableItem(54, 2800, 50),
-      new LookupTableItem(60, 2900, 50),
-      new LookupTableItem(66, 3100, 50),
-      new LookupTableItem(72, 3250, 50),
-      new LookupTableItem(78, 3250, 50),
-      new LookupTableItem(84, 3270, 50),
-      new LookupTableItem(90, 3300, 47),
-      new LookupTableItem(96, 3350, 45),
-      new LookupTableItem(102, 3300, 45),
-      new LookupTableItem(108, 3400, 40),
-      new LookupTableItem(114, 3450, 35),
-      new LookupTableItem(120, 3600, 35),
-      new LookupTableItem(126, 3600, 35),
-      new LookupTableItem(132, 3600, 35),
-      new LookupTableItem(138, 3600, 35),
-      new LookupTableItem(144, 3600, 35),
-      new LookupTableItem(150, 3600, 35),
-      new LookupTableItem(156, 3600, 35),
-      new LookupTableItem(162, 3600, 35),
-      new LookupTableItem(168, 3600, 35),
-      new LookupTableItem(174, 3600, 35),
-      new LookupTableItem(180, 3600, 35),
-      new LookupTableItem(186, 3600, 35),
-      new LookupTableItem(192, 3600, 35),
-      new LookupTableItem(198, 3600, 35),
-      new LookupTableItem(204, 3600, 35)
+      new LookupTableItem(0, 2050, 90),
+      new LookupTableItem(29.3, 2050, 90),
+      new LookupTableItem(33.4, 2000, 65),
+      new LookupTableItem(36.5, 2000, 60),
+      new LookupTableItem(45.5, 2020, 55),
+      new LookupTableItem(56.5, 2100, 50),
+      new LookupTableItem(67, 2200, 50),
+      new LookupTableItem(75.6, 2350, 50),
+      new LookupTableItem(81.4, 2500, 50),
+      new LookupTableItem(93.5, 2600, 50),
+      new LookupTableItem(100.8, 2620, 45),
+      new LookupTableItem(108.3, 2700, 45),
+      new LookupTableItem(117.3, 2740, 35),
+      new LookupTableItem(128.7, 2870, 35),
+      new LookupTableItem(136.7, 3000, 35),
+      new LookupTableItem(155.8, 3200, 30),
+      new LookupTableItem(164.8, 3280, 25),
+      new LookupTableItem(250, 3280, 25)
     }; // preliminary values
   }
 
