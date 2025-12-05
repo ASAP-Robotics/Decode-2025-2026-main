@@ -10,9 +10,7 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 public class AUTOMOTOMONOUS extends LinearOpMode {
   @Override
   public void runOpMode() throws InterruptedException {
-    Pose2d beginPose = new Pose2d(-59, 38, 0);
     if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
-      MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
       AutoRobot robot = new AutoRobot(hardwareMap, telemetry, AllianceColor.RED);
 
       robot.init();
@@ -26,7 +24,7 @@ public class AUTOMOTOMONOUS extends LinearOpMode {
       robot.start();
 
       while (opModeIsActive()) {
-        robot.loop(drive);
+        robot.loop();
       }
     }
   }

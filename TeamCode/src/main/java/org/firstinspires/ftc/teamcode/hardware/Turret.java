@@ -142,7 +142,9 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    */
   @Override
   public boolean isReadyToShoot() {
-    return super.isReadyToShoot() && rotator.atTargetPosition();
+    return super.isReadyToShoot() &&
+        getHorizontalAngleDegrees() + 3 > getTargetHorizontalAngleDegrees()
+        && getHorizontalAngleDegrees() - 3 < getTargetHorizontalAngleDegrees();
   }
 
   /**
