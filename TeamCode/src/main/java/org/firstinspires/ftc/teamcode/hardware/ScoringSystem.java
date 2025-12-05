@@ -26,6 +26,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.jetbrains.annotations.TestOnly;
 
 public class ScoringSystem {
@@ -62,6 +63,7 @@ public class ScoringSystem {
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private boolean clearingIntake = false; // if the intake is being reversed to clear a blockage
   private final Telemetry telemetry;
+  private final SimpleTimer fullWait = new SimpleTimer(0.5);
 
   public ScoringSystem(
       ActiveIntake intake,
@@ -251,7 +253,7 @@ public class ScoringSystem {
         break;
 
       case FULL:
-        if (spindex.isAtTarget() && intake.isIntaking()) clearIntake();
+        if (spindex.isAtTarget() && intake.isIntaking() && fullWait.isFinished()) clearIntake();
         break;
 
       case INTAKING:
@@ -276,9 +278,11 @@ public class ScoringSystem {
    */
   protected void switchModeToFull() {
     state = State.FULL;
-    intake.intakeIdle(); // start intake up to keep balls in the mag
+    //intake.intakeIdle(); // start intake up to keep balls in the mag
+    intake.intake();
     spindex.moveSpindexIdle(spindex.getIndex()); // move spindex to idle position
     turret.activate(); // get ready to shoot at any time
+    fullWait.start();
   }
 
   /**

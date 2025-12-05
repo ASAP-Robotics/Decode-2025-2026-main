@@ -38,14 +38,16 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 public abstract class CommonRobot {
   protected HardwareMap hardwareMap;
   protected Telemetry telemetry;
+  protected AllianceColor allianceColor;
   public ScoringSystem scoringSystem;
 
   public CommonRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     this.hardwareMap = hardwareMap;
     this.telemetry = telemetry;
+    this.allianceColor = allianceColor;
 
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
-    Limelight limelight = new Limelight(rawLimelight, allianceColor, 2);
+    Limelight limelight = new Limelight(rawLimelight, this.allianceColor, 2);
 
     AnalogInput lifterEncoder = this.hardwareMap.get(AnalogInput.class, "lifterEncoder");
     Servo rawLifterServo2 = this.hardwareMap.get(Servo.class, "lifter2");
@@ -71,7 +73,7 @@ public abstract class CommonRobot {
     ActiveIntake intake = new ActiveIntake(intakeMotor);
 
     scoringSystem =
-        new ScoringSystem(intake, turret, spindex, limelight, allianceColor, this.telemetry);
+        new ScoringSystem(intake, turret, spindex, limelight, this.allianceColor, this.telemetry);
   }
 
   /**

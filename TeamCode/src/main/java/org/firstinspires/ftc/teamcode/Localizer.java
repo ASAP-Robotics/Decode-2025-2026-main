@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 
 /** Interface for localization methods. */
 public interface Localizer {
@@ -21,4 +22,6 @@ public interface Localizer {
    * @return the Localizer's current velocity estimate
    */
   PoseVelocity2d update();
+
+  GoBildaPinpointDriver.DeviceStatus getState();
 }
