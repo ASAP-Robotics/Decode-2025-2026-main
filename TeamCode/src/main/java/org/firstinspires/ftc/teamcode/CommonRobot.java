@@ -19,13 +19,12 @@ package org.firstinspires.ftc.teamcode;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
+import org.firstinspires.ftc.teamcode.hardware.ColorSensorV3;
 import org.firstinspires.ftc.teamcode.hardware.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
@@ -59,10 +58,8 @@ public abstract class CommonRobot {
     Axon magServo2 = new Axon(rawMagServo2, magServoEncoder);
     Servo rawMagServo1 = this.hardwareMap.get(Servo.class, "magServo1");
     Axon magServo1 = new Axon(rawMagServo1, magServoEncoder);
-    ColorSensor colorSensor = this.hardwareMap.get(ColorSensor.class, "colorSensor");
-    DistanceSensor distanceSensor = this.hardwareMap.get(DistanceSensor.class, "colorSensor");
-    Spindex spindex =
-        new Spindex(magServo1, magServo2, lifterServo1, lifterServo2, colorSensor, distanceSensor);
+    ColorSensorV3 colorSensor = new ColorSensorV3(this.hardwareMap, "colorSensor");
+    Spindex spindex = new Spindex(magServo1, magServo2, lifterServo1, lifterServo2, colorSensor);
 
     Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
     Axon turretHood = new Axon(rawTurretHood);
