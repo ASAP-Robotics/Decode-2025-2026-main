@@ -68,7 +68,8 @@ public class TeleOpRobot extends CommonRobot {
   public void init() {
     SimpleTimer backup = new SimpleTimer(2);
     backup.start();
-    while (pinpoint.getState() != GoBildaPinpointDriver.DeviceStatus.READY && !backup.isFinished()) {
+    while (pinpoint.getState() != GoBildaPinpointDriver.DeviceStatus.READY
+        && !backup.isFinished()) {
       pinpoint.update();
     }
     scoringSystem.init(false, false); // initialize scoring systems

@@ -17,7 +17,6 @@
 package org.firstinspires.ftc.teamcode.types;
 
 import com.acmerobotics.roadrunner.Pose2d;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
