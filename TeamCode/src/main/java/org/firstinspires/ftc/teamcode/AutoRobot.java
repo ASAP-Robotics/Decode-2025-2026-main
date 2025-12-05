@@ -104,7 +104,7 @@ public class AutoRobot extends CommonRobot {
                             Math.PI / 4,
                             new TranslationalVelConstraint(200.0),
                             new ProfileAccelConstraint(-30, 175))
-                        .waitSeconds(1.5)
+                        .waitSeconds(0.5)
                         .build()),
                 new SequentialAction( // shoot 2
                     drive
@@ -120,23 +120,23 @@ public class AutoRobot extends CommonRobot {
                     drive
                         .actionBuilder(new Pose2d(-2, 31, Math.toRadians(90)))
                         .splineToLinearHeading(
-                            new Pose2d(17, 33, Math.toRadians(90)),
+                            new Pose2d(24, 33, Math.toRadians(90)),
                             Math.PI / 4,
                             new TranslationalVelConstraint(200.0),
                             new ProfileAccelConstraint(-30, 175))
                         .build()),
                 new SequentialAction( // pickup2 also
                     drive
-                        .actionBuilder(new Pose2d(-2, 31, Math.toRadians(90)))
+                        .actionBuilder(new Pose2d(21, 33, Math.toRadians(90)))
                         .splineToLinearHeading(
-                            new Pose2d(22, 56, Math.toRadians(90)),
+                            new Pose2d(24, 67, Math.toRadians(90)),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(200.0),
-                            new ProfileAccelConstraint(-30, 175))
+                            new TranslationalVelConstraint(175.0),
+                            new ProfileAccelConstraint(-10, 110))
                         .build()),
                 new SequentialAction( // shoot 3
                     drive
-                        .actionBuilder(new Pose2d(-59, 38, Math.toRadians(0)))
+                        .actionBuilder(new Pose2d(-59, 38, Math.toRadians(45)))
                         .splineToLinearHeading(
                             allianceColor.getAutoRRShootPosition(),
                             Math.PI / 4,
