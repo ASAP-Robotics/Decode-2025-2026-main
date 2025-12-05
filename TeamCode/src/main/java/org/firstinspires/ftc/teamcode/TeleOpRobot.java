@@ -30,8 +30,6 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
-import java.util.Objects;
-
 /**
  * @brief class to contain the behavior of the robot in TeliOp, to avoid code duplication
  */
@@ -129,10 +127,13 @@ public class TeleOpRobot extends CommonRobot {
     // reset odometry
     if (gamepad2.yWasPressed()) {
       Pose2D location = scoringSystem.allianceColor.getResetLocation();
-      pinpoint = new PinpointLocalizer(hardwareMap, new Pose2d(
-          location.getX(DistanceUnit.INCH),
-          location.getY(DistanceUnit.INCH),
-          location.getHeading(AngleUnit.RADIANS)));
+      pinpoint =
+          new PinpointLocalizer(
+              hardwareMap,
+              new Pose2d(
+                  location.getX(DistanceUnit.INCH),
+                  location.getY(DistanceUnit.INCH),
+                  location.getHeading(AngleUnit.RADIANS)));
     }
     // adjust turret offset
     if (gamepad1.dpadLeftWasPressed()) {
@@ -164,11 +165,12 @@ public class TeleOpRobot extends CommonRobot {
 
     telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
 
-    if (odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25 ) {
+    if (odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25) {
       Pose2D limelightPose = scoringSystem.getRobotPosition();
       if (limelightPose != null) {
         pinpoint.setPose(
-            new Pose2d(limelightPose.getX(DistanceUnit.INCH),
+            new Pose2d(
+                limelightPose.getX(DistanceUnit.INCH),
                 limelightPose.getY(DistanceUnit.INCH),
                 limelightPose.getHeading(AngleUnit.RADIANS)));
         odometryResetTimer.start();

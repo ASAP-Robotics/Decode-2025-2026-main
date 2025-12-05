@@ -19,8 +19,6 @@ package org.firstinspires.ftc.teamcode.hardware;
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
 import java.util.Arrays;
-import java.util.Objects;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -633,7 +631,9 @@ public class ScoringSystem {
     double rotationDegrees = AngleUnit.normalizeDegrees(turret.getHorizontalAngleDegrees());
     double x = limelightPosition.getX(DistanceUnit.INCH);
     double y = limelightPosition.getY(DistanceUnit.INCH);
-    double heading = AngleUnit.normalizeDegrees(limelightPosition.getHeading(AngleUnit.DEGREES) - rotationDegrees);
+    double heading =
+        AngleUnit.normalizeDegrees(
+            limelightPosition.getHeading(AngleUnit.DEGREES) - rotationDegrees);
     return new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading);
   }
 
