@@ -14,6 +14,7 @@ import com.acmerobotics.roadrunner.ftc.FlightRecorder;
 import com.acmerobotics.roadrunner.ftc.OverflowEncoder;
 import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
 import com.acmerobotics.roadrunner.ftc.RawEncoder;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -146,5 +147,10 @@ public final class TwoDeadWheelLocalizer implements Localizer {
 
     pose = pose.plus(twist.value());
     return twist.velocity().value();
+  }
+
+  @Override
+  public GoBildaPinpointDriver.DeviceStatus getState() {
+    return null;
   }
 }

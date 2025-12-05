@@ -70,22 +70,22 @@ public class AutoRobot extends CommonRobot {
                     new setScoringPose(scoringSystem)),
                 new SequentialAction( // shoot 1
                     drive
-                        .actionBuilder(allianceColor.getAutoRRShootPosition())
+                        .actionBuilder(allianceColor.getAutoStartPosition())
                         .splineToLinearHeading(
-                            new Pose2d(-2, 31, Math.toRadians(90)),
+                            allianceColor.getAutoRRShootPosition(),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(170.0),
-                            new ProfileAccelConstraint(-10, 110))
+                            new TranslationalVelConstraint(200.0),
+                            new ProfileAccelConstraint(-30, 175))
                         .build(),
                     new shootAction(scoringSystem)),
                 new SequentialAction( // pickup 1
                     drive
                         .actionBuilder(new Pose2d(-2, 31, Math.toRadians(90)))
                         .splineToLinearHeading(
-                            new Pose2d(-2, 65, Math.toRadians(90)),
+                            new Pose2d(-2, 63, Math.toRadians(90)),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(200.0),
-                            new ProfileAccelConstraint(-30, 150))
+                            new TranslationalVelConstraint(175.0),
+                            new ProfileAccelConstraint(-10, 110))
                         .build()),
                 new SequentialAction( // back and rotate
                     drive
