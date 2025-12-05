@@ -278,7 +278,7 @@ public class ScoringSystem {
    */
   protected void switchModeToFull() {
     state = State.FULL;
-    //intake.intakeIdle(); // start intake up to keep balls in the mag
+    // intake.intakeIdle(); // start intake up to keep balls in the mag
     intake.intake();
     spindex.moveSpindexIdle(spindex.getIndex()); // move spindex to idle position
     turret.activate(); // get ready to shoot at any time
