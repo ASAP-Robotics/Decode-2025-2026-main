@@ -283,7 +283,9 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @return false if the rotator motor is moving to the target, true if it is at its target
    */
   public boolean isAtTarget() {
-    return rotatorController.atSetPoint();
+    double angle = getHorizontalAngleDegrees();
+    double target = getTargetHorizontalAngleDegrees();
+    return angle - 5 < target && angle + 5 > target;
   }
 
   /**

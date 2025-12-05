@@ -83,7 +83,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
    */
   public boolean isReadyToShoot() {
-    return currentSpeed >= (targetSpeed - 42) && currentSpeed <= (targetSpeed + 42);
+    return currentSpeed >= (targetSpeed - 50) && currentSpeed <= (targetSpeed + 50);
   }
 
   /**
