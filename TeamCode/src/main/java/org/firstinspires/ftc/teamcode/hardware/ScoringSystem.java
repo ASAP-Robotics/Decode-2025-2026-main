@@ -305,7 +305,7 @@ public class ScoringSystem {
    * @brief starts filling the mag with three balls of any color
    * @return true if the mag had empty slots, false if the mag is full
    */
-  public boolean fillMag() {
+  protected boolean fillMag() {
     if (spindex.getColorIndex(BallColor.EMPTY) == NULL) return false;
     // ^ if there are no empty slots in the mag, return false
 

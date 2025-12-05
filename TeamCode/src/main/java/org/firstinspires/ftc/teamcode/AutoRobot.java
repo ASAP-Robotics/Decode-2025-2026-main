@@ -23,6 +23,7 @@ import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -30,6 +31,7 @@ import org.firstinspires.ftc.teamcode.actions.setScoringPose;
 import org.firstinspires.ftc.teamcode.actions.shootAction;
 import org.firstinspires.ftc.teamcode.actions.updateScoring;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 /**
  * @brief class to contain the behavior of the robot in Auto, to avoid code duplication
@@ -44,6 +46,7 @@ public class AutoRobot extends CommonRobot {
   }
 
   public void init() {
+    // TODO: put wait for pinpoint code here (it's in TeleOpRobot.java)
 
     scoringSystem.init(true, true);
   }
