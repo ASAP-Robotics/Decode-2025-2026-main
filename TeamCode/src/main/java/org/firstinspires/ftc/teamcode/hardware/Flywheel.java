@@ -83,7 +83,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
    */
   public boolean isReadyToShoot() {
-    return currentSpeed >= (targetSpeed - 25) && currentSpeed <= (targetSpeed + 25);
+    return currentSpeed >= (targetSpeed - 42) && currentSpeed <= (targetSpeed + 42);
   }
 
   /**
@@ -91,7 +91,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @param rpm the speed to spin the flywheel at
    */
   @TestOnly
-  public void overrideRpm(double rpm) {
+  protected void overrideRpm(double rpm) {
     testing = true;
     testingSpeed = rpm;
   }

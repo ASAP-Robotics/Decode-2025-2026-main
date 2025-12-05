@@ -139,6 +139,7 @@ public class ScoringSystem {
     telemetry.addData("State", state.toString());
     telemetry.addData("Sequence", ballSequence.toString());
     telemetry.addData("Position", robotPosition);
+    telemetry.addData("Limelight Position", getRobotPosition());
     telemetry.addData("Target Angle", turret.getTargetHorizontalAngleDegrees());
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
     telemetry.addData("Distance", turret.getTargetDistance());
@@ -254,13 +255,12 @@ public class ScoringSystem {
         break;
 
       case INTAKING:
-        if (spindex.getIsIntakeColorNew() && spindex.isAtTarget()) {
-          // ^ if intaking a ball, the spindex is stationary, and a new color of ball is in the
-          // intake
-          if (spindex.getIntakeColor().isShootable()) {
-            // ^ if intake contains a shootable ball
-            spindex.storeIntakeColor(); // record the color of the ball taken in
-          }
+        if (spindex.getIsIntakeColorNew()
+            && spindex.isAtTarget()
+            && spindex.getIntakeColor().isShootable()) {
+          // ^ if intaking a ball, the spindex is stationary, and a new color of (shootable) ball is
+          // in the intake
+          spindex.storeIntakeColor(); // record the color of the ball taken in
         }
 
         if (!fillMag()) {
@@ -628,10 +628,12 @@ public class ScoringSystem {
   public Pose2D getRobotPosition() {
     Pose2D limelightPosition = limelight.getPosition();
     if (limelightPosition == null || !turret.isAtTarget()) return null;
-    double rotationDegrees = AngleUnit.normalizeDegrees(turret.getHorizontalAngleDegrees() - 180);
+    double rotationDegrees = AngleUnit.normalizeDegrees(turret.getHorizontalAngleDegrees());
     double x = limelightPosition.getX(DistanceUnit.INCH);
     double y = limelightPosition.getY(DistanceUnit.INCH);
-    double heading = limelightPosition.getHeading(AngleUnit.DEGREES) + rotationDegrees;
+    double heading =
+        AngleUnit.normalizeDegrees(
+            limelightPosition.getHeading(AngleUnit.DEGREES) - rotationDegrees);
     return new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading);
   }
 
@@ -644,6 +646,14 @@ public class ScoringSystem {
     turretAimOverride = true;
     distanceOverride = distance;
     horizontalAngleOverride = angle;
+  }
+
+  /**
+   * @brief gets if the aiming of the turret is override
+   * @return false if the robot is auto aiming, true if the robot is using an aim override
+   */
+  public boolean isAimOverride() {
+    return turretAimOverride;
   }
 
   /**

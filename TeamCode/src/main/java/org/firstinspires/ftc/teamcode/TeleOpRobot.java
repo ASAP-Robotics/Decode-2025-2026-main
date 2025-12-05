@@ -39,7 +39,7 @@ public class TeleOpRobot extends CommonRobot {
   protected MecanumWheelBase wheelBase;
   protected PinpointLocalizer pinpoint;
   protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
-  protected SimpleTimer odometryResetTimer = new SimpleTimer(6.7);
+  protected SimpleTimer odometryResetTimer = new SimpleTimer(2);
 
   public TeleOpRobot(
       HardwareMap hardwareMap,
@@ -117,17 +117,23 @@ public class TeleOpRobot extends CommonRobot {
     // miscellaneous backup manual controls
     // override aiming
     if (gamepad2.bWasPressed()) {
-      scoringSystem.overrideAiming(50, 0); // TODO: tune distance
+      if (scoringSystem.isAimOverride()) {
+        scoringSystem.autoAim();
+
+      } else {
+        scoringSystem.overrideAiming(50, 0); // TODO: tune distance
+      }
     }
     // reset odometry
     if (gamepad2.yWasPressed()) {
       Pose2D location = scoringSystem.allianceColor.getResetLocation();
-      pinpoint.setPose(
-          new Pose2d(
-              location.getX(DistanceUnit.INCH),
-              location.getY(DistanceUnit.INCH),
-              location.getHeading(AngleUnit.RADIANS)));
-      pinpoint.recalibrate();
+      pinpoint =
+          new PinpointLocalizer(
+              hardwareMap,
+              new Pose2d(
+                  location.getX(DistanceUnit.INCH),
+                  location.getY(DistanceUnit.INCH),
+                  location.getHeading(AngleUnit.RADIANS)));
     }
     // adjust turret offset
     if (gamepad1.dpadLeftWasPressed()) {
@@ -144,6 +150,7 @@ public class TeleOpRobot extends CommonRobot {
         faulted && pinpointErrorTimer.isFinished() ? new Pose2d(0, 0, 0) : pinpoint.getPose();
     double velocity =
         Math.hypot(Math.abs(velocityPose.linearVel.x), Math.abs(velocityPose.linearVel.y));
+    double angleVel = Math.abs(velocityPose.angVel);
     // ^ directionless velocity of the robot, in inches per second
 
     // update scoring systems
@@ -156,15 +163,19 @@ public class TeleOpRobot extends CommonRobot {
             location.heading.toDouble()));
     scoringSystem.update();
 
-    /*
-    if (odometryResetTimer.isFinished() && velocity < 1.0) { // might need to tune
+    telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
+
+    if (odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25) {
       Pose2D limelightPose = scoringSystem.getRobotPosition();
       if (limelightPose != null) {
-        pinpoint.setPosition(limelightPose);
+        pinpoint.setPose(
+            new Pose2d(
+                limelightPose.getX(DistanceUnit.INCH),
+                limelightPose.getY(DistanceUnit.INCH),
+                limelightPose.getHeading(AngleUnit.RADIANS)));
         odometryResetTimer.start();
       }
     }
-     */
 
     // update wheelbase
     wheelBase.setRotation(
