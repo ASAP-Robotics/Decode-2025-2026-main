@@ -647,6 +647,14 @@ public class ScoringSystem {
   }
 
   /**
+   * @brief gets if the aiming of the turret is override
+   * @return false if the robot is auto aiming, true if the robot is using an aim override
+   */
+  public boolean isAimOverride() {
+    return turretAimOverride;
+  }
+
+  /**
    * @brief intended for use when tuning the lookup table, providing manual flywheel control
    * @param RPM the RPM to spin the flywheel at
    * @param angle the angle to move the flap to

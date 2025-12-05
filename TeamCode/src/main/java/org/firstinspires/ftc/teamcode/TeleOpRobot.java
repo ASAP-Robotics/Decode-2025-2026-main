@@ -117,7 +117,12 @@ public class TeleOpRobot extends CommonRobot {
     // miscellaneous backup manual controls
     // override aiming
     if (gamepad2.bWasPressed()) {
-      scoringSystem.overrideAiming(50, 0); // TODO: tune distance
+      if (scoringSystem.isAimOverride()) {
+        scoringSystem.autoAim();
+
+      } else {
+        scoringSystem.overrideAiming(50, 0); // TODO: tune distance
+      }
     }
     // reset odometry
     if (gamepad2.yWasPressed()) {
