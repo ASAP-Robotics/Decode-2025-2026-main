@@ -64,7 +64,7 @@ public class Limelight {
   private final AllianceColor allianceColor;
   private BallSequence detectedSequence = BallSequence.GPP;
   private LimeLightMode mode;
-  private LinkedList<Result> results = new LinkedList<>();
+  private final LinkedList<Result> results = new LinkedList<>();
   private boolean isResultValid = false; // if the latest result is valid (contains a target)
   private final SimpleTimer detectionTimer;
   private final ElapsedTime timeSinceStart; // timer to track time since object creation
@@ -240,7 +240,7 @@ public class Limelight {
    * @return the 2D position of limelight on the field, or 0 if invalid
    */
   public Pose2D getPosition() {
-    if (results == null || !isResultValid || results.isEmpty()) {
+    if (!isResultValid || results.isEmpty()) {
       return null;
     }
 

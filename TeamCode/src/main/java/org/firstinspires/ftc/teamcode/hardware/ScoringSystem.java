@@ -638,6 +638,14 @@ public class ScoringSystem {
   }
 
   /**
+   * @brief gets the state limelight is in
+   * @return limelight's state
+   */
+  public Limelight.LimeLightMode getLimelightState() {
+    return limelight.getMode();
+  }
+
+  /**
    * @brief overrides aiming, switching control away from pinpoint / limelight
    * @param distance the distance from the target, in inches
    * @param angle the angle to turn the turret to

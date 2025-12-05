@@ -140,9 +140,13 @@ public class TeleOpRobot extends CommonRobot {
     }
     // adjust turret offset
     if (gamepad1.dpadLeftWasPressed()) {
-      scoringSystem.adjustTurretAngleOffset(-1);
-    } else if (gamepad1.dpadRightWasPressed()) {
       scoringSystem.adjustTurretAngleOffset(1);
+    } else if (gamepad1.dpadRightWasPressed()) {
+      scoringSystem.adjustTurretAngleOffset(-1);
+    } else if (gamepad1.dpadDownWasPressed()) {
+      scoringSystem.adjustTurretAngleOffset(5);
+    } else if (gamepad1.dpadUpWasPressed()) {
+      scoringSystem.adjustTurretAngleOffset(-5);
     }
 
     // get robot position
