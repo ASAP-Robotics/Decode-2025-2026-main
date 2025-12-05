@@ -16,109 +16,101 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import static java.lang.Thread.sleep;
+
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.actions.intakeAction;
+import org.firstinspires.ftc.teamcode.actions.setScoringPose;
+import org.firstinspires.ftc.teamcode.actions.shootAction;
+import org.firstinspires.ftc.teamcode.actions.updateScoring;
+import org.firstinspires.ftc.teamcode.drivers.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
+
 
 /**
  * @brief class to contain the behavior of the robot in Auto, to avoid code duplication
  */
 public class AutoRobot extends CommonRobot {
-  // stuff (variables, etc., see TeleOpRobot) goes here; TODO: update
+  // stuff (variables, etc., see TeliOpRobot) goes here;
+  ElapsedTime loopTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
   ElapsedTime timer = new ElapsedTime();
-  boolean move = true;
-  boolean move1 = false;
-  boolean done = false;
+
+
 
   public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     super(hardwareMap, telemetry, allianceColor);
 
-    // other "Init" setup stuff goes here
+
   }
 
-  /**
-   * @brief to be called once, when the opMode is initialized
-   */
-  public void init() {
-    scoringSystem.init(true, false);
+  public void init()  {
+
+    scoringSystem.init(true, true);
+
+
+
   }
 
-  /**
-   * @brief to be called repeatedly, while the opMode is in init
-   */
   public void initLoop() {
     scoringSystem.initLoop();
   }
 
-  /**
-   * @brief to be called once when the "start" button is pressed
-   */
   public void start() {
-    scoringSystem.start(true, true); // start scoring systems up
+    scoringSystem.start(false, false); // start scoring systems up
     timer.reset();
+    loopTime.reset();
   }
 
-  /**
-   * @brief to be called repeatedly, every loop
-   */
-  public void loop(MecanumDrive drive) {
-    // update scoring systems
-    scoringSystem.update();
+  @Override
+  public void loop() {
 
-    if (!done) {
-      // other stuff goes here; TODO: fill out
-      if (move && timer.seconds() > 3) {
-        Actions.runBlocking(
-            drive
-                .actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
-                .splineToLinearHeading(
-                    new Pose2d(30, 0, Math.toRadians(0)),
-                    Math.PI / 4,
-                    new TranslationalVelConstraint(80.0))
-                .build());
-
-        move = false;
-      }
-
-      if (move1) {
-        Actions.runBlocking(
-            drive
-                .actionBuilder(new Pose2d(30, 0, Math.toRadians(0)))
-                .splineToLinearHeading(
-                    new Pose2d(35, 20, Math.toRadians(0)),
-                    Math.PI / 4,
-                    new TranslationalVelConstraint(80.0))
-                .build());
-
-        move1 = false;
-        done = true;
-      }
-
-      // update telemetry
-      telemetry.update();
-
-      if (!move && !move1) {
-        scoringSystem.shootHalfSorted();
-        if (scoringSystem.getState() == ScoringSystem.State.INTAKING) {
-          move1 = true;
-        }
-      }
-    } else {
-      scoringSystem.fillMag();
-    }
   }
 
-  public void loop() {}
-
-  /**
-   * @brief to be called once, when the "stop" button is pressed
-   */
   public void stop() {
-    scoringSystem.stop(); // stop all powered movement in scoring systems
+
   }
+
+  public void loop(MecanumDrive drive) throws InterruptedException {
+    // update scoring systems
+
+    telemetry.addData("Loop time", loopTime.seconds());
+    loopTime.reset();
+    //  sleep(6000);
+
+    Actions.runBlocking(
+        new ParallelAction( // BIGEST BOI
+            new updateScoring(scoringSystem),
+            new SequentialAction( // BIG BOI
+                new SequentialAction( //1
+                    new setScoringPose(scoringSystem)
+                ),
+
+                new SequentialAction(
+                   drive
+                       .actionBuilder(new Pose2d(-59, 38, Math.toRadians(0)))
+                       .splineToLinearHeading(new Pose2d(-2, 31, Math.toRadians(90)), Math.PI / 4,
+                           new TranslationalVelConstraint(200.0), new ProfileAccelConstraint(-30,175))
+                       .build(),
+                    new shootAction(scoringSystem)
+                )
+            )
+        )
+    );
+  }
+
+
 }
+
+

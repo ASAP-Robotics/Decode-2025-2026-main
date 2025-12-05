@@ -62,7 +62,7 @@ public class Limelight {
   JSONObject config = new JSONObject(); // by default, config is blank
   private final Limelight3A limelight;
   private final AllianceColor allianceColor;
-  private BallSequence detectedSequence;
+  private BallSequence detectedSequence = BallSequence.GPP;
   private LimeLightMode mode;
   private LinkedList<Result> results = new LinkedList<>();
   private boolean isResultValid = false; // if the latest result is valid (contains a target)
