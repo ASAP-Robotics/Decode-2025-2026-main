@@ -54,17 +54,17 @@ public class Limelight {
     UNINITIALIZED
   }
 
-  private static final double AVERAGE_TIME = 2; // time period to average location over, seconds
-  private static final double MAX_POSITION_DEVIATION = 2; // for average, inches
-  private static final double MAX_ANGLE_DEVIATION = 5; // for average, degrees
-  private static final double OUTLIER_PERCENTAGE = 0.2; // the percent of values to trim as outliers
+  private static final double AVERAGE_TIME = 3; // time period to average location over, seconds
+  private static final double MAX_POSITION_DEVIATION = 4; // for average, inches
+  private static final double MAX_ANGLE_DEVIATION = 6.7; // for average, degrees
+  private static final double OUTLIER_PERCENTAGE = 0.4; // the percent of values to trim as outliers
   File configFile = AppUtil.getInstance().getSettingsFile("ball_sequence.json");
   JSONObject config = new JSONObject(); // by default, config is blank
   private final Limelight3A limelight;
   private final AllianceColor allianceColor;
   private BallSequence detectedSequence;
   private LimeLightMode mode;
-  private LinkedList<Result> results;
+  private LinkedList<Result> results = new LinkedList<>();
   private boolean isResultValid = false; // if the latest result is valid (contains a target)
   private final SimpleTimer detectionTimer;
   private final ElapsedTime timeSinceStart; // timer to track time since object creation
@@ -241,7 +241,7 @@ public class Limelight {
    */
   public Pose2D getPosition() {
     if (results == null || !isResultValid || results.isEmpty()) {
-      return new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
+      return null;
     }
 
     // lists for raw individual values
@@ -269,7 +269,7 @@ public class Limelight {
     if (isSpreadTooLarge(xt, MAX_POSITION_DEVIATION)
         || isSpreadTooLarge(yt, MAX_POSITION_DEVIATION)
         || isSpreadTooLarge(ht, MAX_ANGLE_DEVIATION)) {
-      return new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0);
+      return null;
     }
 
     // get average values

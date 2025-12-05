@@ -19,6 +19,8 @@ package org.firstinspires.ftc.teamcode.hardware;
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
 import java.util.Arrays;
+import java.util.Objects;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -139,7 +141,7 @@ public class ScoringSystem {
     telemetry.addData("State", state.toString());
     telemetry.addData("Sequence", ballSequence.toString());
     telemetry.addData("Position", robotPosition);
-    telemetry.addData("Limelight Position", limelight.getPosition().toString());
+    telemetry.addData("Limelight Position", getRobotPosition());
     telemetry.addData("Target Angle", turret.getTargetHorizontalAngleDegrees());
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
     telemetry.addData("Distance", turret.getTargetDistance());
@@ -628,10 +630,10 @@ public class ScoringSystem {
   public Pose2D getRobotPosition() {
     Pose2D limelightPosition = limelight.getPosition();
     if (limelightPosition == null || !turret.isAtTarget()) return null;
-    double rotationDegrees = AngleUnit.normalizeDegrees(turret.getHorizontalAngleDegrees() - 180);
+    double rotationDegrees = AngleUnit.normalizeDegrees(turret.getHorizontalAngleDegrees());
     double x = limelightPosition.getX(DistanceUnit.INCH);
     double y = limelightPosition.getY(DistanceUnit.INCH);
-    double heading = limelightPosition.getHeading(AngleUnit.DEGREES) + rotationDegrees;
+    double heading = AngleUnit.normalizeDegrees(limelightPosition.getHeading(AngleUnit.DEGREES) - rotationDegrees);
     return new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading);
   }
 
