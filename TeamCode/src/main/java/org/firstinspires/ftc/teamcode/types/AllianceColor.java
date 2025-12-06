@@ -16,6 +16,7 @@
 
 package org.firstinspires.ftc.teamcode.types;
 
+import com.acmerobotics.roadrunner.Pose2d;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -25,13 +26,21 @@ public enum AllianceColor {
   RED(
       24,
       2,
-      -30,
+      -110,
+      new Pose2d(-59, 38, 0), // starting pose
+      new Pose2d(-2, 31, Math.toRadians(90)),
+      new Pose2D(DistanceUnit.INCH, -13, 24, AngleUnit.DEGREES, 90),
+      new Pose2d(-6, 23, Math.toRadians(90)),
       new Pose2D(DistanceUnit.INCH, -66, 66, AngleUnit.DEGREES, 0),
       new Pose2D(DistanceUnit.INCH, 63, -63, AngleUnit.DEGREES, 0)),
   BLUE(
       20,
       1,
-      30,
+      110,
+      new Pose2d(-59, -38, 0),
+      new Pose2d(-2, -31, Math.toRadians(-90)),
+      new Pose2D(DistanceUnit.INCH, -13, -24, AngleUnit.DEGREES, -90),
+      new Pose2d(-6, -23, Math.toRadians(90)),
       new Pose2D(DistanceUnit.INCH, -66, -66, AngleUnit.DEGREES, 0),
       new Pose2D(DistanceUnit.INCH, 63, 63, AngleUnit.DEGREES, 0));
 
@@ -40,16 +49,28 @@ public enum AllianceColor {
   private final double obeliskAngle;
   private final Pose2D targetLocation;
   private final Pose2D resetLocation;
+  private final Pose2d autoStartPosition;
+  private final Pose2d autoRRShootPosition;
+  private final Pose2D autoSSShootPosition;
+  private final Pose2d autoEndPosition;
 
   AllianceColor(
       int aprilTagId,
       int limelightPipeline,
       double obeliskAngle,
+      Pose2d autoStartPosition,
+      Pose2d autoRRShootPosition,
+      Pose2D autoSSShootPosition,
+      Pose2d autoEndPosition,
       Pose2D targetLocation,
       Pose2D resetLocation) {
     this.aprilTagId = aprilTagId;
     this.limelightPipeline = limelightPipeline;
     this.obeliskAngle = obeliskAngle;
+    this.autoStartPosition = autoStartPosition;
+    this.autoRRShootPosition = autoRRShootPosition;
+    this.autoSSShootPosition = autoSSShootPosition;
+    this.autoEndPosition = autoEndPosition;
     this.targetLocation = targetLocation;
     this.resetLocation = resetLocation;
   }
@@ -92,5 +113,37 @@ public enum AllianceColor {
    */
   public Pose2D getResetLocation() {
     return resetLocation;
+  }
+
+  /**
+   * @brief gets the position of the robot at the start of auto
+   * @return the auto start position of the robot
+   */
+  public Pose2d getAutoStartPosition() {
+    return autoStartPosition;
+  }
+
+  /**
+   * @brief gets the roadRunner position that the robot shoots at in auto
+   * @return the auto shoot position of the robot
+   */
+  public Pose2d getAutoRRShootPosition() {
+    return autoRRShootPosition;
+  }
+
+  /**
+   * @brief gets the position to give the scoring system while shooting in auto
+   * @return the auto scoring system shoot position fo the robot
+   */
+  public Pose2D getAutoSSShootPosition() {
+    return autoSSShootPosition;
+  }
+
+  /**
+   * @brief gets the position of the robot at the end of auto (to use at the start of teleOp
+   * @return the position the robot finishes auto at
+   */
+  public Pose2d getAutoEndPosition() {
+    return autoEndPosition;
   }
 }

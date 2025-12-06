@@ -94,4 +94,8 @@ public final class PinpointLocalizer implements Localizer {
         return false;
     }
   }
+
+  public GoBildaPinpointDriver.DeviceStatus getState() {
+    return driver.getDeviceStatus();
+  }
 }
