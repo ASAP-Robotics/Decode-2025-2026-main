@@ -28,6 +28,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
+import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
@@ -73,7 +74,7 @@ public class TeleOpRobot extends CommonRobot {
       pinpoint.update();
     }
     scoringSystem.init(false, false); // initialize scoring systems
-    scoringSystem.adjustTurretAngleOffset(-17); // tune
+    scoringSystem.adjustTurretAngleOffset(allianceColor.getTurretOffset()); // tune
   }
 
   /**
@@ -116,6 +117,12 @@ public class TeleOpRobot extends CommonRobot {
     // eject
     if (gamepad2.leftBumperWasPressed()) {
       scoringSystem.clearIntake();
+    }
+
+    if (gamepad2.xWasPressed()) {
+      scoringSystem.setIntakeFull(BallColor.PURPLE);
+    } else if (gamepad2.aWasPressed()) {
+      scoringSystem.setIntakeFull(BallColor.GREEN);
     }
 
     // miscellaneous backup manual controls

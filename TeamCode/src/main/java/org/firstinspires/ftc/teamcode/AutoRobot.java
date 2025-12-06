@@ -71,7 +71,7 @@ public class AutoRobot extends CommonRobot {
                     drive
                         .actionBuilder(allianceColor.getAutoStartPosition())
                         .splineToLinearHeading(
-                            allianceColor.getAutoRRShootPosition(),
+                            new Pose2d(-7, 31, Math.toRadians(90)),
                             Math.PI / 4,
                             new TranslationalVelConstraint(250.0),
                             new ProfileAccelConstraint(-50, 180))
@@ -79,7 +79,7 @@ public class AutoRobot extends CommonRobot {
                     new shootAction(scoringSystem)),
                 new SequentialAction( // pickup 1
                     drive
-                        .actionBuilder(new Pose2d(-2, 31, Math.toRadians(90)))
+                        .actionBuilder(new Pose2d(-7, 31, Math.toRadians(90)))
                         .splineToLinearHeading(
                             new Pose2d(-2, 62, Math.toRadians(90)),
                             Math.PI / 4,
@@ -109,7 +109,7 @@ public class AutoRobot extends CommonRobot {
                     drive
                         .actionBuilder(new Pose2d(-8, 60, Math.toRadians(270)))
                         .splineToLinearHeading(
-                            new Pose2d(-5, 31, Math.toRadians(90)),
+                            new Pose2d(-7, 31, Math.toRadians(90)),
                             Math.PI / 4,
                             new TranslationalVelConstraint(250.0),
                             new ProfileAccelConstraint(-50, 180))
@@ -117,7 +117,7 @@ public class AutoRobot extends CommonRobot {
                     new shootAction(scoringSystem)),
                 new SequentialAction( // pickup2
                     drive
-                        .actionBuilder(new Pose2d(-2, 31, Math.toRadians(90)))
+                        .actionBuilder(new Pose2d(-7, 31, Math.toRadians(90)))
                         .splineToLinearHeading(
                             new Pose2d(20, 33, Math.toRadians(90)),
                             Math.PI / 4,
@@ -137,7 +137,7 @@ public class AutoRobot extends CommonRobot {
                     drive
                         .actionBuilder(new Pose2d(24, 69, Math.toRadians(180)))
                         .splineToLinearHeading(
-                            allianceColor.getAutoRRShootPosition(),
+                            new Pose2d(-7, 31, Math.toRadians(90)),
                             Math.PI / 4,
                             new TranslationalVelConstraint(250.0),
                             new ProfileAccelConstraint(-50, 180))
@@ -161,7 +161,7 @@ public class AutoRobot extends CommonRobot {
                     drive
                         .actionBuilder(new Pose2d(43, 69, Math.toRadians(90)))
                         .splineToLinearHeading(
-                            new Pose2d(-2, 31, Math.toRadians(90)),
+                            new Pose2d(-7, 31, Math.toRadians(90)),
                             Math.PI / 4,
                             new TranslationalVelConstraint(250.0),
                             new ProfileAccelConstraint(-50, 180))
@@ -169,7 +169,7 @@ public class AutoRobot extends CommonRobot {
                     new shootAction(scoringSystem)),
                 new ParallelAction( // leave
                     drive
-                        .actionBuilder(new Pose2d(-2, 31, Math.toRadians(90)))
+                        .actionBuilder(new Pose2d(-7, 31, Math.toRadians(90)))
                         .splineToLinearHeading(
                             new Pose2d(7, 31, Math.toRadians(90)),
                             Math.PI / 4,

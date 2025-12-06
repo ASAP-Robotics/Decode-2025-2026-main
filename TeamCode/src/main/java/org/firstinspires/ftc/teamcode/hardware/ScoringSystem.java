@@ -98,7 +98,7 @@ public class ScoringSystem {
    * @brief to be called repeatedly while the robot is in init
    */
   public void initLoop() {
-    spindex.update();
+    spindex.update(telemetry);
     turret.initLoop();
   }
 
@@ -136,13 +136,15 @@ public class ScoringSystem {
     updateIntake();
     intake.update();
     turret.update();
-    spindex.update();
+    spindex.update(telemetry);
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("State", state.toString());
     telemetry.addData("Sequence", ballSequence);
     telemetry.addData("Position", robotPosition);
     telemetry.addData("Limelight Position", getRobotPosition());
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
+    telemetry.addData("At target", turret.isAtTarget());
+    telemetry.addData("Intake", spindex.getIntakeColor());
   }
 
   /**
@@ -363,6 +365,7 @@ public class ScoringSystem {
       }
     }
 
+
     if (!spindex.isIndexValid(index)) return false; // if spindex is empty, return false
 
     int correctColorIndex = spindex.getColorIndex(ballSequence.getBallColors()[0]);
@@ -556,6 +559,10 @@ public class ScoringSystem {
     }
 
     return true;
+  }
+
+  public void setIntakeFull(BallColor ball) {
+    spindex.setIntakeColor(ball);
   }
 
   /**

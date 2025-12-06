@@ -22,31 +22,30 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public enum AllianceColor {
-  // TODO: tune obelisk angle
   RED(
       24,
       2,
-      -110,
+      -50,
       new Pose2d(-59, 38, 0), // starting pose
-      new Pose2d(-2, 31, Math.toRadians(90)),
-      new Pose2D(DistanceUnit.INCH, -13, 24, AngleUnit.DEGREES, 90),
-      new Pose2d(-6, 23, Math.toRadians(90)),
+      new Pose2d(-4, 31, Math.toRadians(90)), // roadrunner shooting pose
+      new Pose2D(DistanceUnit.INCH, -13, 24, AngleUnit.DEGREES, 90), // scoring system shooting pose
+      new Pose2d(-6, 23, Math.toRadians(90)), // auto end position
       new Pose2D(DistanceUnit.INCH, -66, 66, AngleUnit.DEGREES, 0),
-      new Pose2D(DistanceUnit.INCH, 63, -63, AngleUnit.DEGREES, 0)),
+      new Pose2D(DistanceUnit.INCH, 63, 63, AngleUnit.DEGREES, 0)),
   BLUE(
       20,
       1,
-      110,
+      0,
       new Pose2d(-59, -38, 0),
-      new Pose2d(-2, -31, Math.toRadians(-90)),
+      new Pose2d(-4, -31, Math.toRadians(-90)),
       new Pose2D(DistanceUnit.INCH, -13, -24, AngleUnit.DEGREES, -90),
-      new Pose2d(-6, -23, Math.toRadians(90)),
+      new Pose2d(-61.6, -37.5, Math.toRadians(0)),
       new Pose2D(DistanceUnit.INCH, -66, -66, AngleUnit.DEGREES, 0),
-      new Pose2D(DistanceUnit.INCH, 63, 63, AngleUnit.DEGREES, 0));
+      new Pose2D(DistanceUnit.INCH, 63, -63, AngleUnit.DEGREES, 0));
 
   private final int aprilTagId;
   private final int limelightPipeline;
-  private final double obeliskAngle;
+  private final double turretOffset;
   private final Pose2D targetLocation;
   private final Pose2D resetLocation;
   private final Pose2d autoStartPosition;
@@ -57,7 +56,7 @@ public enum AllianceColor {
   AllianceColor(
       int aprilTagId,
       int limelightPipeline,
-      double obeliskAngle,
+      double turretOffset,
       Pose2d autoStartPosition,
       Pose2d autoRRShootPosition,
       Pose2D autoSSShootPosition,
@@ -66,7 +65,7 @@ public enum AllianceColor {
       Pose2D resetLocation) {
     this.aprilTagId = aprilTagId;
     this.limelightPipeline = limelightPipeline;
-    this.obeliskAngle = obeliskAngle;
+    this.turretOffset = turretOffset;
     this.autoStartPosition = autoStartPosition;
     this.autoRRShootPosition = autoRRShootPosition;
     this.autoSSShootPosition = autoSSShootPosition;
@@ -95,8 +94,8 @@ public enum AllianceColor {
    * @brief gets the angle to move the turret to to look at the obelisk
    * @return the turret angle to look at the obelisk
    */
-  public double getObeliskAngle() {
-    return obeliskAngle;
+  public double getTurretOffset() {
+    return turretOffset;
   }
 
   /**
