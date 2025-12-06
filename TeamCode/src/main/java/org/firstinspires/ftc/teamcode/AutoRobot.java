@@ -131,12 +131,10 @@ public class AutoRobot extends CommonRobot {
                             new ProfileAccelConstraint(-10, 80))
                         .build()),
 
-
                 new SequentialAction( // shoot 3
                     drive
                         .actionBuilder(new Pose2d(24, 55, Math.toRadians(180)))
                         .splineToLinearHeading(
-
                             allianceColor.getAutoRRShootPosition(),
                             Math.PI / 4,
                             new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
