@@ -129,8 +129,8 @@ public class AutoRobot extends CommonRobot {
                         .splineToLinearHeading(
                             new Pose2d(24, 69, Math.toRadians(90)),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(165.0),
-                            new ProfileAccelConstraint(-10, 80))
+                            new TranslationalVelConstraint(160.0),
+                            new ProfileAccelConstraint(-10, 75))
                         .build()),
                 new SequentialAction( // shoot 3
                     drive
