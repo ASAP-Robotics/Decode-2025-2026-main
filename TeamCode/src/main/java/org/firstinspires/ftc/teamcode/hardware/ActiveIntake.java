@@ -49,7 +49,7 @@ public class ActiveIntake {
   public org.firstinspires.ftc.teamcode.utils.SimpleTimer timer = new SimpleTimer(1);
 
   public ActiveIntake(DcMotorEx intakeMotor) {
-    this(intakeMotor, 0.5, 25);
+    this(intakeMotor, 1, 9);
   }
 
   public ActiveIntake(DcMotorEx intakeMotor, double readingTime, double stallCurrent) {

@@ -127,17 +127,28 @@ public class AutoRobot extends CommonRobot {
                         .build()),
                 new SequentialAction( // pickup2 also
                     drive
-                        .actionBuilder(new Pose2d(21, 33, Math.toRadians(90)))
+                        .actionBuilder(new Pose2d(24, 33, Math.toRadians(90)))
                         .splineToLinearHeading(
                             new Pose2d(24, 67, Math.toRadians(90)),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(175.0),
-                            new ProfileAccelConstraint(-10, 110))
+                            new TranslationalVelConstraint(170.0),
+                            new ProfileAccelConstraint(-10, 100))
                         .build()),
+                new SequentialAction( // backup
+                    drive
+                        .actionBuilder(new Pose2d(24, 67, Math.toRadians(90)))
+                        .splineToLinearHeading(
+                            new Pose2d(24, 55, Math.toRadians(90)),
+                            Math.PI / 4,
+                            new TranslationalVelConstraint(200.0),
+                            new ProfileAccelConstraint(-30, 175))
+                        .build()),
+
                 new SequentialAction( // shoot 3
                     drive
-                        .actionBuilder(new Pose2d(-59, 38, Math.toRadians(45)))
+                        .actionBuilder(new Pose2d(24, 55, Math.toRadians(90)))
                         .splineToLinearHeading(
+
                             allianceColor.getAutoRRShootPosition(),
                             Math.PI / 4,
                             new TranslationalVelConstraint(200.0),
