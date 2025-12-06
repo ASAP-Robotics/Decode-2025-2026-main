@@ -2,9 +2,7 @@ package org.firstinspires.ftc.teamcode.actions; // file: MySetPositionAction.jav
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 
 public class updateTelemetry implements Action {
   private final Telemetry telemetry;

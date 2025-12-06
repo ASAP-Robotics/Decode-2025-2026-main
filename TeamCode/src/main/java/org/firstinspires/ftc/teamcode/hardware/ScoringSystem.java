@@ -156,7 +156,6 @@ public class ScoringSystem {
       turret.setHorizontalAngle(horizontalAngleOverride);
       turret.setTargetDistance(distanceOverride);
       return;
-
     }
     /*
     else if (!limelight.isReadyToNavigate()) {
