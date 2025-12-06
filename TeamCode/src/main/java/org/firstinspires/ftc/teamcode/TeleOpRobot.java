@@ -73,6 +73,7 @@ public class TeleOpRobot extends CommonRobot {
       pinpoint.update();
     }
     scoringSystem.init(false, false); // initialize scoring systems
+    scoringSystem.adjustTurretAngleOffset(-17); // tune
   }
 
   /**

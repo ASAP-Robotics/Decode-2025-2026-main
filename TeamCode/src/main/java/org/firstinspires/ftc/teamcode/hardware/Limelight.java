@@ -26,8 +26,6 @@ import com.qualcomm.robotcore.util.ReadWriteFile;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -64,9 +62,9 @@ public class Limelight {
   JSONObject config = new JSONObject(); // by default, config is blank
   private final Limelight3A limelight;
   private final AllianceColor allianceColor;
-  private BallSequence detectedSequence = null;
+  private BallSequence detectedSequence = BallSequence.GPP;
   private LimeLightMode mode;
-  private final LinkedList<Result> results = new LinkedList<>();
+  private LinkedList<Result> results = new LinkedList<>();
   private boolean isResultValid = false; // if the latest result is valid (contains a target)
   private final SimpleTimer detectionTimer;
   private final ElapsedTime timeSinceStart; // timer to track time since object creation
@@ -95,14 +93,20 @@ public class Limelight {
   public void init(boolean search) {
     mode = search ? LimeLightMode.IDENTIFICATION : LimeLightMode.NAVIGATION;
 
-    if (!search) {
-      try {
-        config = new JSONObject(ReadWriteFile.readFile(configFile)); // get stored sequence
-        detectedSequence = BallSequence.valueOf(config.getString("sequence"));
-      } catch (JSONException ignored) {
-        // fail silently if config read failed
-        detectedSequence = BallSequence.GPP;
-      }
+    switch (mode) {
+      case IDENTIFICATION:
+        detectionTimer.start();
+        break;
+
+      case NAVIGATION:
+        try {
+          config = new JSONObject(ReadWriteFile.readFile(configFile)); // get stored sequence
+          detectedSequence = BallSequence.valueOf(config.getString("sequence"));
+        } catch (JSONException ignored) {
+          // fail silently if config read failed
+          detectedSequence = BallSequence.PPG;
+        }
+        break;
     }
 
     limelight.pipelineSwitch(getPipeline());
@@ -114,40 +118,26 @@ public class Limelight {
    */
   public void start() {
     limelight.start();
-    limelight.pipelineSwitch(getPipeline());
     timeSinceStart.reset();
-    detectionTimer.start();
   }
 
   /**
    * @brief gets the latest data from limelight
    * @note call every loop
    */
-  public void update(Telemetry telemetry) {
-    if (detectionTimer.isFinished() && mode == LimeLightMode.IDENTIFICATION) {
-      detectedSequence = BallSequence.GPP; // default to GPP if search failed
-      mode = LimeLightMode.NAVIGATION;
-    }
-
+  public void update() {
     LLResult result = limelight.getLatestResult();
-
-    isResultValid = result != null && result.isValid();
-    telemetry.addData("Result valid", isResultValid);
-    if (result != null) telemetry.addData("Pipeline", result.getPipelineIndex());
-
-    telemetry.addData("LL Mode", mode);
-
-    try {
-      telemetry.addData("Num Results", results.getFirst().result.getFiducialResults().size());
-    } catch (Exception e) {
-      telemetry.addData("Num Results Exception", e.toString());
+    if (result == null || !result.isValid()) {
+      isResultValid = false;
+      return;
+    } else {
+      isResultValid = true;
     }
-
-    if (!isResultValid) return;
 
     double now = timeSinceStart.time();
     try {
-      results.add(new Result(result, now));
+      // only add result if it is valid
+      if (isResultValid) results.add(new Result(result, now));
 
       // remove old results
       while (!results.isEmpty() && now - results.getFirst().timestamp > AVERAGE_TIME) {
@@ -159,53 +149,50 @@ public class Limelight {
 
     if (!isPipelineCorrect()) limelight.pipelineSwitch(getPipeline());
 
-    if (mode == LimeLightMode.IDENTIFICATION) {
-      telemetry.addData("Update working", updateIdentification());
-    }
+    if (mode == LimeLightMode.IDENTIFICATION) updateIdentification();
   }
 
   /**
    * @brief updates stuff to do with detecting the ball sequence
    * @note only call if mode is identification
    */
-  private boolean updateIdentification() {
-    limelight.pipelineSwitch(0); // stupid
+  private void updateIdentification() {
+    BallSequence oldSequence = detectedSequence;
 
     List<LLResultTypes.FiducialResult> apriltags = results.getLast().result.getFiducialResults();
     int bestId = NULL;
-
-    for (LLResultTypes.FiducialResult tag : apriltags) {
-      bestId = tag.getFiducialId();
-    }
-
-    /*
     if (apriltags.size() == 2) {
       // if limelight sees two apriltags
       bestId = getBestId(apriltags);
-    } else if (apriltags.size() == 1) {
-      bestId = apriltags.get(0).getFiducialId();
     }
-     */
 
     for (BallSequence sequence : BallSequence.values()) {
       // ^ for all possible ball sequences
       if (sequence.getAprilTagId() == bestId) {
         // ^ if the tag ID of the sequence matches the best tag
         detectedSequence = sequence;
-        mode = LimeLightMode.NAVIGATION;
-
-        try {
-          config.put("sequence", detectedSequence.name());
-          ReadWriteFile.writeFile(configFile, config.toString()); // store detected sequence
-        } catch (Exception ignored) {
-
-        }
-
-        return true;
+        break;
       }
     }
 
-    return true;
+    boolean searchFailed = detectionTimer.isFinished();
+
+    if (detectedSequence != oldSequence || searchFailed) {
+      // ^ if a new ball sequence was detected
+      mode = LimeLightMode.NAVIGATION;
+
+      if (searchFailed) {
+        detectedSequence = BallSequence.GPP; // default to GPP if search failed
+      }
+
+      try {
+        config.put("sequence", detectedSequence.name());
+        config.put("search_failed", searchFailed);
+      } catch (JSONException ignored) {
+
+      }
+      ReadWriteFile.writeFile(configFile, config.toString()); // store detected sequence
+    }
   }
 
   /**
@@ -245,7 +232,7 @@ public class Limelight {
    * @note if a sequence hasn't been detected yet, this will return null
    */
   public BallSequence getSequence() {
-    return detectedSequence == null ? BallSequence.GPP : detectedSequence;
+    return detectedSequence;
   }
 
   /**
@@ -253,7 +240,7 @@ public class Limelight {
    * @return the 2D position of limelight on the field, or 0 if invalid
    */
   public Pose2D getPosition() {
-    if (!isResultValid || results.isEmpty()) {
+    if (results == null || !isResultValid || results.isEmpty()) {
       return null;
     }
 
@@ -368,7 +355,7 @@ public class Limelight {
    *     false otherwise
    */
   public boolean isReadyToNavigate() {
-    return mode == LimeLightMode.NAVIGATION;
+    return mode == LimeLightMode.NAVIGATION && detectedSequence != null;
   }
 
   /**
@@ -414,7 +401,7 @@ public class Limelight {
     try {
       return results.getLast().result.getPipelineIndex() == getPipeline();
     } catch (Exception e) {
-      return false;
+      return true;
     }
   }
 }

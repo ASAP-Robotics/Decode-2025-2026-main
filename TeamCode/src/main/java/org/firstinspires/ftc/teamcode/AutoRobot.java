@@ -60,14 +60,13 @@ public class AutoRobot extends CommonRobot {
   }
 
   public void start() {
-    scoringSystem.start(false, true); // start scoring systems up
+    scoringSystem.start(false, false); // start scoring systems up
 
     Actions.runBlocking(
         new ParallelAction( // BIGGEST BOI
             new updateScoring(scoringSystem),
             new updateTelemetry(telemetry),
             new SequentialAction( // BIG BOI
-                new SearchObelisk(scoringSystem),
                 new SequentialAction(new setScoringPose(scoringSystem)), // 1
                 new SequentialAction( // shoot 1
                     drive

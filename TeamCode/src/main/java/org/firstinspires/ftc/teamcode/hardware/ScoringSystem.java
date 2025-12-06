@@ -89,7 +89,7 @@ public class ScoringSystem {
    */
   public void init(boolean isPreloaded, boolean auto) {
     spindex.init(BallSequence.GPP, isPreloaded);
-    turret.init(auto ? allianceColor.getObeliskAngle() : 0);
+    turret.init(0);
     turret.setActive(!isPreloaded);
     limelight.init(auto);
   }
@@ -129,7 +129,7 @@ public class ScoringSystem {
    * @note call each loop
    */
   public void update() {
-    limelight.update(telemetry);
+    limelight.update();
     ballSequence = limelight.getSequence();
     updateAiming();
     updateShooting();
@@ -140,6 +140,7 @@ public class ScoringSystem {
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("State", state.toString());
     telemetry.addData("Sequence", ballSequence);
+    telemetry.addData("Position", robotPosition);
     telemetry.addData("Limelight Position", getRobotPosition());
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
   }
@@ -156,10 +157,13 @@ public class ScoringSystem {
       turret.setTargetDistance(distanceOverride);
       return;
 
-    } else if (!limelight.isReadyToNavigate()) {
+    }
+    /*
+    else if (!limelight.isReadyToNavigate()) {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
       return;
     }
+     */
 
     /*
     Pose2D limelightPosition = limelight.getPosition();
