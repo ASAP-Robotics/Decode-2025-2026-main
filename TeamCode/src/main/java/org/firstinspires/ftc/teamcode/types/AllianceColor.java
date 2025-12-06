@@ -27,7 +27,7 @@ public enum AllianceColor {
       24,
       2,
       -30,
-      new Pose2d(-59, 38, 0), //starting pose
+      new Pose2d(-59, 38, 0), // starting pose
       new Pose2d(-2, 31, Math.toRadians(90)),
       new Pose2D(DistanceUnit.INCH, -13, 24, AngleUnit.DEGREES, 90),
       new Pose2d(0, 0, 0), // TODO: tune

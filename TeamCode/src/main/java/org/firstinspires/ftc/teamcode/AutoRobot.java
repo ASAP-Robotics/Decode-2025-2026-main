@@ -31,9 +31,7 @@ import org.firstinspires.ftc.teamcode.actions.updateScoring;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
-
- /** class to contain the behavior of the robot in Auto, to avoid code duplication */
-
+/** class to contain the behavior of the robot in Auto, to avoid code duplication */
 public class AutoRobot extends CommonRobot {
   // stuff (variables, etc., see TeliOpRobot) goes here;
   protected final Pose2d beginPose;
@@ -74,7 +72,8 @@ public class AutoRobot extends CommonRobot {
                         .splineToLinearHeading(
                             allianceColor.getAutoRRShootPosition(),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
+                            new TranslationalVelConstraint(250.0),
+                            new ProfileAccelConstraint(-50, 180))
                         .build(),
                     new shootAction(scoringSystem)),
                 new SequentialAction( // pickup 1
@@ -92,7 +91,8 @@ public class AutoRobot extends CommonRobot {
                         .splineToLinearHeading(
                             new Pose2d(-8, 48, Math.toRadians(270)),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
+                            new TranslationalVelConstraint(250.0),
+                            new ProfileAccelConstraint(-50, 180))
                         .build()),
                 new SequentialAction( // hit gate
                     drive
@@ -110,7 +110,8 @@ public class AutoRobot extends CommonRobot {
                         .splineToLinearHeading(
                             allianceColor.getAutoRRShootPosition(),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
+                            new TranslationalVelConstraint(250.0),
+                            new ProfileAccelConstraint(-50, 180))
                         .build(),
                     new shootAction(scoringSystem)),
                 new SequentialAction( // pickup2
@@ -119,7 +120,8 @@ public class AutoRobot extends CommonRobot {
                         .splineToLinearHeading(
                             new Pose2d(24, 33, Math.toRadians(90)),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
+                            new TranslationalVelConstraint(250.0),
+                            new ProfileAccelConstraint(-50, 180))
                         .build()),
                 new SequentialAction( // pickup2 also
                     drive
@@ -130,52 +132,49 @@ public class AutoRobot extends CommonRobot {
                             new TranslationalVelConstraint(165.0),
                             new ProfileAccelConstraint(-10, 80))
                         .build()),
-
                 new SequentialAction( // shoot 3
                     drive
                         .actionBuilder(new Pose2d(24, 55, Math.toRadians(180)))
                         .splineToLinearHeading(
                             allianceColor.getAutoRRShootPosition(),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
+                            new TranslationalVelConstraint(250.0),
+                            new ProfileAccelConstraint(-50, 180))
                         .build(),
-                    new shootAction(scoringSystem)
-                ),
-                new SequentialAction(//pickup 3
+                    new shootAction(scoringSystem)),
+                new SequentialAction( // pickup 3
                     drive
                         .actionBuilder(new Pose2d(-2, 31, Math.toRadians(90)))
                         .splineToLinearHeading(
                             new Pose2d(43, 31, Math.toRadians(90)),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
+                            new TranslationalVelConstraint(250.0),
+                            new ProfileAccelConstraint(-50, 180))
                         .splineToLinearHeading(
                             new Pose2d(43, 67, Math.toRadians(90)),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(175.0), new ProfileAccelConstraint(-10,110))
-                        .build()
-        ),
-                new SequentialAction(//shoot 4
+                            new TranslationalVelConstraint(175.0),
+                            new ProfileAccelConstraint(-10, 110))
+                        .build()),
+                new SequentialAction( // shoot 4
                     drive
                         .actionBuilder(new Pose2d(43, 67, Math.toRadians(90)))
                         .splineToLinearHeading(
                             new Pose2d(-2, 31, Math.toRadians(90)),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
+                            new TranslationalVelConstraint(250.0),
+                            new ProfileAccelConstraint(-50, 180))
                         .build(),
-                    new shootAction(scoringSystem)
-                ),
-                new ParallelAction(//leave
+                    new shootAction(scoringSystem)),
+                new ParallelAction( // leave
                     drive
                         .actionBuilder(new Pose2d(-2, 31, Math.toRadians(90)))
                         .splineToLinearHeading(
                             new Pose2d(7, 31, Math.toRadians(90)),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
-                        .build()
-                )
-
-
-            )));
+                            new TranslationalVelConstraint(250.0),
+                            new ProfileAccelConstraint(-50, 180))
+                        .build()))));
   }
 
   public void stop() {}
