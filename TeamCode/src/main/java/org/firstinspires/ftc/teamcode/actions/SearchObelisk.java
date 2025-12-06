@@ -6,10 +6,10 @@ import com.acmerobotics.roadrunner.Action;
 import org.firstinspires.ftc.teamcode.hardware.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 
-public class SearchOblisk implements Action {
+public class SearchObelisk implements Action {
   protected ScoringSystem scoringSystem;
 
-  public SearchOblisk(ScoringSystem scoringSystem) {
+  public SearchObelisk(ScoringSystem scoringSystem) {
     this.scoringSystem = scoringSystem;
   }
 

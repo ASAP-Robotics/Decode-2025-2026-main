@@ -26,7 +26,7 @@ public enum AllianceColor {
   RED(
       24,
       2,
-      -30,
+      -110,
       new Pose2d(-59, 38, 0), // starting pose
       new Pose2d(-2, 31, Math.toRadians(90)),
       new Pose2D(DistanceUnit.INCH, -13, 24, AngleUnit.DEGREES, 90),
@@ -36,7 +36,7 @@ public enum AllianceColor {
   BLUE(
       20,
       1,
-      30,
+      110,
       new Pose2d(-59, -38, 0),
       new Pose2d(-2, -31, Math.toRadians(270)),
       new Pose2D(DistanceUnit.INCH, -13, -24, AngleUnit.DEGREES, 270),

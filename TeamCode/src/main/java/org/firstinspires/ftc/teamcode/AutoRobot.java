@@ -25,9 +25,11 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.actions.SearchObelisk;
 import org.firstinspires.ftc.teamcode.actions.setScoringPose;
 import org.firstinspires.ftc.teamcode.actions.shootAction;
 import org.firstinspires.ftc.teamcode.actions.updateScoring;
+import org.firstinspires.ftc.teamcode.actions.updateTelemetry;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
@@ -58,14 +60,15 @@ public class AutoRobot extends CommonRobot {
   }
 
   public void start() {
-    scoringSystem.start(false, false); // start scoring systems up
+    scoringSystem.start(false, true); // start scoring systems up
 
     Actions.runBlocking(
         new ParallelAction( // BIGGEST BOI
             new updateScoring(scoringSystem),
+            new updateTelemetry(telemetry),
             new SequentialAction( // BIG BOI
-                new SequentialAction( // 1
-                    new setScoringPose(scoringSystem)),
+                new SearchObelisk(scoringSystem),
+                new SequentialAction(new setScoringPose(scoringSystem)), // 1
                 new SequentialAction( // shoot 1
                     drive
                         .actionBuilder(allianceColor.getAutoStartPosition())

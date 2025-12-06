@@ -49,7 +49,7 @@ public class ScoringSystem {
   private final Limelight limelight; // the limelight camera on the turret
   protected State state = State.UNINITIALISED; // the state of the scoring system
   protected SequenceMode sequenceMode = SequenceMode.UNSORTED; // the mode used for shooting
-  private BallSequence ballSequence = BallSequence.PPG; // the sequence being shot
+  private BallSequence ballSequence = BallSequence.GPP; // the sequence being shot
   public final AllianceColor allianceColor; // the alliance we are on
   private boolean turretAimOverride = false; // if the aim of the turret is overridden
   private double horizontalAngleOverride = 0;
@@ -129,7 +129,7 @@ public class ScoringSystem {
    * @note call each loop
    */
   public void update() {
-    limelight.update();
+    limelight.update(telemetry);
     ballSequence = limelight.getSequence();
     updateAiming();
     updateShooting();
@@ -139,12 +139,9 @@ public class ScoringSystem {
     spindex.update();
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("State", state.toString());
-    telemetry.addData("Sequence", ballSequence.toString());
-    telemetry.addData("Position", robotPosition);
+    telemetry.addData("Sequence", ballSequence);
     telemetry.addData("Limelight Position", getRobotPosition());
-    telemetry.addData("Target Angle", turret.getTargetHorizontalAngleDegrees());
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
-    telemetry.addData("Distance", turret.getTargetDistance());
   }
 
   /**
@@ -158,14 +155,11 @@ public class ScoringSystem {
       turret.setHorizontalAngle(horizontalAngleOverride);
       turret.setTargetDistance(distanceOverride);
       return;
-    }
 
-    /*
-    else if (!limelight.isReadyToNavigate()) {
+    } else if (!limelight.isReadyToNavigate()) {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
       return;
     }
-    */
 
     /*
     Pose2D limelightPosition = limelight.getPosition();

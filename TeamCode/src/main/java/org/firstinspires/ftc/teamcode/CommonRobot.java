@@ -47,7 +47,7 @@ public abstract class CommonRobot {
     this.allianceColor = allianceColor;
 
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
-    Limelight limelight = new Limelight(rawLimelight, this.allianceColor, 2);
+    Limelight limelight = new Limelight(rawLimelight, this.allianceColor, 30);
 
     AnalogInput lifterEncoder = this.hardwareMap.get(AnalogInput.class, "lifterEncoder");
     Servo rawLifterServo2 = this.hardwareMap.get(Servo.class, "lifter2");
