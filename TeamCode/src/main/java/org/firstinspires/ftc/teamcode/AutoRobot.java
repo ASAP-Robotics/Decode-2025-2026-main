@@ -31,9 +31,9 @@ import org.firstinspires.ftc.teamcode.actions.updateScoring;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
-/**
- * @brief class to contain the behavior of the robot in Auto, to avoid code duplication
- */
+
+ /** class to contain the behavior of the robot in Auto, to avoid code duplication */
+
 public class AutoRobot extends CommonRobot {
   // stuff (variables, etc., see TeliOpRobot) goes here;
   protected final Pose2d beginPose;
@@ -63,7 +63,7 @@ public class AutoRobot extends CommonRobot {
     scoringSystem.start(false, false); // start scoring systems up
 
     Actions.runBlocking(
-        new ParallelAction( // BIGEST BOI
+        new ParallelAction( // BIGGEST BOI
             new updateScoring(scoringSystem),
             new SequentialAction( // BIG BOI
                 new SequentialAction( // 1
@@ -74,8 +74,7 @@ public class AutoRobot extends CommonRobot {
                         .splineToLinearHeading(
                             allianceColor.getAutoRRShootPosition(),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(200.0),
-                            new ProfileAccelConstraint(-30, 175))
+                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
                         .build(),
                     new shootAction(scoringSystem)),
                 new SequentialAction( // pickup 1
@@ -89,16 +88,15 @@ public class AutoRobot extends CommonRobot {
                         .build()),
                 new SequentialAction( // back and rotate
                     drive
-                        .actionBuilder(new Pose2d(-2, 52, Math.toRadians(90)))
+                        .actionBuilder(new Pose2d(-2, 63, Math.toRadians(90)))
                         .splineToLinearHeading(
-                            new Pose2d(-2, 48, Math.toRadians(270)),
+                            new Pose2d(-8, 48, Math.toRadians(270)),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(200.0),
-                            new ProfileAccelConstraint(-30, 175))
+                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
                         .build()),
                 new SequentialAction( // hit gate
                     drive
-                        .actionBuilder(new Pose2d(-2, 48, Math.toRadians(270)))
+                        .actionBuilder(new Pose2d(-8, 48, Math.toRadians(270)))
                         .splineToLinearHeading(
                             new Pose2d(-8, 60, Math.toRadians(270)),
                             Math.PI / 4,
@@ -108,12 +106,11 @@ public class AutoRobot extends CommonRobot {
                         .build()),
                 new SequentialAction( // shoot 2
                     drive
-                        .actionBuilder(new Pose2d(-59, 38, Math.toRadians(0)))
+                        .actionBuilder(new Pose2d(-8, 60, Math.toRadians(270)))
                         .splineToLinearHeading(
                             allianceColor.getAutoRRShootPosition(),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(200.0),
-                            new ProfileAccelConstraint(-30, 175))
+                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
                         .build(),
                     new shootAction(scoringSystem)),
                 new SequentialAction( // pickup2
@@ -122,8 +119,7 @@ public class AutoRobot extends CommonRobot {
                         .splineToLinearHeading(
                             new Pose2d(24, 33, Math.toRadians(90)),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(200.0),
-                            new ProfileAccelConstraint(-30, 175))
+                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
                         .build()),
                 new SequentialAction( // pickup2 also
                     drive
@@ -131,28 +127,57 @@ public class AutoRobot extends CommonRobot {
                         .splineToLinearHeading(
                             new Pose2d(24, 67, Math.toRadians(90)),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(170.0),
-                            new ProfileAccelConstraint(-10, 100))
+                            new TranslationalVelConstraint(165.0),
+                            new ProfileAccelConstraint(-10, 80))
                         .build()),
-                new SequentialAction( // backup
-                    drive
-                        .actionBuilder(new Pose2d(24, 67, Math.toRadians(90)))
-                        .splineToLinearHeading(
-                            new Pose2d(24, 55, Math.toRadians(90)),
-                            Math.PI / 4,
-                            new TranslationalVelConstraint(200.0),
-                            new ProfileAccelConstraint(-30, 175))
-                        .build()),
+
+
                 new SequentialAction( // shoot 3
                     drive
-                        .actionBuilder(new Pose2d(24, 55, Math.toRadians(90)))
+                        .actionBuilder(new Pose2d(24, 55, Math.toRadians(180)))
                         .splineToLinearHeading(
+
                             allianceColor.getAutoRRShootPosition(),
                             Math.PI / 4,
-                            new TranslationalVelConstraint(200.0),
-                            new ProfileAccelConstraint(-30, 175))
+                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
                         .build(),
-                    new shootAction(scoringSystem)))));
+                    new shootAction(scoringSystem)
+                ),
+                new SequentialAction(//pickup 3
+                    drive
+                        .actionBuilder(new Pose2d(-2, 31, Math.toRadians(90)))
+                        .splineToLinearHeading(
+                            new Pose2d(43, 31, Math.toRadians(90)),
+                            Math.PI / 4,
+                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
+                        .splineToLinearHeading(
+                            new Pose2d(43, 67, Math.toRadians(90)),
+                            Math.PI / 4,
+                            new TranslationalVelConstraint(175.0), new ProfileAccelConstraint(-10,110))
+                        .build()
+        ),
+                new SequentialAction(//shoot 4
+                    drive
+                        .actionBuilder(new Pose2d(43, 67, Math.toRadians(90)))
+                        .splineToLinearHeading(
+                            new Pose2d(-2, 31, Math.toRadians(90)),
+                            Math.PI / 4,
+                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
+                        .build(),
+                    new shootAction(scoringSystem)
+                ),
+                new ParallelAction(//leave
+                    drive
+                        .actionBuilder(new Pose2d(-2, 31, Math.toRadians(90)))
+                        .splineToLinearHeading(
+                            new Pose2d(7, 31, Math.toRadians(90)),
+                            Math.PI / 4,
+                            new TranslationalVelConstraint(250.0), new ProfileAccelConstraint(-50,180))
+                        .build()
+                )
+
+
+            )));
   }
 
   public void stop() {}
