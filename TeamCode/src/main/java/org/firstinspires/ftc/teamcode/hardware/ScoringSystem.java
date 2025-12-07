@@ -365,7 +365,6 @@ public class ScoringSystem {
       }
     }
 
-
     if (!spindex.isIndexValid(index)) return false; // if spindex is empty, return false
 
     int correctColorIndex = spindex.getColorIndex(ballSequence.getBallColors()[0]);
