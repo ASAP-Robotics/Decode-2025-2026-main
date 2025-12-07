@@ -18,6 +18,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -27,6 +28,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
+import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
@@ -49,7 +51,7 @@ public class TeleOpRobot extends CommonRobot {
       Gamepad gamepad2) {
     super(hardwareMap, telemetry, allianceColor);
 
-    pinpoint = new PinpointLocalizer(hardwareMap, new Pose2d(0, 0, 0));
+    pinpoint = new PinpointLocalizer(hardwareMap, allianceColor.getAutoEndPosition());
 
     this.gamepad1 = gamepad1;
     this.gamepad2 = gamepad2;
@@ -65,8 +67,14 @@ public class TeleOpRobot extends CommonRobot {
    * @brief to be called once, when the opMode is initialized
    */
   public void init() {
+    SimpleTimer backup = new SimpleTimer(2);
+    backup.start();
+    while (pinpoint.getState() != GoBildaPinpointDriver.DeviceStatus.READY
+        && !backup.isFinished()) {
+      pinpoint.update();
+    }
     scoringSystem.init(false, false); // initialize scoring systems
-    pinpoint.recalibrate();
+    scoringSystem.adjustTurretAngleOffset(allianceColor.getTurretOffset()); // tune
   }
 
   /**
@@ -106,12 +114,15 @@ public class TeleOpRobot extends CommonRobot {
       scoringSystem.shootHalfSorted();
     }
 
-    // intake
-    if (gamepad2.left_trigger > 0.5) {
-      scoringSystem.fillMag(); // fill the mag with any three balls
-
-    } else if (gamepad2.leftBumperWasPressed()) {
+    // eject
+    if (gamepad2.leftBumperWasPressed()) {
       scoringSystem.clearIntake();
+    }
+
+    if (gamepad2.xWasPressed()) {
+      scoringSystem.setIntakeFull(BallColor.PURPLE);
+    } else if (gamepad2.aWasPressed()) {
+      scoringSystem.setIntakeFull(BallColor.GREEN);
     }
 
     // miscellaneous backup manual controls
@@ -137,9 +148,13 @@ public class TeleOpRobot extends CommonRobot {
     }
     // adjust turret offset
     if (gamepad1.dpadLeftWasPressed()) {
-      scoringSystem.adjustTurretAngleOffset(-1);
-    } else if (gamepad1.dpadRightWasPressed()) {
       scoringSystem.adjustTurretAngleOffset(1);
+    } else if (gamepad1.dpadRightWasPressed()) {
+      scoringSystem.adjustTurretAngleOffset(-1);
+    } else if (gamepad1.dpadDownWasPressed()) {
+      scoringSystem.adjustTurretAngleOffset(5);
+    } else if (gamepad1.dpadUpWasPressed()) {
+      scoringSystem.adjustTurretAngleOffset(-5);
     }
 
     // get robot position

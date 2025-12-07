@@ -16,109 +16,296 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
+import org.firstinspires.ftc.teamcode.actions.setScoringPose;
+import org.firstinspires.ftc.teamcode.actions.shootAction;
+import org.firstinspires.ftc.teamcode.actions.updateScoring;
+import org.firstinspires.ftc.teamcode.actions.updateTelemetry;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
-/**
- * @brief class to contain the behavior of the robot in Auto, to avoid code duplication
- */
+/** class to contain the behavior of the robot in Auto, to avoid code duplication */
 public class AutoRobot extends CommonRobot {
-  // stuff (variables, etc., see TeleOpRobot) goes here; TODO: update
-  ElapsedTime timer = new ElapsedTime();
-  boolean move = true;
-  boolean move1 = false;
-  boolean done = false;
+  // stuff (variables, etc., see TeliOpRobot) goes here;
+  protected final Pose2d beginPose;
+  protected MecanumDrive drive;
 
   public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     super(hardwareMap, telemetry, allianceColor);
-
-    // other "Init" setup stuff goes here
+    beginPose = allianceColor.getAutoStartPosition();
+    drive = new MecanumDrive(hardwareMap, beginPose);
   }
 
-  /**
-   * @brief to be called once, when the opMode is initialized
-   */
   public void init() {
-    scoringSystem.init(true, false);
+    SimpleTimer backup = new SimpleTimer(2);
+    backup.start();
+    while (drive.localizer.getState() != GoBildaPinpointDriver.DeviceStatus.READY
+        && !backup.isFinished()) {
+      drive.localizer.update();
+    }
+    scoringSystem.init(true, true);
   }
 
-  /**
-   * @brief to be called repeatedly, while the opMode is in init
-   */
   public void initLoop() {
     scoringSystem.initLoop();
   }
 
-  /**
-   * @brief to be called once when the "start" button is pressed
-   */
   public void start() {
-    scoringSystem.start(true, true); // start scoring systems up
-    timer.reset();
-  }
+    scoringSystem.start(false, false); // start scoring systems up
 
-  /**
-   * @brief to be called repeatedly, every loop
-   */
-  public void loop(MecanumDrive drive) {
-    // update scoring systems
-    scoringSystem.update();
-
-    if (!done) {
-      // other stuff goes here; TODO: fill out
-      if (move && timer.seconds() > 3) {
+    switch (allianceColor) {
+      case RED:
         Actions.runBlocking(
-            drive
-                .actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
-                .splineToLinearHeading(
-                    new Pose2d(30, 0, Math.toRadians(0)),
-                    Math.PI / 4,
-                    new TranslationalVelConstraint(80.0))
-                .build());
+            new ParallelAction( // BIGGEST BOI
+                new updateScoring(scoringSystem),
+                new updateTelemetry(telemetry),
+                new SequentialAction( // BIG BOI
+                    new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
+                    new SequentialAction( // shoot 1
+                        drive
+                            .actionBuilder(allianceColor.getAutoStartPosition())
+                            .splineToLinearHeading(
+                                new Pose2d(-7, 31, Math.toRadians(90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .build(),
+                        new shootAction(scoringSystem)),
+                    new SequentialAction( // pickup 1
+                        drive
+                            .actionBuilder(new Pose2d(-7, 31, Math.toRadians(90)))
+                            .splineToLinearHeading(
+                                new Pose2d(-2, 62, Math.toRadians(90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(175.0),
+                                new ProfileAccelConstraint(-10, 110))
+                            .build()),
+                    /*
+                    new SequentialAction( // back and rotate
+                        drive
+                            .actionBuilder(new Pose2d(-2, 63, Math.toRadians(90)))
+                            .splineToLinearHeading(
+                                new Pose2d(-8, 48, Math.toRadians(270)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .build()),
+                    new SequentialAction( // hit gate
+                        drive
+                            .actionBuilder(new Pose2d(-8, 48, Math.toRadians(270)))
+                            .splineToLinearHeading(
+                                new Pose2d(-8, 60, Math.toRadians(270)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(200.0),
+                                new ProfileAccelConstraint(-30, 175))
+                            .waitSeconds(0.5)
+                            .build()),
+                     */
+                    new SequentialAction( // shoot 2
+                        drive
+                            .actionBuilder(new Pose2d(-2, 62, Math.toRadians(90)))
+                            .splineToLinearHeading(
+                                new Pose2d(-7, 31, Math.toRadians(90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-30, 180))
+                            .build(),
+                        new shootAction(scoringSystem)),
+                    new SequentialAction( // pickup2
+                        drive
+                            .actionBuilder(new Pose2d(-7, 31, Math.toRadians(90)))
+                            .splineToLinearHeading(
+                                new Pose2d(20, 33, Math.toRadians(90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .build()),
+                    new SequentialAction( // pickup2 also
+                        drive
+                            .actionBuilder(new Pose2d(20, 33, Math.toRadians(90)))
+                            .splineToLinearHeading(
+                                new Pose2d(24, 69, Math.toRadians(90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(160.0),
+                                new ProfileAccelConstraint(-10, 75))
+                            .build()),
+                    new SequentialAction( // shoot 3
+                        drive
+                            .actionBuilder(new Pose2d(24, 69, Math.toRadians(90)))
+                            .splineToLinearHeading(
+                                new Pose2d(-7, 31, Math.toRadians(90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .build(),
+                        new shootAction(scoringSystem)),
+                    new SequentialAction( // pickup 3
+                        drive
+                            .actionBuilder(new Pose2d(-2, 31, Math.toRadians(90)))
+                            .splineToLinearHeading(
+                                new Pose2d(38, 28, Math.toRadians(90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .splineToLinearHeading(
+                                new Pose2d(43, 69, Math.toRadians(90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(175.0),
+                                new ProfileAccelConstraint(-10, 110))
+                            .build()),
+                    new SequentialAction( // shoot 4
+                        drive
+                            .actionBuilder(new Pose2d(43, 69, Math.toRadians(90)))
+                            .splineToLinearHeading(
+                                new Pose2d(-7, 31, Math.toRadians(90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .build(),
+                        new shootAction(scoringSystem)),
+                    new ParallelAction( // leave
+                        drive
+                            .actionBuilder(new Pose2d(-7, 31, Math.toRadians(90)))
+                            .splineToLinearHeading(
+                                new Pose2d(7, 31, Math.toRadians(90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .build()))));
+        break;
 
-        move = false;
-      }
-
-      if (move1) {
+      case BLUE:
         Actions.runBlocking(
-            drive
-                .actionBuilder(new Pose2d(30, 0, Math.toRadians(0)))
-                .splineToLinearHeading(
-                    new Pose2d(35, 20, Math.toRadians(0)),
-                    Math.PI / 4,
-                    new TranslationalVelConstraint(80.0))
-                .build());
-
-        move1 = false;
-        done = true;
-      }
-
-      // update telemetry
-      telemetry.update();
-
-      if (!move && !move1) {
-        scoringSystem.shootHalfSorted();
-        if (scoringSystem.getState() == ScoringSystem.State.INTAKING) {
-          move1 = true;
-        }
-      }
-    } else {
-      scoringSystem.fillMag();
+            new ParallelAction( // BIGGEST BOI
+                new updateScoring(scoringSystem),
+                new updateTelemetry(telemetry),
+                new SequentialAction( // BIG BOI
+                    new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
+                    new SequentialAction( // shoot 1
+                        drive
+                            .actionBuilder(allianceColor.getAutoStartPosition())
+                            .splineToLinearHeading(
+                                new Pose2d(-7, -31, Math.toRadians(-90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .build(),
+                        new shootAction(scoringSystem)),
+                    new SequentialAction( // pickup 1
+                        drive
+                            .actionBuilder(new Pose2d(-7, -31, Math.toRadians(-90)))
+                            .splineToLinearHeading(
+                                new Pose2d(-2, -62, Math.toRadians(-90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(175.0),
+                                new ProfileAccelConstraint(-10, 110))
+                            .build()),
+                    /*
+                    new SequentialAction( // back and rotate
+                        drive
+                            .actionBuilder(new Pose2d(-2, 63, Math.toRadians(90)))
+                            .splineToLinearHeading(
+                                new Pose2d(-8, 48, Math.toRadians(270)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .build()),
+                    new SequentialAction( // hit gate
+                        drive
+                            .actionBuilder(new Pose2d(-8, 48, Math.toRadians(270)))
+                            .splineToLinearHeading(
+                                new Pose2d(-8, 60, Math.toRadians(270)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(200.0),
+                                new ProfileAccelConstraint(-30, 175))
+                            .waitSeconds(0.5)
+                            .build()),
+                     */
+                    new SequentialAction( // shoot 2
+                        drive
+                            .actionBuilder(new Pose2d(-2, -62, Math.toRadians(-90)))
+                            .splineToLinearHeading(
+                                new Pose2d(-9, -32, Math.toRadians(-90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .build(),
+                        new shootAction(scoringSystem)),
+                    new SequentialAction( // pickup2
+                        drive
+                            .actionBuilder(new Pose2d(-9, -32, Math.toRadians(-90)))
+                            .splineToLinearHeading(
+                                new Pose2d(20, -33, Math.toRadians(-90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .build()),
+                    new SequentialAction( // pickup2 also
+                        drive
+                            .actionBuilder(new Pose2d(20, -33, Math.toRadians(-90)))
+                            .splineToLinearHeading(
+                                new Pose2d(24, -69, Math.toRadians(-90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(160.0),
+                                new ProfileAccelConstraint(-10, 75))
+                            .build()),
+                    new SequentialAction( // shoot 3
+                        drive
+                            .actionBuilder(new Pose2d(24, -69, Math.toRadians(-90)))
+                            .splineToLinearHeading(
+                                new Pose2d(-7, -31, Math.toRadians(-90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .build(),
+                        new shootAction(scoringSystem)),
+                    new SequentialAction( // pickup 3
+                        drive
+                            .actionBuilder(new Pose2d(-2, -31, Math.toRadians(-90)))
+                            .splineToLinearHeading(
+                                new Pose2d(38, -28, Math.toRadians(-90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .splineToLinearHeading(
+                                new Pose2d(43, -69, Math.toRadians(-90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(175.0),
+                                new ProfileAccelConstraint(-10, 110))
+                            .build()),
+                    new SequentialAction( // shoot 4
+                        drive
+                            .actionBuilder(new Pose2d(43, -69, Math.toRadians(-90)))
+                            .splineToLinearHeading(
+                                new Pose2d(-7, -31, Math.toRadians(-90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .build(),
+                        new shootAction(scoringSystem)),
+                    new ParallelAction( // leave
+                        drive
+                            .actionBuilder(new Pose2d(-7, -31, Math.toRadians(-90)))
+                            .splineToLinearHeading(
+                                new Pose2d(7, -31, Math.toRadians(-90)),
+                                Math.PI / 4,
+                                new TranslationalVelConstraint(250.0),
+                                new ProfileAccelConstraint(-50, 180))
+                            .build()))));
+        break;
     }
   }
 
-  public void loop() {}
+  public void stop() {}
 
-  /**
-   * @brief to be called once, when the "stop" button is pressed
-   */
-  public void stop() {
-    scoringSystem.stop(); // stop all powered movement in scoring systems
-  }
+  @Override
+  public void loop() {}
 }

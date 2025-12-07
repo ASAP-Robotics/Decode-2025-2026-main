@@ -26,6 +26,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.jetbrains.annotations.TestOnly;
 
 public class ScoringSystem {
@@ -48,7 +49,7 @@ public class ScoringSystem {
   private final Limelight limelight; // the limelight camera on the turret
   protected State state = State.UNINITIALISED; // the state of the scoring system
   protected SequenceMode sequenceMode = SequenceMode.UNSORTED; // the mode used for shooting
-  private BallSequence ballSequence = BallSequence.PPG; // the sequence being shot
+  private BallSequence ballSequence = BallSequence.GPP; // the sequence being shot
   public final AllianceColor allianceColor; // the alliance we are on
   private boolean turretAimOverride = false; // if the aim of the turret is overridden
   private double horizontalAngleOverride = 0;
@@ -62,6 +63,7 @@ public class ScoringSystem {
   private int sequenceIndex = 0; // the index of ball in the sequence that is being shot
   private boolean clearingIntake = false; // if the intake is being reversed to clear a blockage
   private final Telemetry telemetry;
+  private final SimpleTimer fullWait = new SimpleTimer(0.5);
 
   public ScoringSystem(
       ActiveIntake intake,
@@ -87,7 +89,7 @@ public class ScoringSystem {
    */
   public void init(boolean isPreloaded, boolean auto) {
     spindex.init(BallSequence.GPP, isPreloaded);
-    turret.init(auto ? allianceColor.getObeliskAngle() : 0);
+    turret.init(0);
     turret.setActive(!isPreloaded);
     limelight.init(auto);
   }
@@ -96,7 +98,7 @@ public class ScoringSystem {
    * @brief to be called repeatedly while the robot is in init
    */
   public void initLoop() {
-    spindex.update();
+    spindex.update(telemetry);
     turret.initLoop();
   }
 
@@ -134,15 +136,15 @@ public class ScoringSystem {
     updateIntake();
     intake.update();
     turret.update();
-    spindex.update();
+    spindex.update(telemetry);
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("State", state.toString());
-    telemetry.addData("Sequence", ballSequence.toString());
+    telemetry.addData("Sequence", ballSequence);
     telemetry.addData("Position", robotPosition);
     telemetry.addData("Limelight Position", getRobotPosition());
-    telemetry.addData("Target Angle", turret.getTargetHorizontalAngleDegrees());
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
-    telemetry.addData("Distance", turret.getTargetDistance());
+    telemetry.addData("At target", turret.isAtTarget());
+    telemetry.addData("Intake", spindex.getIntakeColor());
   }
 
   /**
@@ -157,13 +159,12 @@ public class ScoringSystem {
       turret.setTargetDistance(distanceOverride);
       return;
     }
-
     /*
     else if (!limelight.isReadyToNavigate()) {
       turret.setHorizontalAngle(allianceColor.getObeliskAngle());
       return;
     }
-    */
+     */
 
     /*
     Pose2D limelightPosition = limelight.getPosition();
@@ -251,7 +252,7 @@ public class ScoringSystem {
         break;
 
       case FULL:
-        if (spindex.isAtTarget() && intake.isIntaking()) clearIntake();
+        if (spindex.isAtTarget() && intake.isIntaking() && fullWait.isFinished()) clearIntake();
         break;
 
       case INTAKING:
@@ -276,9 +277,11 @@ public class ScoringSystem {
    */
   protected void switchModeToFull() {
     state = State.FULL;
-    intake.intakeIdle(); // start intake up to keep balls in the mag
+    // intake.intakeIdle(); // start intake up to keep balls in the mag
+    intake.intake();
     spindex.moveSpindexIdle(spindex.getIndex()); // move spindex to idle position
     turret.activate(); // get ready to shoot at any time
+    fullWait.start();
   }
 
   /**
@@ -305,7 +308,7 @@ public class ScoringSystem {
    * @brief starts filling the mag with three balls of any color
    * @return true if the mag had empty slots, false if the mag is full
    */
-  public boolean fillMag() {
+  protected boolean fillMag() {
     if (spindex.getColorIndex(BallColor.EMPTY) == NULL) return false;
     // ^ if there are no empty slots in the mag, return false
 
@@ -557,6 +560,10 @@ public class ScoringSystem {
     return true;
   }
 
+  public void setIntakeFull(BallColor ball) {
+    spindex.setIntakeColor(ball);
+  }
+
   /**
    * @brief gets the distance to the target (from the robot), in inches
    * @return the number of inches from the robot to the target
@@ -635,6 +642,14 @@ public class ScoringSystem {
         AngleUnit.normalizeDegrees(
             limelightPosition.getHeading(AngleUnit.DEGREES) - rotationDegrees);
     return new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading);
+  }
+
+  /**
+   * @brief gets the state limelight is in
+   * @return limelight's state
+   */
+  public Limelight.LimeLightMode getLimelightState() {
+    return limelight.getMode();
   }
 
   /**

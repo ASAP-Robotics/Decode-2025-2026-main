@@ -117,7 +117,7 @@ public class Spindex {
   /**
    * @brief updates everything to do with the spindex
    */
-  public void update() {
+  public void update(Telemetry telemetry) {
     if (!isIndexValid(currentIndex)) state = SpindexState.UNINITIALIZED; // shouldn't happen
 
     // do something different depending on the spindex state / mode
@@ -163,7 +163,7 @@ public class Spindex {
 
     oldIntakeColor = intakeColor; // store old intake color
     if (state.checkSensor && isAtTarget()) {
-      colorSensor.update();
+      colorSensor.update(telemetry);
       intakeColor = colorSensor.getColor(); // update intake color
     } else {
       intakeColor = BallColor.INVALID;
@@ -228,7 +228,7 @@ public class Spindex {
    */
   public void storeIntakeColor() {
     // if spindex isn't stationary at an intake position, return false
-    if (state != SpindexState.INTAKING || !isAtTarget()) return;
+    if (state != SpindexState.INTAKING || !isAtTarget() || !intakeColor.isShootable()) return;
 
     setSpindexIndexColor(currentIndex, intakeColor);
   }
@@ -290,6 +290,10 @@ public class Spindex {
    */
   public BallColor getIntakeColor() {
     return intakeColor;
+  }
+
+  public void setIntakeColor(BallColor color) {
+    setSpindexIndexColor(currentIndex, color);
   }
 
   /**

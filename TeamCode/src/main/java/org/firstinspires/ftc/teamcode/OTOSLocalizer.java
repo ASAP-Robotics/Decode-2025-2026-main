@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.OTOSKt;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -64,5 +65,10 @@ public class OTOSLocalizer implements Localizer {
     Vector2d fieldVel = new Vector2d(otosVel.x, otosVel.y);
     Vector2d robotVel = Rotation2d.exp(otosPose.h).inverse().times(fieldVel);
     return new PoseVelocity2d(robotVel, otosVel.h);
+  }
+
+  @Override
+  public GoBildaPinpointDriver.DeviceStatus getState() {
+    return null;
   }
 }

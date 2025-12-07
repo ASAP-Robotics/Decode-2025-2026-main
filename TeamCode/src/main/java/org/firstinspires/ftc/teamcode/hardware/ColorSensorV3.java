@@ -21,6 +21,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
@@ -51,8 +52,9 @@ public class ColorSensorV3 {
   /**
    * @brief updates the color sensor readings, call every loop
    */
-  public void update() {
+  public void update(Telemetry telemetry) {
     double distance = distanceSensor.getDistance(DistanceUnit.INCH);
+    telemetry.addData("Dist", distance);
     if (distance <= BALL_DISTANCE_THRESHOLD) {
       if (timeSinceBallDetected.seconds() > BALL_DETECTION_TIME) {
         color = BallColor.UNKNOWN;
@@ -62,7 +64,7 @@ public class ColorSensorV3 {
 
     if (timeSinceBallDetected.seconds() <= BALL_DETECTION_TIME) {
       if (colorReadTimer.isFinished()) {
-        readColor();
+        telemetry.addData("h", readColor());
         colorReadTimer.start();
       }
 
@@ -83,18 +85,20 @@ public class ColorSensorV3 {
    * @brief reads the color from the color sensor and updates the ball color
    * @note this is relatively slow, don't call every loop
    */
-  protected void readColor() {
+  protected double readColor() {
     float[] hsv = new float[3];
     Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsv);
     float h = hsv[0];
-    if (h >= 145 && h <= 170) { // green
+    if (h >= 145 && h <= 175) { // green
       color = BallColor.GREEN; // intake has a green ball in it
 
-    } else if (h >= 185 && h <= 205) { // purple
+    } else if (h >= 185 && h <= 215) { // purple
       color = BallColor.PURPLE; // intake has a purple ball in it
 
     } else { // color can't be determined
       color = BallColor.UNKNOWN; // intake has an unknown ball in it
     }
+
+    return h;
   }
 }
