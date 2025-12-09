@@ -23,14 +23,17 @@ import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.utils.Follower;
+
 /**
  * @brief wrapper around the `Servo` class to add encoder feedback
  */
 public class Axon {
+  private final Follower follower; // backup follower to model servo movement if encoder fails
   private final Servo servo; // the servo being controlled
   private final AnalogInput encoder; // the encoder of the servo being controlled
   private final boolean dummy; // if true, the servo will always be "at target"
-  private double toleranceDegrees;
+  private final double toleranceDegrees;
 
   /**
    * @brief creates a dummy (no encoder) Axon with default parameters
@@ -50,16 +53,6 @@ public class Axon {
   }
 
   /**
-   * @brief creates an object of the `EncoderServo` class with default parameters
-   * @param servo the servo to control
-   * @param encoder the encoder of the servo being controlled
-   * @param dummy if true, the servo will always be "at target"
-   */
-  public Axon(Servo servo, AnalogInput encoder, boolean dummy) {
-    this(servo, encoder, 5, dummy);
-  }
-
-  /**
    * @brief creates an object of the `EncoderServo` class
    * @param servo the servo to control
    * @param encoder the encoder of the servo being controlled
@@ -71,6 +64,8 @@ public class Axon {
     this.encoder = encoder;
     this.dummy = dummy;
     this.toleranceDegrees = toleranceDegrees;
+    // 214 degrees per second, about the speed of an axon divided by 2
+    this.follower = dummy ? null : new Follower(getPosition(), 0, 0, 214);
   }
 
   /**
@@ -83,17 +78,8 @@ public class Axon {
   }
 
   /**
-   * @brief sets the amount the angle read can differ from the target angle and the servo still be *
-   *     considered "at target"
-   * @param toleranceDegrees the tolerance, in degrees
-   */
-  public void setToleranceDegrees(double toleranceDegrees) {
-    this.toleranceDegrees = toleranceDegrees;
-  }
-
-  /**
    * @brief sets the target position of the servo
-   * @param degrees
+   * @param degrees the target position of the servo, in degrees
    */
   public void setPosition(double degrees) {
     servo.setPosition(degrees / 360);
@@ -101,11 +87,12 @@ public class Axon {
 
   /**
    * @brief gets the target position of the servo
-   * @return the target position of the servo
+   * @return the target position of the servo, or 0 if it hasn't been set yet
    * @note this method doesn't return the *current position*, it returns the *target position*
    */
   public double getTargetPosition() {
-    return servo.getPosition() * 360;
+    double target = servo.getPosition() * 360;
+    return Double.isNaN(target) ? target : 0;
   }
 
   /**
@@ -126,8 +113,8 @@ public class Axon {
    */
   public boolean isAtTarget() {
     if (dummy) return true; // dummy servos are always at target
-    double target = getTargetPosition();
-    double position = getPosition();
-    return position >= (target - toleranceDegrees) && position <= (target + toleranceDegrees);
+    boolean encoderAtTarget = Math.abs(getTargetPosition() - getPosition()) <= toleranceDegrees;
+    boolean followerAtTarget = follower.isAtTarget();
+    return encoderAtTarget || followerAtTarget;
   }
 }

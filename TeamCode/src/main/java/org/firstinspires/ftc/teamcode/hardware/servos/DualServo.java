@@ -40,11 +40,11 @@ public class DualServo {
   }
 
   /**
-   * @return true if both servos are at target, false otherwise
-   * @brief gets if both servos are at the target
+   * @return true if either servo is at target, false otherwise
+   * @brief gets if either servo is at the target angle
    */
   public boolean isAtTarget() {
-    return servo1.isAtTarget() && servo2.isAtTarget();
+    return servo1.isAtTarget() || servo2.isAtTarget();
   }
 
   /**
