@@ -26,6 +26,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.types.SystemReport;
+import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.jetbrains.annotations.TestOnly;
 
@@ -98,7 +100,7 @@ public class ScoringSystem {
    * @brief to be called repeatedly while the robot is in init
    */
   public void initLoop() {
-    spindex.update(telemetry);
+    spindex.update();
     turret.initLoop();
   }
 
@@ -136,15 +138,8 @@ public class ScoringSystem {
     updateIntake();
     intake.update();
     turret.update();
-    spindex.update(telemetry);
-    telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
-    telemetry.addData("State", state.toString());
-    telemetry.addData("Sequence", ballSequence);
-    telemetry.addData("Position", robotPosition);
-    telemetry.addData("Limelight Position", getRobotPosition());
-    telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
-    telemetry.addData("At target", turret.isAtTarget());
-    telemetry.addData("Intake", spindex.getIntakeColor());
+    spindex.update();
+    updateTelemetry();
   }
 
   /**
@@ -179,9 +174,6 @@ public class ScoringSystem {
 
     turret.setHorizontalAngle(getRelativeTargetAngle());
     turret.setTargetDistance(getTargetDistance());
-
-    telemetry.addData("Relative angle", getRelativeTargetAngle());
-    telemetry.addData("Absolute angle", getAbsoluteTargetAngle());
   }
 
   /**
@@ -269,6 +261,30 @@ public class ScoringSystem {
         }
 
         break;
+    }
+  }
+
+  /**
+   * @brief updates (or adds the data of) the telemetry from the scoring systems
+   */
+  private void updateTelemetry() {
+    telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
+    telemetry.addData("State", state.toString());
+    telemetry.addData("Sequence", ballSequence);
+    telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
+    telemetry.addData("At target", turret.isAtTarget());
+
+    SystemReport spindexReport = spindex.getStatus();
+    SystemReport turretReport = turret.getStatus();
+
+    if (spindexReport.status == SystemStatus.NOMINAL
+        && turretReport.status == SystemStatus.NOMINAL) {
+      telemetry.addData("System status", "🟩Normal"); // emoji might not work
+
+    } else {
+      telemetry.addData("System status", "🟥Abnormal"); // emoji might not work
+      telemetry.addData("Spindex status", spindex.getStatus().message);
+      telemetry.addData("Turret status", turret.getStatus().message);
     }
   }
 

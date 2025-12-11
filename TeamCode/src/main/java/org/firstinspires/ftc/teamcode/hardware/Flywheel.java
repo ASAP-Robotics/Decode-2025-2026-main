@@ -18,10 +18,15 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+import org.firstinspires.ftc.teamcode.interfaces.System;
+import org.firstinspires.ftc.teamcode.types.SystemReport;
+import org.firstinspires.ftc.teamcode.types.SystemStatus;
+import org.firstinspires.ftc.teamcode.utils.Follower;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.jetbrains.annotations.TestOnly;
 
-public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
+public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements System {
   protected abstract static class LookupTableItem {
     /**
      * @brief gets the distance associated with this lookup table entry
@@ -37,6 +42,8 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
   }
 
   public final DcMotorEx flywheel;
+  protected Follower speedSimulation; // simulation of flywheel speed
+  protected SystemStatus flywheelStatus; // status of the flywheel
   protected boolean isEnabled = false; // if the flywheel is enabled
   protected boolean isActive = true; // if the flywheel is active (as opposed to idling)
   private double idleSpeed; // the speed (RPM) of the flywheel when idle
@@ -50,7 +57,6 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
 
   protected T[] LOOKUP_TABLE; // lookup table of distance, rpm, etc.
 
-  // target speed"
 
   /**
    * @brief makes an object of the Flywheel class
@@ -58,6 +64,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    * @param idleSpeed the speed of the flywheel when idling (RPM)
    */
   public Flywheel(DcMotorEx motor, double idleSpeed) {
+    this.speedSimulation = new Follower(0, 0, 5, 100); // tune 100
     this.flywheel = motor;
     this.idleSpeed = idleSpeed; // set the speed of the flywheel at idle
     this.LOOKUP_TABLE = fillLookupTable();
@@ -68,7 +75,6 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
     this.flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     // set motor to spin the right way
     this.flywheel.setDirection(DcMotor.Direction.REVERSE);
-    // quick-and-dirty tuning values, could be updated:
   }
 
   /**
@@ -77,12 +83,24 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
    */
   protected abstract T[] fillLookupTable();
 
+  public SystemReport getStatus() {
+    return new SystemReport(flywheelStatus);
+  }
+
   /**
    * @brief returns if the flywheel is fully up to speed
    * @return true if flywheel is at speed, false if flywheel is below target speed
    * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
    */
   public boolean isReadyToShoot() {
+    return isEnabled && isActive && (isAtSpeed() || speedSimulation.isAtTarget());
+  }
+
+  /**
+   * @brief checks if the measured flywheel speed is at target
+   * @return true if flywheel is actually at speed, false otherwise
+   */
+  protected boolean isAtSpeed() {
     return currentSpeed >= (targetSpeed - 140) && currentSpeed <= (targetSpeed + 140);
   }
 
@@ -224,6 +242,11 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
     } else { // if flywheel is disabled
       stopMotor(); // set the motor to 0% power
     }
+
+    speedSimulation.setTarget(targetSpeed);
+
+    flywheelStatus = isEnabled && isActive && !isAtSpeed() && speedSimulation.isAtTarget()
+        ? SystemStatus.FALLBACK : SystemStatus.NOMINAL;
   }
 
   /**
@@ -240,6 +263,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
       flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
       flywheel.setPower(0); // spin freely
     }
+    targetSpeed = idleSpeed;
   }
 
   /**
@@ -262,6 +286,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> {
     flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
     flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT); // float if zero power
     flywheel.setPower(0);
+    targetSpeed = 0;
   }
 
   /**

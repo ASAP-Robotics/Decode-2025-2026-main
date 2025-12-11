@@ -17,13 +17,16 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
-
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.hardware.servos.DualServo;
+import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.types.SystemReport;
+import org.firstinspires.ftc.teamcode.types.SystemStatus;
 
-public class Spindex {
+public class Spindex implements System {
   /**
    * @brief simple enum to track the spindex's mode / state
    */
@@ -63,6 +66,9 @@ public class Spindex {
     }
   }
 
+  SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
+  SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
+  SystemReport lifterReport = new SystemReport(SystemStatus.NOMINAL); // latest lifter report
   private final DualServo spinner; // the servos that rotate the divider in the mag
   private final DualServo lifter; // the servos that lift balls into the shooter turret
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
@@ -117,7 +123,11 @@ public class Spindex {
   /**
    * @brief updates everything to do with the spindex
    */
-  public void update(Telemetry telemetry) {
+  public void update() {
+    sensorReport = colorSensor.getStatus();
+    spinnerReport = spinner.getStatus();
+    lifterReport = lifter.getStatus();
+
     if (!isIndexValid(currentIndex)) state = SpindexState.UNINITIALIZED; // shouldn't happen
 
     // do something different depending on the spindex state / mode
@@ -163,11 +173,46 @@ public class Spindex {
 
     oldIntakeColor = intakeColor; // store old intake color
     if (state.checkSensor && isAtTarget()) {
-      colorSensor.update(telemetry);
+      colorSensor.update();
       intakeColor = colorSensor.getColor(); // update intake color
     } else {
       intakeColor = BallColor.INVALID;
     }
+  }
+
+  public SystemReport getStatus() {
+    SystemStatus status = SystemStatus.NOMINAL;
+    SystemStatus sensorStatus = sensorReport.status;
+    SystemStatus spinnerStatus = spinnerReport.status;
+    SystemStatus lifterStatus = lifterReport.status;
+    String message = "🟩Normal";
+
+    if (spinnerStatus == SystemStatus.INOPERABLE) {
+      status = SystemStatus.INOPERABLE;
+      message = "🟥Broken (Spinner)";
+
+    } else if (lifterStatus == SystemStatus.INOPERABLE) {
+      status = SystemStatus.INOPERABLE;
+      message = "🟥Broken (Lifter)";
+
+    } else if (sensorStatus == SystemStatus.INOPERABLE) {
+      status = SystemStatus.INOPERABLE;
+      message = "🟥Broken (Color sensor); use backups controls";
+
+    } else if (spinnerStatus == SystemStatus.FALLBACK) {
+      status = SystemStatus.FALLBACK;
+      message = "🟨Backup (Spinner); performance will be degraded";
+
+    } else if (lifterStatus == SystemStatus.FALLBACK) {
+      status = SystemStatus.FALLBACK;
+      message = "🟨Backup (Lifter); performance will be degraded";
+
+    } else if (sensorStatus == SystemStatus.FALLBACK) {
+      status = SystemStatus.FALLBACK;
+      message = "🟨Backup (Color sensor); use backups controls";
+    }
+
+    return new SystemReport(status, message);
   }
 
   /**

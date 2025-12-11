@@ -23,6 +23,9 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
+import org.firstinspires.ftc.teamcode.types.SystemReport;
+import org.firstinspires.ftc.teamcode.types.SystemStatus;
+import org.firstinspires.ftc.teamcode.utils.Follower;
 import org.jetbrains.annotations.TestOnly;
 
 public class Turret extends Flywheel<Turret.LookupTableItem> {
@@ -56,7 +59,9 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private static final double MOTOR_GEAR_TEETH = 24;
   // amount horizontal angle can go over 180 or under -180 degrees before wrapping
   private static final double HORIZONTAL_HYSTERESIS = 10;
-
+  private static final double HORIZONTAL_TOLERANCE = 3; // degrees
+  protected Follower angleSimulation; // simulation of the horizontal angle of the turret
+  protected SystemStatus turretStatus = SystemStatus.NOMINAL;
   private final Motor rotator;
   private final PIDController rotatorController;
   // ^ PID controller for horizontal rotation of turret, uses motor degrees as units
@@ -79,6 +84,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
     this.rotatorController = new PIDController(0.006, 0.001, 0.0002);
     rotatorController.setTolerance(turretDegreesToMotorDegrees(1));
+    angleSimulation = new Follower(0, 0, 1, 60); // tune 60
   }
 
   public Turret(DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo) {
@@ -134,6 +140,43 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     }; // preliminary values
   }
 
+  @Override
+  public SystemReport getStatus() {
+    SystemReport report = super.getStatus();
+    SystemReport toReturn = new SystemReport(SystemStatus.NOMINAL);
+    if (report.status.severity > toReturn.status.severity) {
+      String message = "⁉️Unknown (Flywheel)";
+      switch (report.status) {
+        case FALLBACK:
+          message = "🟨Fallback (Flywheel)";
+          break;
+
+        case INOPERABLE:
+          message = "🟥Broken (Flywheel)";
+          break;
+      }
+
+      toReturn = new SystemReport(report.status, message);
+    }
+
+    if (turretStatus.severity > toReturn.status.severity) {
+      String message = "⁉️Unknown (Turret)";
+      switch (report.status) {
+        case FALLBACK:
+          message = "🟨Fallback (Turret)";
+          break;
+
+        case INOPERABLE:
+          message = "🟥Broken (Turret)";
+          break;
+      }
+
+      toReturn = new SystemReport(turretStatus, message);
+    }
+
+    return toReturn;
+  }
+
   /**
    * @brief gets if the turret is ready to shoot a ball
    * @return true if the flywheel is up to speed, the turret is at its target rotation, and the hood
@@ -142,9 +185,17 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    */
   @Override
   public boolean isReadyToShoot() {
-    return super.isReadyToShoot()
-        && getHorizontalAngleDegrees() + 3 > getTargetHorizontalAngleDegrees()
-        && getHorizontalAngleDegrees() - 3 < getTargetHorizontalAngleDegrees();
+    return super.isReadyToShoot() && (isRotatorAtTarget() || angleSimulation.isAtTarget());
+  }
+
+  /**
+   * @brief gets if the turret is at its target horizontal angle
+   * @return true if the turret is at target, false otherwise
+   */
+  protected boolean isRotatorAtTarget() {
+    double angle = getHorizontalAngleDegrees();
+    double targetAngle = getTargetHorizontalAngleDegrees();
+    return angle + HORIZONTAL_TOLERANCE > targetAngle && angle - HORIZONTAL_TOLERANCE < targetAngle;
   }
 
   /**
@@ -166,6 +217,9 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
         turretDegreesToMotorDegrees(targetHorizontalAngleDegrees + horizontalAngleOffsetDegrees);
     rotatorController.setSetPoint(motorDegrees);
     rotator.set(rotationEnabled ? rotatorController.calculate(getRotatorDegrees()) : 0);
+
+    turretStatus = rotationEnabled && !isRotatorAtTarget() && angleSimulation.isAtTarget()
+        ? SystemStatus.FALLBACK : SystemStatus.NOMINAL;
   }
 
   /**
@@ -227,6 +281,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     } else {
       targetHorizontalAngleDegrees = degrees;
     }
+
+    angleSimulation.setTarget(targetHorizontalAngleDegrees);
   }
 
   /**

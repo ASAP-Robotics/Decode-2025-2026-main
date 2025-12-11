@@ -17,88 +17,118 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import android.graphics.Color;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.Size;
+
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.types.BallColor;
-import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
-public class ColorSensorV3 {
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.interfaces.System;
+import org.firstinspires.ftc.teamcode.types.BallColor;
+import org.firstinspires.ftc.teamcode.types.SystemReport;
+import org.firstinspires.ftc.teamcode.types.SystemStatus;
+
+import java.util.LinkedList;
+
+public class ColorSensorV3 implements System {
+  protected class Reading {
+    public final double timestamp;
+    public final double distance;
+
+    public Reading(double timestamp, double distance) {
+      this.timestamp = timestamp;
+      this.distance = distance;
+    }
+  }
+  protected SystemStatus status = SystemStatus.NOMINAL;
   protected final ColorSensor colorSensor;
   protected final DistanceSensor distanceSensor;
   protected BallColor color = BallColor.INVALID;
-  protected ElapsedTime timeSinceBallDetected = new ElapsedTime();
-  protected SimpleTimer colorReadTimer = new SimpleTimer(0.01);
-  protected static final double BALL_DETECTION_TIME = 0.1; // seconds
+  protected ElapsedTime timeSinceStart = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+  protected LinkedList<Reading> readings = new LinkedList<>();
+  protected static final double DISCONNECT_TIME = 1.0; // seconds
   protected static final double BALL_DISTANCE_THRESHOLD = 1.5; // inches
 
   public ColorSensorV3(HardwareMap hardwareMap, String deviceName) {
     this.colorSensor = hardwareMap.get(ColorSensor.class, deviceName);
     this.distanceSensor = hardwareMap.get(DistanceSensor.class, deviceName);
     this.colorSensor.enableLed(true);
-  }
-
-  /**
-   * @brief to be called one, on program start
-   */
-  public void start() {
-    timeSinceBallDetected.reset();
-    colorReadTimer.start();
+    this.timeSinceStart.reset();
   }
 
   /**
    * @brief updates the color sensor readings, call every loop
    */
-  public void update(Telemetry telemetry) {
+  public void update() {
     double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-    telemetry.addData("Dist", distance);
-    if (distance <= BALL_DISTANCE_THRESHOLD) {
-      if (timeSinceBallDetected.seconds() > BALL_DETECTION_TIME) {
-        color = BallColor.UNKNOWN;
-      }
-      timeSinceBallDetected.reset();
-    }
 
-    if (timeSinceBallDetected.seconds() <= BALL_DETECTION_TIME) {
-      if (colorReadTimer.isFinished()) {
-        telemetry.addData("h", readColor());
-        colorReadTimer.start();
+    if (distance <= BALL_DISTANCE_THRESHOLD) {
+      float[] hsv = new float[3];
+      Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsv);
+      float h = hsv[0];
+      if (h >= 140 && h <= 180) { // green
+        color = BallColor.GREEN; // intake has a green ball in it
+
+      } else if (h >= 180 && h <= 220) { // purple
+        color = BallColor.PURPLE; // intake has a purple ball in it
+
+      } else { // color can't be determined
+        color = BallColor.UNKNOWN; // intake has an unknown ball in it
       }
 
     } else {
       color = BallColor.EMPTY;
     }
+
+    double now = timeSinceStart.seconds();
+    readings.add(new Reading(now, distance));
+    // remove old readings
+    while (!readings.isEmpty() && now - readings.getFirst().timestamp > DISCONNECT_TIME) {
+      readings.removeFirst();
+    }
+    boolean connected = false;
+    Reading previousReading = readings.isEmpty() ? null : readings.getLast();
+    for (Reading reading : readings) {
+      if (reading.distance != previousReading.distance) {
+        connected = true;
+        break;
+      }
+      previousReading = reading;
+    }
+    status = connected ? SystemStatus.NOMINAL : SystemStatus.INOPERABLE;
+  }
+
+  public SystemReport getStatus() {
+    String message;
+    switch (status) {
+      case NOMINAL:
+        message = "Color sensor operational";
+        break;
+
+      case INOPERABLE:
+        message = "Color sensor disconnected";
+        break;
+
+      case FALLBACK:
+        message = "Color sensor using fallback";
+        break;
+
+      default:
+        message = "Color sensor in unknown state";
+    }
+    return new SystemReport(status, message);
   }
 
   /**
    * @brief gets the detected ball color
    * @return the ball color
+   * @note if the sensor is disconnected, returns invalid
    */
   public BallColor getColor() {
-    return color;
-  }
-
-  /**
-   * @brief reads the color from the color sensor and updates the ball color
-   * @note this is relatively slow, don't call every loop
-   */
-  protected double readColor() {
-    float[] hsv = new float[3];
-    Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsv);
-    float h = hsv[0];
-    if (h >= 145 && h <= 175) { // green
-      color = BallColor.GREEN; // intake has a green ball in it
-
-    } else if (h >= 185 && h <= 215) { // purple
-      color = BallColor.PURPLE; // intake has a purple ball in it
-
-    } else { // color can't be determined
-      color = BallColor.UNKNOWN; // intake has an unknown ball in it
-    }
-
-    return h;
+    return getStatus().status == SystemStatus.NOMINAL ? color :BallColor.INVALID;
   }
 }

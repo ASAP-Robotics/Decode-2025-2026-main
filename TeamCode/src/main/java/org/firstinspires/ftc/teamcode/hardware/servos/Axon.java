@@ -23,12 +23,16 @@ import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.interfaces.System;
+import org.firstinspires.ftc.teamcode.types.SystemReport;
+import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.Follower;
 
 /**
  * @brief wrapper around the `Servo` class to add encoder feedback
  */
-public class Axon {
+public class Axon implements System {
+  private SystemStatus status = SystemStatus.NOMINAL; // the status of the servo
   private final Follower follower; // backup follower to model servo movement if encoder fails
   private final Servo servo; // the servo being controlled
   private final AnalogInput encoder; // the encoder of the servo being controlled
@@ -66,6 +70,27 @@ public class Axon {
     this.toleranceDegrees = toleranceDegrees;
     // 214 degrees per second, about the speed of an axon divided by 2
     this.follower = dummy ? null : new Follower(getPosition(), 0, 0, 214);
+  }
+
+  public SystemReport getStatus() {
+    String message;
+    switch (status) {
+      case NOMINAL:
+        message = "Operational";
+        break;
+
+      case INOPERABLE:
+        message = "Inoperable";
+        break;
+
+      case FALLBACK:
+        message = "Encoder failure; performance will be degraded";
+        break;
+
+      default:
+        message = "Unknown state";
+    }
+    return new SystemReport(status, message);
   }
 
   /**
@@ -115,6 +140,7 @@ public class Axon {
     if (dummy) return true; // dummy servos are always at target
     boolean encoderAtTarget = Math.abs(getTargetPosition() - getPosition()) <= toleranceDegrees;
     boolean followerAtTarget = follower.isAtTarget();
+    status = followerAtTarget && !encoderAtTarget ? SystemStatus.FALLBACK : SystemStatus.NOMINAL;
     return encoderAtTarget || followerAtTarget;
   }
 }
