@@ -22,7 +22,6 @@ import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;

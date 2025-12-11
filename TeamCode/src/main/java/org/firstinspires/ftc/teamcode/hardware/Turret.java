@@ -218,8 +218,10 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     rotatorController.setSetPoint(motorDegrees);
     rotator.set(rotationEnabled ? rotatorController.calculate(getRotatorDegrees()) : 0);
 
-    turretStatus = rotationEnabled && !isRotatorAtTarget() && angleSimulation.isAtTarget()
-        ? SystemStatus.FALLBACK : SystemStatus.NOMINAL;
+    turretStatus =
+        rotationEnabled && !isRotatorAtTarget() && angleSimulation.isAtTarget()
+            ? SystemStatus.FALLBACK
+            : SystemStatus.NOMINAL;
   }
 
   /**

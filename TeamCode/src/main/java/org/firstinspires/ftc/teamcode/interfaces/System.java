@@ -17,7 +17,6 @@
 package org.firstinspires.ftc.teamcode.interfaces;
 
 import org.firstinspires.ftc.teamcode.types.SystemReport;
-import org.firstinspires.ftc.teamcode.types.SystemStatus;
 
 /**
  * @brief interface for systems that can report a status

@@ -18,7 +18,6 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
@@ -56,7 +55,6 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   private final double MOTOR_TICKS_PER_REV = 28; // ticks per revolution of flywheel motor
 
   protected T[] LOOKUP_TABLE; // lookup table of distance, rpm, etc.
-
 
   /**
    * @brief makes an object of the Flywheel class
@@ -245,8 +243,10 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
 
     speedSimulation.setTarget(targetSpeed);
 
-    flywheelStatus = isEnabled && isActive && !isAtSpeed() && speedSimulation.isAtTarget()
-        ? SystemStatus.FALLBACK : SystemStatus.NOMINAL;
+    flywheelStatus =
+        isEnabled && isActive && !isAtSpeed() && speedSimulation.isAtTarget()
+            ? SystemStatus.FALLBACK
+            : SystemStatus.NOMINAL;
   }
 
   /**

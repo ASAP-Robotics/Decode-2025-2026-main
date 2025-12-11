@@ -40,14 +40,15 @@ public class DualServo implements System {
 
     if (s1Status == SystemStatus.FALLBACK || s2Status == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
-      message = s1Status == SystemStatus.FALLBACK ? "Servo 1 in fallback; performance will be degraded"
-          : "Servo 2 in fallback; performance will be degraded";
+      message =
+          s1Status == SystemStatus.FALLBACK
+              ? "Servo 1 in fallback; performance will be degraded"
+              : "Servo 2 in fallback; performance will be degraded";
     }
 
     if (s1Status == SystemStatus.INOPERABLE || s2Status == SystemStatus.INOPERABLE) {
       status = SystemStatus.INOPERABLE;
-      message = s1Status == SystemStatus.INOPERABLE ? "Servo 1 inoperable"
-          : "Servo 2 inoperable";
+      message = s1Status == SystemStatus.INOPERABLE ? "Servo 1 inoperable" : "Servo 2 inoperable";
     }
 
     return new SystemReport(status, message);

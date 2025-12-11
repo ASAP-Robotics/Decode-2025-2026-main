@@ -17,22 +17,16 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import android.graphics.Color;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.Size;
-
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import java.util.LinkedList;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
-
-import java.util.LinkedList;
 
 public class ColorSensorV3 implements System {
   protected class Reading {
@@ -44,6 +38,7 @@ public class ColorSensorV3 implements System {
       this.distance = distance;
     }
   }
+
   protected SystemStatus status = SystemStatus.NOMINAL;
   protected final ColorSensor colorSensor;
   protected final DistanceSensor distanceSensor;
@@ -129,6 +124,6 @@ public class ColorSensorV3 implements System {
    * @note if the sensor is disconnected, returns invalid
    */
   public BallColor getColor() {
-    return getStatus().status == SystemStatus.NOMINAL ? color :BallColor.INVALID;
+    return getStatus().status == SystemStatus.NOMINAL ? color : BallColor.INVALID;
   }
 }
