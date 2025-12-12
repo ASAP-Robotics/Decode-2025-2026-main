@@ -106,6 +106,7 @@ public class Axon implements System {
    * @param degrees the target position of the servo, in degrees
    */
   public void setPosition(double degrees) {
+    if (!dummy) follower.setTarget(degrees);
     servo.setPosition(degrees / 360);
   }
 
@@ -116,7 +117,7 @@ public class Axon implements System {
    */
   public double getTargetPosition() {
     double target = servo.getPosition() * 360;
-    return Double.isNaN(target) ? target : 0;
+    return Double.isNaN(target) ? 0 : target;
   }
 
   /**

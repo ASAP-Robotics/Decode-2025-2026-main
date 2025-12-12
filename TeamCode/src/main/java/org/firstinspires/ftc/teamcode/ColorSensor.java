@@ -13,10 +13,8 @@ public class ColorSensor extends LinearOpMode {
 
     waitForStart();
 
-    colorSensorV3.start();
-
     while (opModeIsActive()) {
-      colorSensorV3.update(telemetry);
+      colorSensorV3.update();
 
       telemetry.addData("Color", colorSensorV3.getColor());
       telemetry.update();
