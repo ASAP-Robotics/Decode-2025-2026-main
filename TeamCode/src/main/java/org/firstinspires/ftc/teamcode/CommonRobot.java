@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,19 +49,13 @@ public abstract class CommonRobot {
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
     Limelight limelight = new Limelight(rawLimelight, this.allianceColor, 0.001);
 
-    AnalogInput lifterEncoder = this.hardwareMap.get(AnalogInput.class, "lifterEncoder");
-    Servo rawLifterServo2 = this.hardwareMap.get(Servo.class, "lifter2");
-    Axon lifterServo2 = new Axon(rawLifterServo2, lifterEncoder);
-    Servo rawLifterServo1 = this.hardwareMap.get(Servo.class, "lifter1");
-    rawLifterServo1.setDirection(Servo.Direction.REVERSE);
-    Axon lifterServo1 = new Axon(rawLifterServo1);
     AnalogInput magServoEncoder = this.hardwareMap.get(AnalogInput.class, "magServoEncoder");
     Servo rawMagServo2 = this.hardwareMap.get(Servo.class, "magServo2");
     Axon magServo2 = new Axon(rawMagServo2, magServoEncoder);
     Servo rawMagServo1 = this.hardwareMap.get(Servo.class, "magServo1");
     Axon magServo1 = new Axon(rawMagServo1, magServoEncoder);
     ColorSensorV3 colorSensor = new ColorSensorV3(this.hardwareMap, "colorSensor");
-    Spindex spindex = new Spindex(magServo1, magServo2, lifterServo1, lifterServo2, colorSensor);
+    Spindex spindex = new Spindex(magServo1, magServo2, colorSensor);
 
     Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
     Axon turretHood = new Axon(rawTurretHood);
