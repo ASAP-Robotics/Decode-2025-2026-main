@@ -60,7 +60,8 @@ public class Spindex implements System {
     // the position half-a-slot off from intake position, so balls cannot exit the mag
     public final double idlePosition;
 
-    public SpindexSlot(double intakePosition, double shootPosition, double liftPosition, double idlePosition) {
+    public SpindexSlot(
+        double intakePosition, double shootPosition, double liftPosition, double idlePosition) {
       this.color = BallColor.UNKNOWN;
       this.intakePosition = intakePosition;
       this.shootPosition = shootPosition;
@@ -87,10 +88,7 @@ public class Spindex implements System {
   private BallColor oldIntakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
-  public Spindex(
-      Axon spinServo1,
-      Axon spinServo2,
-      ColorSensorV3 colorSensor) {
+  public Spindex(Axon spinServo1, Axon spinServo2, ColorSensorV3 colorSensor) {
     this.spinner = new DualServo(spinServo1, spinServo2);
     this.colorSensor = colorSensor;
     this.state = SpindexState.UNINITIALIZED;
