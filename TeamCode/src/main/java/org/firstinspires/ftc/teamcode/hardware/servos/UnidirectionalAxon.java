@@ -23,10 +23,10 @@ import org.firstinspires.ftc.teamcode.hardware.thirdparty.RTPAxon;
 // Written mostly by Gemini
 
 /**
- * An extension of RTPAxon that enforces a unidirectional path for the setpoint.
- * If given a position that would require reversing, this class
- * automatically "rolls over" the target (adding/subtracting 360 degrees)
- * so the servo reaches the correct angle by continuing in the allowed direction.
+ * An extension of RTPAxon that enforces a unidirectional path for the setpoint. If given a position
+ * that would require reversing, this class automatically "rolls over" the target
+ * (adding/subtracting 360 degrees) so the servo reaches the correct angle by continuing in the
+ * allowed direction.
  */
 public class UnidirectionalAxon extends RTPAxon {
   public enum DirectionConstraint {
@@ -51,6 +51,7 @@ public class UnidirectionalAxon extends RTPAxon {
 
   /**
    * Sets the direction constraint.
+   *
    * @param constraint The direction the servo is allowed to travel to reach new setpoints.
    */
   public void setDirectionConstraint(DirectionConstraint constraint) {
@@ -62,10 +63,10 @@ public class UnidirectionalAxon extends RTPAxon {
   }
 
   /**
-   * Sets the target rotation.
-   * If a constraint is active, this method adjusts the input 'target' by adding
-   * or subtracting multiples of 360 degrees to ensure the new target lies
-   * in the allowed direction relative to the current total rotation.
+   * Sets the target rotation. If a constraint is active, this method adjusts the input 'target' by
+   * adding or subtracting multiples of 360 degrees to ensure the new target lies in the allowed
+   * direction relative to the current total rotation.
+   *
    * @param target The desired target angle (absolute degrees, or 0-360).
    */
   @Override
