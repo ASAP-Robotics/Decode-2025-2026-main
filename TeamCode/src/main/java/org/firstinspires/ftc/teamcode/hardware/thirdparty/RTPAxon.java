@@ -253,7 +253,7 @@ public class RTPAxon {
   // Get current angle from encoder (in degrees)
   public double getCurrentAngle() {
     if (servoEncoder == null) return 0;
-    return (servoEncoder.getVoltage() / 3.3) * (direction.equals(Direction.REVERSE) ? -360 : 360);
+    return (servoEncoder.getVoltage() / 3.3) * (direction.equals(Direction.REVERSE) ? 360 : -360);
   }
 
   // Check if servo is at target (default tolerance)
@@ -376,8 +376,8 @@ public class RTPAxon {
     @Override
     public void runOpMode() throws InterruptedException {
       telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-      CRServo crservo = hardwareMap.crservo.get("rightHorizSlide");
-      AnalogInput encoder = hardwareMap.get(AnalogInput.class, "rightHorizSlideEncoder");
+      CRServo crservo = hardwareMap.crservo.get("magServo2");
+      AnalogInput encoder = hardwareMap.get(AnalogInput.class, "magServoEncoder");
       GamepadPair gamepads = new GamepadPair(gamepad1, gamepad2);
       RTPAxon servo = new RTPAxon(crservo, encoder);
 
@@ -412,12 +412,14 @@ public class RTPAxon {
           servo.setKI(Math.max(0, servo.getKI() - 0.0001));
         }
 
+        /*
         if (gamepads.isPressed(-1, "touchpad")) {
           servo.setKP(0.015);
           servo.setKI(0.0005);
           servo.setKD(0.0025);
           servo.resetPID();
         }
+         */
 
         telemetry.addData("Starting angle", servo.STARTPOS);
         telemetry.addLine(servo.log());

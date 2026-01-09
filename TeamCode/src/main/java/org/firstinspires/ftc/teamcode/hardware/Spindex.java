@@ -76,9 +76,9 @@ public class Spindex implements System {
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // TODO: retune after rework
-    new SpindexSlot(39.6, 39.6, 49.6, 108), // slot 0
-    new SpindexSlot(172.8, 172.8, 182.8, 237.6), // slot 1
-    new SpindexSlot(306, 306, 316, 237.6) // slot 2
+    new SpindexSlot(70, 333, 333, 333), // slot 0
+    new SpindexSlot(203, 100, 100, 100), // slot 1
+    new SpindexSlot(333, 200, 200, 200) // slot 2
   };
 
   private SpindexState state; // the current state of the spindex
