@@ -25,6 +25,7 @@ import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.Follower;
+import org.firstinspires.ftc.teamcode.utils.MathUtils;
 
 // Written mostly by Gemini
 
@@ -32,13 +33,14 @@ import org.firstinspires.ftc.teamcode.utils.Follower;
  * An extension of RTPAxon that enforces a unidirectional path for the setpoint. If given a position
  * that would require reversing, this class automatically "rolls over" the target
  * (adding/subtracting 360 degrees) so the servo reaches the correct angle by continuing in the
- * allowed direction.
+ * allowed direction. (this class **does not** necessarily support commands to turn more than one
+ * turn at a time, issuing such commands can cause undefined behavior [esp. with "NONE" constraint])
  */
 public class UnidirectionalAxon extends RTPAxon implements System {
   public enum DirectionConstraint {
-    NONE, // Standard shortest-path behavior
-    FORWARD_ONLY, // Target must always be > current position (Clockwise/Increasing)
-    REVERSE_ONLY // Target must always be < current position (Counter-Clockwise/Decreasing)
+    NONE, // Standard shortest-path behavior (**DOES NOT** support multi-turn commands)
+    FORWARD_ONLY, // Target must always be > current position (Increasing)
+    REVERSE_ONLY // Target must always be < current position (Decreasing)
   }
 
   private DirectionConstraint directionConstraint = DirectionConstraint.NONE;
@@ -114,6 +116,10 @@ public class UnidirectionalAxon extends RTPAxon implements System {
         break;
 
       case NONE:
+        // Find closest equivalent target
+        adjustedTarget = MathUtils.closestWithOffset(target, currentPos, ROTATION_DEG);
+        break;
+
       default:
         // Pass through unchanged
         break;

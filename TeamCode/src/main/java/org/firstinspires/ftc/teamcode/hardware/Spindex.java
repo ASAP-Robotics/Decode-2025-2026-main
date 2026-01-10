@@ -131,21 +131,22 @@ public class Spindex implements System {
     if (!isIndexValid(currentIndex)) state = SpindexState.UNINITIALIZED; // shouldn't happen
 
     // do something different depending on the spindex state / mode
+    // direction constraints assume that forwards shoots, backwards doesn't
     switch (state) {
       case IDLE: // if the spindex is idle
-        spinner.setTargetRotation(spindex[currentIndex].idlePosition);
+        turnSpindexNoShoot(spindex[currentIndex].idlePosition);
         break;
 
       case INTAKING: // if the spindex is intaking
-        spinner.setTargetRotation(spindex[currentIndex].intakePosition);
+        turnSpindexNoShoot(spindex[currentIndex].intakePosition);
         break;
 
       case SHOOTING: // if the spindex is shooting
-        spinner.setTargetRotation(spindex[currentIndex].shootPosition);
+        turnSpindexNoShoot(spindex[currentIndex].shootPosition);
         break;
 
       case LIFTING: // if the spindex is lifting
-        spinner.setTargetRotation(spindex[currentIndex].liftPosition);
+        turnSpindexShoot(spindex[currentIndex].liftPosition);
         if (spinner.isAtTarget()) { // if spindex is at lift position
           spindex[currentIndex].color = BallColor.EMPTY; // spindex slot is now empty
           state = SpindexState.LIFTED; // spindex in interim "lifted" mode
@@ -160,6 +161,8 @@ public class Spindex implements System {
         // nothing needs to be done
         break;
     }
+
+    spinner.update();
 
     oldIntakeColor = intakeColor; // store old intake color
     if (state.checkSensor && isAtTarget()) {
@@ -289,7 +292,7 @@ public class Spindex implements System {
    * @return true if the color of ball in the intake changed, false if it didn't
    */
   public boolean getIsIntakeColorNew() {
-    return intakeColor == oldIntakeColor;
+    return intakeColor != oldIntakeColor;
   }
 
   /**
@@ -398,6 +401,48 @@ public class Spindex implements System {
    */
   public boolean isIndexValid(int index) {
     return index >= 0 && index < spindex.length;
+  }
+
+  /**
+   * @brief checks if moving to a target position will (inadvertently) shoot a ball
+   * @param targetPosition the position being moved to
+   * @return true if the movement will shoot a ball, false otherwise
+   */
+  protected boolean willMovementShootBall(double targetPosition) {
+    double currentPosition = spinner.isAtTarget() ?
+        spinner.getNormalizedTargetRotation() : spinner.getCurrentRotation();
+
+    for (SpindexSlot slot : spindex) {
+      double shootPos = slot.shootPosition;
+      // if slot contains a ball that will be inadvertently shot
+      if (slot.color.isShootable() && shootPos <= targetPosition && shootPos >= currentPosition) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * @brief turns the spindex to an angle in such a way that a ball could be shot
+   * @param target the angle to turn to
+   */
+  private void turnSpindexShoot(double target) {
+    spinner.setDirectionConstraint(UnidirectionalAxon.DirectionConstraint.FORWARD_ONLY);
+    spinner.setTargetRotation(target);
+  }
+
+  /**
+   * @brief turns the spindex to an angle in such a way that balls aren't shot
+   * @param target the angle to turn to
+   */
+  private void turnSpindexNoShoot(double target) {
+    spinner.setDirectionConstraint(
+        willMovementShootBall(target) ?
+            UnidirectionalAxon.DirectionConstraint.REVERSE_ONLY :
+            UnidirectionalAxon.DirectionConstraint.NONE
+    );
+    spinner.setTargetRotation(target);
   }
 
   /**

@@ -32,6 +32,8 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 public class RTPAxon {
   // Encoder for servo position feedback
   private final AnalogInput servoEncoder;
@@ -234,6 +236,11 @@ public class RTPAxon {
     return totalRotation;
   }
 
+  // Get total rotation normalized to 0-360 degrees
+  public double getCurrentRotation() {
+    return 180 + AngleUnit.normalizeDegrees(totalRotation);
+  }
+
   // Get current target rotation
   public double getTargetRotation() {
     return targetRotation;
@@ -245,7 +252,7 @@ public class RTPAxon {
   }
 
   // Set target rotation and reset PID
-  public void setTargetRotation(double target) {
+  protected void setTargetRotation(double target) {
     targetRotation = target;
     resetPID();
   }
