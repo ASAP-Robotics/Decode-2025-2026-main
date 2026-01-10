@@ -18,7 +18,6 @@ package org.firstinspires.ftc.teamcode.hardware.servos;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.thirdparty.RTPAxon;
 import org.firstinspires.ftc.teamcode.interfaces.System;
@@ -76,6 +75,7 @@ public class UnidirectionalAxon extends RTPAxon implements System {
 
   /**
    * Gets the target rotation angle normalized to 0-360 degrees
+   *
    * @return the normalized target angle
    */
   public double getNormalizedTargetRotation() {
@@ -131,8 +131,8 @@ public class UnidirectionalAxon extends RTPAxon implements System {
   }
 
   public SystemReport getStatus() {
-    status = !isAtTarget() && follower.isAtTarget()
-        ? SystemStatus.INOPERABLE : SystemStatus.NOMINAL;
+    status =
+        !isAtTarget() && follower.isAtTarget() ? SystemStatus.INOPERABLE : SystemStatus.NOMINAL;
     return new SystemReport(status);
   }
 }

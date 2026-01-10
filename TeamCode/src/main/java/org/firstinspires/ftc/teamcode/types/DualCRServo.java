@@ -19,15 +19,14 @@ package org.firstinspires.ftc.teamcode.types;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ServoController;
 
-/**
- * A class that combines two CRServos into one logical CRServo, controlling both simultaneously.
- */
+/** A class that combines two CRServos into one logical CRServo, controlling both simultaneously. */
 public class DualCRServo implements CRServo {
   private final CRServo servo0; // "master" servo
   private final CRServo servo1;
 
   /**
    * Makes a single CRServo that controls two CRServos
+   *
    * @param servo0 first (primary) servo
    * @param servo1 second (secondary) servo
    */

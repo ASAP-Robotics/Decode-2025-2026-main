@@ -18,15 +18,9 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
-import org.firstinspires.ftc.teamcode.hardware.servos.DualServo;
 import org.firstinspires.ftc.teamcode.hardware.servos.UnidirectionalAxon;
-import org.firstinspires.ftc.teamcode.hardware.thirdparty.RTPAxon;
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -409,8 +403,8 @@ public class Spindex implements System {
    * @return true if the movement will shoot a ball, false otherwise
    */
   protected boolean willMovementShootBall(double targetPosition) {
-    double currentPosition = spinner.isAtTarget() ?
-        spinner.getNormalizedTargetRotation() : spinner.getCurrentRotation();
+    double currentPosition =
+        spinner.isAtTarget() ? spinner.getNormalizedTargetRotation() : spinner.getCurrentRotation();
 
     for (SpindexSlot slot : spindex) {
       double shootPos = slot.shootPosition;
@@ -438,10 +432,9 @@ public class Spindex implements System {
    */
   private void turnSpindexNoShoot(double target) {
     spinner.setDirectionConstraint(
-        willMovementShootBall(target) ?
-            UnidirectionalAxon.DirectionConstraint.REVERSE_ONLY :
-            UnidirectionalAxon.DirectionConstraint.NONE
-    );
+        willMovementShootBall(target)
+            ? UnidirectionalAxon.DirectionConstraint.REVERSE_ONLY
+            : UnidirectionalAxon.DirectionConstraint.NONE);
     spinner.setTargetRotation(target);
   }
 
