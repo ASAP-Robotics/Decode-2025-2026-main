@@ -18,7 +18,13 @@ package org.firstinspires.ftc.teamcode.hardware.servos;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.thirdparty.RTPAxon;
+import org.firstinspires.ftc.teamcode.interfaces.System;
+import org.firstinspires.ftc.teamcode.types.SystemReport;
+import org.firstinspires.ftc.teamcode.types.SystemStatus;
+import org.firstinspires.ftc.teamcode.utils.Follower;
 
 // Written mostly by Gemini
 
@@ -28,23 +34,27 @@ import org.firstinspires.ftc.teamcode.hardware.thirdparty.RTPAxon;
  * (adding/subtracting 360 degrees) so the servo reaches the correct angle by continuing in the
  * allowed direction.
  */
-public class UnidirectionalAxon extends RTPAxon {
+public class UnidirectionalAxon extends RTPAxon implements System {
   public enum DirectionConstraint {
     NONE, // Standard shortest-path behavior
     FORWARD_ONLY, // Target must always be > current position (Clockwise/Increasing)
     REVERSE_ONLY // Target must always be < current position (Counter-Clockwise/Decreasing)
   }
 
-  private DirectionConstraint directionConstraint = DirectionConstraint.FORWARD_ONLY;
+  private DirectionConstraint directionConstraint = DirectionConstraint.NONE;
+  protected final Follower follower;
+  protected SystemStatus status = SystemStatus.NOMINAL;
 
   // region Constructors
 
   public UnidirectionalAxon(CRServo servo, AnalogInput encoder) {
     super(servo, encoder);
+    this.follower = new Follower(getTotalRotation(), getTotalRotation(), 0, 214);
   }
 
   public UnidirectionalAxon(CRServo servo, AnalogInput encoder, Direction direction) {
     super(servo, encoder, direction);
+    this.follower = new Follower(getTotalRotation(), getTotalRotation(), 0, 214);
   }
 
   // endregion
@@ -60,6 +70,19 @@ public class UnidirectionalAxon extends RTPAxon {
 
   public DirectionConstraint getDirectionConstraint() {
     return directionConstraint;
+  }
+
+  /**
+   * Gets the target rotation angle normalized to 0-360 degrees
+   * @return the normalized target angle
+   */
+  public double getNormalizedTargetRotation() {
+    return 180 + AngleUnit.normalizeDegrees(getTargetRotation());
+  }
+
+  @Override
+  public void changeTargetRotation(double change) {
+    setTargetRotation(getTargetRotation() + change);
   }
 
   /**
@@ -96,6 +119,14 @@ public class UnidirectionalAxon extends RTPAxon {
         break;
     }
 
+    follower.setTarget(adjustedTarget);
+
     super.setTargetRotation(adjustedTarget);
+  }
+
+  public SystemReport getStatus() {
+    status = !isAtTarget() && follower.isAtTarget()
+        ? SystemStatus.INOPERABLE : SystemStatus.NOMINAL;
+    return new SystemReport(status);
   }
 }

@@ -19,6 +19,7 @@ package org.firstinspires.ftc.teamcode;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -31,6 +32,7 @@ import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
+import org.firstinspires.ftc.teamcode.types.DualCRServo;
 
 /**
  * @brief class to contain the configuration of the robot, to avoid code duplication
@@ -50,12 +52,11 @@ public abstract class CommonRobot {
     Limelight limelight = new Limelight(rawLimelight, this.allianceColor, 0.001);
 
     AnalogInput magServoEncoder = this.hardwareMap.get(AnalogInput.class, "magServoEncoder");
-    Servo rawMagServo2 = this.hardwareMap.get(Servo.class, "magServo2");
-    Axon magServo2 = new Axon(rawMagServo2, magServoEncoder);
-    Servo rawMagServo1 = this.hardwareMap.get(Servo.class, "magServo1");
-    Axon magServo1 = new Axon(rawMagServo1, magServoEncoder);
+    CRServo rawMagServo1 = this.hardwareMap.get(CRServo.class, "magServo1");
+    CRServo rawMagServo2 = this.hardwareMap.get(CRServo.class, "magServo2");
+    DualCRServo magServo = new DualCRServo(rawMagServo1, rawMagServo2);
     ColorSensorV3 colorSensor = new ColorSensorV3(this.hardwareMap, "colorSensor");
-    Spindex spindex = new Spindex(magServo1, magServo2, colorSensor);
+    Spindex spindex = new Spindex(magServo, magServoEncoder, colorSensor);
 
     Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
     Axon turretHood = new Axon(rawTurretHood);
