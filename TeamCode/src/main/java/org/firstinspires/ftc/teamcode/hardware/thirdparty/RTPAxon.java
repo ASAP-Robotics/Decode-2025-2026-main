@@ -32,6 +32,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.types.DualCRServo;
 
 public class RTPAxon {
   // Encoder for servo position feedback
@@ -382,7 +383,7 @@ public class RTPAxon {
     @Override
     public void runOpMode() throws InterruptedException {
       telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-      CRServo crservo = hardwareMap.crservo.get("magServo2");
+      CRServo crservo = new DualCRServo(hardwareMap.crservo.get("magServo2"), hardwareMap.crservo.get("magServo1"));
       AnalogInput encoder = hardwareMap.get(AnalogInput.class, "magServoEncoder");
       GamepadPair gamepads = new GamepadPair(gamepad1, gamepad2);
       RTPAxon servo = new RTPAxon(crservo, encoder);
