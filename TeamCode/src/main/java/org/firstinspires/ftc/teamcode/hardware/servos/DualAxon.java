@@ -23,11 +23,11 @@ import org.firstinspires.ftc.teamcode.types.SystemStatus;
 /**
  * @brief simple class to control two Axon servos at once
  */
-public class DualServo implements System {
+public class DualAxon implements System {
   private final Axon servo1, servo2; // servos
   private double targetPosition; // the angle to move the servos to
 
-  public DualServo(Axon servo1, Axon servo2) {
+  public DualAxon(Axon servo1, Axon servo2) {
     this.servo1 = servo1;
     this.servo2 = servo2;
   }
