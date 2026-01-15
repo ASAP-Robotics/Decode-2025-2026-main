@@ -20,6 +20,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 
 /**
  * Class to use a simple break beam sensor
+ *
  * @note assumes an always-on LED
  */
 public class BreakBeam {
@@ -38,6 +39,7 @@ public class BreakBeam {
 
   /**
    * Gets the current state of the sensor's beam
+   *
    * @return the state of the beam
    */
   public State getState() {
@@ -50,6 +52,7 @@ public class BreakBeam {
 
   /**
    * Gets if the beam is broken
+   *
    * @return true if the beam is broken, false otherwise
    */
   public boolean isBroken() {
@@ -58,6 +61,7 @@ public class BreakBeam {
 
   /**
    * Gets if the beam is unbroken
+   *
    * @return true if the beam is unbroken, false otherwise
    */
   public boolean isUnbroken() {
