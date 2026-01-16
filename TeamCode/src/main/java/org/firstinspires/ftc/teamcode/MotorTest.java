@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class MotorTest extends LinearOpMode {
   private DcMotor motor1;
   private DcMotor motor2;
+
   @Override
   public void runOpMode() {
     motor1 = hardwareMap.get(DcMotor.class, "motor1");
