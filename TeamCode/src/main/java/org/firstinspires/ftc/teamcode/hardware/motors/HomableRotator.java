@@ -18,14 +18,13 @@ package org.firstinspires.ftc.teamcode.hardware.motors;
 
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
 import org.firstinspires.ftc.teamcode.utils.Follower;
 
 /**
- * Class to contain a motor that is set to a given angle setpoint,
- * which can be homed via a break beam sensor
+ * Class to contain a motor that is set to a given angle setpoint, which can be homed via a break
+ * beam sensor
  */
 public class HomableRotator {
   public enum State {
@@ -91,6 +90,7 @@ public class HomableRotator {
 
   /**
    * Sets the target angle of the motor (can be greater than 360)
+   *
    * @param degrees the new target angle
    */
   public void setTargetAngle(double degrees) {
@@ -102,6 +102,7 @@ public class HomableRotator {
 
   /**
    * Gets the target angle of the motor
+   *
    * @return the target angle
    */
   public double getTargetAngle() {
@@ -110,15 +111,14 @@ public class HomableRotator {
 
   /**
    * Gets the target angle, normalized to 0-360 degrees
+   *
    * @return the normalized target angle
    */
   public double getNormalizedTargetAngle() {
     return AngleUnit.normalizeDegrees(getTargetAngle());
   }
 
-  /**
-   * Starts homing the motor
-   */
+  /** Starts homing the motor */
   public void home() {
     setTargetAngle(0);
     state = State.HOMING;
@@ -130,6 +130,7 @@ public class HomableRotator {
 
   /**
    * Gets if the motor is at it's target angle
+   *
    * @return true if at target, false otherwise
    */
   public boolean atTarget() {
@@ -138,6 +139,7 @@ public class HomableRotator {
 
   /**
    * Sets the tolerance of the motor (how close to the target is "at target")
+   *
    * @param degrees tolerance
    */
   public void setTolerance(double degrees) {
@@ -146,6 +148,7 @@ public class HomableRotator {
 
   /**
    * Sets the PID tuning values for the PID controller
+   *
    * @param kp proportional
    * @param ki integral
    * @param kd derivative
@@ -156,6 +159,7 @@ public class HomableRotator {
 
   /**
    * Sets the P tuning value for the PID controller
+   *
    * @param kp proportional
    */
   public void setP(double kp) {
@@ -164,6 +168,7 @@ public class HomableRotator {
 
   /**
    * Sets the I tuning value for the PID controller
+   *
    * @param ki integral
    */
   public void setI(double ki) {
@@ -172,6 +177,7 @@ public class HomableRotator {
 
   /**
    * Sets the D tuning value for the PID controller
+   *
    * @param kd derivative
    */
   public void setD(double kd) {
@@ -180,6 +186,7 @@ public class HomableRotator {
 
   /**
    * Gets the PID tuning values from the PID controller
+   *
    * @return PID values
    */
   public double[] getPID() {
@@ -188,6 +195,7 @@ public class HomableRotator {
 
   /**
    * Gets the P tuning value from the PID controller
+   *
    * @return proportional
    */
   public double getP() {
@@ -196,6 +204,7 @@ public class HomableRotator {
 
   /**
    * Gets the I tuning value from the PID controller
+   *
    * @return integral
    */
   public double getI() {
@@ -204,6 +213,7 @@ public class HomableRotator {
 
   /**
    * Gets the D tuning value from the PID controller
+   *
    * @return derivative
    */
   public double getD() {

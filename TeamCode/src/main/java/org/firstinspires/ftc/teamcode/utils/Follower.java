@@ -77,6 +77,7 @@ public class Follower {
 
   /**
    * Overrides the value of the modeled system
+   *
    * @note this is an advanced feature, and usually isn't needed. use with discretion
    * @param value the new value of the modeled system
    */
