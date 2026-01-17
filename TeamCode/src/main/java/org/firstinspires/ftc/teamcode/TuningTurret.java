@@ -29,7 +29,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
-import org.firstinspires.ftc.teamcode.hardware.servos.DualServo;
+import org.firstinspires.ftc.teamcode.hardware.servos.DualAxon;
 
 @TeleOp(name = "Tuning turret", group = "Tuning")
 @Config
@@ -56,7 +56,7 @@ public class TuningTurret extends LinearOpMode {
     Axon turretHood = new Axon(rawTurretHood);
     Axon l1 = new Axon(lifter1);
     Axon l2 = new Axon(lifter2, lifterEncoder);
-    DualServo lifter = new DualServo(l1, l2);
+    DualAxon lifter = new DualAxon(l1, l2);
     Turret turret = new Turret(flywheel, turretRotator, turretHood, 1500);
     turret.activate();
     turret.enable();

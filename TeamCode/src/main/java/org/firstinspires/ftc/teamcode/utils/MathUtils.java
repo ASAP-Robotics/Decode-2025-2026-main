@@ -40,4 +40,16 @@ public class MathUtils {
   public static double clamp(double val, double min, double max) {
     return Math.max(min, Math.min(max, val));
   }
+
+  /**
+   * @brief finds the closest value to `input` that is equal to `desired` modulo `offset`
+   * @param input the initial, unadjusted input value
+   * @param desired the value we want to be close to
+   * @param offset the size of offset steps
+   * @return the optimized value
+   */
+  public static double closestWithOffset(double input, double desired, double offset) {
+    double numOffsets = Math.round((desired - input) / offset);
+    return input + numOffsets * offset;
+  }
 }

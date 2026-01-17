@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,16 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
-import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
-import org.firstinspires.ftc.teamcode.hardware.servos.DualServo;
+import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServo;
+import org.firstinspires.ftc.teamcode.hardware.servos.UnidirectionalAxon;
+import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.types.SystemReport;
+import org.firstinspires.ftc.teamcode.types.SystemStatus;
 
-public class Spindex {
+public class Spindex implements System {
   /**
    * @brief simple enum to track the spindex's mode / state
    */
@@ -50,28 +54,32 @@ public class Spindex {
     public BallColor color;
     // the position to move the spindex to to intake a ball into this slot
     public final double intakePosition;
-    // the position to move the spindex to to shoot a ball from this slot
+    // the position to move the spindex to to prepare to shoot a ball from this slot
     public final double shootPosition;
+    // the position to move the spindex to to force a ball up the ramp
+    public final double liftPosition;
     // the position half-a-slot off from intake position, so balls cannot exit the mag
     public final double idlePosition;
 
-    public SpindexSlot(double intakePosition, double shootPosition, double idlePosition) {
+    public SpindexSlot(
+        double intakePosition, double shootPosition, double liftPosition, double idlePosition) {
       this.color = BallColor.UNKNOWN;
       this.intakePosition = intakePosition;
       this.shootPosition = shootPosition;
+      this.liftPosition = liftPosition;
       this.idlePosition = idlePosition;
     }
   }
 
-  private final DualServo spinner; // the servos that rotate the divider in the mag
-  private final DualServo lifter; // the servos that lift balls into the shooter turret
+  SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
+  SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
+  private final UnidirectionalAxon spinner; // the servos that rotate the divider in the mag
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
-  private static final double lifterRetractedPos = 7; // position of lift servos when at rest
-  private static final double lifterExtendedPos = 100; // position of lift servos when shooting
   private final SpindexSlot[] spindex = {
-    new SpindexSlot(39.6, 39.6, 108), // slot 0
-    new SpindexSlot(172.8, 172.8, 237.6), // slot 1
-    new SpindexSlot(306, 306, 237.6) // slot 2
+    // TODO: retune after rework
+    new SpindexSlot(70, 333, 333, 333), // slot 0
+    new SpindexSlot(203, 100, 100, 100), // slot 1
+    new SpindexSlot(333, 200, 200, 200) // slot 2
   };
 
   private SpindexState state; // the current state of the spindex
@@ -81,14 +89,8 @@ public class Spindex {
   private BallColor oldIntakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
-  public Spindex(
-      Axon spinServo1,
-      Axon spinServo2,
-      Axon liftServo1,
-      Axon liftServo2,
-      ColorSensorV3 colorSensor) {
-    this.spinner = new DualServo(spinServo1, spinServo2);
-    this.lifter = new DualServo(liftServo1, liftServo2);
+  public Spindex(CRServo spinServo, AnalogInput spinEncoder, ColorSensorV3 colorSensor) {
+    this.spinner = new UnidirectionalAxon(spinServo, spinEncoder);
     this.colorSensor = colorSensor;
     this.state = SpindexState.UNINITIALIZED;
   }
@@ -111,42 +113,35 @@ public class Spindex {
 
     state = isPreloaded ? SpindexState.IDLE : SpindexState.INTAKING;
     currentIndex = 0; // spindex at index 0
-    lifter.setPosition(lifterRetractedPos); // move lifting mechanism to rest position
   }
 
   /**
    * @brief updates everything to do with the spindex
    */
-  public void update(Telemetry telemetry) {
+  public void update() {
+    sensorReport = colorSensor.getStatus();
+    spinnerReport = spinner.getStatus();
+
     if (!isIndexValid(currentIndex)) state = SpindexState.UNINITIALIZED; // shouldn't happen
 
     // do something different depending on the spindex state / mode
+    // direction constraints assume that forwards shoots, backwards doesn't
     switch (state) {
       case IDLE: // if the spindex is idle
-        // if the lifter is retracted and the spindex has not been set to the correct position
-        if (lifter.isAtTarget()) {
-          // move spindex to idle position
-          spinner.setPosition(spindex[currentIndex].idlePosition);
-        }
+        turnSpindexNoShoot(spindex[currentIndex].idlePosition);
         break;
 
       case INTAKING: // if the spindex is intaking
-        // if the lifter is retracted and the spindex has not been set to the correct position
-        if (lifter.isAtTarget()) {
-          spinner.setPosition(spindex[currentIndex].intakePosition);
-        }
+        turnSpindexNoShoot(spindex[currentIndex].intakePosition);
         break;
 
       case SHOOTING: // if the spindex is shooting
-        // if the lifter is retracted and the spindex has not been set to the correct position
-        if (lifter.isAtTarget()) {
-          spinner.setPosition(spindex[currentIndex].shootPosition);
-        }
+        turnSpindexNoShoot(spindex[currentIndex].shootPosition);
         break;
 
       case LIFTING: // if the spindex is lifting
-        if (lifter.isAtTarget()) { // if lifter is fully extended
-          lifter.setPosition(lifterRetractedPos); // retract lifter
+        turnSpindexShoot(spindex[currentIndex].liftPosition);
+        if (spinner.isAtTarget()) { // if spindex is at lift position
           spindex[currentIndex].color = BallColor.EMPTY; // spindex slot is now empty
           state = SpindexState.LIFTED; // spindex in interim "lifted" mode
         }
@@ -161,13 +156,41 @@ public class Spindex {
         break;
     }
 
+    spinner.update();
+
     oldIntakeColor = intakeColor; // store old intake color
     if (state.checkSensor && isAtTarget()) {
-      colorSensor.update(telemetry);
+      colorSensor.update();
       intakeColor = colorSensor.getColor(); // update intake color
     } else {
       intakeColor = BallColor.INVALID;
     }
+  }
+
+  public SystemReport getStatus() {
+    SystemStatus status = SystemStatus.NOMINAL;
+    SystemStatus sensorStatus = sensorReport.status;
+    SystemStatus spinnerStatus = spinnerReport.status;
+    String message = "🟩Normal";
+
+    if (spinnerStatus == SystemStatus.INOPERABLE) {
+      status = SystemStatus.INOPERABLE;
+      message = "🟥Broken (Spinner)";
+
+    } else if (sensorStatus == SystemStatus.INOPERABLE) {
+      status = SystemStatus.INOPERABLE;
+      message = "🟥Broken (Color sensor); use backups controls";
+
+    } else if (spinnerStatus == SystemStatus.FALLBACK) {
+      status = SystemStatus.FALLBACK;
+      message = "🟨Backup (Spinner); performance will be degraded";
+
+    } else if (sensorStatus == SystemStatus.FALLBACK) {
+      status = SystemStatus.FALLBACK;
+      message = "🟨Backup (Color sensor); use backups controls";
+    }
+
+    return new SystemReport(status, message);
   }
 
   /**
@@ -176,12 +199,7 @@ public class Spindex {
    */
   public void moveSpindexIntake(int index) {
     if (!isIndexValid(index)) return; // return on invalid parameters
-    // retract lifter
-    lifter.setPosition(lifterRetractedPos);
-    if (lifter.isAtTarget()) { // if lifter is fully retracted
-      // set spindex to new position
-      spinner.setPosition(spindex[index].intakePosition);
-    }
+    spinner.setTargetRotation(spindex[index].intakePosition);
     currentIndex = index; // set new index
     state = SpindexState.INTAKING; // spindex in intaking mode
   }
@@ -193,12 +211,8 @@ public class Spindex {
   public void moveSpindexShoot(int index) {
     if (!isIndexValid(index) || state == SpindexState.SHOOTING || state == SpindexState.LIFTING)
       return; // return on invalid parameters
-    // retract lifter
-    lifter.setPosition(lifterRetractedPos);
-    if (lifter.isAtTarget()) { // if lifter is fully retracted
-      // set spindex to new position
-      spinner.setPosition(spindex[index].shootPosition);
-    }
+    // set spindex to new position
+    spinner.setTargetRotation(spindex[index].shootPosition);
     currentIndex = index; // set new index
     state = SpindexState.SHOOTING; // spindex in shooting mode
   }
@@ -210,13 +224,8 @@ public class Spindex {
    */
   public void moveSpindexIdle(int index) {
     if (!isIndexValid(index)) return; // return on invalid parameters
-    // retract lifter
-    lifter.setPosition(lifterRetractedPos);
-    // if the lifter is fully retracted
-    if (lifter.isAtTarget()) {
-      // set spindex to new position
-      spinner.setPosition(spindex[index].idlePosition);
-    }
+    // set spindex to new position
+    spinner.setTargetRotation(spindex[index].idlePosition);
     currentIndex = index; // set new index
     state = SpindexState.IDLE; // spindex in idle mode
   }
@@ -235,14 +244,11 @@ public class Spindex {
 
   /**
    * @brief starts lifting a ball into the turret
+   * @note only starts lifting after the next call to update()
    */
   public void liftBall() {
-    // if the spindex is not stationary at a valid shooting position, or the lifter is not
-    // retracted, we cannot lift a ball
-    if (state != SpindexState.SHOOTING || currentIndex == NULL || !isAtTarget()) return;
-
-    lifter.setPosition(lifterExtendedPos);
-
+    // if the spindex is not stationary at a valid shooting position, we cannot lift a ball
+    if (state != SpindexState.SHOOTING || currentIndex == NULL) return;
     state = SpindexState.LIFTING; // spindex in lifting mode
   }
 
@@ -253,7 +259,7 @@ public class Spindex {
    */
   public boolean isAtTarget() {
     boolean isSet = true;
-    double targetPosition = spinner.getTargetPosition();
+    double targetPosition = spinner.getNormalizedTargetRotation();
     switch (state) {
       case IDLE:
         if (targetPosition != spindex[currentIndex].idlePosition) isSet = false;
@@ -272,7 +278,7 @@ public class Spindex {
         break;
     }
 
-    return spinner.isAtTarget() && lifter.isAtTarget() && isSet;
+    return spinner.isAtTarget() && isSet;
   }
 
   /**
@@ -280,7 +286,7 @@ public class Spindex {
    * @return true if the color of ball in the intake changed, false if it didn't
    */
   public boolean getIsIntakeColorNew() {
-    return intakeColor == oldIntakeColor;
+    return intakeColor != oldIntakeColor;
   }
 
   /**
@@ -392,12 +398,44 @@ public class Spindex {
   }
 
   /**
-   * @brief checks if the lifter is at a specified position
-   * @param positionToCheck the position to compare against the lifter's target position
-   * @return true if the lifter's target is the same as the specified position, false otherwise
+   * @brief checks if moving to a target position will (inadvertently) shoot a ball
+   * @param targetPosition the position being moved to
+   * @return true if the movement will shoot a ball, false otherwise
    */
-  private boolean isLifterPosition(double positionToCheck) {
-    return lifter.getTargetPosition() == positionToCheck;
+  protected boolean willMovementShootBall(double targetPosition) {
+    double currentPosition =
+        spinner.isAtTarget() ? spinner.getNormalizedTargetRotation() : spinner.getCurrentRotation();
+
+    for (SpindexSlot slot : spindex) {
+      double shootPos = slot.shootPosition;
+      // if slot contains a ball that will be inadvertently shot
+      if (slot.color.isShootable() && shootPos <= targetPosition && shootPos >= currentPosition) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * @brief turns the spindex to an angle in such a way that a ball could be shot
+   * @param target the angle to turn to
+   */
+  private void turnSpindexShoot(double target) {
+    spinner.setDirectionConstraint(UnidirectionalAxon.DirectionConstraint.FORWARD_ONLY);
+    spinner.setTargetRotation(target);
+  }
+
+  /**
+   * @brief turns the spindex to an angle in such a way that balls aren't shot
+   * @param target the angle to turn to
+   */
+  private void turnSpindexNoShoot(double target) {
+    spinner.setDirectionConstraint(
+        willMovementShootBall(target)
+            ? UnidirectionalAxon.DirectionConstraint.REVERSE_ONLY
+            : UnidirectionalAxon.DirectionConstraint.NONE);
+    spinner.setTargetRotation(target);
   }
 
   /**
@@ -407,7 +445,7 @@ public class Spindex {
    *     otherwise
    */
   private boolean isSpindexPosition(double positionToCheck) {
-    return spinner.getTargetPosition() == positionToCheck;
+    return spinner.getNormalizedTargetRotation() == positionToCheck;
   }
 
   /**
