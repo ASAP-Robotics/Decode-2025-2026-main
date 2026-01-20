@@ -12,7 +12,7 @@ public class MotorTest extends LinearOpMode {
   @Override
   public void runOpMode() {
     motor1 = hardwareMap.get(DcMotor.class, "motor1");
-    motor2 = hardwareMap.get(DcMotor.class, "motor2");
+    motor2 = hardwareMap.get(DcMotor.class, "motor");
     motor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     motor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 

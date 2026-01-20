@@ -21,18 +21,10 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.hardware.Turret;
 import org.firstinspires.ftc.teamcode.hardware.motors.HomableRotator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
-import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
-import org.firstinspires.ftc.teamcode.hardware.servos.DualAxon;
 
 @TeleOp(name = "Tuning turret", group = "Tuning")
 @Config
@@ -41,7 +33,8 @@ public class TuningTurret extends LinearOpMode {
   public static double kD = 0.001;
   public static double kI = 0.05;
   public static double kP = 0.25;
-  //public static double kF = 0;
+
+  // public static double kF = 0;
 
   @Override
   public void runOpMode() {
@@ -50,7 +43,7 @@ public class TuningTurret extends LinearOpMode {
 
     BreakBeam sensor = new BreakBeam(hardwareMap.get(DigitalChannel.class, "breakBeam"));
     Motor motor = new Motor(hardwareMap, "motor", Motor.GoBILDA.RPM_117);
-    HomableRotator spindex = new HomableRotator(motor, sensor, 0,0, 0, 1, false);
+    HomableRotator spindex = new HomableRotator(motor, sensor, 0, 0, 0, 1, false);
 
     waitForStart();
     spindex.start();
