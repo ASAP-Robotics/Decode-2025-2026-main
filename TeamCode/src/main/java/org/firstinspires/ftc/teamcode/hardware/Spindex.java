@@ -18,8 +18,12 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
+
+import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
+import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
 import org.firstinspires.ftc.teamcode.hardware.servos.UnidirectionalAxon;
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
@@ -73,7 +77,7 @@ public class Spindex implements System {
 
   SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
   SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
-  private final UnidirectionalAxon spinner; // the servos that rotate the divider in the mag
+  private final UnidirectionalHomableRotator spinner; // the motor that rotates the mag's divider
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // TODO: retune after rework
@@ -89,8 +93,9 @@ public class Spindex implements System {
   private BallColor oldIntakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
-  public Spindex(CRServo spinServo, AnalogInput spinEncoder, ColorSensorV3 colorSensor) {
-    this.spinner = new UnidirectionalAxon(spinServo, spinEncoder);
+  public Spindex(Motor spinner, BreakBeam homingSwitch, ColorSensorV3 colorSensor) {
+    this.spinner =
+        new UnidirectionalHomableRotator(spinner, homingSwitch, 0.25, 0.05, 0.001, 1, false);
     this.colorSensor = colorSensor;
     this.state = SpindexState.UNINITIALIZED;
   }
@@ -141,7 +146,7 @@ public class Spindex implements System {
 
       case LIFTING: // if the spindex is lifting
         turnSpindexShoot(spindex[currentIndex].liftPosition);
-        if (spinner.isAtTarget()) { // if spindex is at lift position
+        if (spinner.atTarget()) { // if spindex is at lift position
           spindex[currentIndex].color = BallColor.EMPTY; // spindex slot is now empty
           state = SpindexState.LIFTED; // spindex in interim "lifted" mode
         }
@@ -199,7 +204,7 @@ public class Spindex implements System {
    */
   public void moveSpindexIntake(int index) {
     if (!isIndexValid(index)) return; // return on invalid parameters
-    spinner.setTargetRotation(spindex[index].intakePosition);
+    spinner.setAngle(spindex[index].intakePosition);
     currentIndex = index; // set new index
     state = SpindexState.INTAKING; // spindex in intaking mode
   }
@@ -212,7 +217,7 @@ public class Spindex implements System {
     if (!isIndexValid(index) || state == SpindexState.SHOOTING || state == SpindexState.LIFTING)
       return; // return on invalid parameters
     // set spindex to new position
-    spinner.setTargetRotation(spindex[index].shootPosition);
+    spinner.setAngle(spindex[index].shootPosition);
     currentIndex = index; // set new index
     state = SpindexState.SHOOTING; // spindex in shooting mode
   }
@@ -225,7 +230,7 @@ public class Spindex implements System {
   public void moveSpindexIdle(int index) {
     if (!isIndexValid(index)) return; // return on invalid parameters
     // set spindex to new position
-    spinner.setTargetRotation(spindex[index].idlePosition);
+    spinner.setAngle(spindex[index].idlePosition);
     currentIndex = index; // set new index
     state = SpindexState.IDLE; // spindex in idle mode
   }
@@ -259,7 +264,7 @@ public class Spindex implements System {
    */
   public boolean isAtTarget() {
     boolean isSet = true;
-    double targetPosition = spinner.getNormalizedTargetRotation();
+    double targetPosition = spinner.getNormalizedCurrentAngle();
     switch (state) {
       case IDLE:
         if (targetPosition != spindex[currentIndex].idlePosition) isSet = false;
@@ -278,7 +283,7 @@ public class Spindex implements System {
         break;
     }
 
-    return spinner.isAtTarget() && isSet;
+    return spinner.atTarget() && isSet;
   }
 
   /**
@@ -404,7 +409,7 @@ public class Spindex implements System {
    */
   protected boolean willMovementShootBall(double targetPosition) {
     double currentPosition =
-        spinner.isAtTarget() ? spinner.getNormalizedTargetRotation() : spinner.getCurrentRotation();
+        spinner.atTarget() ? spinner.getNormalizedTargetAngle() : spinner.getNormalizedCurrentAngle();
 
     for (SpindexSlot slot : spindex) {
       double shootPos = slot.shootPosition;
@@ -422,8 +427,8 @@ public class Spindex implements System {
    * @param target the angle to turn to
    */
   private void turnSpindexShoot(double target) {
-    spinner.setDirectionConstraint(UnidirectionalAxon.DirectionConstraint.FORWARD_ONLY);
-    spinner.setTargetRotation(target);
+    spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.FORWARD_ONLY);
+    spinner.setAngle(target);
   }
 
   /**
@@ -433,9 +438,9 @@ public class Spindex implements System {
   private void turnSpindexNoShoot(double target) {
     spinner.setDirectionConstraint(
         willMovementShootBall(target)
-            ? UnidirectionalAxon.DirectionConstraint.REVERSE_ONLY
-            : UnidirectionalAxon.DirectionConstraint.NONE);
-    spinner.setTargetRotation(target);
+            ? UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY
+            : UnidirectionalHomableRotator.DirectionConstraint.NONE);
+    spinner.setAngle(target);
   }
 
   /**
@@ -445,7 +450,7 @@ public class Spindex implements System {
    *     otherwise
    */
   private boolean isSpindexPosition(double positionToCheck) {
-    return spinner.getNormalizedTargetRotation() == positionToCheck;
+    return spinner.getNormalizedCurrentAngle() == positionToCheck;
   }
 
   /**

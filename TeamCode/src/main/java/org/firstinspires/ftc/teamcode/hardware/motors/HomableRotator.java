@@ -115,6 +115,7 @@ public class HomableRotator implements System {
   /**
    * Sets the target angle of the motor (can be greater than 360)
    *
+   * @note Not safe to use while homing, prefer setAngle() instead
    * @param degrees the new target angle
    */
   protected void setTargetAngle(double degrees) {

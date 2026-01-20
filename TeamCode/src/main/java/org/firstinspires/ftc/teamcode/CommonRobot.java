@@ -30,6 +30,7 @@ import org.firstinspires.ftc.teamcode.hardware.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
+import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.DualCRServo;
@@ -51,12 +52,10 @@ public abstract class CommonRobot {
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
     Limelight limelight = new Limelight(rawLimelight, this.allianceColor, 0.001);
 
-    AnalogInput magServoEncoder = this.hardwareMap.get(AnalogInput.class, "magServoEncoder");
-    CRServo rawMagServo1 = this.hardwareMap.get(CRServo.class, "magServo1");
-    CRServo rawMagServo2 = this.hardwareMap.get(CRServo.class, "magServo2");
-    DualCRServo magServo = new DualCRServo(rawMagServo1, rawMagServo2);
+    BreakBeam spindexHomer = new BreakBeam(this.hardwareMap.get(com.qualcomm.robotcore.hardware.DigitalChannel.class, "spindexHomer"));
+    Motor spindexMotor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
     ColorSensorV3 colorSensor = new ColorSensorV3(this.hardwareMap, "colorSensor");
-    Spindex spindex = new Spindex(magServo, magServoEncoder, colorSensor);
+    Spindex spindex = new Spindex(spindexMotor, spindexHomer, colorSensor);
 
     Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
     Axon turretHood = new Axon(rawTurretHood);
