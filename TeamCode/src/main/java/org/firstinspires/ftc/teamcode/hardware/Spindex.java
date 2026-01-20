@@ -19,12 +19,8 @@ package org.firstinspires.ftc.teamcode.hardware;
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
-
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
-import org.firstinspires.ftc.teamcode.hardware.servos.UnidirectionalAxon;
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -409,7 +405,9 @@ public class Spindex implements System {
    */
   protected boolean willMovementShootBall(double targetPosition) {
     double currentPosition =
-        spinner.atTarget() ? spinner.getNormalizedTargetAngle() : spinner.getNormalizedCurrentAngle();
+        spinner.atTarget()
+            ? spinner.getNormalizedTargetAngle()
+            : spinner.getNormalizedCurrentAngle();
 
     for (SpindexSlot slot : spindex) {
       double shootPos = slot.shootPosition;

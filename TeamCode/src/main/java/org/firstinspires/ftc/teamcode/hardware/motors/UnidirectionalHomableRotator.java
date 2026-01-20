@@ -22,6 +22,7 @@ import org.firstinspires.ftc.teamcode.utils.MathUtils;
 
 /**
  * An extension of HomableRotator that allows enforcing direction constraints on movement.
+ *
  * @note Does not support multi-turn commands.
  */
 public class UnidirectionalHomableRotator extends HomableRotator {
@@ -33,7 +34,14 @@ public class UnidirectionalHomableRotator extends HomableRotator {
 
   protected DirectionConstraint directionConstraint = DirectionConstraint.NONE;
 
-  public UnidirectionalHomableRotator(Motor motor, BreakBeam sensor, double kp, double ki, double kd, double tolerance, boolean inverted) {
+  public UnidirectionalHomableRotator(
+      Motor motor,
+      BreakBeam sensor,
+      double kp,
+      double ki,
+      double kd,
+      double tolerance,
+      boolean inverted) {
     super(motor, sensor, kp, ki, kd, tolerance, inverted);
   }
 
@@ -48,6 +56,7 @@ public class UnidirectionalHomableRotator extends HomableRotator {
 
   /**
    * Gets the current direction constraint.
+   *
    * @return the current direction constraint.
    */
   public DirectionConstraint getDirectionConstraint() {

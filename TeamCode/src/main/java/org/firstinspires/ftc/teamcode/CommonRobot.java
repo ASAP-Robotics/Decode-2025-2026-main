@@ -18,8 +18,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -33,7 +31,6 @@ import org.firstinspires.ftc.teamcode.hardware.Turret;
 import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
-import org.firstinspires.ftc.teamcode.types.DualCRServo;
 
 /**
  * @brief class to contain the configuration of the robot, to avoid code duplication
@@ -52,7 +49,10 @@ public abstract class CommonRobot {
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
     Limelight limelight = new Limelight(rawLimelight, this.allianceColor, 0.001);
 
-    BreakBeam spindexHomer = new BreakBeam(this.hardwareMap.get(com.qualcomm.robotcore.hardware.DigitalChannel.class, "spindexHomer"));
+    BreakBeam spindexHomer =
+        new BreakBeam(
+            this.hardwareMap.get(
+                com.qualcomm.robotcore.hardware.DigitalChannel.class, "spindexHomer"));
     Motor spindexMotor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
     ColorSensorV3 colorSensor = new ColorSensorV3(this.hardwareMap, "colorSensor");
     Spindex spindex = new Spindex(spindexMotor, spindexHomer, colorSensor);

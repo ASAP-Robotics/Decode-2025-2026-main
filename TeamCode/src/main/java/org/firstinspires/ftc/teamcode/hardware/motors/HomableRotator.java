@@ -19,7 +19,6 @@ package org.firstinspires.ftc.teamcode.hardware.motors;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.util.Range;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
 import org.firstinspires.ftc.teamcode.interfaces.System;
@@ -30,6 +29,7 @@ import org.firstinspires.ftc.teamcode.utils.Follower;
 /**
  * Class to contain a motor that is set to a given angle setpoint, which can be homed via a break
  * beam sensor
+ *
  * @note assumes that the break beam is placed at 0 degrees
  */
 public class HomableRotator implements System {
@@ -80,13 +80,7 @@ public class HomableRotator implements System {
 
   public void update() {
     if (state == State.UNINITIALIZED) return;
-    motor.set(
-        Range.clip(
-            motorController.calculate(getCurrentAngle()),
-            -1,
-            1
-        )
-    );
+    motor.set(Range.clip(motorController.calculate(getCurrentAngle()), -1, 1));
     if (state == State.HOMING && atTarget()) {
       if (sensor.isBroken()) {
         homed = true;
@@ -154,6 +148,7 @@ public class HomableRotator implements System {
 
   /**
    * Gets the current angle of the motor
+   *
    * @return the motor's angle, or 0 if angle is invalid
    */
   public double getCurrentAngle() {
@@ -163,6 +158,7 @@ public class HomableRotator implements System {
 
   /**
    * Gets the current angle of the motor, normalized to 0-360 degrees
+   *
    * @return the normalized value of the motor's angle
    */
   public double getNormalizedCurrentAngle() {
@@ -210,7 +206,8 @@ public class HomableRotator implements System {
   public SystemReport getStatus() {
     org.firstinspires.ftc.teamcode.types.SystemStatus status =
         state == State.NORMAL && motorSimulation.isAtTarget() && !motorController.atSetPoint()
-        ? SystemStatus.INOPERABLE : SystemStatus.NOMINAL;
+            ? SystemStatus.INOPERABLE
+            : SystemStatus.NOMINAL;
 
     return new SystemReport(status);
   }
