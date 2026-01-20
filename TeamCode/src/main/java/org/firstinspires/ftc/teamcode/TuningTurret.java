@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class TuningTurret extends LinearOpMode {
       spindex.setP(kP);
       spindex.setI(kI);
       spindex.setD(kD);
-      spindex.setTargetAngle(angle);
+      spindex.setAngle(angle);
       spindex.update();
 
       dashboardTelemetry.addData("At target", spindex.atTarget());

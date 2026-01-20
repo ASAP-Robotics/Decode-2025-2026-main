@@ -18,28 +18,35 @@ package org.firstinspires.ftc.teamcode.hardware.motors;
 
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.robotcore.util.Range;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
+import org.firstinspires.ftc.teamcode.interfaces.System;
+import org.firstinspires.ftc.teamcode.types.SystemReport;
+import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.Follower;
 
 /**
  * Class to contain a motor that is set to a given angle setpoint, which can be homed via a break
  * beam sensor
+ * @note assumes that the break beam is placed at 0 degrees
  */
-public class HomableRotator {
+public class HomableRotator implements System {
   public enum State {
     NORMAL,
     HOMING,
     UNINITIALIZED
   }
 
-  protected static final double HOMING_INCREMENT_SIZE = 5;
+  protected static final double HOMING_INCREMENT_SIZE = 5; // degrees
 
   protected final Motor motor;
   protected final BreakBeam sensor;
   protected final PIDController motorController;
-  protected final Follower angleSimulation;
+  protected final Follower motorSimulation;
   protected State state = State.UNINITIALIZED;
+  protected boolean homed = false;
   protected double targetAngle = 0;
 
   public HomableRotator(
@@ -58,24 +65,31 @@ public class HomableRotator {
     this.motor.setRunMode(Motor.RunMode.RawPower);
     this.motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
     this.motor.set(0);
-    this.angleSimulation =
+    this.motorSimulation =
         new Follower(0, 0, tolerance, this.motor.getMaxRPM() / 24); // tune 24 (1/4 of max speed)
   }
 
   public void start() {
     state = State.NORMAL;
+    motor.set(0);
     motor.stopAndResetEncoder();
     motorController.reset();
     setTargetAngle(0);
     motorController.setSetPoint(targetAngle);
-    motor.set(0);
   }
 
   public void update() {
     if (state == State.UNINITIALIZED) return;
-    motor.set(motorController.calculate(motor.getCurrentPosition() / motor.getCPR() * 360));
+    motor.set(
+        Range.clip(
+            motorController.calculate(getCurrentAngle()),
+            -1,
+            1
+        )
+    );
     if (state == State.HOMING && atTarget()) {
       if (sensor.isBroken()) {
+        homed = true;
         state = State.NORMAL;
         motor.set(0);
         motor.stopAndResetEncoder();
@@ -83,7 +97,7 @@ public class HomableRotator {
         setTargetAngle(0);
 
       } else {
-        targetAngle += HOMING_INCREMENT_SIZE;
+        changeTargetAngle(HOMING_INCREMENT_SIZE);
       }
     }
   }
@@ -93,11 +107,30 @@ public class HomableRotator {
    *
    * @param degrees the new target angle
    */
-  public void setTargetAngle(double degrees) {
-    if (Double.isNaN(degrees) || state != State.NORMAL) return;
+  public void setAngle(double degrees) {
+    if (state != State.NORMAL) return;
+    setTargetAngle(degrees);
+  }
+
+  /**
+   * Sets the target angle of the motor (can be greater than 360)
+   *
+   * @param degrees the new target angle
+   */
+  protected void setTargetAngle(double degrees) {
+    if (Double.isNaN(degrees) || Double.isInfinite(degrees)) return;
     targetAngle = degrees;
     motorController.setSetPoint(degrees);
-    angleSimulation.setTarget(degrees);
+    motorSimulation.setTarget(degrees);
+  }
+
+  /**
+   * Changes the target angle of the motor b a given amount
+   *
+   * @param change the amount to change the target angle by
+   */
+  public void changeTargetAngle(double change) {
+    setTargetAngle(getTargetAngle() + change);
   }
 
   /**
@@ -115,12 +148,30 @@ public class HomableRotator {
    * @return the normalized target angle
    */
   public double getNormalizedTargetAngle() {
-    return AngleUnit.normalizeDegrees(getTargetAngle());
+    return AngleUnit.normalizeDegrees(getTargetAngle()) + 180;
+  }
+
+  /**
+   * Gets the current angle of the motor
+   * @return the motor's angle, or 0 if angle is invalid
+   */
+  public double getCurrentAngle() {
+    double angle = motor.getCurrentPosition() / motor.getCPR() * 360;
+    return Double.isNaN(angle) || Double.isInfinite(angle) ? 0 : angle;
+  }
+
+  /**
+   * Gets the current angle of the motor, normalized to 0-360 degrees
+   * @return the normalized value of the motor's angle
+   */
+  public double getNormalizedCurrentAngle() {
+    return AngleUnit.normalizeDegrees(getCurrentAngle()) + 180;
   }
 
   /** Starts homing the motor */
   public void home() {
-    setTargetAngle(0);
+    homed = false;
+    targetAngle = 0;
     state = State.HOMING;
     motor.set(0);
     motor.stopAndResetEncoder();
@@ -138,12 +189,29 @@ public class HomableRotator {
   }
 
   /**
+   * Gets if the motor is homed
+   *
+   * @return true if homed, false otherwise
+   */
+  public boolean isHomed() {
+    return homed;
+  }
+
+  /**
    * Sets the tolerance of the motor (how close to the target is "at target")
    *
    * @param degrees tolerance
    */
   public void setTolerance(double degrees) {
     motorController.setTolerance(degrees);
+  }
+
+  public SystemReport getStatus() {
+    org.firstinspires.ftc.teamcode.types.SystemStatus status =
+        state == State.NORMAL && motorSimulation.isAtTarget() && !motorController.atSetPoint()
+        ? SystemStatus.INOPERABLE : SystemStatus.NOMINAL;
+
+    return new SystemReport(status);
   }
 
   /**
