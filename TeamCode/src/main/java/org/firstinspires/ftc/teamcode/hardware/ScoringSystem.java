@@ -324,6 +324,7 @@ public class ScoringSystem {
 
   /**
    * Starts shooting a sequence of balls out of the turret
+   *
    * @return true if the mag wasn't empty, false if the mag is empty
    */
   public boolean shoot() {

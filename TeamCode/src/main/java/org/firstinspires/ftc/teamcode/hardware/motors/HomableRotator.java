@@ -148,9 +148,7 @@ public class HomableRotator implements System {
     return AngleUnit.normalizeDegrees(getTargetAngle()) + 180;
   }
 
-  /**
-   * Measures the current angle of the motor
-   */
+  /** Measures the current angle of the motor */
   private void measureCurrentAngle() {
     double angle = motor.getCurrentPosition() / motor.getCPR() * 360;
     currentAngle = Double.isNaN(angle) || Double.isInfinite(angle) ? 0 : angle;
@@ -177,6 +175,7 @@ public class HomableRotator implements System {
   /**
    * Gets the distance (in degrees) between the given angle and the current angle. Basically, if the
    * given angle was set as the target, how far would the motor move?
+   *
    * @param angle the "target" to measure the distance from
    * @return the distance from the given target, and the current angle
    * @note returns positive infinity on invalid parameters

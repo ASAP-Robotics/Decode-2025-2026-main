@@ -24,7 +24,8 @@ import org.firstinspires.ftc.teamcode.utils.MathUtils;
  * An extension of HomableRotator that allows enforcing direction constraints on movement.
  *
  * @note Does not support multi-turn commands (moving more than 360 degrees from current position).
- * It should be noted that moving up to exactly 360 degrees from current position *is* supported.
+ *     It should be noted that moving up to exactly 360 degrees from current position *is*
+ *     supported.
  */
 public class UnidirectionalHomableRotator extends HomableRotator {
   public enum DirectionConstraint {
@@ -77,6 +78,7 @@ public class UnidirectionalHomableRotator extends HomableRotator {
 
   /**
    * Calculates the actual setpoint to be applied from a given target angle
+   *
    * @param degrees the angle to convert to a setpoint
    * @param constraint the direction constraint to evaluate the setpoint using
    * @return a setpoint that will move the motor to the given angle under the applied constraints
@@ -112,6 +114,7 @@ public class UnidirectionalHomableRotator extends HomableRotator {
   /**
    * Gets the distance (in degrees) between the given angle and the current angle. Basically, if the
    * given angle was set as the target, how far would the motor move?
+   *
    * @param angle the "target" to measure the distance from
    * @param constraint the direction constraint to simulate under
    * @return the distance from the given target, and the current angle
