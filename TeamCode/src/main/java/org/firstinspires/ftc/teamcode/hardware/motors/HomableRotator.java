@@ -47,6 +47,7 @@ public class HomableRotator implements System {
   protected final Follower motorSimulation;
   protected State state = State.UNINITIALIZED;
   protected boolean homed = false;
+  protected double currentAngle = 0;
   protected double targetAngle = 0;
 
   public HomableRotator(
@@ -80,6 +81,7 @@ public class HomableRotator implements System {
 
   public void update() {
     if (state == State.UNINITIALIZED) return;
+    measureCurrentAngle();
     motor.set(Range.clip(motorController.calculate(getCurrentAngle()), -1, 1));
     if (state == State.HOMING && atTarget()) {
       if (sensor.isBroken()) {
@@ -147,13 +149,20 @@ public class HomableRotator implements System {
   }
 
   /**
-   * Gets the current angle of the motor
+   * Measures the current angle of the motor
+   */
+  private void measureCurrentAngle() {
+    double angle = motor.getCurrentPosition() / motor.getCPR() * 360;
+    currentAngle = Double.isNaN(angle) || Double.isInfinite(angle) ? 0 : angle;
+  }
+
+  /**
+   * Gets the last read angle of the motor
    *
-   * @return the motor's angle, or 0 if angle is invalid
+   * @return the motor's angle (can be over 360 or under 0 degrees), or 0 if angle is invalid
    */
   public double getCurrentAngle() {
-    double angle = motor.getCurrentPosition() / motor.getCPR() * 360;
-    return Double.isNaN(angle) || Double.isInfinite(angle) ? 0 : angle;
+    return currentAngle;
   }
 
   /**
@@ -163,6 +172,18 @@ public class HomableRotator implements System {
    */
   public double getNormalizedCurrentAngle() {
     return AngleUnit.normalizeDegrees(getCurrentAngle()) + 180;
+  }
+
+  /**
+   * Gets the distance (in degrees) between the given angle and the current angle. Basically, if the
+   * given angle was set as the target, how far would the motor move?
+   * @param angle the "target" to measure the distance from
+   * @return the distance from the given target, and the current angle
+   * @note returns positive infinity on invalid parameters
+   */
+  public double getAngleTravel(double angle) {
+    if (Double.isNaN(angle) || Double.isInfinite(angle)) return Double.POSITIVE_INFINITY;
+    return Math.abs(getCurrentAngle() - angle);
   }
 
   /** Starts homing the motor */

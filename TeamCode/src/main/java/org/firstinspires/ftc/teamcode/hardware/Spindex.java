@@ -26,6 +26,7 @@ import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
+import org.opencv.ml.EM;
 
 public class Spindex implements System {
   /**
@@ -33,11 +34,9 @@ public class Spindex implements System {
    */
   public enum SpindexState {
     UNINITIALIZED(false),
-    IDLE(false),
     INTAKING(true),
-    SHOOTING(false),
-    LIFTING(false),
-    LIFTED(false);
+    SHOOTING_READY(false),
+    SHOOTING(false);
 
     public final boolean checkSensor;
 
@@ -56,17 +55,14 @@ public class Spindex implements System {
     public final double intakePosition;
     // the position to move the spindex to to prepare to shoot a ball from this slot
     public final double shootPosition;
-    // the position to move the spindex to to force a ball up the ramp
-    public final double liftPosition;
     // the position half-a-slot off from intake position, so balls cannot exit the mag
     public final double idlePosition;
 
     public SpindexSlot(
-        double intakePosition, double shootPosition, double liftPosition, double idlePosition) {
+        double intakePosition, double shootPosition, double idlePosition) {
       this.color = BallColor.UNKNOWN;
       this.intakePosition = intakePosition;
       this.shootPosition = shootPosition;
-      this.liftPosition = liftPosition;
       this.idlePosition = idlePosition;
     }
   }
@@ -77,12 +73,13 @@ public class Spindex implements System {
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // TODO: retune after rework
-    new SpindexSlot(70, 333, 333, 333), // slot 0
-    new SpindexSlot(203, 100, 100, 100), // slot 1
-    new SpindexSlot(333, 200, 200, 200) // slot 2
+    // code assumptions: slots with higher index have larger angles, and that increasing angle shoots
+    new SpindexSlot(70, 333, 333), // slot 0
+    new SpindexSlot(203, 100, 100), // slot 1
+    new SpindexSlot(333, 200, 200) // slot 2
   };
 
-  private SpindexState state; // the current state of the spindex
+  private SpindexState state = SpindexState.UNINITIALIZED; // the current state of the spindex
   private int currentIndex = NULL; // the current index the spindex is at, dependant on the state
   private BallColor intakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake the most recent time checked
@@ -93,7 +90,6 @@ public class Spindex implements System {
     this.spinner =
         new UnidirectionalHomableRotator(spinner, homingSwitch, 0.25, 0.05, 0.001, 1, false);
     this.colorSensor = colorSensor;
-    this.state = SpindexState.UNINITIALIZED;
   }
 
   /**
@@ -112,7 +108,7 @@ public class Spindex implements System {
       }
     }
 
-    state = isPreloaded ? SpindexState.IDLE : SpindexState.INTAKING;
+    state = isPreloaded ? SpindexState.SHOOTING_READY : SpindexState.INTAKING;
     currentIndex = 0; // spindex at index 0
   }
 
@@ -128,28 +124,24 @@ public class Spindex implements System {
     // do something different depending on the spindex state / mode
     // direction constraints assume that forwards shoots, backwards doesn't
     switch (state) {
-      case IDLE: // if the spindex is idle
-        turnSpindexNoShoot(spindex[currentIndex].idlePosition);
+      case INTAKING: // if the spindex is intaking
+        if (!isIndexValid(getColorIndex(BallColor.EMPTY))) break; // don't do anything if full
+        currentIndex = getColorIndex(BallColor.EMPTY);
+        turnSpindexNoShoot(spindex[currentIndex].intakePosition); // move spindex to position
         break;
 
-      case INTAKING: // if the spindex is intaking
-        turnSpindexNoShoot(spindex[currentIndex].intakePosition);
+      case SHOOTING_READY: // if the spindex is preparing to shoot
+        turnSpindexNoShoot(spindex[currentIndex].shootPosition); // move spindex to position
         break;
 
       case SHOOTING: // if the spindex is shooting
-        turnSpindexNoShoot(spindex[currentIndex].shootPosition);
-        break;
-
-      case LIFTING: // if the spindex is lifting
-        turnSpindexShoot(spindex[currentIndex].liftPosition);
-        if (spinner.atTarget()) { // if spindex is at lift position
-          spindex[currentIndex].color = BallColor.EMPTY; // spindex slot is now empty
-          state = SpindexState.LIFTED; // spindex in interim "lifted" mode
+        if (spinner.atTarget()) { // if spindex is done turning around
+          for (SpindexSlot slot : spindex) { // spindex is now empty
+            slot.color = BallColor.EMPTY;
+          }
+          currentIndex = getColorIndex(BallColor.EMPTY);
+          state = SpindexState.INTAKING; // spindex back to intaking mode
         }
-        break;
-
-      case LIFTED: // if the spindex is lifted
-        // nothing needs to be done
         break;
 
       case UNINITIALIZED: // if the spindex is uninitialized
@@ -195,40 +187,32 @@ public class Spindex implements System {
   }
 
   /**
-   * @param index the spindex index to move to the intake position
-   * @brief moves the specified spindex index to its intake position
+   * Prepares the spindex to shoot the given sequence
+   * @param sequence the sequence to prepare to shoot
+   * @note should fail gracefully and silently if passed null, but avoid doing so
    */
-  public void moveSpindexIntake(int index) {
-    if (!isIndexValid(index)) return; // return on invalid parameters
-    spinner.setAngle(spindex[index].intakePosition);
-    currentIndex = index; // set new index
-    state = SpindexState.INTAKING; // spindex in intaking mode
+  public void prepToShootSequence(BallSequence sequence) {
+    prepSlotForShoot(getBestStartIndex(sequence));
   }
 
   /**
+   * Moves the specified spindex index to its shooting position (ready to shoot)
    * @param index the spindex index to move to the shooting position
-   * @brief moves the specified spindex index to its shooting position
    */
-  public void moveSpindexShoot(int index) {
-    if (!isIndexValid(index) || state == SpindexState.SHOOTING || state == SpindexState.LIFTING)
-      return; // return on invalid parameters
-    // set spindex to new position
-    spinner.setAngle(spindex[index].shootPosition);
+  protected void prepSlotForShoot(int index) {
+    if (!isIndexValid(index) || state == SpindexState.SHOOTING) return; // return on invalid parameters
     currentIndex = index; // set new index
-    state = SpindexState.SHOOTING; // spindex in shooting mode
+    state = SpindexState.SHOOTING_READY; // spindex in shooting mode
   }
 
   /**
-   * @brief moves the the specified spindex index to its idle position
-   * @param index the spindex index to move to the idle position
-   * @note idle position is offset by half a slot such that balls cannot exit the spindex
+   * Starts shooting all balls in the spindex
+   * @note returns if spindex isn't ready to shoot
    */
-  public void moveSpindexIdle(int index) {
-    if (!isIndexValid(index)) return; // return on invalid parameters
-    // set spindex to new position
-    spinner.setAngle(spindex[index].idlePosition);
-    currentIndex = index; // set new index
-    state = SpindexState.IDLE; // spindex in idle mode
+  public void shoot() {
+    if (state != SpindexState.SHOOTING_READY || !spinner.atTarget()) return;
+    spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.FORWARD_ONLY);
+    spinner.changeTargetAngle(360.0);
   }
 
   /**
@@ -244,37 +228,19 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief starts lifting a ball into the turret
-   * @note only starts lifting after the next call to update()
-   */
-  public void liftBall() {
-    // if the spindex is not stationary at a valid shooting position, we cannot lift a ball
-    if (state != SpindexState.SHOOTING || currentIndex == NULL) return;
-    state = SpindexState.LIFTING; // spindex in lifting mode
-  }
-
-  /**
    * @brief returns if the spindex is at its target position (in a "idle" or inactive state)
    * @return true if the spindex is at its target angle and set to the correct target angle for the
    *     mode the spindex is in and the lifter is at its target, false otherwise
    */
   public boolean isAtTarget() {
     boolean isSet = true;
-    double targetPosition = spinner.getNormalizedCurrentAngle();
+    double targetPosition = spinner.getNormalizedTargetAngle();
     switch (state) {
-      case IDLE:
-        if (targetPosition != spindex[currentIndex].idlePosition) isSet = false;
-        break;
-
       case INTAKING:
         if (targetPosition != spindex[currentIndex].intakePosition) isSet = false;
         break;
 
       case SHOOTING:
-        if (targetPosition != spindex[currentIndex].shootPosition) isSet = false;
-        break;
-
-      case LIFTING:
         isSet = false;
         break;
     }
@@ -333,6 +299,59 @@ public class Spindex implements System {
   }
 
   /**
+   * Gets how closely shooting from a given index will match a given ball sequence
+   *
+   * @param index the index from the spindex to get the number of sequence matches from
+   * @param sequence the sequence to compare against
+   * @return the number of matching colors in the sequence and the spindex from the given index
+   * @note will return -1 on invalid parameters
+   */
+  public int getIndexMatches(int index, BallSequence sequence) {
+    if (index >= spindex.length || index < 0 || sequence == null) return NULL;
+
+    int matches = 0;
+
+    for (BallColor color : sequence.getBallColors()) {
+      if (spindex[index].color == color) matches++;
+      if (++index >= spindex.length) index = 0;
+    }
+
+    return matches;
+  }
+
+  /**
+   * Gets which spindex index it would be best to start shooting from, ranked primarily on accuracy
+   * and secondarily on speed (distance to slot).
+   *
+   * @param sequence the sequence of the shot being evaluated
+   * @return the index of the best slot to start shooting from
+   * @note if sequence is null, this will return 0
+   */
+  public int getBestStartIndex(BallSequence sequence) {
+    if (sequence == null) return 0; // trying to fail in a non-catastrophic way
+    int bestIndex = 0;
+    int bestIndexMatches = Integer.MIN_VALUE;
+    double bestIndexDist = Double.POSITIVE_INFINITY;
+
+    for (int i = 0; i < spindex.length; i++) {
+      int thisIndexMatches = getIndexMatches(i, sequence);
+      double thisIndexDist = spinner.getAngleTravel(
+          spindex[i].shootPosition,
+          UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY
+      );
+
+      if (thisIndexMatches > bestIndexMatches ||
+          (thisIndexMatches == bestIndexMatches && thisIndexDist < bestIndexDist)) {
+        bestIndex = i;
+        bestIndexMatches = thisIndexMatches;
+        bestIndexDist = thisIndexDist;
+      }
+    }
+
+    return bestIndex;
+  }
+
+  /**
    * @brief gets an index containing a shootable ball
    * @return the index of a slot containing a ball, or -1 if the spindex is empty
    */
@@ -385,7 +404,7 @@ public class Spindex implements System {
    * @return true if the spindex is stationary and in shooting mode, false otherwise
    */
   public boolean isReadyToShoot() {
-    return state == SpindexState.SHOOTING && isAtTarget() && isIndexValid(currentIndex);
+    return state == SpindexState.SHOOTING_READY && isAtTarget() && isIndexValid(currentIndex);
   }
 
   /**

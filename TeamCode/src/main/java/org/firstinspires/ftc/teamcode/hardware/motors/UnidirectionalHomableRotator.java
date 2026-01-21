@@ -23,13 +23,14 @@ import org.firstinspires.ftc.teamcode.utils.MathUtils;
 /**
  * An extension of HomableRotator that allows enforcing direction constraints on movement.
  *
- * @note Does not support multi-turn commands.
+ * @note Does not support multi-turn commands (moving more than 360 degrees from current position).
+ * It should be noted that moving up to exactly 360 degrees from current position *is* supported.
  */
 public class UnidirectionalHomableRotator extends HomableRotator {
   public enum DirectionConstraint {
-    NONE, // Standard shortest-path behavior
-    FORWARD_ONLY, // Target must always be > current position (Increasing)
-    REVERSE_ONLY // Target must always be < current position (Decreasing)
+    NONE, // Standard behavior
+    FORWARD_ONLY, // Target will be adjusted to always be > current position (Increasing)
+    REVERSE_ONLY // Target will be adjusted to always be < current position (Decreasing)
   }
 
   protected DirectionConstraint directionConstraint = DirectionConstraint.NONE;
@@ -71,15 +72,25 @@ public class UnidirectionalHomableRotator extends HomableRotator {
   @Override
   public void setTargetAngle(double degrees) {
     if (Double.isNaN(degrees) || Double.isInfinite(degrees)) return;
-    double currentAngle = getCurrentAngle();
+    super.setTargetAngle(calculateSetAngle(degrees, directionConstraint));
+  }
 
-    switch (directionConstraint) {
+  /**
+   * Calculates the actual setpoint to be applied from a given target angle
+   * @param degrees the angle to convert to a setpoint
+   * @param constraint the direction constraint to evaluate the setpoint using
+   * @return a setpoint that will move the motor to the given angle under the applied constraints
+   */
+  private double calculateSetAngle(double degrees, DirectionConstraint constraint) {
+    double currentAngle = atTarget() ? getTargetAngle() : getCurrentAngle();
+
+    switch (constraint) {
       case FORWARD_ONLY:
-        while (degrees - 360 >= currentAngle) degrees -= 360; // remove unneeded turns
+        while (degrees - 360 > currentAngle) degrees -= 360; // remove unneeded turns
         while (degrees < currentAngle) degrees += 360; // ensure direction
         break;
       case REVERSE_ONLY:
-        while (degrees + 360 <= currentAngle) degrees += 360; // remove unneeded turns
+        while (degrees + 360 < currentAngle) degrees += 360; // remove unneeded turns
         while (degrees > currentAngle) degrees -= 360; // ensure direction
         break;
       case NONE:
@@ -89,6 +100,25 @@ public class UnidirectionalHomableRotator extends HomableRotator {
         break;
     }
 
-    super.setTargetAngle(degrees);
+    return degrees;
+  }
+
+  @Override
+  public double getAngleTravel(double angle) {
+    if (Double.isNaN(angle) || Double.isInfinite(angle)) return Double.POSITIVE_INFINITY;
+    return Math.abs(getCurrentAngle() - calculateSetAngle(angle, directionConstraint));
+  }
+
+  /**
+   * Gets the distance (in degrees) between the given angle and the current angle. Basically, if the
+   * given angle was set as the target, how far would the motor move?
+   * @param angle the "target" to measure the distance from
+   * @param constraint the direction constraint to simulate under
+   * @return the distance from the given target, and the current angle
+   * @note returns positive infinity on invalid parameters
+   */
+  public double getAngleTravel(double angle, DirectionConstraint constraint) {
+    if (Double.isNaN(angle) || Double.isInfinite(angle)) return Double.POSITIVE_INFINITY;
+    return Math.abs(getCurrentAngle() - calculateSetAngle(angle, constraint));
   }
 }

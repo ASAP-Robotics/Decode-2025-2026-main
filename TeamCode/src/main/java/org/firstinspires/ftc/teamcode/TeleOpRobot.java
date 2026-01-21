@@ -111,7 +111,7 @@ public class TeleOpRobot extends CommonRobot {
     // shoot
     if (gamepad2.right_trigger > 0.5) {
       // mag.shootMag(); // shoot all balls in the mag, in a sequence if possible
-      scoringSystem.shootHalfSorted();
+      scoringSystem.shoot();
     }
 
     // eject
