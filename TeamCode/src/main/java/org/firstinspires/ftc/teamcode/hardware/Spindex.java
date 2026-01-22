@@ -242,6 +242,7 @@ public class Spindex implements System {
 
   /**
    * Sets the ball sequence that the spindex tries to shoot
+   *
    * @param sequence the sequence to shoot
    */
   public void setSequence(BallSequence sequence) {
