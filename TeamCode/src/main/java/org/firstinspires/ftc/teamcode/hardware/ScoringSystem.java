@@ -16,9 +16,9 @@
 
 package org.firstinspires.ftc.teamcode.hardware;
 
-import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
-
 import java.util.Arrays;
+import java.util.Objects;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -126,7 +126,7 @@ public class ScoringSystem {
     limelight.update();
     ballSequence = limelight.getSequence();
     updateAiming();
-    updateShooting();
+    updateSpindex();
     updateIntake();
     intake.update();
     turret.update();
@@ -169,46 +169,39 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief updates everything to do with shooting balls out of the turret
+   * @brief updates everything to do with the spindex
    */
-  private void updateShooting() {
-    if (state != State.SHOOTING) return;
-    // ^ only do this logic if shooting
+  private void updateSpindex() {
+    spindex.setSequence(ballSequence);
 
-    if (!emptyMag()) {
-      switchModeToIntaking();
+    switch (spindex.getState()) {
+      case INTAKING:
+        if (state != State.INTAKING) switchModeToIntaking();
+        break;
+
+      case SHOOTING_READY:
+        if (state != State.FULL) switchModeToFull();
+        break;
+
+      case SHOOTING:
+      case UNINITIALIZED:
+        break;
     }
+
+    if (state == State.SHOOTING) emptyMag();
   }
 
   /**
    * @brief updates everything to do with the intake
    */
   private void updateIntake() {
-    if (clearingIntake) {
-      // ^ if clearing the intake
-      if (intake.timer.isFinished()) {
-        // ^ if done clearing the intake
+    if (clearingIntake) { // if clearing the intake
+      if (intake.timer.isFinished()) { // if done clearing the intake
         clearingIntake = false;
-        switch (state) {
-          case UNINITIALISED:
-            return;
 
-          case FULL:
-          case SHOOTING:
-            intake.ejectIdle();
-            return;
+      } else return;
 
-          default:
-            intake.intake();
-            break;
-        }
-
-      } else {
-        return;
-      }
-
-    } else if (intake.isStalled() && intake.isIntaking()) {
-      // ^ if intake is intaking and stalled
+    } else if (intake.isStalled() && intake.isIntaking()) { // if intake is intaking and stalled
       clearIntake(); // eject the intake to clear the blockage
       return;
     }
@@ -218,22 +211,21 @@ public class ScoringSystem {
         break;
 
       case FULL:
-        if (spindex.isAtTarget() && intake.isIntaking() && fullWait.isFinished()) clearIntake();
+        if (intake.isIntaking()) {
+          if (spindex.isAtTarget() && fullWait.isFinished()) clearIntake();
+
+        } else {
+          intake.ejectIdle();
+        }
+        break;
+
+      case SHOOTING:
+        intake.intakeIdle();
         break;
 
       case INTAKING:
-        if (spindex.getIsIntakeColorNew()
-            && spindex.isAtTarget()
-            && spindex.getIntakeColor().isShootable()) {
-          // ^ if intaking a ball, the spindex is stationary, and a new color of (shootable) ball is
-          // in the intake
-          spindex.storeIntakeColor(); // record the color of the ball taken in
-        }
-
-        if (!fillMag()) {
-          switchModeToFull();
-        }
-
+      default:
+        intake.intake();
         break;
     }
   }
@@ -288,38 +280,17 @@ public class ScoringSystem {
    */
   protected void switchModeToShooting() {
     state = State.SHOOTING;
-    intake.intake(); // start the intake spinning
+    intake.intakeIdle(); // start the intake spinning
     turret.activate(); // start the flywheel spinning (just in case)
   }
 
   /**
-   * @brief starts filling the mag with three balls of any color
-   * @return true if the mag had empty slots, false if the mag is full
-   */
-  protected boolean fillMag() {
-    if (spindex.getColorIndex(BallColor.EMPTY) == NULL) return false;
-    // ^ if there are no empty slots in the mag, return false
-
-    switchModeToIntaking();
-
-    return true; // start intaking balls
-  }
-
-  /**
    * @brief the internal logic for emptying the mag
-   * @return true if the mag is being emptied, false if the mag is empty
    */
-  protected boolean emptyMag() {
-    if (spindex.isReadyToShoot()) {
-      // ^ spindex is ready for balls to be shot
-      if (turret.isReadyToShoot()) {
-        // ^ turret is ready for balls to be shot
-        spindex.shoot();
-      }
-
-    } else return spindex.getShootableIndex() != NULL;
-
-    return true; // emptying mag
+  protected void emptyMag() {
+    if (spindex.isReadyToShoot() && turret.isReadyToShoot()) {
+      spindex.shoot();
+    }
   }
 
   /**
@@ -328,10 +299,11 @@ public class ScoringSystem {
    * @return true if the mag wasn't empty, false if the mag is empty
    */
   public boolean shoot() {
-    if (spindex.getShootableIndex() == NULL) return false;
+    if (!spindex.isIndexValid(spindex.getShootableIndex())) return false;
     // ^ return false if there are no balls in the mag
     switchModeToShooting();
-    return emptyMag(); // start emptying mag
+    emptyMag(); // start emptying mag
+    return true;
   }
 
   /**

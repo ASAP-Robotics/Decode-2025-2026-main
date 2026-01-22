@@ -79,6 +79,7 @@ public class Spindex implements System {
   };
 
   private SpindexState state = SpindexState.UNINITIALIZED; // the current state of the spindex
+  private BallSequence sequence = BallSequence.GPP; // the sequence that is to be shot
   private int currentIndex = NULL; // the current index the spindex is at, dependant on the state
   private BallColor intakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake the most recent time checked
@@ -124,9 +125,17 @@ public class Spindex implements System {
     // direction constraints assume that forwards shoots, backwards doesn't
     switch (state) {
       case INTAKING: // if the spindex is intaking
-        if (!isIndexValid(getColorIndex(BallColor.EMPTY))) break; // don't do anything if full
+        if (!isIndexValid(getColorIndex(BallColor.EMPTY))) {
+          prepSlotForShoot(getBestStartIndex(sequence));
+          break;
+        } // prepare to shoot if full
         currentIndex = getColorIndex(BallColor.EMPTY);
         turnSpindexNoShoot(spindex[currentIndex].intakePosition); // move spindex to position
+
+        if (getIsIntakeColorNew() && isAtTarget() && intakeColor.isShootable()) {
+          storeIntakeColor();
+        }
+
         break;
 
       case SHOOTING_READY: // if the spindex is preparing to shoot
@@ -214,6 +223,7 @@ public class Spindex implements System {
    */
   public void shoot() {
     if (state != SpindexState.SHOOTING_READY || !spinner.atTarget()) return;
+    state = SpindexState.SHOOTING;
     spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.FORWARD_ONLY);
     spinner.changeTargetAngle(360.0);
   }
@@ -228,6 +238,14 @@ public class Spindex implements System {
     if (state != SpindexState.INTAKING || !isAtTarget() || !intakeColor.isShootable()) return;
 
     setSpindexIndexColor(currentIndex, intakeColor);
+  }
+
+  /**
+   * Sets the ball sequence that the spindex tries to shoot
+   * @param sequence the sequence to shoot
+   */
+  public void setSequence(BallSequence sequence) {
+    this.sequence = sequence;
   }
 
   /**
