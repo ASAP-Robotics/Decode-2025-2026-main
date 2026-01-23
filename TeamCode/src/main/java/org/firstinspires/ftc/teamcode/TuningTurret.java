@@ -21,12 +21,9 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.motors.HomableRotator;
-import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
 
 @TeleOp(name = "Tuning turret", group = "Tuning")
 @Config
@@ -57,9 +54,9 @@ public class TuningTurret extends LinearOpMode {
         spindex.home();
         home = false;
       }
-      //spindex.setP(kP);
-      //spindex.setI(kI);
-      //spindex.setD(kD);
+      // spindex.setP(kP);
+      // spindex.setI(kI);
+      // spindex.setD(kD);
       spindex.setAngle(angle);
       spindex.update();
 

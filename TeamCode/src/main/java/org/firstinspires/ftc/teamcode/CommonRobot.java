@@ -22,7 +22,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
 import org.firstinspires.ftc.teamcode.hardware.ColorSensorV3;
@@ -30,7 +29,6 @@ import org.firstinspires.ftc.teamcode.hardware.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
-import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
@@ -51,7 +49,7 @@ public abstract class CommonRobot {
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
     Limelight limelight = new Limelight(rawLimelight, this.allianceColor, 0.001);
 
-    TouchSensor spindexHomer =this.hardwareMap.get(TouchSensor.class, "spindexHomer");
+    TouchSensor spindexHomer = this.hardwareMap.get(TouchSensor.class, "spindexHomer");
     Motor spindexMotor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
     ColorSensorV3 colorSensor = new ColorSensorV3(this.hardwareMap, "colorSensor");
     Spindex spindex = new Spindex(spindexMotor, spindexHomer, colorSensor);

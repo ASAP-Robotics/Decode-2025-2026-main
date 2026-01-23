@@ -18,8 +18,6 @@ package org.firstinspires.ftc.teamcode.hardware.motors;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-
-import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 
 /**
