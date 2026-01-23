@@ -18,6 +18,7 @@ package org.firstinspires.ftc.teamcode.hardware.motors;
 
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
@@ -39,10 +40,10 @@ public class HomableRotator implements System {
     UNINITIALIZED
   }
 
-  protected static final double HOMING_INCREMENT_SIZE = 5; // degrees
+  protected static final double HOMING_INCREMENT_SIZE = 1; // degrees
 
   protected final Motor motor;
-  protected final BreakBeam sensor;
+  protected final TouchSensor sensor;
   protected final PIDController motorController;
   protected final Follower motorSimulation;
   protected State state = State.UNINITIALIZED;
@@ -52,7 +53,7 @@ public class HomableRotator implements System {
 
   public HomableRotator(
       Motor motor,
-      BreakBeam sensor,
+      TouchSensor sensor,
       double kp,
       double ki,
       double kd,
@@ -82,9 +83,9 @@ public class HomableRotator implements System {
   public void update() {
     if (state == State.UNINITIALIZED) return;
     measureCurrentAngle();
-    motor.set(Range.clip(motorController.calculate(getCurrentAngle()), -1, 1));
-    if (state == State.HOMING && atTarget()) {
-      if (sensor.isBroken()) {
+    motor.set(-Range.clip(motorController.calculate(getCurrentAngle()), -1, 1));
+    if (state == State.HOMING && motorController.atSetPoint()) {
+      if (sensor.isPressed()) {
         homed = true;
         state = State.NORMAL;
         motor.set(0);
@@ -150,7 +151,7 @@ public class HomableRotator implements System {
 
   /** Measures the current angle of the motor */
   private void measureCurrentAngle() {
-    double angle = motor.getCurrentPosition() / motor.getCPR() * 360;
+    double angle = motor.getCurrentPosition() / motor.getCPR() * -360;
     currentAngle = Double.isNaN(angle) || Double.isInfinite(angle) ? 0 : angle;
   }
 
@@ -202,7 +203,7 @@ public class HomableRotator implements System {
    * @return true if at target, false otherwise
    */
   public boolean atTarget() {
-    return motorController.atSetPoint();
+    return state == State.NORMAL && motorController.atSetPoint();
   }
 
   /**

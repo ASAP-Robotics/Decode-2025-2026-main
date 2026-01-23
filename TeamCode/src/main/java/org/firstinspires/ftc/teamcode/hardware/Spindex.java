@@ -19,6 +19,8 @@ package org.firstinspires.ftc.teamcode.hardware;
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
 import org.firstinspires.ftc.teamcode.interfaces.System;
@@ -54,14 +56,11 @@ public class Spindex implements System {
     public final double intakePosition;
     // the position to move the spindex to to prepare to shoot a ball from this slot
     public final double shootPosition;
-    // the position half-a-slot off from intake position, so balls cannot exit the mag
-    public final double idlePosition;
 
-    public SpindexSlot(double intakePosition, double shootPosition, double idlePosition) {
+    public SpindexSlot(double intakePosition, double shootPosition) {
       this.color = BallColor.UNKNOWN;
       this.intakePosition = intakePosition;
       this.shootPosition = shootPosition;
-      this.idlePosition = idlePosition;
     }
   }
 
@@ -70,12 +69,12 @@ public class Spindex implements System {
   private final UnidirectionalHomableRotator spinner; // the motor that rotates the mag's divider
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
-    // TODO: retune after rework
+    // TODO: fine tune
     // code assumptions: slots with higher index have larger angles, and that increasing angle
     // shoots
-    new SpindexSlot(70, 333, 333), // slot 0
-    new SpindexSlot(203, 100, 100), // slot 1
-    new SpindexSlot(333, 200, 200) // slot 2
+    new SpindexSlot(8, 30), // slot 0
+    new SpindexSlot(128, 150), // slot 1
+    new SpindexSlot(248, 270) // slot 2
   };
 
   private SpindexState state = SpindexState.UNINITIALIZED; // the current state of the spindex
@@ -86,9 +85,9 @@ public class Spindex implements System {
   private BallColor oldIntakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
-  public Spindex(Motor spinner, BreakBeam homingSwitch, ColorSensorV3 colorSensor) {
+  public Spindex(Motor spinner, TouchSensor homingSwitch, ColorSensorV3 colorSensor) {
     this.spinner =
-        new UnidirectionalHomableRotator(spinner, homingSwitch, 0.25, 0.05, 0.001, 1, false);
+        new UnidirectionalHomableRotator(spinner, homingSwitch, 0.25, 0.05, 0.001, 1, true);
     this.colorSensor = colorSensor;
   }
 
@@ -97,6 +96,8 @@ public class Spindex implements System {
    * @note call when the "init" button is pressed
    */
   public void init(BallSequence preloadedSequence, boolean isPreloaded) {
+    spinner.home();
+
     if (isPreloaded) { // if the spindex is preloaded
       for (int i = 0; i < spindex.length; i++) { // for each spindex slot
         spindex[i].color = preloadedSequence.getBallColors()[i]; // set contained ball color

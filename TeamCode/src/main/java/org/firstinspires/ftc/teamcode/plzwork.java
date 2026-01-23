@@ -100,7 +100,7 @@ public class plzwork extends CommonRobot {
     telemetry.update();
 
     if (!move && !move1) {
-      scoringSystem.shootHalfSorted();
+      scoringSystem.shoot();
       if (scoringSystem.getState() == ScoringSystem.State.INTAKING) {
         move1 = true;
       }

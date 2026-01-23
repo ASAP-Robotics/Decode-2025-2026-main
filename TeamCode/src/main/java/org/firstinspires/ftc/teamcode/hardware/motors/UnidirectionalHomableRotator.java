@@ -17,6 +17,8 @@
 package org.firstinspires.ftc.teamcode.hardware.motors;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+
 import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 
@@ -38,7 +40,7 @@ public class UnidirectionalHomableRotator extends HomableRotator {
 
   public UnidirectionalHomableRotator(
       Motor motor,
-      BreakBeam sensor,
+      TouchSensor sensor,
       double kp,
       double ki,
       double kd,
