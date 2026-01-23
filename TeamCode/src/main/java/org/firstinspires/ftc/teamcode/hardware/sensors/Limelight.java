@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.firstinspires.ftc.teamcode.hardware;
+package org.firstinspires.ftc.teamcode.hardware.sensors;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 

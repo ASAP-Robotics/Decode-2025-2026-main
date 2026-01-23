@@ -21,6 +21,7 @@ import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
@@ -98,7 +99,8 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief initializes the spindex
+   * Initializes the spindex
+   *
    * @note call when the "init" button is pressed
    */
   public void init(BallSequence preloadedSequence, boolean isPreloaded) {
@@ -122,7 +124,7 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief updates everything to do with the spindex
+   * Updates everything to do with the spindex
    */
   public void update() {
     sensorReport = colorSensor.getStatus();
@@ -256,11 +258,30 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief stores the color of ball detected in the intake as the color of ball in the spindex
+   * Moves the spindexer so homing will be very fast on next startup
+   * @note intended mainly for use at the very end of Auto
+   * @note spindex WILL NOT WORK after calling this; call only at the end of auto
+   */
+  public void prepForShutdown() {
+    state = SpindexState.UNINITIALIZED;
+    turnSpindexNoShoot(-10);
+  }
+
+  /**
+   * Homes the spindexer
+   *
+   * @note only intended as a manual driver backup; normally not needed or helpful
+   */
+  public void reHome() {
+    spinner.home();
+  }
+
+  /**
+   * Stores the color of ball detected in the intake as the color of ball in the spindex
    *     index at the intake position
    * @note uses the stored intake color, call update() to update
    */
-  public void storeIntakeColor() {
+  protected void storeIntakeColor() {
     // if spindex isn't stationary at an intake position, return false
     if (state != SpindexState.INTAKING || !isAtTarget() || !intakeColor.isShootable()) return;
 
@@ -277,7 +298,7 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief returns if the spindex is at its target position (in a "idle" or inactive state)
+   * Returns if the spindex is at its target position (in a "idle" or inactive state)
    * @return true if the spindex is at its target angle and set to the correct target angle for the
    *     mode the spindex is in and the intake flap is at its target, false otherwise
    */
@@ -298,10 +319,10 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief returns if the color of ball in the intake is different from the last reading
+   * Returns if the color of ball in the intake is different from the last reading
    * @return true if the color of ball in the intake changed, false if it didn't
    */
-  public boolean getIsIntakeColorNew() {
+  protected boolean getIsIntakeColorNew() {
     return intakeColor != oldIntakeColor;
   }
 
@@ -331,7 +352,8 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief returns the spindex index that is currently active
+   * Returns the spindex index that is currently active
+   *
    * @return the index that is at the intake, or NULL (-1) if the spindex isn't at an intake index
    * @note what the "active" index means depends on state / mode (e.g. intaking vs shooting)
    */
@@ -401,7 +423,8 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief gets an index containing a shootable ball
+   * Gets an index containing a shootable ball
+   *
    * @return the index of a slot containing a ball, or -1 if the spindex is empty
    */
   public int getShootableIndex() {
@@ -418,7 +441,8 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief finds an index in the spindex containing a given color
+   * Finds an index in the spindex containing a given color
+   *
    * @param color the color wanted
    * @return the index in the spindex where that color is located, or -1 if that color isn't in the
    *     mag
@@ -439,7 +463,8 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief gets the color of ball at a given index in the spindex
+   * Gets the color of ball at a given index in the spindex
+   *
    * @param index the index to get the color of contained ball of
    * @return the color of ball in the given index in the spindex
    */
@@ -449,7 +474,8 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief gets if the spindex is ready to lift a ball into the turret
+   * Gets if the spindex is ready to lift a ball into the turret
+   *
    * @return true if the spindex is stationary and in shooting mode, false otherwise
    */
   public boolean isReadyToShoot() {
@@ -457,7 +483,8 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief gets if a spindex index is valid
+   * Gets if a spindex index is valid
+   *
    * @param index the spindex index to check
    * @return true if the index is contained in the spindex, false if the index is invalid
    * @note this method should always return false if passed -1 (NULL)
@@ -467,7 +494,8 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief checks if moving to a target position will (inadvertently) shoot a ball
+   * Checks if moving to a target position will (inadvertently) shoot a ball
+   *
    * @param targetPosition the position being moved to
    * @return true if the movement will shoot a ball, false otherwise
    */
@@ -489,7 +517,8 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief turns the spindex to an angle in such a way that a ball could be shot
+   * Turns the spindex to an angle in such a way that a ball could be shot
+   *
    * @param target the angle to turn to
    */
   private void turnSpindexShoot(double target) {
@@ -498,7 +527,8 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief turns the spindex to an angle in such a way that balls aren't shot
+   * Turns the spindex to an angle in such a way that balls aren't shot
+   *
    * @param target the angle to turn to
    */
   private void turnSpindexNoShoot(double target) {
@@ -510,7 +540,8 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief checks if the target position of the spindex is the same as the position supplied
+   * Checks if the target position of the spindex is the same as the position supplied
+   *
    * @param positionToCheck the position to compare against the spindex's target position
    * @return true if the supplied position is the same as the spindex's target position, false
    *     otherwise
@@ -520,7 +551,8 @@ public class Spindex implements System {
   }
 
   /**
-   * @brief sets the ball color at a specified spindex index
+   * Sets the ball color at a specified spindex index
+   *
    * @param index the index in the spindex to set the color of
    * @param color the color the spindex index contains
    */

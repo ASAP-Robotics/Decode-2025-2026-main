@@ -45,6 +45,7 @@ public class HomableRotator implements System {
   protected final TouchSensor sensor;
   protected final PIDController motorController;
   protected final Follower motorSimulation;
+  protected final boolean inverted;
   protected State state = State.UNINITIALIZED;
   protected boolean homed = false;
   protected double currentAngle = 0;
@@ -68,6 +69,7 @@ public class HomableRotator implements System {
     this.motor.set(0);
     this.motorSimulation =
         new Follower(0, 0, tolerance, this.motor.getMaxRPM() / 24); // tune 24 (1/4 of max speed)
+    this.inverted = inverted;
   }
 
   public void start() {
@@ -82,7 +84,10 @@ public class HomableRotator implements System {
   public void update() {
     if (state == State.UNINITIALIZED) return;
     measureCurrentAngle();
-    motor.set(-Range.clip(motorController.calculate(getCurrentAngle()), -1, 1));
+    motor.set(
+        Range.clip(motorController.calculate(getCurrentAngle() * (inverted ? -1 : 1)), -1, 1
+        )
+    );
     if (state == State.HOMING && motorController.atSetPoint()) {
       if (sensor.isPressed()) {
         homed = true;
@@ -150,7 +155,7 @@ public class HomableRotator implements System {
 
   /** Measures the current angle of the motor */
   private void measureCurrentAngle() {
-    double angle = motor.getCurrentPosition() / motor.getCPR() * -360;
+    double angle = motor.getCurrentPosition() / motor.getCPR() * (inverted ? -360 : 360);
     currentAngle = Double.isNaN(angle) || Double.isInfinite(angle) ? 0 : angle;
   }
 

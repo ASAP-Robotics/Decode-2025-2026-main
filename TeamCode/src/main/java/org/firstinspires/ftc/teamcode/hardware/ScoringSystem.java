@@ -21,6 +21,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -415,6 +416,15 @@ public class ScoringSystem {
    */
   public Limelight.LimeLightMode getLimelightState() {
     return limelight.getMode();
+  }
+
+  /**
+   * (Re) homes the spindexer
+   *
+   * @note only to be used as a driver backup
+   */
+  public void homeSpindexer() {
+    spindex.reHome();
   }
 
   /**
