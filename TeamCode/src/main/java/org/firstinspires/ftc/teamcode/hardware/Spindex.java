@@ -88,7 +88,8 @@ public class Spindex implements System {
   private BallColor oldIntakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
-  public Spindex(Motor spinner, TouchSensor homingSwitch, Axon intakeBlocker, ColorSensorV3 colorSensor) {
+  public Spindex(
+      Motor spinner, TouchSensor homingSwitch, Axon intakeBlocker, ColorSensorV3 colorSensor) {
     this.spinner =
         new UnidirectionalHomableRotator(spinner, homingSwitch, 0.25, 0.05, 0.001, 1, true);
     this.intakeBlocker = intakeBlocker;

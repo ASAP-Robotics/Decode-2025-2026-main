@@ -28,9 +28,7 @@ import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.Follower;
 
-/**
- * Wrapper around the `Servo` class to add encoder feedback and rudimentary fault detection
- */
+/** Wrapper around the `Servo` class to add encoder feedback and rudimentary fault detection */
 public class Axon implements System {
   private SystemStatus status = SystemStatus.NOMINAL; // the status of the servo
   private final Follower follower; // backup follower to model servo movement if encoder fails
@@ -109,7 +107,7 @@ public class Axon implements System {
 
   /**
    * Gets the amount the angle read can differ from the target angle and the servo still be
-   *     considered "at target"
+   * considered "at target"
    *
    * @return the tolerance, in degrees
    */
