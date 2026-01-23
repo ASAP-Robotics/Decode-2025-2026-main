@@ -21,6 +21,7 @@ import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
+import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -62,9 +63,13 @@ public class Spindex implements System {
     }
   }
 
+  private static final double INTAKE_FLAP_CLOSED = 0; // TODO: tune
+  private static final double INTAKE_FLAP_OPEN = 30; // TODO: tune
+
   SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
   SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
   private final UnidirectionalHomableRotator spinner; // the motor that rotates the mag's divider
+  private final Axon intakeBlocker; // servo moving flap to close intake while shooting
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // TODO: fine tune
@@ -83,9 +88,10 @@ public class Spindex implements System {
   private BallColor oldIntakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
-  public Spindex(Motor spinner, TouchSensor homingSwitch, ColorSensorV3 colorSensor) {
+  public Spindex(Motor spinner, TouchSensor homingSwitch, Axon intakeBlocker, ColorSensorV3 colorSensor) {
     this.spinner =
         new UnidirectionalHomableRotator(spinner, homingSwitch, 0.25, 0.05, 0.001, 1, true);
+    this.intakeBlocker = intakeBlocker;
     this.colorSensor = colorSensor;
   }
 
@@ -94,7 +100,9 @@ public class Spindex implements System {
    * @note call when the "init" button is pressed
    */
   public void init(BallSequence preloadedSequence, boolean isPreloaded) {
+    spinner.setAngle(0); // temporary, to avoid sudden motion after homing
     spinner.home();
+    intakeBlocker.setPosition(isPreloaded ? INTAKE_FLAP_CLOSED : INTAKE_FLAP_OPEN);
 
     if (isPreloaded) { // if the spindex is preloaded
       for (int i = 0; i < spindex.length; i++) { // for each spindex slot
@@ -128,20 +136,25 @@ public class Spindex implements System {
           prepSlotForShoot(getBestStartIndex(sequence));
           break;
         } // prepare to shoot if full
+
+        intakeBlocker.setPosition(INTAKE_FLAP_OPEN); // open intake
         currentIndex = getColorIndex(BallColor.EMPTY);
-        turnSpindexNoShoot(spindex[currentIndex].intakePosition); // move spindex to position
+        // move spindex to position if flap open
+        if (intakeBlocker.atTarget()) turnSpindexNoShoot(spindex[currentIndex].intakePosition);
 
         if (getIsIntakeColorNew() && isAtTarget() && intakeColor.isShootable()) {
           storeIntakeColor();
         }
-
         break;
 
       case SHOOTING_READY: // if the spindex is preparing to shoot
-        turnSpindexNoShoot(spindex[currentIndex].shootPosition); // move spindex to position
+        intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake (just in case)
+        // move spindex to position if flap closed
+        if (intakeBlocker.atTarget()) turnSpindexNoShoot(spindex[currentIndex].shootPosition);
         break;
 
       case SHOOTING: // if the spindex is shooting
+        intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake (just in case)
         if (spinner.atTarget()) { // if spindex is done turning around
           for (SpindexSlot slot : spindex) { // spindex is now empty
             slot.color = BallColor.EMPTY;
@@ -211,6 +224,7 @@ public class Spindex implements System {
   protected void prepSlotForShoot(int index) {
     if (!isIndexValid(index) || state == SpindexState.SHOOTING)
       return; // return on invalid parameters
+    intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake
     currentIndex = index; // set new index
     state = SpindexState.SHOOTING_READY; // spindex in shooting mode
   }
@@ -221,7 +235,9 @@ public class Spindex implements System {
    * @note returns if spindex isn't ready to shoot
    */
   public void shoot() {
-    if (state != SpindexState.SHOOTING_READY || !spinner.atTarget()) return;
+    if (state != SpindexState.SHOOTING_READY || !spinner.atTarget() || !intakeBlocker.atTarget())
+      return;
+    intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake (just in case)
     state = SpindexState.SHOOTING;
     spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.FORWARD_ONLY);
     spinner.changeTargetAngle(360.0);
@@ -251,7 +267,7 @@ public class Spindex implements System {
   /**
    * @brief returns if the spindex is at its target position (in a "idle" or inactive state)
    * @return true if the spindex is at its target angle and set to the correct target angle for the
-   *     mode the spindex is in and the lifter is at its target, false otherwise
+   *     mode the spindex is in and the intake flap is at its target, false otherwise
    */
   public boolean isAtTarget() {
     boolean isSet = true;
@@ -266,7 +282,7 @@ public class Spindex implements System {
         break;
     }
 
-    return spinner.atTarget() && isSet;
+    return spinner.atTarget() && intakeBlocker.atTarget() && isSet;
   }
 
   /**

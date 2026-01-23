@@ -51,8 +51,10 @@ public abstract class CommonRobot {
 
     TouchSensor spindexHomer = this.hardwareMap.get(TouchSensor.class, "spindexHomer");
     Motor spindexMotor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
+    Axon intakeBlocker =
+        new Axon(this.hardwareMap, "intakeBlocker", "intakeBlockerEncoder");
     ColorSensorV3 colorSensor = new ColorSensorV3(this.hardwareMap, "colorSensor");
-    Spindex spindex = new Spindex(spindexMotor, spindexHomer, colorSensor);
+    Spindex spindex = new Spindex(spindexMotor, spindexHomer, intakeBlocker, colorSensor);
 
     Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
     Axon turretHood = new Axon(rawTurretHood);

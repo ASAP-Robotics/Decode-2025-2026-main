@@ -27,8 +27,8 @@ import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.Follower;
 
 /**
- * Class to contain a motor that is set to a given angle setpoint, which can be homed via a break
- * beam sensor
+ * Class to contain a motor that is set to a given angle setpoint, which can be homed via a button
+ * pressed by a cam
  *
  * @note assumes that the break beam is placed at 0 degrees
  */

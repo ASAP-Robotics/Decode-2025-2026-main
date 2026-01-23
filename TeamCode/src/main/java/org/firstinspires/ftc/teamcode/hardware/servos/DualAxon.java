@@ -70,7 +70,7 @@ public class DualAxon implements System {
    * @brief gets if either servo is at the target angle
    */
   public boolean isAtTarget() {
-    return servo1.isAtTarget() || servo2.isAtTarget();
+    return servo1.atTarget() || servo2.atTarget();
   }
 
   /**
