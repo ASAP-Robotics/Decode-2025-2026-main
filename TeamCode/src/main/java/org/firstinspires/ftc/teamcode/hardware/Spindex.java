@@ -68,6 +68,7 @@ public class Spindex implements System {
 
   SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
   SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
+  SystemReport blockerReport = new SystemReport(SystemStatus.NOMINAL); // latest blocker report
   private final UnidirectionalHomableRotator spinner; // the motor that rotates the mag's divider
   private final Axon intakeBlocker; // servo moving flap to close intake while shooting
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
@@ -126,6 +127,7 @@ public class Spindex implements System {
   public void update() {
     sensorReport = colorSensor.getStatus();
     spinnerReport = spinner.getStatus();
+    blockerReport = intakeBlocker.getStatus();
 
     if (!isIndexValid(currentIndex)) state = SpindexState.UNINITIALIZED; // shouldn't happen
 
@@ -185,11 +187,16 @@ public class Spindex implements System {
     SystemStatus status = SystemStatus.NOMINAL;
     SystemStatus sensorStatus = sensorReport.status;
     SystemStatus spinnerStatus = spinnerReport.status;
+    SystemStatus blockerStatus = blockerReport.status;
     String message = "🟩Normal";
 
     if (spinnerStatus == SystemStatus.INOPERABLE) {
       status = SystemStatus.INOPERABLE;
       message = "🟥Broken (Spinner)";
+
+    } else if (blockerStatus == SystemStatus.INOPERABLE) {
+      status = SystemStatus.INOPERABLE;
+      message = "🟥Broken (Intake blocker)";
 
     } else if (sensorStatus == SystemStatus.INOPERABLE) {
       status = SystemStatus.INOPERABLE;
@@ -198,6 +205,10 @@ public class Spindex implements System {
     } else if (spinnerStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
       message = "🟨Backup (Spinner); performance will be degraded";
+
+    } else if (blockerStatus == SystemStatus.FALLBACK) {
+      status = SystemStatus.FALLBACK;
+      message = "🟨Backup (Intake blocker); performance will be degraded";
 
     } else if (sensorStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
