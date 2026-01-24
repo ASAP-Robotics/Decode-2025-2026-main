@@ -23,14 +23,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
 /**
- * Unified driver for the ELC Encoder V2.
- * * Functionality:
- * - Uses the Analog connection to "seed" the initial position (Absolute).
- * - Uses the Quadrature connection for runtime tracking (Incremental).
- * - Supports software offsets and direction inversion.
- * * Datasheet Specs:
- * - Analog Output: 0-3.3V [cite: 6]
- * - Quadrature Resolution: 4000 CPR [cite: 6]
+ * Unified driver for the ELC Encoder V2. * Functionality: - Uses the Analog connection to "seed"
+ * the initial position (Absolute). - Uses the Quadrature connection for runtime tracking
+ * (Incremental). - Supports software offsets and direction inversion. * Datasheet Specs: - Analog
+ * Output: 0-3.3V [cite: 6] - Quadrature Resolution: 4000 CPR [cite: 6]
  *
  * @note written by Gemini, still needs to be tested
  */
@@ -50,11 +46,11 @@ public class ElcAbsEncoder {
   private int syncSampleCount = 5;
 
   /**
-   * Constructor.
-   * Automatically attempts to synchronize position upon instantiation.
-   * * @param hardwareMap   The OpMode's hardware map.
-   * @param analogName    Name of the device in Config -> Analog Input.
-   * @param digitalName   Name of the device in Config -> Motors.
+   * Constructor. Automatically attempts to synchronize position upon instantiation. * @param
+   * hardwareMap The OpMode's hardware map.
+   *
+   * @param analogName Name of the device in Config -> Analog Input.
+   * @param digitalName Name of the device in Config -> Motors.
    */
   public ElcAbsEncoder(HardwareMap hardwareMap, String analogName, String digitalName) {
     // Initialize Hardware
@@ -72,9 +68,8 @@ public class ElcAbsEncoder {
   }
 
   /**
-   * Reads the Absolute (Analog) encoder and forces the internal offset
-   * to match the incremental encoder to this real-world angle.
-   * * Uses a multi-read average to reject noise.
+   * Reads the Absolute (Analog) encoder and forces the internal offset to match the incremental
+   * encoder to this real-world angle. * Uses a multi-read average to reject noise.
    */
   public void synchronize() {
     double absoluteAngle = getAbsoluteAngle();
@@ -90,6 +85,7 @@ public class ElcAbsEncoder {
 
   /**
    * Gets the absolute angle
+   *
    * @return the current absolute angle of the encoder
    * @note auto-generated
    */
@@ -117,6 +113,7 @@ public class ElcAbsEncoder {
 
   /**
    * Gets the current hybrid position in degrees.
+   *
    * @return Position in degrees (0-360, or multi-turn if tracked continuously).
    */
   public double getPosition() {
@@ -134,8 +131,8 @@ public class ElcAbsEncoder {
   }
 
   /**
-   * Gets the current position normalized to 0-360 degrees.
-   * Useful for swerve modules where 361 degrees should be 1 degree.
+   * Gets the current position normalized to 0-360 degrees. Useful for swerve modules where 361
+   * degrees should be 1 degree.
    */
   public double getPositionNormalized() {
     double angle = getPosition() % 360.0;
@@ -145,10 +142,7 @@ public class ElcAbsEncoder {
     return angle;
   }
 
-  /**
-   * Gets velocity in Degrees per Second.
-   * Uses the high-speed Quadrature signal.
-   */
+  /** Gets velocity in Degrees per Second. Uses the high-speed Quadrature signal. */
   public double getVelocity() {
     double velTicks = incrementalEncoder.getVelocity();
     if (inverted) {
@@ -158,9 +152,8 @@ public class ElcAbsEncoder {
   }
 
   /**
-   * Sets the direction of the encoder.
-   * If true, inverts both the incremental count and the absolute logic.
-   * * @param inverted true to invert.
+   * Sets the direction of the encoder. If true, inverts both the incremental count and the absolute
+   * logic. * @param inverted true to invert.
    */
   public void setInverted(boolean inverted) {
     this.inverted = inverted;
@@ -169,16 +162,14 @@ public class ElcAbsEncoder {
   }
 
   /**
-   * Configure how many samples to average during a synchronize() call.
-   * Default is 5. Higher numbers reduce noise but take slightly longer.
+   * Configure how many samples to average during a synchronize() call. Default is 5. Higher numbers
+   * reduce noise but take slightly longer.
    */
   public void setSyncSampleCount(int count) {
     this.syncSampleCount = count;
   }
 
-  /**
-   * Returns the raw voltage from the absolute line (Debug).
-   */
+  /** Returns the raw voltage from the absolute line (Debug). */
   public double getRawVoltage() {
     return absoluteEncoder.getVoltage();
   }
