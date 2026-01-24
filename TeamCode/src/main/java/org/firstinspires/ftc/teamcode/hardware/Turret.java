@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,13 +103,6 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     rotator.set(0);
     if (horizontalAngle == 0) rotationEnabled = false;
     hoodServo.setPosition(targetVerticalAngleDegrees);
-  }
-
-  /**
-   * @brief to be called repeatedly, while the opMode is in init
-   */
-  public void initLoop() {
-    update();
   }
 
   /**

@@ -24,6 +24,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
+import org.firstinspires.ftc.teamcode.hardware.indicators.RGBIndicator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
 import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
@@ -64,8 +65,20 @@ public abstract class CommonRobot {
     DcMotorEx intakeMotor = this.hardwareMap.get(DcMotorEx.class, "intake");
     ActiveIntake intake = new ActiveIntake(intakeMotor);
 
+    RGBIndicator indicator1 = new RGBIndicator(hardwareMap, "indicator1");
+    RGBIndicator indicator2 = new RGBIndicator(hardwareMap, "indicator2");
+
     scoringSystem =
-        new ScoringSystem(intake, turret, spindex, limelight, this.allianceColor, this.telemetry);
+        new ScoringSystem(
+            intake,
+            turret,
+            spindex,
+            limelight,
+            indicator1,
+            indicator2,
+            this.allianceColor,
+            this.telemetry
+        );
   }
 
   /**

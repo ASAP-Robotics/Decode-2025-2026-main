@@ -21,6 +21,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.hardware.indicators.RGBIndicator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
@@ -42,6 +43,8 @@ public class ScoringSystem {
   private final Turret turret; // the flywheel on the robot
   private final Spindex spindex; // the spindex on the robot
   private final Limelight limelight; // the limelight camera on the turret
+  private final RGBIndicator indicator1; // first indicator light
+  private final RGBIndicator indicator2; // second indicator light
   protected State state = State.UNINITIALISED; // the state of the scoring system
   private BallSequence ballSequence = BallSequence.GPP; // the sequence being shot
   public final AllianceColor allianceColor; // the alliance we are on
@@ -63,24 +66,30 @@ public class ScoringSystem {
       Turret turret,
       Spindex spindex,
       Limelight limelight,
+      RGBIndicator indicator1,
+      RGBIndicator indicator2,
       AllianceColor allianceColor,
       Telemetry telemetry) {
     this.intake = intake;
     this.turret = turret;
     this.spindex = spindex;
     this.limelight = limelight;
+    this.indicator1 = indicator1;
+    this.indicator2 = indicator2;
     this.allianceColor = allianceColor;
     this.telemetry = telemetry;
     this.targetPosition = this.allianceColor.getTargetLocation();
   }
 
   /**
-   * @brief initializes the artifact scoring system
+   * Initializes the artifact scoring system
+   *
    * @param isPreloaded if the spindex is preloaded with balls
    * @param auto if limelight should search for a new ball sequence (opMode is auto)
    * @note call when OpMode is initialized ("Init" is pressed)
    */
   public void init(boolean isPreloaded, boolean auto) {
+    setIndicatorColor(RGBIndicator.Color.VIOLET);
     spindex.init(BallSequence.GPP, isPreloaded);
     turret.init(0);
     turret.setActive(!isPreloaded);
@@ -88,15 +97,16 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief to be called repeatedly while the robot is in init
+   * To be called repeatedly while the robot is in init
    */
   public void initLoop() {
     spindex.update();
-    turret.initLoop();
+    turret.update();
   }
 
   /**
-   * @brief starts scoring systems up
+   * Starts scoring systems up
+   *
    * @note call when OpMode is started ("Start" is pressed)
    */
   public void start(boolean isPreloaded, boolean search) {
@@ -108,7 +118,8 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief stops all powered movement as quickly as possible (think E-stop)
+   * Stops all powered movement as quickly as possible (think E-stop)
+   *
    * @note intended to be called when the "Stop" button is pressed
    */
   public void stop() {
@@ -118,7 +129,8 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief updates everything to do with the artifact scoring system
+   * Updates everything to do with the artifact scoring system
+   *
    * @note call each loop
    */
   public void update() {
@@ -130,11 +142,12 @@ public class ScoringSystem {
     intake.update();
     turret.update();
     spindex.update();
+    updateIndicators();
     updateTelemetry();
   }
 
   /**
-   * @brief updates everything to do with aiming the turret
+   * Updates everything to do with aiming the turret
    */
   private void updateAiming() {
     if (tuning) {
@@ -168,7 +181,7 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief updates everything to do with the spindex
+   * Updates everything to do with the spindexer
    */
   private void updateSpindex() {
     spindex.setSequence(ballSequence);
@@ -191,7 +204,7 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief updates everything to do with the intake
+   * Updates everything to do with the intake
    */
   private void updateIntake() {
     if (clearingIntake) { // if clearing the intake
@@ -230,7 +243,49 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief updates (or adds the data of) the telemetry from the scoring systems
+   * Updates the indicator lights
+   */
+  private void updateIndicators() {
+    switch (state) {
+      case UNINITIALISED:
+        setIndicatorColor(RGBIndicator.Color.VIOLET);
+        break;
+
+      case SHOOTING:
+        setIndicatorColor(RGBIndicator.Color.BLUE);
+        break;
+
+      case FULL:
+        if (isReadyToShoot()) {
+          setIndicatorColor(RGBIndicator.Color.GREEN);
+
+        } else {
+          setIndicatorColor(RGBIndicator.Color.WHITE);
+        }
+        break;
+
+      case INTAKING:
+        int numBalls = 0;
+        RGBIndicator.Color color = RGBIndicator.Color.RED;
+        for (BallColor ball : spindex.getSpindexContents()) {
+          if (ball.isShootable()) numBalls++;
+        }
+        switch (numBalls) {
+          case 1:
+            color = RGBIndicator.Color.ORANGE;
+            break;
+
+          case 2: color = RGBIndicator.Color.YELLOW;
+          break;
+        }
+
+        setIndicatorColor(color);
+        break;
+    }
+  }
+
+  /**
+   * Updates (or adds the data of) the telemetry from the scoring systems
    */
   private void updateTelemetry() {
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
@@ -328,6 +383,14 @@ public class ScoringSystem {
 
   public void setIntakeFull(BallColor ball) {
     spindex.setIntakeColor(ball);
+  }
+
+  /**
+   * Gets if the scoring system is ready to shoot
+   * @return true if ready to shoot, false otherwise
+   */
+  protected boolean isReadyToShoot() {
+    return turret.isReadyToShoot() && spindex.isReadyToShoot() && limelight.isTargetInFrame();
   }
 
   /**
@@ -463,5 +526,14 @@ public class ScoringSystem {
    */
   public void autoAim() {
     turretAimOverride = false;
+  }
+
+  /**
+   * Sets the color of the indicator lights
+   * @param color the color to set them to
+   */
+  public void setIndicatorColor(RGBIndicator.Color color) {
+    indicator1.setColor(color);
+    indicator2.setColor(color);
   }
 }
