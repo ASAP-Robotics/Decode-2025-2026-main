@@ -96,9 +96,7 @@ public class ScoringSystem {
     limelight.init(auto);
   }
 
-  /**
-   * To be called repeatedly while the robot is in init
-   */
+  /** To be called repeatedly while the robot is in init */
   public void initLoop() {
     spindex.update();
     turret.update();
@@ -146,9 +144,7 @@ public class ScoringSystem {
     updateTelemetry();
   }
 
-  /**
-   * Updates everything to do with aiming the turret
-   */
+  /** Updates everything to do with aiming the turret */
   private void updateAiming() {
     if (tuning) {
       turret.tuneShooting(rpmOverride, verticalAngleOverride);
@@ -180,9 +176,7 @@ public class ScoringSystem {
     turret.setTargetDistance(getTargetDistance());
   }
 
-  /**
-   * Updates everything to do with the spindexer
-   */
+  /** Updates everything to do with the spindexer */
   private void updateSpindex() {
     spindex.setSequence(ballSequence);
 
@@ -203,9 +197,7 @@ public class ScoringSystem {
     if (state == State.SHOOTING) emptyMag();
   }
 
-  /**
-   * Updates everything to do with the intake
-   */
+  /** Updates everything to do with the intake */
   private void updateIntake() {
     if (clearingIntake) { // if clearing the intake
       if (intake.timer.isFinished()) { // if done clearing the intake
@@ -242,9 +234,7 @@ public class ScoringSystem {
     }
   }
 
-  /**
-   * Updates the indicator lights
-   */
+  /** Updates the indicator lights */
   private void updateIndicators() {
     switch (state) {
       case UNINITIALISED:
@@ -275,8 +265,9 @@ public class ScoringSystem {
             color = RGBIndicator.Color.ORANGE;
             break;
 
-          case 2: color = RGBIndicator.Color.YELLOW;
-          break;
+          case 2:
+            color = RGBIndicator.Color.YELLOW;
+            break;
         }
 
         setIndicatorColor(color);
@@ -284,9 +275,7 @@ public class ScoringSystem {
     }
   }
 
-  /**
-   * Updates (or adds the data of) the telemetry from the scoring systems
-   */
+  /** Updates (or adds the data of) the telemetry from the scoring systems */
   private void updateTelemetry() {
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("State", state.toString());
@@ -387,6 +376,7 @@ public class ScoringSystem {
 
   /**
    * Gets if the scoring system is ready to shoot
+   *
    * @return true if ready to shoot, false otherwise
    */
   protected boolean isReadyToShoot() {
@@ -530,6 +520,7 @@ public class ScoringSystem {
 
   /**
    * Sets the color of the indicator lights
+   *
    * @param color the color to set them to
    */
   public void setIndicatorColor(RGBIndicator.Color color) {

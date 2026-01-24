@@ -123,9 +123,7 @@ public class Spindex implements System {
     currentIndex = 0; // spindex at index 0
   }
 
-  /**
-   * Updates everything to do with the spindex
-   */
+  /** Updates everything to do with the spindex */
   public void update() {
     sensorReport = colorSensor.getStatus();
     spinnerReport = spinner.getStatus();
@@ -259,6 +257,7 @@ public class Spindex implements System {
 
   /**
    * Moves the spindexer so homing will be very fast on next startup
+   *
    * @note intended mainly for use at the very end of Auto
    * @note spindex WILL NOT WORK after calling this; call only at the end of auto
    */
@@ -277,8 +276,9 @@ public class Spindex implements System {
   }
 
   /**
-   * Stores the color of ball detected in the intake as the color of ball in the spindex
-   *     index at the intake position
+   * Stores the color of ball detected in the intake as the color of ball in the spindex index at
+   * the intake position
+   *
    * @note uses the stored intake color, call update() to update
    */
   protected void storeIntakeColor() {
@@ -299,6 +299,7 @@ public class Spindex implements System {
 
   /**
    * Returns if the spindex is at its target position (in a "idle" or inactive state)
+   *
    * @return true if the spindex is at its target angle and set to the correct target angle for the
    *     mode the spindex is in and the intake flap is at its target, false otherwise
    */
@@ -320,6 +321,7 @@ public class Spindex implements System {
 
   /**
    * Returns if the color of ball in the intake is different from the last reading
+   *
    * @return true if the color of ball in the intake changed, false if it didn't
    */
   protected boolean getIsIntakeColorNew() {

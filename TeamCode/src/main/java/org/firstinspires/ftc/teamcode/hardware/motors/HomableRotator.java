@@ -85,9 +85,7 @@ public class HomableRotator implements System {
     if (state == State.UNINITIALIZED) return;
     measureCurrentAngle();
     motor.set(
-        Range.clip(motorController.calculate(getCurrentAngle() * (inverted ? -1 : 1)), -1, 1
-        )
-    );
+        Range.clip(motorController.calculate(getCurrentAngle() * (inverted ? -1 : 1)), -1, 1));
     if (state == State.HOMING && motorController.atSetPoint()) {
       if (sensor.isPressed()) {
         homed = true;

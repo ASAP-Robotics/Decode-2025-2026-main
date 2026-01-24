@@ -19,9 +19,7 @@ package org.firstinspires.ftc.teamcode.hardware.indicators;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-/**
- * Simple class to control a GoBILDA "RGB Indicator light (PWM controlled)"
- */
+/** Simple class to control a GoBILDA "RGB Indicator light (PWM controlled)" */
 public class RGBIndicator {
   public enum Color {
     OFF(0.0),
@@ -55,6 +53,7 @@ public class RGBIndicator {
 
   /**
    * Sets the color of the light
+   *
    * @param color the color to set the light to
    */
   public void setColor(Color color) {

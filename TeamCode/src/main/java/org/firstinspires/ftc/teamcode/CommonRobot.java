@@ -24,12 +24,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
-import org.firstinspires.ftc.teamcode.hardware.indicators.RGBIndicator;
-import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
-import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
+import org.firstinspires.ftc.teamcode.hardware.indicators.RGBIndicator;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
+import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
@@ -77,8 +77,7 @@ public abstract class CommonRobot {
             indicator1,
             indicator2,
             this.allianceColor,
-            this.telemetry
-        );
+            this.telemetry);
   }
 
   /**
