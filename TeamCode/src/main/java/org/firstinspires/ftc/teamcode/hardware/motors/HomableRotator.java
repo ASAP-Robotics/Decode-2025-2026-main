@@ -68,7 +68,7 @@ public class HomableRotator implements System {
     this.motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
     this.motor.set(0);
     this.motorSimulation =
-        new Follower(0, 0, tolerance, this.motor.getMaxRPM() / 24); // tune 24 (1/4 of max speed)
+        new Follower(0, 0, tolerance, this.motor.getMaxRPM() / 12); // tune 12 (1/2 of max speed)
     this.inverted = inverted;
   }
 

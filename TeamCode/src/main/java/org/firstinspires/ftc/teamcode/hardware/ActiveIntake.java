@@ -54,7 +54,7 @@ public class ActiveIntake {
 
   public ActiveIntake(DcMotorEx intakeMotor, double readingTime, double stallCurrent) {
     this.intakeMotor = intakeMotor;
-    this.intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD); // spin forwards
+    this.intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     this.intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); // brake if zero power
     this.current = 0.0; // start at zero current
     this.stallCurrent = stallCurrent;

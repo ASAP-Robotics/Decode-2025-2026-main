@@ -16,6 +16,8 @@
 
 package org.firstinspires.ftc.teamcode.hardware;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import java.util.Arrays;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -60,6 +62,7 @@ public class ScoringSystem {
   private boolean clearingIntake = false; // if the intake is being reversed to clear a blockage
   private final Telemetry telemetry;
   private final SimpleTimer fullWait = new SimpleTimer(0.5);
+  private ElapsedTime loopTime = new ElapsedTime();
 
   public ScoringSystem(
       ActiveIntake intake,
@@ -281,7 +284,12 @@ public class ScoringSystem {
     telemetry.addData("State", state.toString());
     telemetry.addData("Sequence", ballSequence);
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
-    telemetry.addData("At target", turret.isAtTarget());
+    telemetry.addData("Turret at target", turret.isAtTarget());
+    telemetry.addData("Spindex at target", spindex.isAtTarget());
+    telemetry.addData("Intake color", spindex.getIntakeColor());
+    telemetry.addData("Spindex state", spindex.getState());
+    telemetry.addData("Loop time", loopTime.milliseconds());
+    loopTime.reset();
 
     SystemReport spindexReport = spindex.getStatus();
     SystemReport turretReport = turret.getStatus();

@@ -84,7 +84,8 @@ public class UnidirectionalHomableRotator extends HomableRotator {
    * @return a setpoint that will move the motor to the given angle under the applied constraints
    */
   private double calculateSetAngle(double degrees, DirectionConstraint constraint) {
-    double currentAngle = atTarget() ? getTargetAngle() : getCurrentAngle();
+    //double currentAngle = atTarget() ? getTargetAngle() : getCurrentAngle();
+    double currentAngle = getTargetAngle(); // chat strategy
 
     switch (constraint) {
       case FORWARD_ONLY:

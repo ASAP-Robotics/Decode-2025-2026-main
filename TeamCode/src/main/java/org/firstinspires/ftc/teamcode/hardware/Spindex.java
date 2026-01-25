@@ -64,8 +64,8 @@ public class Spindex implements System {
     }
   }
 
-  private static final double INTAKE_FLAP_CLOSED = 0; // TODO: tune
-  private static final double INTAKE_FLAP_OPEN = 30; // TODO: tune
+  private static final double INTAKE_FLAP_CLOSED = 335;
+  private static final double INTAKE_FLAP_OPEN = 248;
 
   SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
   SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
@@ -93,7 +93,7 @@ public class Spindex implements System {
   public Spindex(
       Motor spinner, TouchSensor homingSwitch, Axon intakeBlocker, ColorSensorV3 colorSensor) {
     this.spinner =
-        new UnidirectionalHomableRotator(spinner, homingSwitch, 0.25, 0.05, 0.001, 1, true);
+        new UnidirectionalHomableRotator(spinner, homingSwitch, 0.1, 0.01, 0.0, 1, true);
     this.intakeBlocker = intakeBlocker;
     this.colorSensor = colorSensor;
   }
@@ -168,7 +168,7 @@ public class Spindex implements System {
         break;
 
       case UNINITIALIZED: // if the spindex is uninitialized
-        // nothing needs to be done
+        spinner.setAngle(0);
         break;
     }
 
@@ -176,8 +176,9 @@ public class Spindex implements System {
 
     oldIntakeColor = intakeColor; // store old intake color
     if (state.checkSensor && isAtTarget()) {
-      colorSensor.update();
-      intakeColor = colorSensor.getColor(); // update intake color
+      //colorSensor.update();
+      //intakeColor = colorSensor.getColor(); // update intake color
+      intakeColor = BallColor.GREEN;
     } else {
       intakeColor = BallColor.INVALID;
     }
@@ -304,19 +305,7 @@ public class Spindex implements System {
    *     mode the spindex is in and the intake flap is at its target, false otherwise
    */
   public boolean isAtTarget() {
-    boolean isSet = true;
-    double targetPosition = spinner.getNormalizedTargetAngle();
-    switch (state) {
-      case INTAKING:
-        if (targetPosition != spindex[currentIndex].intakePosition) isSet = false;
-        break;
-
-      case SHOOTING:
-        isSet = false;
-        break;
-    }
-
-    return spinner.atTarget() && intakeBlocker.atTarget() && isSet;
+    return spinner.atTarget() && intakeBlocker.atTarget();
   }
 
   /**
