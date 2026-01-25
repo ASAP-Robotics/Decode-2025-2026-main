@@ -42,6 +42,7 @@ public class RGBIndicator {
   }
 
   private final Servo led; // light is controlled by servo PWM control
+  private Color color = null;
 
   public RGBIndicator(HardwareMap hardwareMap, String deviceName) {
     this.led = hardwareMap.get(Servo.class, deviceName);
@@ -57,6 +58,16 @@ public class RGBIndicator {
    * @param color the color to set the light to
    */
   public void setColor(Color color) {
+    if (color == this.color) return;
+    this.color = color;
     led.setPosition(color.num);
+  }
+
+  /**
+   * Gets the currently displayed color
+   * @return the color being displayed
+   */
+  public Color getColor() {
+    return color;
   }
 }

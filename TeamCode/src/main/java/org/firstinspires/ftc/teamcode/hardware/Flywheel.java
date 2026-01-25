@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,19 +40,21 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
     public abstract double getRpm();
   }
 
-  public final DcMotorEx flywheel;
+  private static final double RPM_TARGET_TOLERANCE = 10;
+  private final double MOTOR_TICKS_PER_REV = 28; // ticks per revolution of flywheel motor
+  protected final DcMotorEx flywheel;
   protected Follower speedSimulation; // simulation of flywheel speed
   protected SystemStatus flywheelStatus; // status of the flywheel
   protected boolean isEnabled = false; // if the flywheel is enabled
   protected boolean isActive = true; // if the flywheel is active (as opposed to idling)
   private double idleSpeed; // the speed (RPM) of the flywheel when idle
   private double targetSpeed = 0; // the speed (RPM) the flywheel is targeting
-  public double currentSpeed = 0; // the latest speed (RPM) of the flywheel
+  private double currentSpeed = 0; // the latest speed (RPM) of the flywheel
   private double targetDistance = 0; // the distance (inches) to the target
-
-  public double testingSpeed = 2000;
+  private double lastSetSpeed = 0; // the last RPM the flywheel was set to spin at
+  private DcMotor.RunMode flywheelRunMode = DcMotor.RunMode.RUN_USING_ENCODER;
+  protected double testingSpeed = 2000;
   protected boolean testing = false;
-  private final double MOTOR_TICKS_PER_REV = 28; // ticks per revolution of flywheel motor
 
   protected T[] LOOKUP_TABLE; // lookup table of distance, rpm, etc.
 
@@ -119,9 +121,6 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    */
   public void setEnabled(boolean isEnabled) {
     this.isEnabled = isEnabled; // set the new enabled state
-    // set motor mode; if enabled, use speed-based control, if disabled, use power-based control
-    flywheel.setMode(
-        isEnabled ? DcMotor.RunMode.RUN_USING_ENCODER : DcMotor.RunMode.RUN_WITHOUT_ENCODER);
   }
 
   /**
@@ -254,16 +253,30 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @note use setIdleSpeed() to set the idle speed
    */
   private void idleMotor() {
+    targetSpeed = idleSpeed;
     if (currentSpeed - 200 <= idleSpeed) {
-      double ticksPerSec = (idleSpeed / 60.0) * MOTOR_TICKS_PER_REV;
-      flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
-      flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
+      if (flywheelRunMode != DcMotor.RunMode.RUN_USING_ENCODER) {
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
+        flywheelRunMode = DcMotor.RunMode.RUN_USING_ENCODER;
+      }
+
+      if (Math.abs(idleSpeed - lastSetSpeed) > RPM_TARGET_TOLERANCE) {
+        double ticksPerSec = (idleSpeed / 60.0) * MOTOR_TICKS_PER_REV;
+        flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
+        lastSetSpeed = idleSpeed;
+      }
 
     } else { // if flywheel is going much too fast
-      flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
-      flywheel.setPower(0); // spin freely
+      if (flywheelRunMode != DcMotor.RunMode.RUN_WITHOUT_ENCODER) {
+        flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
+        flywheelRunMode = DcMotor.RunMode.RUN_WITHOUT_ENCODER;
+      }
+
+      if (lastSetSpeed != 0) {
+        flywheel.setPower(0); // spin freely
+        lastSetSpeed = 0;
+      }
     }
-    targetSpeed = idleSpeed;
   }
 
   /**
@@ -272,21 +285,35 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    */
   private void startMotor() {
     double rpm = getRPMLookup(targetDistance);
-    double ticksPerSec = (rpm / 60.0) * MOTOR_TICKS_PER_REV;
     targetSpeed = rpm; // store target speed
 
-    flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
-    flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PIDF controller
+    if (flywheelRunMode != DcMotor.RunMode.RUN_USING_ENCODER) {
+      flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
+      flywheelRunMode = DcMotor.RunMode.RUN_USING_ENCODER;
+    }
+
+    if (Math.abs(rpm - lastSetSpeed) > RPM_TARGET_TOLERANCE) {
+      double ticksPerSec = (rpm / 60.0) * MOTOR_TICKS_PER_REV;
+      flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PIDF controller
+      lastSetSpeed = rpm;
+    }
   }
 
   /**
    * @brief stops powered movement of the flywheel
    */
   private void stopMotor() {
-    flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
-    flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT); // float if zero power
-    flywheel.setPower(0);
     targetSpeed = 0;
+
+    if (flywheelRunMode != DcMotor.RunMode.RUN_WITHOUT_ENCODER) {
+      flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
+      flywheelRunMode = DcMotor.RunMode.RUN_WITHOUT_ENCODER;
+    }
+
+    if (lastSetSpeed != 0) {
+      flywheel.setPower(0);
+      lastSetSpeed = 0;
+    }
   }
 
   /**

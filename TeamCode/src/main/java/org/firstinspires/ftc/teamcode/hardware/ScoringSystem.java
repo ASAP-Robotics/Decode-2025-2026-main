@@ -61,7 +61,7 @@ public class ScoringSystem {
   private boolean clearingIntake = false; // if the intake is being reversed to clear a blockage
   private final Telemetry telemetry;
   private final SimpleTimer fullWait = new SimpleTimer(0.5);
-  private ElapsedTime loopTime = new ElapsedTime();
+  private final ElapsedTime loopTime = new ElapsedTime();
 
   public ScoringSystem(
       ActiveIntake intake,
@@ -133,7 +133,7 @@ public class ScoringSystem {
    *
    * @note call each loop
    */
-  public void update() {
+  public void update(boolean updateTelemetry) {
     limelight.update();
     ballSequence = limelight.getSequence();
     updateAiming();
@@ -143,7 +143,7 @@ public class ScoringSystem {
     turret.update();
     spindex.update();
     updateIndicators();
-    updateTelemetry();
+    if (updateTelemetry) updateTelemetry();
   }
 
   /** Updates everything to do with aiming the turret */

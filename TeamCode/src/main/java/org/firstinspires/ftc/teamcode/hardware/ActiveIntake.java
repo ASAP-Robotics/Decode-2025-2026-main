@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class ActiveIntake {
-  private class CurrentReading {
+  private static class CurrentReading {
     public double current;
     public double timeStamp;
 
@@ -95,6 +95,7 @@ public class ActiveIntake {
    * @brief stops the intake from spinning
    */
   public void stop() {
+    if (!intaking && !ejecting && !idling) return;
     intakeMotor.setPower(0);
     intaking = false;
     ejecting = false;
@@ -105,6 +106,7 @@ public class ActiveIntake {
    * @brief spins intake up to bring balls in
    */
   public void intake() {
+    if (intaking && !ejecting && !idling) return;
     intakeMotor.setPower(1);
     intaking = true;
     ejecting = false;
@@ -115,6 +117,7 @@ public class ActiveIntake {
    * @brief spins intake up to half speed to hold balls in the mag
    */
   public void intakeIdle() {
+    if (intaking && !ejecting && idling) return;
     intakeMotor.setPower(0.5);
     intaking = true;
     ejecting = false;
@@ -125,9 +128,10 @@ public class ActiveIntake {
    * @brief spins intake up in reverse to spit balls out
    */
   public void eject() {
+    if (!intaking && ejecting && !idling) return;
     intakeMotor.setPower(-1);
-    ejecting = true;
     intaking = false;
+    ejecting = true;
     idling = false;
   }
 
@@ -135,9 +139,10 @@ public class ActiveIntake {
    * @brief spins intake up in reverse to half speed to keep balls out of the mag
    */
   public void ejectIdle() {
+    if (!intaking && ejecting && idling) return;
     intakeMotor.setPower(-0.5);
-    ejecting = true;
     intaking = false;
+    ejecting = true;
     idling = true;
   }
 

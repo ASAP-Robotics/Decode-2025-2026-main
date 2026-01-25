@@ -30,12 +30,15 @@ import org.firstinspires.ftc.teamcode.utils.Follower;
 
 /** Wrapper around the `Servo` class to add encoder feedback and rudimentary fault detection */
 public class Axon implements System {
+  private static final double UPDATE_TOLERANCE_DEGREES = 1; // amount setpoint has to change by to
+  // actually set servo
   private SystemStatus status = SystemStatus.NOMINAL; // the status of the servo
   private final Follower follower; // backup follower to model servo movement if encoder fails
   private final Servo servo; // the servo being controlled
   private final AnalogInput encoder; // the encoder of the servo being controlled
   private final boolean dummy; // if true, the servo will always be "at target"
   private final double toleranceDegrees;
+  private double targetPositionDegrees;
 
   /**
    * Creates a default Axon
@@ -80,6 +83,7 @@ public class Axon implements System {
     this.encoder = encoder;
     this.dummy = dummy;
     this.toleranceDegrees = toleranceDegrees;
+    this.targetPositionDegrees = 0;
     // 214 degrees per second, about the speed of an axon divided by 2
     this.follower = dummy ? null : new Follower(getPosition(), 0, 0, 214);
   }
@@ -121,6 +125,9 @@ public class Axon implements System {
    * @param degrees the target position of the servo, in degrees
    */
   public void setPosition(double degrees) {
+    double oldTargetPositionDegrees = targetPositionDegrees;
+    targetPositionDegrees = degrees;
+    if (Math.abs(oldTargetPositionDegrees - degrees) <= UPDATE_TOLERANCE_DEGREES) return;
     if (!dummy) follower.setTarget(degrees);
     servo.setPosition(degrees / 360);
   }
@@ -132,8 +139,7 @@ public class Axon implements System {
    * @note this method doesn't return the *current position*, it returns the *target position*
    */
   public double getTargetPosition() {
-    double target = servo.getPosition() * 360;
-    return Double.isNaN(target) ? 0 : target;
+    return targetPositionDegrees;
   }
 
   /**

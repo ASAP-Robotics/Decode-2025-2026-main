@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,12 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -32,14 +35,17 @@ import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
+import java.util.List;
+
 /**
- * @brief class to contain the behavior of the robot in TeliOp, to avoid code duplication
+ * @brief class to contain the behavior of the robot in TeleOp, to avoid code duplication
  */
 public class TeleOpRobot extends CommonRobot {
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
   protected MecanumWheelBase wheelBase;
   protected PinpointLocalizer pinpoint;
+  protected SimpleTimer telemetryTimer = new SimpleTimer(0.5);
   protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
   protected SimpleTimer odometryResetTimer = new SimpleTimer(2);
 
@@ -49,7 +55,7 @@ public class TeleOpRobot extends CommonRobot {
       AllianceColor allianceColor,
       Gamepad gamepad1,
       Gamepad gamepad2) {
-    super(hardwareMap, telemetry, allianceColor);
+    super(hardwareMap, telemetry, allianceColor, true);
 
     pinpoint = new PinpointLocalizer(hardwareMap, allianceColor.getAutoEndPosition());
 
@@ -67,10 +73,12 @@ public class TeleOpRobot extends CommonRobot {
    * @brief to be called once, when the opMode is initialized
    */
   public void init() {
+    clearSensorCache();
     SimpleTimer backup = new SimpleTimer(2);
     backup.start();
     while (pinpoint.getState() != GoBildaPinpointDriver.DeviceStatus.READY
         && !backup.isFinished()) {
+      clearSensorCache();
       pinpoint.update();
     }
     scoringSystem.init(false, false); // initialize scoring systems
@@ -81,6 +89,7 @@ public class TeleOpRobot extends CommonRobot {
    * @brief to be called repeatedly, while the opMode is in init
    */
   public void initLoop() {
+    clearSensorCache();
     scoringSystem.initLoop();
   }
 
@@ -88,6 +97,8 @@ public class TeleOpRobot extends CommonRobot {
    * @brief to be called once when the opMode is started
    */
   public void start() {
+    clearSensorCache();
+    telemetryTimer.start();
     scoringSystem.start(false, false); // start scoring systems up
     pinpointErrorTimer.start(); // maybe change
     odometryResetTimer.start();
@@ -97,6 +108,13 @@ public class TeleOpRobot extends CommonRobot {
    * @brief to be called repeatedly, every loop
    */
   public void loop() {
+    clearSensorCache();
+
+    boolean updateTelemetry = telemetryTimer.isFinished();
+    if (updateTelemetry) {
+      telemetryTimer.start();
+    }
+
     // manual sequence setting
     if (gamepad2.dpadDownWasPressed()) {
       scoringSystem.setBallSequence(BallSequence.PGP);
@@ -176,9 +194,9 @@ public class TeleOpRobot extends CommonRobot {
             location.position.y,
             AngleUnit.RADIANS,
             location.heading.toDouble()));
-    scoringSystem.update();
+    scoringSystem.update(updateTelemetry);
 
-    telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
+    if (updateTelemetry) telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
 
     if (odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25) {
       Pose2D limelightPose = scoringSystem.getRobotPosition();
@@ -199,7 +217,7 @@ public class TeleOpRobot extends CommonRobot {
     wheelBase.update();
 
     // update telemetry
-    telemetry.update();
+    if (updateTelemetry) telemetry.update();
   }
 
   /**

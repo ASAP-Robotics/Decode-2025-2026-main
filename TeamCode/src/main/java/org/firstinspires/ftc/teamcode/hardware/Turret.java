@@ -53,6 +53,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     }
   }
 
+  // amount power has to change by to actually set (rotator) motor
+  private static final double UPDATE_TOLERANCE = 0.01;
   // number of teeth on the gear attached to the turret
   private static final double TURRET_GEAR_TEETH = 120;
   // number of teeth on the gear attached to the motor
@@ -72,6 +74,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   // target angle for servo moving flap
   private double targetVerticalAngleDegrees = 50;
   private double testingVerticalAngleDegrees = 50;
+  private double currentRotatorPower = 0;
   private boolean rotationEnabled = true; // if turret can move side to side
 
   public Turret(DcMotorEx flywheelMotor, Motor rotator, Axon hoodServo, double idleSpeed) {
@@ -209,7 +212,12 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     double motorDegrees =
         turretDegreesToMotorDegrees(targetHorizontalAngleDegrees + horizontalAngleOffsetDegrees);
     rotatorController.setSetPoint(motorDegrees);
-    rotator.set(rotationEnabled ? rotatorController.calculate(getRotatorDegrees()) : 0);
+    double targetRotatorPower =
+        rotationEnabled ? rotatorController.calculate(getRotatorDegrees()) : 0;
+    if (Math.abs(targetRotatorPower - currentRotatorPower) > UPDATE_TOLERANCE) {
+      rotator.set(targetRotatorPower);
+      currentRotatorPower = targetRotatorPower;
+    }
 
     turretStatus =
         rotationEnabled && !isRotatorAtTarget() && angleSimulation.isAtTarget()

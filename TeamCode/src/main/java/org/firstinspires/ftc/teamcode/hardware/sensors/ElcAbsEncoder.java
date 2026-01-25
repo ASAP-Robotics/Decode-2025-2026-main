@@ -42,13 +42,10 @@ public class ElcAbsEncoder {
   private double angleOffsetDegrees = 0.0;
   private boolean inverted = false;
 
-  // Configurable noise reduction
-  private int syncSampleCount = 5;
-
   /**
-   * Constructor. Automatically attempts to synchronize position upon instantiation. * @param
-   * hardwareMap The OpMode's hardware map.
+   * Constructor. Automatically attempts to synchronize position upon instantiation.
    *
+   * @param hardwareMap The OpMode's hardware map.
    * @param analogName Name of the device in Config -> Analog Input.
    * @param digitalName Name of the device in Config -> Motors.
    */
@@ -90,19 +87,13 @@ public class ElcAbsEncoder {
    * @note auto-generated
    */
   private double getAbsoluteAngle() {
-    double avgVoltage = 0;
-
-    // Block briefly to average samples for accuracy
-    for (int i = 0; i < syncSampleCount; i++) {
-      avgVoltage += absoluteEncoder.getVoltage();
-    }
-    avgVoltage /= syncSampleCount;
+    double voltage = absoluteEncoder.getVoltage();
 
     // Clip voltage to expected range [cite: 6]
-    avgVoltage = Range.clip(avgVoltage, 0, MAX_VOLTAGE);
+    voltage = Range.clip(voltage, 0, MAX_VOLTAGE);
 
     // Calculate Absolute Angle (0-360)
-    double absoluteAngle = (avgVoltage / MAX_VOLTAGE) * 360.0;
+    double absoluteAngle = (voltage / MAX_VOLTAGE) * 360.0;
 
     // If the mechanism is inverted, flip the absolute read logic
     if (inverted) {
@@ -153,20 +144,13 @@ public class ElcAbsEncoder {
 
   /**
    * Sets the direction of the encoder. If true, inverts both the incremental count and the absolute
-   * logic. * @param inverted true to invert.
+   * logic.
+   * @param inverted true to invert.
    */
   public void setInverted(boolean inverted) {
     this.inverted = inverted;
     // Re-sync immediately because inversion changes the absolute target
     synchronize();
-  }
-
-  /**
-   * Configure how many samples to average during a synchronize() call. Default is 5. Higher numbers
-   * reduce noise but take slightly longer.
-   */
-  public void setSyncSampleCount(int count) {
-    this.syncSampleCount = count;
   }
 
   /** Returns the raw voltage from the absolute line (Debug). */

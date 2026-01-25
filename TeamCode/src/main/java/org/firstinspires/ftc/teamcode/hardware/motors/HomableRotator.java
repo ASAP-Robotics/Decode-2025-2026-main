@@ -39,6 +39,7 @@ public class HomableRotator implements System {
     UNINITIALIZED
   }
 
+  private static final double UPDATE_TOLERANCE = 0.01; // amount power has to change by to actually set motor
   protected static final double HOMING_INCREMENT_SIZE = 1; // degrees
 
   protected final Motor motor;
@@ -50,6 +51,8 @@ public class HomableRotator implements System {
   protected boolean homed = false;
   protected double currentAngle = 0;
   protected double targetAngle = 0;
+  protected double currentMotorPower = 0;
+  protected double targetMotorPower = 0;
 
   public HomableRotator(
       Motor motor,
@@ -84,13 +87,23 @@ public class HomableRotator implements System {
   public void update() {
     if (state == State.UNINITIALIZED) return;
     measureCurrentAngle();
-    motor.set(
-        Range.clip(motorController.calculate(getCurrentAngle() * (inverted ? -1 : 1)), -1, 1));
+    targetMotorPower = Range.clip(
+        motorController.calculate(getCurrentAngle() * (inverted ? -1 : 1)),
+        -1,
+        1
+    );
+    if (Math.abs(targetMotorPower - currentMotorPower) >= UPDATE_TOLERANCE) {
+      motor.set(targetMotorPower);
+      currentMotorPower = targetMotorPower;
+    }
+
     if (state == State.HOMING && motorController.atSetPoint()) {
       if (sensor.isPressed()) {
         homed = true;
         state = State.NORMAL;
         motor.set(0);
+        targetMotorPower = 0;
+        currentMotorPower = 0;
         motor.stopAndResetEncoder();
         motorController.reset();
         setTargetAngle(0);
@@ -194,6 +207,8 @@ public class HomableRotator implements System {
     targetAngle = 0;
     state = State.HOMING;
     motor.set(0);
+    targetMotorPower = 0;
+    currentMotorPower = 0;
     motor.stopAndResetEncoder();
     motorController.reset();
     motorController.setSetPoint(targetAngle);

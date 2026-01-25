@@ -34,7 +34,7 @@ public class plzwork extends CommonRobot {
   boolean done = false;
 
   public plzwork(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
-    super(hardwareMap, telemetry, allianceColor);
+    super(hardwareMap, telemetry, allianceColor, false);
 
     // other "Init" setup stuff goes here
   }
@@ -94,7 +94,7 @@ public class plzwork extends CommonRobot {
 
     // update scoring systems
     // scoringSystem.setRobotPosition(); // TODO: fill out
-    scoringSystem.update();
+    scoringSystem.update(true);
 
     // update telemetry
     telemetry.update();

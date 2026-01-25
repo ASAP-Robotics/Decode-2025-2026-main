@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,16 @@ import org.firstinspires.ftc.teamcode.actions.updateTelemetry;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
+// TODO: maybe add loop time optimization
+
 /** class to contain the behavior of the robot in Auto, to avoid code duplication */
 public class AutoRobot extends CommonRobot {
-  // stuff (variables, etc., see TeliOpRobot) goes here;
+  // stuff (variables, etc., see TeleOpRobot) goes here;
   protected final Pose2d beginPose;
   protected MecanumDrive drive;
 
   public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
-    super(hardwareMap, telemetry, allianceColor);
+    super(hardwareMap, telemetry, allianceColor, false);
     beginPose = allianceColor.getAutoStartPosition();
     drive = new MecanumDrive(hardwareMap, beginPose);
   }
