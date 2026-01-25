@@ -24,10 +24,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
-import org.firstinspires.ftc.teamcode.hardware.motors.HomableRotator;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
 
 @TeleOp(name = "Tuning turret", group = "Tuning")
@@ -40,7 +38,8 @@ public class TuningTurret extends LinearOpMode {
   public static double kP = 0.25;
 
   public static boolean home = false;
-  public static UnidirectionalHomableRotator.DirectionConstraint direction = UnidirectionalHomableRotator.DirectionConstraint.NONE;
+  public static UnidirectionalHomableRotator.DirectionConstraint direction =
+      UnidirectionalHomableRotator.DirectionConstraint.NONE;
 
   // public static double kF = 0;
 
@@ -55,7 +54,8 @@ public class TuningTurret extends LinearOpMode {
 
     TouchSensor sensor = hardwareMap.get(TouchSensor.class, "spindexHomer");
     Motor motor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
-    UnidirectionalHomableRotator spindex = new UnidirectionalHomableRotator(motor, sensor, 0.25, 0.05, 0.001, 1, true);
+    UnidirectionalHomableRotator spindex =
+        new UnidirectionalHomableRotator(motor, sensor, 0.25, 0.05, 0.001, 1, true);
 
     waitForStart();
     spindex.start();

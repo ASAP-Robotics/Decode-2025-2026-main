@@ -92,8 +92,7 @@ public class Spindex implements System {
 
   public Spindex(
       Motor spinner, TouchSensor homingSwitch, Axon intakeBlocker, ColorSensorV3 colorSensor) {
-    this.spinner =
-        new UnidirectionalHomableRotator(spinner, homingSwitch, 0.1, 0.01, 0.0, 1, true);
+    this.spinner = new UnidirectionalHomableRotator(spinner, homingSwitch, 0.1, 0.01, 0.0, 1, true);
     this.intakeBlocker = intakeBlocker;
     this.colorSensor = colorSensor;
   }
@@ -176,8 +175,8 @@ public class Spindex implements System {
 
     oldIntakeColor = intakeColor; // store old intake color
     if (state.checkSensor && isAtTarget()) {
-      //colorSensor.update();
-      //intakeColor = colorSensor.getColor(); // update intake color
+      // colorSensor.update();
+      // intakeColor = colorSensor.getColor(); // update intake color
       intakeColor = BallColor.GREEN;
     } else {
       intakeColor = BallColor.INVALID;
