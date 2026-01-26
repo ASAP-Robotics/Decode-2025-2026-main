@@ -65,6 +65,7 @@ public class RGBIndicator {
 
   /**
    * Gets the currently displayed color
+   *
    * @return the color being displayed
    */
   public Color getColor() {

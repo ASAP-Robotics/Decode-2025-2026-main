@@ -66,6 +66,7 @@ public class MecanumWheelBase {
 
   /**
    * Stops all powered wheel movement (think E-stop)
+   *
    * @note call only when the "Stop" button is pressed; otherwise things will break
    */
   public void stop() {
@@ -90,6 +91,7 @@ public class MecanumWheelBase {
 
   /**
    * Sets weather or not field-centric control will be used
+   *
    * @param fieldCentric true for field-centric control, false for robot-centric control
    */
   public void setFieldCentric(boolean fieldCentric) {
@@ -98,6 +100,7 @@ public class MecanumWheelBase {
 
   /**
    * Sets the minimum time that the robot can go from 0% to 100% throttle
+   *
    * @param seconds the time in seconds to go from 0 to full speed
    */
   public void setAccelerationTime(double seconds) {
@@ -106,6 +109,7 @@ public class MecanumWheelBase {
 
   /**
    * Sets the rotation of the robot relative to the field (for field-centric control)
+   *
    * @param degrees the number of degrees the robot is rotated relative to the field
    */
   public void setRotation(double degrees) {
@@ -114,6 +118,7 @@ public class MecanumWheelBase {
 
   /**
    * Sets all throttle values controlling the wheel base
+   *
    * @param x the throttle controlling the x-axis speed
    * @param y the throttle controlling the y-axis speed
    * @param z the throttle controlling turning speed
@@ -128,6 +133,7 @@ public class MecanumWheelBase {
 
   /**
    * Sets the throttle value controlling the x-axis motion of the wheel base
+   *
    * @param x the throttle controlling the x-axis speed
    * @note input must be between 1 and -1, values below 0 reverse direction
    */
@@ -137,6 +143,7 @@ public class MecanumWheelBase {
 
   /**
    * Sets the throttle value controlling the x-axis motion of the wheel base
+   *
    * @param x the throttle controlling the x-axis speed
    * @param update weather or not the motors should be updated with the new value
    * @note input must be between 1 and -1, values below 0 reverse direction
@@ -148,6 +155,7 @@ public class MecanumWheelBase {
 
   /**
    * Sets the throttle value controlling the y-axis motion of the wheel base
+   *
    * @param y the throttle controlling the y-axis speed
    * @note input must be between 1 and -1, values below 0 reverse direction
    */
@@ -157,6 +165,7 @@ public class MecanumWheelBase {
 
   /**
    * Sets the throttle value controlling the y-axis motion of the wheel base
+   *
    * @param y the throttle controlling the y-axis speed
    * @param update weather or not the motors should be updated with the new value
    * @note input must be between 1 and -1, values below 0 reverse direction
@@ -168,6 +177,7 @@ public class MecanumWheelBase {
 
   /**
    * Sets the throttle value controlling the turning motion of the wheel base
+   *
    * @param z the throttle controlling the turning speed
    * @note input must be between 1 and -1, values below 0 reverse direction
    */
@@ -177,6 +187,7 @@ public class MecanumWheelBase {
 
   /**
    * Sets the throttle value controlling the turning motion of the wheel base
+   *
    * @param z the throttle controlling the turning speed
    * @param update weather or not the motors should be updated with the new value
    * @note input must be between 1 and -1, values below 0 reverse direction
@@ -188,6 +199,7 @@ public class MecanumWheelBase {
 
   /**
    * Adjusts throttle inputs from 1 to -1 to fit a sensitivity curve
+   *
    * @param input the throttle input, from 1 to -1
    * @return the adjusted throttle output, from 1 to -1
    * @note if passed an input less than -1 or greater than 1, 0 will be returned
@@ -198,6 +210,7 @@ public class MecanumWheelBase {
 
   /**
    * Adjusts throttle inputs from 1 to -1 to fit a sensitivity curve and limit acceleration
+   *
    * @param input the throttle input, from 1 to -1
    * @param lastOutput the value used to calculate maximum output increase
    * @param maxIncrease the maximum amount the output is allowed to increase by
@@ -210,6 +223,7 @@ public class MecanumWheelBase {
 
   /**
    * Adjusts throttle inputs from 1 to -1 to fit a sensitivity curve
+   *
    * @param input the throttle input, from 1 to -1
    * @param lastOutput the value used to calculate maximum output increase
    * @param maxIncrease the maximum amount the output is allowed to increase by
@@ -238,6 +252,7 @@ public class MecanumWheelBase {
 
   /**
    * Rotates the vector of a pair of throttle inputs by the given number of degrees
+   *
    * @param degrees the number of degrees to rotate the throttle by
    * @param x the input x throttle value
    * @param y the input y throttle value
@@ -255,6 +270,7 @@ public class MecanumWheelBase {
 
   /**
    * Sets motor target speeds according to throttle values
+   *
    * @note this override uses robot-centric control. Call update(true) for field-centric control
    */
   public void update() {
@@ -263,6 +279,7 @@ public class MecanumWheelBase {
 
   /**
    * Sets motor target speeds according to throttle values
+   *
    * @param fieldCentric driving will be field-centric if true, robot-centric if false
    */
   public void update(boolean fieldCentric) {

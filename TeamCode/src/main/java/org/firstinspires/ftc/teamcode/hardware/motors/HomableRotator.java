@@ -39,7 +39,8 @@ public class HomableRotator implements System {
     UNINITIALIZED
   }
 
-  private static final double UPDATE_TOLERANCE = 0.01; // amount power has to change by to actually set motor
+  private static final double UPDATE_TOLERANCE =
+      0.01; // amount power has to change by to actually set motor
   protected static final double HOMING_INCREMENT_SIZE = 1; // degrees
 
   protected final Motor motor;
@@ -87,11 +88,8 @@ public class HomableRotator implements System {
   public void update() {
     if (state == State.UNINITIALIZED) return;
     measureCurrentAngle();
-    targetMotorPower = Range.clip(
-        motorController.calculate(getCurrentAngle() * (inverted ? -1 : 1)),
-        -1,
-        1
-    );
+    targetMotorPower =
+        Range.clip(motorController.calculate(getCurrentAngle() * (inverted ? -1 : 1)), -1, 1);
     if (Math.abs(targetMotorPower - currentMotorPower) >= UPDATE_TOLERANCE) {
       motor.set(targetMotorPower);
       currentMotorPower = targetMotorPower;

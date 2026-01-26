@@ -145,6 +145,7 @@ public class ElcAbsEncoder {
   /**
    * Sets the direction of the encoder. If true, inverts both the incremental count and the absolute
    * logic.
+   *
    * @param inverted true to invert.
    */
   public void setInverted(boolean inverted) {

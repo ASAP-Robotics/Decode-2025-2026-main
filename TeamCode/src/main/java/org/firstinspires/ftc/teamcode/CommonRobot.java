@@ -23,6 +23,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import java.util.List;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
@@ -33,8 +34,6 @@ import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
 import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
-
-import java.util.List;
 
 /**
  * @brief class to contain the configuration of the robot, to avoid code duplication
@@ -47,7 +46,8 @@ public abstract class CommonRobot {
   protected AllianceColor allianceColor;
   public ScoringSystem scoringSystem;
 
-  public CommonRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor, boolean bulkRead) {
+  public CommonRobot(
+      HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor, boolean bulkRead) {
     this.hardwareMap = hardwareMap;
     this.bulkRead = bulkRead;
 
@@ -96,6 +96,7 @@ public abstract class CommonRobot {
 
   /**
    * Clears the cache of sensor data
+   *
    * @note MUST be called to get new sensor data if bulk reading enabled
    * @note returns without doing anything if bulk reading not enabled in constructor
    */
@@ -107,28 +108,18 @@ public abstract class CommonRobot {
     }
   }
 
-  /**
-   * To be called once, when the opMode is initialized
-   */
+  /** To be called once, when the opMode is initialized */
   public abstract void init();
 
-  /**
-   * To be called repeatedly, while the opMode is in init
-   */
+  /** To be called repeatedly, while the opMode is in init */
   public abstract void initLoop();
 
-  /**
-   * To be called once, when the opMode is started
-   */
+  /** To be called once, when the opMode is started */
   public abstract void start();
 
-  /**
-   * To be called repeatedly, while the opMode is running
-   */
+  /** To be called repeatedly, while the opMode is running */
   public abstract void loop();
 
-  /**
-   * To be called once, when the opMode is stopped
-   */
+  /** To be called once, when the opMode is stopped */
   public abstract void stop();
 }
