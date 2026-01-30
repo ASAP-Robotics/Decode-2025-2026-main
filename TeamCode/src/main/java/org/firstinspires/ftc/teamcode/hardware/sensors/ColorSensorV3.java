@@ -29,7 +29,7 @@ import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
 
 public class ColorSensorV3 implements System {
-  protected class Reading {
+  protected static class Reading {
     public final double timestamp;
     public final double distance;
 

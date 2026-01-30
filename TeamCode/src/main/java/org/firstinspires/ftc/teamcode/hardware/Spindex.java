@@ -178,7 +178,6 @@ public class Spindex implements System {
     if (state.checkSensor && isAtTarget()) {
       colorSensor.update();
       intakeColor = colorSensor.getColor(); // update intake color
-      // intakeColor = BallColor.GREEN;
     } else {
       intakeColor = BallColor.INVALID;
     }
@@ -193,15 +192,15 @@ public class Spindex implements System {
 
     if (spinnerStatus == SystemStatus.INOPERABLE) {
       status = SystemStatus.INOPERABLE;
-      message = "🟥Broken (Spinner)";
+      message = "🟥Broken (Spinner). Is it jammed?";
 
     } else if (blockerStatus == SystemStatus.INOPERABLE) {
       status = SystemStatus.INOPERABLE;
-      message = "🟥Broken (Intake blocker)";
+      message = "🟥Broken (Intake blocker). Is it jammed?";
 
     } else if (sensorStatus == SystemStatus.INOPERABLE) {
       status = SystemStatus.INOPERABLE;
-      message = "🟥Broken (Color sensor); use backups controls";
+      message = "🟥Broken (Color sensor); use backups controls. Is it unplugged?";
 
     } else if (spinnerStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;

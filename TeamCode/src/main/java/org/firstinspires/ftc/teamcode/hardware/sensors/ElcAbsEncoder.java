@@ -22,6 +22,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.jetbrains.annotations.TestOnly;
+
 /**
  * Unified driver for the ELC Encoder V2. * Functionality: - Uses the Analog connection to "seed"
  * the initial position (Absolute). - Uses the Quadrature connection for runtime tracking
@@ -66,13 +69,14 @@ public class ElcAbsEncoder {
 
   /**
    * Reads the Absolute (Analog) encoder and forces the internal offset to match the incremental
-   * encoder to this real-world angle. * Uses a multi-read average to reject noise.
+   * encoder to this real-world angle.
    */
   public void synchronize() {
     double absoluteAngle = getAbsoluteAngle();
 
     // Get current incremental position (usually 0 if we just reset, but good for safety)
     double currentIncrementalTicks = incrementalEncoder.getCurrentPosition();
+    if (inverted) currentIncrementalTicks = -currentIncrementalTicks;
     double currentIncrementalDegrees = (currentIncrementalTicks / TICKS_PER_REV) * 360.0;
 
     // Calculate the offset required to make (Incremental + Offset) = Absolute
@@ -105,7 +109,7 @@ public class ElcAbsEncoder {
   /**
    * Gets the current hybrid position in degrees.
    *
-   * @return Position in degrees (0-360, or multi-turn if tracked continuously).
+   * @return Position in degrees.
    */
   public double getPosition() {
     // 1. Get Incremental Phase
@@ -122,15 +126,10 @@ public class ElcAbsEncoder {
   }
 
   /**
-   * Gets the current position normalized to 0-360 degrees. Useful for swerve modules where 361
-   * degrees should be 1 degree.
+   * Gets the current position normalized to -180 - 180 degrees.
    */
   public double getPositionNormalized() {
-    double angle = getPosition() % 360.0;
-    if (angle < 0) {
-      angle += 360.0;
-    }
-    return angle;
+    return AngleUnit.normalizeDegrees(getPosition());
   }
 
   /** Gets velocity in Degrees per Second. Uses the high-speed Quadrature signal. */
@@ -155,6 +154,7 @@ public class ElcAbsEncoder {
   }
 
   /** Returns the raw voltage from the absolute line (Debug). */
+  @TestOnly
   public double getRawVoltage() {
     return absoluteEncoder.getVoltage();
   }

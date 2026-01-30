@@ -46,7 +46,7 @@ public enum AllianceColor {
 
   private final int aprilTagId;
   private final int limelightPipeline;
-  private final double turretOffset;
+  private final double obeliskOffset;
   private final Pose2D targetLocation;
   private final Pose2D resetLocation;
   private final Pose2d autoStartPosition;
@@ -57,7 +57,7 @@ public enum AllianceColor {
   AllianceColor(
       int aprilTagId,
       int limelightPipeline,
-      double turretOffset,
+      double obeliskOffset,
       Pose2d autoStartPosition,
       Pose2d autoRRShootPosition,
       Pose2D autoSSShootPosition,
@@ -66,7 +66,7 @@ public enum AllianceColor {
       Pose2D resetLocation) {
     this.aprilTagId = aprilTagId;
     this.limelightPipeline = limelightPipeline;
-    this.turretOffset = turretOffset;
+    this.obeliskOffset = obeliskOffset;
     this.autoStartPosition = autoStartPosition;
     this.autoRRShootPosition = autoRRShootPosition;
     this.autoSSShootPosition = autoSSShootPosition;
@@ -95,8 +95,8 @@ public enum AllianceColor {
    * @brief gets the angle to move the turret to to look at the obelisk
    * @return the turret angle to look at the obelisk
    */
-  public double getTurretOffset() {
-    return turretOffset;
+  public double getObeliskOffset() {
+    return obeliskOffset;
   }
 
   /**

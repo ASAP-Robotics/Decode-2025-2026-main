@@ -22,63 +22,65 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
-import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
+import org.firstinspires.ftc.teamcode.hardware.Turret;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoder;
+import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 
 @TeleOp(name = "Tuning turret", group = "Tuning")
 @Config
 public class TuningTurret extends LinearOpMode {
-  public static int sleep = 10;
+  public static int target_loop_time = 20;
   public static double angle = 0;
-  public static double kD = 0.002;
-  public static double kI = 0.05;
-  public static double kP = 0.1;
+  public static double kP = 0.006;
+  public static double kI = 0.001;
+  public static double kD = 0.0002;
 
-  public static boolean home = false;
-  public static UnidirectionalHomableRotator.DirectionConstraint direction =
-      UnidirectionalHomableRotator.DirectionConstraint.NONE;
-
-  // public static double kF = 0;
+  public static boolean sync = false;
 
   @Override
   public void runOpMode() {
     ElapsedTime loopTime = new ElapsedTime();
 
-    ActiveIntake intake = new ActiveIntake(hardwareMap.get(DcMotorEx.class, "intake"));
-
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
-    TouchSensor sensor = hardwareMap.get(TouchSensor.class, "spindexHomer");
-    Motor motor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
-    UnidirectionalHomableRotator spindex =
-        new UnidirectionalHomableRotator(motor, sensor, 0.1, 0.05, 0.002, 1, true);
+    Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
+    Axon turretHood = new Axon(rawTurretHood);
+    Motor turretRotator = new Motor(hardwareMap, "turretRotator", Motor.GoBILDA.RPM_1150);
+    ElcAbsEncoder turretEncoder = new ElcAbsEncoder(hardwareMap, "turretEncoder", "turretRotator");
+    DcMotorEx flywheelMotor = this.hardwareMap.get(DcMotorEx.class, "flywheel");
+    Turret turret = new Turret(flywheelMotor, turretRotator, turretEncoder, turretHood, 1500);
+
+    turret.init(0);
 
     waitForStart();
-    spindex.start();
-    intake.intake();
+    turret.start();
+    turret.setTargetDistance(50);
+    turret.enable();
+    turret.activate();
 
     while (opModeIsActive()) {
-      sleep(sleep);
-
-      if (home) {
-        spindex.home();
-        home = false;
+      if (sync) {
+        turret.syncEncoder();
+        sync = false;
       }
-      spindex.setP(kP);
-      spindex.setI(kI);
-      spindex.setD(kD);
-      spindex.setDirectionConstraint(direction);
-      spindex.setAngle(angle);
-      spindex.update();
-      intake.update();
+      turret.tuneHorizontalPID(kP, kI, kD);
+      turret.setHorizontalAngle(angle);
+      turret.update();
 
-      dashboardTelemetry.addData("At target", spindex.atTarget());
-      dashboardTelemetry.addData("Loop time", loopTime.milliseconds());
+      // it shouldn't matter where this goes
+      double rawLoopTime = loopTime.milliseconds();
+      sleep((long) Math.max(target_loop_time - rawLoopTime, 0));
+      double realLoopTime = loopTime.milliseconds();
       loopTime.reset();
+
+      dashboardTelemetry.addData("At target", turret.isAtTarget());
+      dashboardTelemetry.addData("Angle", turret.getHorizontalAngleDegrees());
+      dashboardTelemetry.addData("Target angle", turret.getTargetHorizontalAngleDegrees());
+      dashboardTelemetry.addData("Loop time", realLoopTime);
 
       dashboardTelemetry.update();
     }
