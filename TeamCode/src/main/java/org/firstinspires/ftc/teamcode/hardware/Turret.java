@@ -78,7 +78,12 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private double currentRotatorPower = 0;
   private boolean rotationEnabled = true; // if turret can move side to side
 
-  public Turret(DcMotorEx flywheelMotor, Motor rotator, ElcAbsEncoder encoder, Axon hoodServo, double idleSpeed) {
+  public Turret(
+      DcMotorEx flywheelMotor,
+      Motor rotator,
+      ElcAbsEncoder encoder,
+      Axon hoodServo,
+      double idleSpeed) {
     super(flywheelMotor, idleSpeed);
     this.rotator = rotator;
     this.encoder = encoder;
@@ -318,6 +323,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
   /**
    * Forces the absolute encoder to re-read it's position
+   *
    * @note this is here mainly as a driver backup
    */
   public void syncEncoder() {

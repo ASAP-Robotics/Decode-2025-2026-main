@@ -21,7 +21,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.jetbrains.annotations.TestOnly;
 
@@ -125,9 +124,7 @@ public class ElcAbsEncoder {
     return incrementalDegrees + angleOffsetDegrees;
   }
 
-  /**
-   * Gets the current position normalized to -180 - 180 degrees.
-   */
+  /** Gets the current position normalized to -180 - 180 degrees. */
   public double getPositionNormalized() {
     return AngleUnit.normalizeDegrees(getPosition());
   }

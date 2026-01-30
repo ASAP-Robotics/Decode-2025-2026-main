@@ -468,6 +468,7 @@ public class ScoringSystem {
 
   /**
    * Forces a re read of the turret's absolute encoder
+   *
    * @note intended only as a driver backup
    */
   public void reSyncTurretEncoder() {
