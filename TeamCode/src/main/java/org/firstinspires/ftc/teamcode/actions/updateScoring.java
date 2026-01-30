@@ -14,7 +14,7 @@ public class updateScoring implements Action {
 
   @Override
   public boolean run(TelemetryPacket packet) {
-    scoringSystem.update();
+    scoringSystem.update(true);
     return true;
   }
 }

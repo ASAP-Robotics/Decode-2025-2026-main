@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,20 @@ package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import java.util.List;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
-import org.firstinspires.ftc.teamcode.hardware.ColorSensorV3;
-import org.firstinspires.ftc.teamcode.hardware.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
+import org.firstinspires.ftc.teamcode.hardware.indicators.RGBIndicator;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
+import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
@@ -36,32 +39,36 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
  * @brief class to contain the configuration of the robot, to avoid code duplication
  */
 public abstract class CommonRobot {
+  protected boolean bulkRead;
+  protected List<LynxModule> allHubs; // for loop time optimization
   protected HardwareMap hardwareMap;
   protected Telemetry telemetry;
   protected AllianceColor allianceColor;
   public ScoringSystem scoringSystem;
 
-  public CommonRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
+  public CommonRobot(
+      HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor, boolean bulkRead) {
     this.hardwareMap = hardwareMap;
+    this.bulkRead = bulkRead;
+
+    if (this.bulkRead) {
+      allHubs = this.hardwareMap.getAll(LynxModule.class);
+      for (LynxModule hub : allHubs) {
+        hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+      }
+    }
+
     this.telemetry = telemetry;
     this.allianceColor = allianceColor;
 
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
     Limelight limelight = new Limelight(rawLimelight, this.allianceColor, 0.001);
 
-    AnalogInput lifterEncoder = this.hardwareMap.get(AnalogInput.class, "lifterEncoder");
-    Servo rawLifterServo2 = this.hardwareMap.get(Servo.class, "lifter2");
-    Axon lifterServo2 = new Axon(rawLifterServo2, lifterEncoder);
-    Servo rawLifterServo1 = this.hardwareMap.get(Servo.class, "lifter1");
-    rawLifterServo1.setDirection(Servo.Direction.REVERSE);
-    Axon lifterServo1 = new Axon(rawLifterServo1);
-    AnalogInput magServoEncoder = this.hardwareMap.get(AnalogInput.class, "magServoEncoder");
-    Servo rawMagServo2 = this.hardwareMap.get(Servo.class, "magServo2");
-    Axon magServo2 = new Axon(rawMagServo2, magServoEncoder);
-    Servo rawMagServo1 = this.hardwareMap.get(Servo.class, "magServo1");
-    Axon magServo1 = new Axon(rawMagServo1, magServoEncoder);
+    TouchSensor spindexHomer = this.hardwareMap.get(TouchSensor.class, "spindexHomer");
+    Motor spindexMotor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
+    Axon intakeBlocker = new Axon(this.hardwareMap, "intakeBlocker", "intakeBlockerEncoder");
     ColorSensorV3 colorSensor = new ColorSensorV3(this.hardwareMap, "colorSensor");
-    Spindex spindex = new Spindex(magServo1, magServo2, lifterServo1, lifterServo2, colorSensor);
+    Spindex spindex = new Spindex(spindexMotor, spindexHomer, intakeBlocker, colorSensor);
 
     Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
     Axon turretHood = new Axon(rawTurretHood);
@@ -72,32 +79,47 @@ public abstract class CommonRobot {
     DcMotorEx intakeMotor = this.hardwareMap.get(DcMotorEx.class, "intake");
     ActiveIntake intake = new ActiveIntake(intakeMotor);
 
+    RGBIndicator indicator1 = new RGBIndicator(hardwareMap, "indicator1");
+    RGBIndicator indicator2 = new RGBIndicator(hardwareMap, "indicator2");
+
     scoringSystem =
-        new ScoringSystem(intake, turret, spindex, limelight, this.allianceColor, this.telemetry);
+        new ScoringSystem(
+            intake,
+            turret,
+            spindex,
+            limelight,
+            indicator1,
+            indicator2,
+            this.allianceColor,
+            this.telemetry);
   }
 
   /**
-   * @brief to be called once, when the opMode is initialized
+   * Clears the cache of sensor data
+   *
+   * @note MUST be called to get new sensor data if bulk reading enabled
+   * @note returns without doing anything if bulk reading not enabled in constructor
    */
+  protected void clearSensorCache() {
+    if (!bulkRead) return;
+    // clears the cache on each hub
+    for (LynxModule hub : allHubs) {
+      hub.clearBulkCache();
+    }
+  }
+
+  /** To be called once, when the opMode is initialized */
   public abstract void init();
 
-  /**
-   * @brief to be called repeatedly, while the opMode is in init
-   */
+  /** To be called repeatedly, while the opMode is in init */
   public abstract void initLoop();
 
-  /**
-   * @brief to be called once, when the opMode is started
-   */
+  /** To be called once, when the opMode is started */
   public abstract void start();
 
-  /**
-   * @brief to be called repeatedly, while the opMode is running
-   */
+  /** To be called repeatedly, while the opMode is running */
   public abstract void loop();
 
-  /**
-   * @brief to be called once, when the opMode is stopped
-   */
+  /** To be called once, when the opMode is stopped */
   public abstract void stop();
 }
