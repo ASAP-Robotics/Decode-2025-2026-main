@@ -19,7 +19,7 @@ public class setScoringPose implements Action {
   public boolean run(TelemetryPacket packet) {
 
     scoringSystem.setRobotPosition(allianceColor.getAutoSSShootPosition());
-    scoringSystem.update();
+    scoringSystem.update(true);
     return false;
   }
 }

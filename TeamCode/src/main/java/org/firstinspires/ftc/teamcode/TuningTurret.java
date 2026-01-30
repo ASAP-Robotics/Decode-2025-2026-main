@@ -33,9 +33,9 @@ import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotat
 public class TuningTurret extends LinearOpMode {
   public static int sleep = 10;
   public static double angle = 0;
-  public static double kD = 0.001;
+  public static double kD = 0.002;
   public static double kI = 0.05;
-  public static double kP = 0.25;
+  public static double kP = 0.1;
 
   public static boolean home = false;
   public static UnidirectionalHomableRotator.DirectionConstraint direction =
@@ -55,7 +55,7 @@ public class TuningTurret extends LinearOpMode {
     TouchSensor sensor = hardwareMap.get(TouchSensor.class, "spindexHomer");
     Motor motor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
     UnidirectionalHomableRotator spindex =
-        new UnidirectionalHomableRotator(motor, sensor, 0.25, 0.05, 0.001, 1, true);
+        new UnidirectionalHomableRotator(motor, sensor, 0.1, 0.05, 0.002, 1, true);
 
     waitForStart();
     spindex.start();

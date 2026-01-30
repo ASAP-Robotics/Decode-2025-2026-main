@@ -22,6 +22,8 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.LinkedList;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
@@ -46,7 +48,7 @@ public class ColorSensorV3 implements System {
   protected ElapsedTime timeSinceStart = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   protected LinkedList<Reading> readings = new LinkedList<>();
   protected static final double DISCONNECT_TIME = 1.0; // seconds
-  protected static final double BALL_DISTANCE_THRESHOLD = 1.5; // inches
+  protected static final double BALL_DISTANCE_THRESHOLD = 2.5; // inches
 
   public ColorSensorV3(HardwareMap hardwareMap, String deviceName) {
     this.colorSensor = hardwareMap.get(ColorSensor.class, deviceName);
@@ -60,15 +62,19 @@ public class ColorSensorV3 implements System {
    */
   public void update() {
     double distance = distanceSensor.getDistance(DistanceUnit.INCH);
+//    telemetry.addData("Dist", distance);
 
     if (distance <= BALL_DISTANCE_THRESHOLD) {
       float[] hsv = new float[3];
       Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsv);
       float h = hsv[0];
-      if (h >= 140 && h <= 180) { // green
+//      telemetry.addData("Hue", hsv[0]);
+//      telemetry.addData("Sat", hsv[1]);
+//      telemetry.addData("Val", hsv[2]);
+      if (h >= 130 && h <= 195) { // green
         color = BallColor.GREEN; // intake has a green ball in it
 
-      } else if (h >= 180 && h <= 220) { // purple
+      } else if (h >= 195 && h <= 260) { // purple
         color = BallColor.PURPLE; // intake has a purple ball in it
 
       } else { // color can't be determined

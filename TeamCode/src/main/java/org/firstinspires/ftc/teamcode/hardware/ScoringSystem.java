@@ -16,8 +16,12 @@
 
 package org.firstinspires.ftc.teamcode.hardware;
 
+import android.util.Pair;
+
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.Arrays;
+import java.util.LinkedList;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -61,7 +65,9 @@ public class ScoringSystem {
   private boolean clearingIntake = false; // if the intake is being reversed to clear a blockage
   private final Telemetry telemetry;
   private final SimpleTimer fullWait = new SimpleTimer(0.5);
+  private final ElapsedTime timeSinceStart = new ElapsedTime();
   private final ElapsedTime loopTime = new ElapsedTime();
+  private final LinkedList<Pair<Double, Double>> loopTimes = new LinkedList<>();
 
   public ScoringSystem(
       ActiveIntake intake,
@@ -115,6 +121,7 @@ public class ScoringSystem {
     limelight.start();
     if (search) limelight.detectSequence();
     state = isPreloaded ? State.FULL : State.INTAKING;
+    timeSinceStart.reset();
   }
 
   /**
@@ -144,6 +151,12 @@ public class ScoringSystem {
     spindex.update();
     updateIndicators();
     if (updateTelemetry) updateTelemetry();
+    double now = timeSinceStart.milliseconds();
+    loopTimes.push(new Pair<>(loopTime.milliseconds(), now));
+    loopTime.reset();
+    while (!loopTimes.isEmpty() && now - loopTimes.getFirst().second > 1) {
+      loopTimes.removeFirst();
+    }
   }
 
   /** Updates everything to do with aiming the turret */
@@ -279,6 +292,16 @@ public class ScoringSystem {
 
   /** Updates (or adds the data of) the telemetry from the scoring systems */
   private void updateTelemetry() {
+    double avLoopTime = 0;
+    double minLoopTime = Double.POSITIVE_INFINITY;
+    double maxLoopTime = Double.NEGATIVE_INFINITY;
+    for (Pair<Double, Double> log : loopTimes) {
+      avLoopTime += log.first;
+      if (log.first > maxLoopTime) maxLoopTime = log.first;
+      if (log.first < minLoopTime) minLoopTime = log.first;
+    }
+    avLoopTime /= loopTimes.size();
+
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("State", state.toString());
     telemetry.addData("Sequence", ballSequence);
@@ -287,8 +310,9 @@ public class ScoringSystem {
     telemetry.addData("Spindex at target", spindex.isAtTarget());
     telemetry.addData("Intake color", spindex.getIntakeColor());
     telemetry.addData("Spindex state", spindex.getState());
-    telemetry.addData("Loop time", loopTime.milliseconds());
-    loopTime.reset();
+    telemetry.addData("Loop time", avLoopTime);
+    telemetry.addData("Max loop time", maxLoopTime);
+    telemetry.addData("Min loop time", minLoopTime);
 
     SystemReport spindexReport = spindex.getStatus();
     SystemReport turretReport = turret.getStatus();
