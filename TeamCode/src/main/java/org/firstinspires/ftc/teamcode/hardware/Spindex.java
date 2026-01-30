@@ -523,10 +523,7 @@ public class Spindex implements System {
    * @param target the angle to turn to
    */
   private void turnSpindexNoShoot(double target) {
-    spinner.setDirectionConstraint(
-        willMovementShootBall(target)
-            ? UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY
-            : UnidirectionalHomableRotator.DirectionConstraint.NONE);
+    spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY);
     spinner.setAngle(target);
   }
 
