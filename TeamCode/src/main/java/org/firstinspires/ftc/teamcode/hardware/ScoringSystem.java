@@ -17,11 +17,9 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import android.util.Pair;
-
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.Arrays;
 import java.util.LinkedList;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;

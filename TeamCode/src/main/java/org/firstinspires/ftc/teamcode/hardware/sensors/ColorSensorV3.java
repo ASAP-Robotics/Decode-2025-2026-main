@@ -22,8 +22,6 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.LinkedList;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
@@ -62,15 +60,15 @@ public class ColorSensorV3 implements System {
    */
   public void update() {
     double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-//    telemetry.addData("Dist", distance);
+    //    telemetry.addData("Dist", distance);
 
     if (distance <= BALL_DISTANCE_THRESHOLD) {
       float[] hsv = new float[3];
       Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsv);
       float h = hsv[0];
-//      telemetry.addData("Hue", hsv[0]);
-//      telemetry.addData("Sat", hsv[1]);
-//      telemetry.addData("Val", hsv[2]);
+      //      telemetry.addData("Hue", hsv[0]);
+      //      telemetry.addData("Sat", hsv[1]);
+      //      telemetry.addData("Val", hsv[2]);
       if (h >= 130 && h <= 195) { // green
         color = BallColor.GREEN; // intake has a green ball in it
 
