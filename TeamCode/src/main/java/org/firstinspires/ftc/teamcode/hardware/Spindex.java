@@ -204,11 +204,11 @@ public class Spindex implements System {
 
     } else if (spinnerStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
-      message = "🟨Backup (Spinner); performance will be degraded";
+      message = "🟨Backup (Spinner); performance will be degraded. Is it jammed?";
 
     } else if (blockerStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
-      message = "🟨Backup (Intake blocker); performance will be degraded";
+      message = "🟨Backup (Intake blocker); performance will be degraded. Is it jammed?";
 
     } else if (sensorStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
