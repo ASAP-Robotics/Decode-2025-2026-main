@@ -77,7 +77,6 @@ public class TeleOpRobot extends CommonRobot {
       pinpoint.update();
     }
     scoringSystem.init(false, false); // initialize scoring systems
-    scoringSystem.adjustTurretAngleOffset(allianceColor.getTurretOffset()); // tune
   }
 
   /**
@@ -122,13 +121,12 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // shoot
-    if (gamepad2.right_trigger > 0.5) {
-      // mag.shootMag(); // shoot all balls in the mag, in a sequence if possible
+    if (gamepad2.right_trigger > 0.5 || gamepad2.rightBumperWasPressed()) {
       scoringSystem.shoot();
     }
 
     // eject
-    if (gamepad2.leftBumperWasPressed()) {
+    if (gamepad2.left_trigger > 0.5 || gamepad2.leftBumperWasPressed()) {
       scoringSystem.clearIntake();
     }
 
@@ -139,6 +137,10 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // miscellaneous backup manual controls
+    // turret rehome
+    if (gamepad1.aWasPressed()) {
+      scoringSystem.reSyncTurretEncoder();
+    }
     // override aiming
     if (gamepad2.bWasPressed()) {
       if (scoringSystem.isAimOverride()) {

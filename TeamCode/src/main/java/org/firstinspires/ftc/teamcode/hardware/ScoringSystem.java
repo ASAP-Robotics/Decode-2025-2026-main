@@ -467,6 +467,15 @@ public class ScoringSystem {
   }
 
   /**
+   * Forces a re read of the turret's absolute encoder
+   *
+   * @note intended only as a driver backup
+   */
+  public void reSyncTurretEncoder() {
+    turret.syncEncoder();
+  }
+
+  /**
    * @brief adjusts the turret's horizontal angle offset by a given amount
    * @param offsetDegrees the amount, in degrees, to adjust the turret's horizontal angle offset by
    */

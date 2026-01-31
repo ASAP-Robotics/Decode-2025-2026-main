@@ -77,9 +77,9 @@ public class Spindex implements System {
     // TODO: fine tune
     // code assumptions: slots with higher index have larger angles, and that increasing angle
     // shoots
-    new SpindexSlot(8, 30), // slot 0
-    new SpindexSlot(128, 150), // slot 1
-    new SpindexSlot(248, 270) // slot 2
+    new SpindexSlot(10, 350), // slot 0
+    new SpindexSlot(130, 110), // slot 1
+    new SpindexSlot(250, 230) // slot 2
   };
 
   private SpindexState state = SpindexState.UNINITIALIZED; // the current state of the spindex
@@ -178,7 +178,6 @@ public class Spindex implements System {
     if (state.checkSensor && isAtTarget()) {
       colorSensor.update();
       intakeColor = colorSensor.getColor(); // update intake color
-      // intakeColor = BallColor.GREEN;
     } else {
       intakeColor = BallColor.INVALID;
     }
@@ -193,23 +192,23 @@ public class Spindex implements System {
 
     if (spinnerStatus == SystemStatus.INOPERABLE) {
       status = SystemStatus.INOPERABLE;
-      message = "🟥Broken (Spinner)";
+      message = "🟥Broken (Spinner). Is it jammed?";
 
     } else if (blockerStatus == SystemStatus.INOPERABLE) {
       status = SystemStatus.INOPERABLE;
-      message = "🟥Broken (Intake blocker)";
+      message = "🟥Broken (Intake blocker). Is it jammed?";
 
     } else if (sensorStatus == SystemStatus.INOPERABLE) {
       status = SystemStatus.INOPERABLE;
-      message = "🟥Broken (Color sensor); use backups controls";
+      message = "🟥Broken (Color sensor); use backups controls. Is it unplugged?";
 
     } else if (spinnerStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
-      message = "🟨Backup (Spinner); performance will be degraded";
+      message = "🟨Backup (Spinner); performance will be degraded. Is it jammed?";
 
     } else if (blockerStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
-      message = "🟨Backup (Intake blocker); performance will be degraded";
+      message = "🟨Backup (Intake blocker); performance will be degraded. Is it jammed?";
 
     } else if (sensorStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
@@ -523,7 +522,14 @@ public class Spindex implements System {
    * @param target the angle to turn to
    */
   private void turnSpindexNoShoot(double target) {
-    spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY);
+
+    spinner.setDirectionConstraint(
+        spinner.isHomed()
+            ? UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY
+            : UnidirectionalHomableRotator.DirectionConstraint.NONE);
+
+    // spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.NONE); //
+    // todo fix
     spinner.setAngle(target);
   }
 
