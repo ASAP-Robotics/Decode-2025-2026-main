@@ -34,10 +34,9 @@ import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 public class TuningTurret extends LinearOpMode {
   public static int target_loop_time = 20;
   public static double angle = 0;
-  public static double kP = 0.006;
-  public static double kI = 0.001;
-  public static double kD = 0.0002;
-
+  public static double kD = 0.0009;
+  public static double kI = 0.05;
+  public static double kP = 0.025;
   public static boolean sync = false;
 
   @Override

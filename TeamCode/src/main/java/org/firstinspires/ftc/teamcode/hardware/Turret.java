@@ -91,8 +91,9 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.rotator.setInverted(true);
     this.rotator.setRunMode(Motor.RunMode.RawPower);
     this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-    this.rotatorController = new PIDController(0.006, 0.001, 0.0002);
+    this.rotatorController = new PIDController(0.025, 0.05, 0.0009);
     rotatorController.setTolerance(turretDegreesToMotorDegrees(1));
+    this.encoder.setInverted(true);
     angleSimulation = new Follower(0, 0, 1, 60); // tune 60
   }
 
@@ -222,7 +223,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     double targetRotatorPower =
         rotationEnabled ? rotatorController.calculate(getRotatorDegrees()) : 0;
     if (Math.abs(targetRotatorPower - currentRotatorPower) > UPDATE_TOLERANCE) {
-      rotator.set(targetRotatorPower); // todo update
+      rotator.set(targetRotatorPower);
       currentRotatorPower = targetRotatorPower;
     }
 
@@ -318,7 +319,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @note this value is not adjusted using the horizontal angle offset
    */
   protected double getRotatorDegrees() {
-    return encoder.getPositionNormalized();
+    return encoder.getPosition();
   }
 
   /**

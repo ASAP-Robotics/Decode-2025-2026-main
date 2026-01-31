@@ -77,9 +77,9 @@ public class Spindex implements System {
     // TODO: fine tune
     // code assumptions: slots with higher index have larger angles, and that increasing angle
     // shoots
-    new SpindexSlot(8, 30), // slot 0
-    new SpindexSlot(128, 150), // slot 1
-    new SpindexSlot(248, 270) // slot 2
+    new SpindexSlot(8, 350), // slot 0
+    new SpindexSlot(128, 110), // slot 1
+    new SpindexSlot(248, 230) // slot 2
   };
 
   private SpindexState state = SpindexState.UNINITIALIZED; // the current state of the spindex
@@ -522,7 +522,13 @@ public class Spindex implements System {
    * @param target the angle to turn to
    */
   private void turnSpindexNoShoot(double target) {
-    spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY);
+
+    spinner.setDirectionConstraint(
+        spinner.isHomed()
+            ? UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY
+            : UnidirectionalHomableRotator.DirectionConstraint.NONE);
+
+    //spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.NONE); // todo fix
     spinner.setAngle(target);
   }
 

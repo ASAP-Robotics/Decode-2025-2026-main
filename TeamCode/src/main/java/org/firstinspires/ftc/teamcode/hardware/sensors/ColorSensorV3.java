@@ -46,7 +46,7 @@ public class ColorSensorV3 implements System {
   protected ElapsedTime timeSinceStart = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   protected LinkedList<Reading> readings = new LinkedList<>();
   protected static final double DISCONNECT_TIME = 1.0; // seconds
-  protected static final double BALL_DISTANCE_THRESHOLD = 2.5; // inches
+  protected static final double BALL_DISTANCE_THRESHOLD = 2; // inches
 
   public ColorSensorV3(HardwareMap hardwareMap, String deviceName) {
     this.colorSensor = hardwareMap.get(ColorSensor.class, deviceName);
