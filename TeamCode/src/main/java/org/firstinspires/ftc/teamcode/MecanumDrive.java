@@ -37,6 +37,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+
+import java.lang.Math;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -79,9 +81,9 @@ public final class MecanumDrive {
     public double maxAngAccel = Math.PI;
 
     // path controller gains
-    public double axialGain = 3.0;
+    public double axialGain = 4.0;
     public double lateralGain = 2.5;
-    public double headingGain = 2.5; // shared with turn
+    public double headingGain = 5.0; // shared with turn
 
     public double axialVelGain = 0.0;
     public double lateralVelGain = 0.0;
