@@ -77,9 +77,9 @@ public class Spindex implements System {
     // TODO: fine tune
     // code assumptions: slots with higher index have larger angles, and that increasing angle
     // shoots
-    new SpindexSlot(8, 350), // slot 0
-    new SpindexSlot(128, 110), // slot 1
-    new SpindexSlot(248, 230) // slot 2
+    new SpindexSlot(10, 350), // slot 0
+    new SpindexSlot(130, 110), // slot 1
+    new SpindexSlot(250, 230) // slot 2
   };
 
   private SpindexState state = SpindexState.UNINITIALIZED; // the current state of the spindex
