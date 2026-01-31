@@ -528,7 +528,8 @@ public class Spindex implements System {
             ? UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY
             : UnidirectionalHomableRotator.DirectionConstraint.NONE);
 
-    //spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.NONE); // todo fix
+    // spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.NONE); //
+    // todo fix
     spinner.setAngle(target);
   }
 
