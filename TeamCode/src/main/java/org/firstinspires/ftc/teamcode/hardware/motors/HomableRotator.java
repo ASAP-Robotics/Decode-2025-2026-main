@@ -76,6 +76,10 @@ public class HomableRotator implements System {
     this.inverted = inverted;
   }
 
+  /**
+   * Starts up the motor
+   * @note does not home the motor
+   */
   public void start() {
     state = State.NORMAL;
     motor.set(0);
@@ -218,7 +222,7 @@ public class HomableRotator implements System {
    * @return true if at target, false otherwise
    */
   public boolean atTarget() {
-    return state == State.NORMAL && motorController.atSetPoint();
+    return state == State.NORMAL && (motorController.atSetPoint() || motorSimulation.isAtTarget());
   }
 
   /**

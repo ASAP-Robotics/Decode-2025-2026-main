@@ -28,6 +28,7 @@ import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class Spindex implements System {
   /**
@@ -66,6 +67,7 @@ public class Spindex implements System {
 
   private static final double INTAKE_FLAP_CLOSED = 335;
   private static final double INTAKE_FLAP_OPEN = 248;
+  private static final double INTAKE_DELAY_SECONDS = 0.1;
 
   SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
   SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
@@ -74,16 +76,18 @@ public class Spindex implements System {
   private final Axon intakeBlocker; // servo moving flap to close intake while shooting
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
-    // TODO: fine tune
-    // code assumptions: slots with higher index have larger angles, and that increasing angle
-    // shoots
+    // code assumptions: increasing angle shoots
     new SpindexSlot(10, 350), // slot 0
     new SpindexSlot(130, 110), // slot 1
     new SpindexSlot(250, 230) // slot 2
   };
 
+  private final SimpleTimer intakeDelay =
+      new SimpleTimer(INTAKE_DELAY_SECONDS); // timer to let ball get all the way in before moving
   private SpindexState state = SpindexState.UNINITIALIZED; // the current state of the spindex
   private BallSequence sequence = BallSequence.GPP; // the sequence that is to be shot
+  private boolean enabled = true; // if spindex can move, sense, etc.
+  private boolean colorSensorEnabled = true; // if color sensor is enabled
   private int currentIndex = NULL; // the current index the spindex is at, dependant on the state
   private BallColor intakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake the most recent time checked
@@ -103,10 +107,11 @@ public class Spindex implements System {
    *
    * @note call when the "init" button is pressed
    */
-  public void init(BallSequence preloadedSequence, boolean isPreloaded) {
-    spinner.setAngle(0); // temporary, to avoid sudden motion after homing
-    spinner.home();
-    intakeBlocker.setPosition(isPreloaded ? INTAKE_FLAP_CLOSED : INTAKE_FLAP_OPEN);
+  public void init(BallSequence preloadedSequence, boolean isPreloaded, boolean auto) {
+    enabled = auto;
+    spinner.start();
+    if (enabled) spinner.home();
+    if (enabled) intakeBlocker.setPosition(isPreloaded ? INTAKE_FLAP_CLOSED : INTAKE_FLAP_OPEN);
 
     if (isPreloaded) { // if the spindex is preloaded
       for (int i = 0; i < spindex.length; i++) { // for each spindex slot
@@ -123,8 +128,18 @@ public class Spindex implements System {
     currentIndex = 0; // spindex at index 0
   }
 
+  /**
+   * Starts up the spindex
+   */
+  public void start() {
+    if (!enabled) spinner.home();
+    enabled = true;
+  }
+
   /** Updates everything to do with the spindex */
   public void update() {
+    if (!enabled) return;
+
     sensorReport = colorSensor.getStatus();
     spinnerReport = spinner.getStatus();
     blockerReport = intakeBlocker.getStatus();
@@ -135,6 +150,8 @@ public class Spindex implements System {
     // direction constraints assume that forwards shoots, backwards doesn't
     switch (state) {
       case INTAKING: // if the spindex is intaking
+        if (intakeDelay.isRunning()) break; // wait for ball te get all the way in
+
         if (!isIndexValid(getColorIndex(BallColor.EMPTY))) {
           prepSlotForShoot(getBestStartIndex(sequence));
           break;
@@ -147,6 +164,7 @@ public class Spindex implements System {
 
         if (getIsIntakeColorNew() && isAtTarget() && intakeColor.isShootable()) {
           storeIntakeColor();
+          intakeDelay.start(); // start movement delay
         }
         break;
 
@@ -175,7 +193,7 @@ public class Spindex implements System {
     spinner.update();
 
     oldIntakeColor = intakeColor; // store old intake color
-    if (state.checkSensor && isAtTarget()) {
+    if (colorSensorEnabled && state.checkSensor && isAtTarget()) {
       colorSensor.update();
       intakeColor = colorSensor.getColor(); // update intake color
     } else {
@@ -325,8 +343,29 @@ public class Spindex implements System {
     return intakeColor;
   }
 
+  /**
+   * Sets the color of ball in the intake
+   * @param color the color of ball in the intake
+   * @note intended as a driver backup
+   */
   public void setIntakeColor(BallColor color) {
     setSpindexIndexColor(currentIndex, color);
+  }
+
+  /**
+   * Sets if the color sensor is enabled. If it is disabled, setIntakeColor() must be used
+   * @param enabled if true, color sensor will be enabled, if false, color sensor will be disabled
+   */
+  public void setColorSensorEnabled(boolean enabled) {
+    colorSensorEnabled = enabled;
+  }
+
+  /**
+   * Gets if the color sensor is enabled
+   * @return true if enabled, false if disabled
+   */
+  public boolean isColorSensorEnabled() {
+    return colorSensorEnabled;
   }
 
   /**

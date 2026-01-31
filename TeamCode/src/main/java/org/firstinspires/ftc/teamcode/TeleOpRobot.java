@@ -140,6 +140,9 @@ public class TeleOpRobot extends CommonRobot {
     // turret rehome
     if (gamepad1.aWasPressed()) {
       scoringSystem.reSyncTurretEncoder();
+
+    } else if (gamepad1.bWasPressed()) {
+      scoringSystem.toggleColorSensorEnabled();
     }
     // override aiming
     if (gamepad2.bWasPressed()) {

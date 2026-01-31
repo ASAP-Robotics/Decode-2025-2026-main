@@ -91,12 +91,12 @@ public class ScoringSystem {
    * Initializes the artifact scoring system
    *
    * @param isPreloaded if the spindex is preloaded with balls
-   * @param auto if limelight should search for a new ball sequence (opMode is auto)
+   * @param auto if opMode is Auto (as opposed to TeleOp)
    * @note call when OpMode is initialized ("Init" is pressed)
    */
   public void init(boolean isPreloaded, boolean auto) {
     setIndicatorColor(RGBIndicator.Color.VIOLET);
-    spindex.init(BallSequence.GPP, isPreloaded);
+    spindex.init(BallSequence.GPP, isPreloaded, auto);
     turret.init(0);
     turret.setActive(!isPreloaded);
     limelight.init(auto);
@@ -114,6 +114,7 @@ public class ScoringSystem {
    * @note call when OpMode is started ("Start" is pressed)
    */
   public void start(boolean isPreloaded, boolean search) {
+    spindex.start();
     turret.enable(); // let the flywheel spin up
     turret.start();
     limelight.start();
@@ -300,17 +301,10 @@ public class ScoringSystem {
     }
     avLoopTime /= loopTimes.size();
 
-    telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("State", state.toString());
+    telemetry.addData("Ready to shoot", isReadyToShoot());
+    telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("Sequence", ballSequence);
-    telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
-    telemetry.addData("Turret at target", turret.isAtTarget());
-    telemetry.addData("Spindex at target", spindex.isAtTarget());
-    telemetry.addData("Intake color", spindex.getIntakeColor());
-    telemetry.addData("Spindex state", spindex.getState());
-    telemetry.addData("Loop time", avLoopTime);
-    telemetry.addData("Max loop time", maxLoopTime);
-    telemetry.addData("Min loop time", minLoopTime);
 
     SystemReport spindexReport = spindex.getStatus();
     SystemReport turretReport = turret.getStatus();
@@ -324,6 +318,17 @@ public class ScoringSystem {
       telemetry.addData("Spindex status", spindex.getStatus().message);
       telemetry.addData("Turret status", turret.getStatus().message);
     }
+
+    telemetry.addData("Color sensor enabled", spindex.isColorSensorEnabled());
+    telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
+    telemetry.addData("Target distance", turret.getTargetDistance());
+    telemetry.addData("Turret at target", turret.isAtTarget());
+    telemetry.addData("Spindex at target", spindex.isAtTarget());
+    telemetry.addData("Intake color", spindex.getIntakeColor());
+    telemetry.addData("Spindex state", spindex.getState());
+    telemetry.addData("Loop time", avLoopTime);
+    telemetry.addData("Max loop time", maxLoopTime);
+    telemetry.addData("Min loop time", minLoopTime);
   }
 
   /**
@@ -387,7 +392,7 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief updates the current position of the robot on the field
+   * Updates the current position of the robot on the field
    * @param position the current position of the robot on the field
    * @note intended to be called every loop
    */
@@ -399,8 +404,38 @@ public class ScoringSystem {
     ballSequence = sequence;
   }
 
+  /**
+   * Sets the intake as full manually
+   * @param ball the color of ball in the intake
+   * @note intended as a driver backup only
+   */
   public void setIntakeFull(BallColor ball) {
     spindex.setIntakeColor(ball);
+  }
+
+  /**
+   * Sets if the color sensor on the spindexer is enabled
+   * @param enabled true if enabled, false if disabled
+   * @note intended as a driver backup only
+   */
+  public void setColorSensorEnabled(boolean enabled) {
+    spindex.setColorSensorEnabled(enabled);
+  }
+
+  /**
+   * Gets if the color sensor on the spindexer is enabled
+   * @return true if enabled, false if disabled
+   */
+  public boolean isColorSensorEnabled() {
+    return spindex.isColorSensorEnabled();
+  }
+
+  /**
+   * Switches if the color sensor on the spindexer is enabled
+   * @note intended as a driver backup only
+   */
+  public void toggleColorSensorEnabled() {
+    setColorSensorEnabled(!isColorSensorEnabled());
   }
 
   /**
@@ -409,7 +444,7 @@ public class ScoringSystem {
    * @return true if ready to shoot, false otherwise
    */
   protected boolean isReadyToShoot() {
-    return turret.isReadyToShoot() && spindex.isReadyToShoot() && limelight.isTargetInFrame();
+    return turret.isReadyToShoot() && spindex.isReadyToShoot() /*&& limelight.isTargetInFrame()*/;
   }
 
   /**
