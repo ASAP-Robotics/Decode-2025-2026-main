@@ -176,17 +176,6 @@ public class ScoringSystem {
     }
      */
 
-    /*
-    Pose2D limelightPosition = limelight.getPosition();
-    if (limelightPosition != null && turret.isAtTarget()) {
-      double targetLimelightHeading =
-          robotPosition.getHeading(AngleUnit.DEGREES) + turret.getHorizontalAngleDegrees();
-      double limelightHeading = limelightPosition.getHeading(AngleUnit.DEGREES);
-      double headingError = targetLimelightHeading - limelightHeading;
-      if (Math.abs(headingError) >= 1) turret.changeHorizontalAngleOffsetDegrees(headingError);
-    }
-     */
-
     turret.setHorizontalAngle(getRelativeTargetAngle());
     turret.setTargetDistance(getTargetDistance());
   }
@@ -194,6 +183,9 @@ public class ScoringSystem {
   /** Updates everything to do with the spindexer */
   private void updateSpindex() {
     spindex.setSequence(ballSequence);
+    if (state == State.SHOOTING && spindex.isReadyToShoot() && turret.isReadyToShoot()) {
+      spindex.shoot();
+    }
 
     switch (spindex.getState()) {
       case INTAKING:
@@ -201,15 +193,13 @@ public class ScoringSystem {
         break;
 
       case SHOOTING_READY:
-        if (state != State.FULL) switchModeToFull();
+        if (state != State.FULL && state != State.SHOOTING) switchModeToFull();
         break;
 
       case SHOOTING:
       case UNINITIALIZED:
         break;
     }
-
-    if (state == State.SHOOTING) emptyMag();
   }
 
   /** Updates everything to do with the intake */
@@ -353,34 +343,17 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief switches the scoring system's mode to "shooting"
-   * @note does not do all that needs to be done when switching the mode to shooting
-   */
-  protected void switchModeToShooting() {
-    state = State.SHOOTING;
-    intake.intakeIdle(); // start the intake spinning
-    turret.activate(); // start the flywheel spinning (just in case)
-  }
-
-  /**
-   * @brief the internal logic for emptying the mag
-   */
-  protected void emptyMag() {
-    if (spindex.isReadyToShoot() && turret.isReadyToShoot()) {
-      spindex.shoot();
-    }
-  }
-
-  /**
    * Starts shooting a sequence of balls out of the turret
    *
    * @return true if the mag wasn't empty, false if the mag is empty
    */
   public boolean shoot() {
-    if (!spindex.isIndexValid(spindex.getShootableIndex())) return false;
+    if (spindex.isEmpty()) return false;
     // ^ return false if there are no balls in the mag
-    switchModeToShooting();
-    emptyMag(); // start emptying mag
+    spindex.prepToShootSequence(ballSequence);
+    state = State.SHOOTING;
+    intake.intakeIdle(); // start the intake spinning
+    turret.activate(); // start the flywheel spinning
     return true;
   }
 

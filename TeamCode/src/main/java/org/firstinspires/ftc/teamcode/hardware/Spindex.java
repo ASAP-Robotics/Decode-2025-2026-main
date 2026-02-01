@@ -150,15 +150,15 @@ public class Spindex implements System {
       case INTAKING: // if the spindex is intaking
         if (intakeDelay.isRunning()) break; // wait for ball te get all the way in
 
-        if (!isIndexValid(getColorIndex(BallColor.EMPTY))) {
-          prepSlotForShoot(getBestStartIndex(sequence));
+        if (isFull()) {
+          prepToShootSequence(sequence);
           break;
         } // prepare to shoot if full
 
         intakeBlocker.setPosition(INTAKE_FLAP_OPEN); // open intake
         currentIndex = getColorIndex(BallColor.EMPTY);
-        // move spindex to position if flap open
-        if (intakeBlocker.atTarget()) turnSpindexNoShoot(spindex[currentIndex].intakePosition);
+
+        turnSpindexNoShoot(spindex[currentIndex].intakePosition); // move spindex to position
 
         if (getIsIntakeColorNew() && isAtTarget() && intakeColor.isShootable()) {
           storeIntakeColor();
@@ -241,19 +241,9 @@ public class Spindex implements System {
    * @note should fail gracefully and silently if passed null, but avoid doing so
    */
   public void prepToShootSequence(BallSequence sequence) {
-    prepSlotForShoot(getBestStartIndex(sequence));
-  }
-
-  /**
-   * Moves the specified spindex index to its shooting position (ready to shoot)
-   *
-   * @param index the spindex index to move to the shooting position
-   */
-  protected void prepSlotForShoot(int index) {
-    if (!isIndexValid(index) || state == SpindexState.SHOOTING)
-      return; // return on invalid parameters
+    if (state == SpindexState.SHOOTING) return; // return if shooting
     intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake
-    currentIndex = index; // set new index
+    currentIndex = getBestStartIndex(sequence); // set new index
     state = SpindexState.SHOOTING_READY; // spindex in shooting mode
   }
 
@@ -263,12 +253,12 @@ public class Spindex implements System {
    * @note returns if spindex isn't ready to shoot
    */
   public void shoot() {
-    if (state != SpindexState.SHOOTING_READY || !spinner.atTarget() || !intakeBlocker.atTarget())
-      return;
+    if (!isReadyToShoot()) return;
     intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake (just in case)
     state = SpindexState.SHOOTING;
     spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.FORWARD_ONLY);
     spinner.changeTargetAngle(360.0);
+    // this empties the entire mag; we don't ever need to only partially shoot it
   }
 
   /**
@@ -462,24 +452,6 @@ public class Spindex implements System {
   }
 
   /**
-   * Gets an index containing a shootable ball
-   *
-   * @return the index of a slot containing a ball, or -1 if the spindex is empty
-   */
-  public int getShootableIndex() {
-    int toReturn = NULL;
-
-    for (SpindexSlot slot : spindex) {
-      if (slot.color.isShootable()) {
-        toReturn = getColorIndex(slot.color);
-        break;
-      }
-    }
-
-    return toReturn;
-  }
-
-  /**
    * Finds an index in the spindex containing a given color
    *
    * @param color the color wanted
@@ -490,11 +462,16 @@ public class Spindex implements System {
     if (color == null) return NULL; // return on invalid arguments
 
     int toReturn = NULL;
+    double bestDist = Double.POSITIVE_INFINITY;
 
     for (int i = 0; i < spindex.length; i++) { // for each spindex slot
       if (spindex[i].color == color) { // if the slot contains the correct color
-        toReturn = i; // record slot index
-        break; // don't keep looking for a slot
+        double dist = spinner.getAngleTravel(spindex[i].intakePosition, UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY);
+
+        if (dist < bestDist) {
+          toReturn = i; // record slot index
+          bestDist = dist;
+        }
       }
     }
 
@@ -513,12 +490,36 @@ public class Spindex implements System {
   }
 
   /**
+   * Gets if the spindex is full
+   * @return true if there are no empty slots in the spindex, false otherwise
+   */
+  public boolean isFull() {
+    for (SpindexSlot slot : spindex) {
+      if (!slot.color.isShootable()) return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Gets if the spindex is empty
+   * @return true if there are no full slots in the spindex, false otherwise
+   */
+  public boolean isEmpty() {
+    for (SpindexSlot slot : spindex) {
+      if (slot.color.isShootable()) return false;
+    }
+
+    return true;
+  }
+
+  /**
    * Gets if the spindex is ready to lift a ball into the turret
    *
    * @return true if the spindex is stationary and in shooting mode, false otherwise
    */
   public boolean isReadyToShoot() {
-    return state == SpindexState.SHOOTING_READY && isAtTarget() && isIndexValid(currentIndex);
+    return state == SpindexState.SHOOTING_READY && !isEmpty() && isAtTarget() && isIndexValid(currentIndex);
   }
 
   /**
