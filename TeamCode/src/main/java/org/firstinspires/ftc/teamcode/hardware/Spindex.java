@@ -466,7 +466,10 @@ public class Spindex implements System {
 
     for (int i = 0; i < spindex.length; i++) { // for each spindex slot
       if (spindex[i].color == color) { // if the slot contains the correct color
-        double dist = spinner.getAngleTravel(spindex[i].intakePosition, UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY);
+        double dist =
+            spinner.getAngleTravel(
+                spindex[i].intakePosition,
+                UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY);
 
         if (dist < bestDist) {
           toReturn = i; // record slot index
@@ -491,6 +494,7 @@ public class Spindex implements System {
 
   /**
    * Gets if the spindex is full
+   *
    * @return true if there are no empty slots in the spindex, false otherwise
    */
   public boolean isFull() {
@@ -503,6 +507,7 @@ public class Spindex implements System {
 
   /**
    * Gets if the spindex is empty
+   *
    * @return true if there are no full slots in the spindex, false otherwise
    */
   public boolean isEmpty() {
@@ -519,7 +524,10 @@ public class Spindex implements System {
    * @return true if the spindex is stationary and in shooting mode, false otherwise
    */
   public boolean isReadyToShoot() {
-    return state == SpindexState.SHOOTING_READY && !isEmpty() && isAtTarget() && isIndexValid(currentIndex);
+    return state == SpindexState.SHOOTING_READY
+        && !isEmpty()
+        && isAtTarget()
+        && isIndexValid(currentIndex);
   }
 
   /**
