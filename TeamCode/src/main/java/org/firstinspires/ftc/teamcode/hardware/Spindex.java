@@ -97,7 +97,7 @@ public class Spindex implements System {
   public Spindex(
       Motor spinner, TouchSensor homingSwitch, Axon intakeBlocker, ColorSensorV3 colorSensor) {
     this.spinner =
-        new UnidirectionalHomableRotator(spinner, homingSwitch, 0.1, 0.05, 0.002, 1, true);
+        new UnidirectionalHomableRotator(spinner, homingSwitch, 0.1, 0.05, 0.001, 1, true);
     this.intakeBlocker = intakeBlocker;
     this.colorSensor = colorSensor;
   }
