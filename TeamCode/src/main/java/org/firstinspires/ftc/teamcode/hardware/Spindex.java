@@ -128,9 +128,7 @@ public class Spindex implements System {
     currentIndex = 0; // spindex at index 0
   }
 
-  /**
-   * Starts up the spindex
-   */
+  /** Starts up the spindex */
   public void start() {
     if (!enabled) spinner.home();
     enabled = true;
@@ -295,6 +293,7 @@ public class Spindex implements System {
 
   /**
    * Disables the spindexer rotator for a short time to allow a stuck artifact to come free
+   *
    * @note only intended as a manual driver backup; shouldn't be needed
    */
   public void unJam() {
@@ -353,6 +352,7 @@ public class Spindex implements System {
 
   /**
    * Sets the color of ball in the intake
+   *
    * @param color the color of ball in the intake
    * @note intended as a driver backup
    */
@@ -362,6 +362,7 @@ public class Spindex implements System {
 
   /**
    * Sets if the color sensor is enabled. If it is disabled, setIntakeColor() must be used
+   *
    * @param enabled if true, color sensor will be enabled, if false, color sensor will be disabled
    */
   public void setColorSensorEnabled(boolean enabled) {
@@ -370,6 +371,7 @@ public class Spindex implements System {
 
   /**
    * Gets if the color sensor is enabled
+   *
    * @return true if enabled, false if disabled
    */
   public boolean isColorSensorEnabled() {

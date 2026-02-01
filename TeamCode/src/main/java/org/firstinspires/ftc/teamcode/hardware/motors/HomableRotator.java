@@ -80,6 +80,7 @@ public class HomableRotator implements System {
 
   /**
    * Starts up the motor
+   *
    * @note does not home the motor
    */
   public void start() {
@@ -101,8 +102,10 @@ public class HomableRotator implements System {
       motorController.reset();
     }
 
-    double targetMotorPower = disabled ? 0 :
-        Range.clip(motorController.calculate(getCurrentAngle() * (inverted ? -1 : 1)), -1, 1);
+    double targetMotorPower =
+        disabled
+            ? 0
+            : Range.clip(motorController.calculate(getCurrentAngle() * (inverted ? -1 : 1)), -1, 1);
     if (Math.abs(targetMotorPower - currentMotorPower) >= UPDATE_TOLERANCE) {
       motor.set(targetMotorPower);
       currentMotorPower = targetMotorPower;
@@ -243,6 +246,7 @@ public class HomableRotator implements System {
 
   /**
    * Disables the motor (turns off power) for a small period of time
+   *
    * @note only intended as a driver backup
    */
   public void disable() {

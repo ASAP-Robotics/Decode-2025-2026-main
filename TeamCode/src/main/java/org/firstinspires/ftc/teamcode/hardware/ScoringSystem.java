@@ -394,6 +394,7 @@ public class ScoringSystem {
 
   /**
    * Updates the current position of the robot on the field
+   *
    * @param position the current position of the robot on the field
    * @note intended to be called every loop
    */
@@ -407,6 +408,7 @@ public class ScoringSystem {
 
   /**
    * Sets the intake as full manually
+   *
    * @param ball the color of ball in the intake
    * @note intended as a driver backup only
    */
@@ -416,6 +418,7 @@ public class ScoringSystem {
 
   /**
    * Sets if the color sensor on the spindexer is enabled
+   *
    * @param enabled true if enabled, false if disabled
    * @note intended as a driver backup only
    */
@@ -425,6 +428,7 @@ public class ScoringSystem {
 
   /**
    * Gets if the color sensor on the spindexer is enabled
+   *
    * @return true if enabled, false if disabled
    */
   public boolean isColorSensorEnabled() {
@@ -433,6 +437,7 @@ public class ScoringSystem {
 
   /**
    * Switches if the color sensor on the spindexer is enabled
+   *
    * @note intended as a driver backup only
    */
   public void toggleColorSensorEnabled() {
@@ -441,6 +446,7 @@ public class ScoringSystem {
 
   /**
    * Disables the spindexer motor for a bit to let any jams clear
+   *
    * @note intended only as a driver backup
    */
   public void unJamSpindexer() {
