@@ -25,6 +25,7 @@ import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.Follower;
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 /**
  * Class to contain a motor that is set to a given angle setpoint, which can be homed via a button
@@ -47,13 +48,14 @@ public class HomableRotator implements System {
   protected final TouchSensor sensor;
   protected final PIDController motorController;
   protected final Follower motorSimulation;
+  protected final SimpleTimer disableTimer = new SimpleTimer(1);
   protected final boolean inverted;
   protected State state = State.UNINITIALIZED;
+  protected boolean disabled = false;
   protected boolean homed = false;
   protected double currentAngle = 0;
   protected double targetAngle = 0;
   protected double currentMotorPower = 0;
-  protected double targetMotorPower = 0;
 
   public HomableRotator(
       Motor motor,
@@ -76,6 +78,11 @@ public class HomableRotator implements System {
     this.inverted = inverted;
   }
 
+  /**
+   * Starts up the motor
+   *
+   * @note does not home the motor
+   */
   public void start() {
     state = State.NORMAL;
     motor.set(0);
@@ -88,8 +95,17 @@ public class HomableRotator implements System {
   public void update() {
     if (state == State.UNINITIALIZED) return;
     measureCurrentAngle();
-    targetMotorPower =
-        Range.clip(motorController.calculate(getCurrentAngle() * (inverted ? -1 : 1)), -1, 1);
+
+    if (disabled && disableTimer.isFinished()) {
+      disabled = false;
+      motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+      motorController.reset();
+    }
+
+    double targetMotorPower =
+        disabled
+            ? 0
+            : Range.clip(motorController.calculate(getCurrentAngle() * (inverted ? -1 : 1)), -1, 1);
     if (Math.abs(targetMotorPower - currentMotorPower) >= UPDATE_TOLERANCE) {
       motor.set(targetMotorPower);
       currentMotorPower = targetMotorPower;
@@ -100,7 +116,6 @@ public class HomableRotator implements System {
         homed = true;
         state = State.NORMAL;
         motor.set(0);
-        targetMotorPower = 0;
         currentMotorPower = 0;
         motor.stopAndResetEncoder();
         motorController.reset();
@@ -205,7 +220,6 @@ public class HomableRotator implements System {
     targetAngle = 0;
     state = State.HOMING;
     motor.set(0);
-    targetMotorPower = 0;
     currentMotorPower = 0;
     motor.stopAndResetEncoder();
     motorController.reset();
@@ -218,7 +232,7 @@ public class HomableRotator implements System {
    * @return true if at target, false otherwise
    */
   public boolean atTarget() {
-    return state == State.NORMAL && motorController.atSetPoint();
+    return state == State.NORMAL && (motorController.atSetPoint() || motorSimulation.isAtTarget());
   }
 
   /**
@@ -228,6 +242,19 @@ public class HomableRotator implements System {
    */
   public boolean isHomed() {
     return homed;
+  }
+
+  /**
+   * Disables the motor (turns off power) for a small period of time
+   *
+   * @note only intended as a driver backup
+   */
+  public void disable() {
+    disabled = true;
+    disableTimer.start();
+    motor.set(0);
+    currentMotorPower = 0;
+    motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT);
   }
 
   /**

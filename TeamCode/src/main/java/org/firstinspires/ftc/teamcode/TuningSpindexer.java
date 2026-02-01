@@ -55,7 +55,7 @@ public class TuningSpindexer extends LinearOpMode {
     TouchSensor sensor = hardwareMap.get(TouchSensor.class, "spindexHomer");
     Motor motor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
     UnidirectionalHomableRotator spindex =
-        new UnidirectionalHomableRotator(motor, sensor, 0.1, 0.05, 0.002, 1, true);
+        new UnidirectionalHomableRotator(motor, sensor, 0.1, 0.05, 0.001, 1, true);
 
     waitForStart();
     spindex.start();
