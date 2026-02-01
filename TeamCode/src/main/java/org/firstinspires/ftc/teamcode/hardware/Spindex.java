@@ -67,7 +67,7 @@ public class Spindex implements System {
 
   private static final double INTAKE_FLAP_CLOSED = 335;
   private static final double INTAKE_FLAP_OPEN = 248;
-  private static final double INTAKE_DELAY_SECONDS = 0.1;
+  private static final double INTAKE_DELAY_SECONDS = 0.5;
 
   SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
   SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
@@ -291,6 +291,14 @@ public class Spindex implements System {
    */
   public void reHome() {
     spinner.home();
+  }
+
+  /**
+   * Disables the spindexer rotator for a short time to allow a stuck artifact to come free
+   * @note only intended as a manual driver backup; shouldn't be needed
+   */
+  public void unJam() {
+    spinner.disable();
   }
 
   /**

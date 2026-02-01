@@ -121,6 +121,7 @@ public class ScoringSystem {
     if (search) limelight.detectSequence();
     state = isPreloaded ? State.FULL : State.INTAKING;
     timeSinceStart.reset();
+    loopTime.reset();
   }
 
   /**
@@ -153,7 +154,7 @@ public class ScoringSystem {
     double now = timeSinceStart.milliseconds();
     loopTimes.push(new Pair<>(loopTime.milliseconds(), now));
     loopTime.reset();
-    while (!loopTimes.isEmpty() && now - loopTimes.getFirst().second > 1) {
+    while (!loopTimes.isEmpty() && now - loopTimes.getFirst().second > 1000) {
       loopTimes.removeFirst();
     }
   }
@@ -326,9 +327,9 @@ public class ScoringSystem {
     telemetry.addData("Spindex at target", spindex.isAtTarget());
     telemetry.addData("Intake color", spindex.getIntakeColor());
     telemetry.addData("Spindex state", spindex.getState());
-    telemetry.addData("Loop time", avLoopTime);
-    telemetry.addData("Max loop time", maxLoopTime);
-    telemetry.addData("Min loop time", minLoopTime);
+    telemetry.addData("Loop time (ms)", avLoopTime);
+    telemetry.addData("Max loop time (ms)", maxLoopTime);
+    telemetry.addData("Min loop time (ms)", minLoopTime);
   }
 
   /**
@@ -436,6 +437,14 @@ public class ScoringSystem {
    */
   public void toggleColorSensorEnabled() {
     setColorSensorEnabled(!isColorSensorEnabled());
+  }
+
+  /**
+   * Disables the spindexer motor for a bit to let any jams clear
+   * @note intended only as a driver backup
+   */
+  public void unJamSpindexer() {
+    spindex.unJam();
   }
 
   /**

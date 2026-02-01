@@ -40,7 +40,7 @@ public class TeleOpRobot extends CommonRobot {
   protected Gamepad gamepad2;
   protected MecanumWheelBase wheelBase;
   protected PinpointLocalizer pinpoint;
-  protected SimpleTimer telemetryTimer = new SimpleTimer(0.5);
+  protected SimpleTimer telemetryTimer = new SimpleTimer(0.67);
   protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
   protected SimpleTimer odometryResetTimer = new SimpleTimer(2);
 
@@ -121,12 +121,12 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // shoot
-    if (gamepad2.right_trigger > 0.5 || gamepad2.rightBumperWasPressed()) {
+    if (gamepad2.right_trigger > 0.67 || gamepad2.rightBumperWasPressed()) {
       scoringSystem.shoot();
     }
 
     // eject
-    if (gamepad2.left_trigger > 0.5 || gamepad2.leftBumperWasPressed()) {
+    if (gamepad2.left_trigger > 0.67 || gamepad2.leftBumperWasPressed()) {
       scoringSystem.clearIntake();
     }
 
@@ -140,9 +140,14 @@ public class TeleOpRobot extends CommonRobot {
     // turret rehome
     if (gamepad1.aWasPressed()) {
       scoringSystem.reSyncTurretEncoder();
-
-    } else if (gamepad1.bWasPressed()) {
+    }
+    // color sensor enable toggle
+    if (gamepad1.bWasPressed()) {
       scoringSystem.toggleColorSensorEnabled();
+    }
+    // unjam spindexer
+    if (gamepad1.xWasPressed()) {
+      scoringSystem.unJamSpindexer();
     }
     // override aiming
     if (gamepad2.bWasPressed()) {
