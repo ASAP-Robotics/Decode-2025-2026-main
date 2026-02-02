@@ -122,8 +122,10 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
 
   /**
    * Sets the control mode of the flywheel when active
+   *
    * @param mode the control mode to use when active
-   * @note the idea is thet flywheel switches to bang-bang when shooting, and PIDF the rest of the time
+   * @note the idea is thet flywheel switches to bang-bang when shooting, and PIDF the rest of the
+   *     time
    */
   public void setControlMode(ControlMode mode) {
     controlMode = mode;
