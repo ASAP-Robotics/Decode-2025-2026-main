@@ -5,14 +5,25 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ReadWriteFile;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+import org.json.JSONObject;
+import org.json.JSONException;
+
+import java.io.File;
+
+import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 import java.util.List;
 
 @TeleOp(name = "Limelight Biggest AprilTag", group = "Vision")
 public class Obelisk1Pipeline extends OpMode {
 
+    private int lastWrittenTagId = -1;
     private Limelight3A limelight;
     private final int[] apriltagID = {21,22,23};
+
+    private BallSequence DetectedSequence = BallSequence.GPP;
 
     private boolean[] aprilTagInSight = {false, false, false};
     private double[] apriltagSize = {0.0, 0.0, 0.0};
@@ -77,14 +88,54 @@ public class Obelisk1Pipeline extends OpMode {
             }
             int biggest = findBiggest();
             if (biggest != -1) {
-                telemetry.addLine("apriltag " + apriltagID[biggest]);
+                int tagId = apriltagID[biggest];
+                double area = apriltagSize[biggest];
+
+                telemetry.addLine("Biggest tag: " + tagId);
+
+                if (tagId != lastWrittenTagId) {
+                    updateBallSequenceJson(tagId);
+                    lastWrittenTagId = tagId;
+                }
             } else {
                 telemetry.addLine("No tag sizes recorded yet");
             }
-            telemetry.update();
+
 
         }
     }
+    private BallSequence sequenceFromTag(int tagId) {
+        switch (tagId) {
+            case 21: return BallSequence.GPP;
+            case 22: return BallSequence.PGP;
+            case 23: return BallSequence.PPG;
+            default: return null;
+        }
+    }
+
+    private void updateBallSequenceJson(int biggestTagId) {
+        DetectedSequence = sequenceFromTag(biggestTagId);
+        if (DetectedSequence == null) return; // ignore unknown IDs
+
+        File configFile = AppUtil.getInstance().getSettingsFile("ball_sequence.json");
+
+        try {
+
+            String raw = ReadWriteFile.readFile(configFile);
+            JSONObject json = (raw != null && !raw.trim().isEmpty())
+                    ? new JSONObject(raw)
+                    : new JSONObject();
+
+            json.put("sequence", DetectedSequence.name());  // "GPP" / "PGP" / "PPG"
+
+            ReadWriteFile.writeFile(configFile, json.toString());
+
+        } catch (Exception e) {
+            telemetry.addLine("ball_sequence.json update failed: " + e.getMessage());
+        }
+    }
+
+
 
     @Override
     public void stop() {
