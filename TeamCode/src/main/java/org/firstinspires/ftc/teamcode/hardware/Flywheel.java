@@ -293,8 +293,9 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
     double rpm = getRPMLookup(targetDistance);
     targetSpeed = rpm; // store target speed
     DcMotor.RunMode targetRunMode =
-        controlMode == ControlMode.PIDF ?
-            DcMotor.RunMode.RUN_USING_ENCODER : DcMotor.RunMode.RUN_WITHOUT_ENCODER;
+        controlMode == ControlMode.PIDF
+            ? DcMotor.RunMode.RUN_USING_ENCODER
+            : DcMotor.RunMode.RUN_WITHOUT_ENCODER;
 
     if (flywheelRunMode != targetRunMode) {
       flywheel.setMode(targetRunMode); // use speed-based control
