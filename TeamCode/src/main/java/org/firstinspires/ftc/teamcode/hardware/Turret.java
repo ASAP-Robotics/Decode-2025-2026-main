@@ -107,12 +107,12 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @note if angle is zero, the turret will not move
    */
   public void init(double horizontalAngle) {
+    //encoder.synchronize();
     rotator.stopAndResetEncoder();
     setHorizontalAngle(horizontalAngle);
     rotatorController.setSetPoint(turretDegreesToMotorDegrees(targetHorizontalAngleDegrees));
     rotator.set(0);
     if (horizontalAngle == 0) rotationEnabled = false;
-    encoder.synchronize();
     hoodServo.setPosition(targetVerticalAngleDegrees);
   }
 
@@ -328,7 +328,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @note this is here mainly as a driver backup
    */
   public void syncEncoder() {
-    encoder.synchronize();
+    //encoder.synchronize();
   }
 
   /**

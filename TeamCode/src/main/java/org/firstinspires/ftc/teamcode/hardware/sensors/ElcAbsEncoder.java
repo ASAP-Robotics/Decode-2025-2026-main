@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+
+
 package org.firstinspires.ftc.teamcode.hardware.sensors;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -93,10 +95,10 @@ public class ElcAbsEncoder {
     double voltage = absoluteEncoder.getVoltage();
 
     // Clip voltage to expected range [cite: 6]
-    voltage = Range.clip(voltage, 0, MAX_VOLTAGE);
+    voltage = Range.clip(voltage, 0, absoluteEncoder.getMaxVoltage());
 
     // Calculate Absolute Angle (0-360)
-    double absoluteAngle = (voltage / MAX_VOLTAGE) * 360.0;
+    double absoluteAngle = (voltage / absoluteEncoder.getMaxVoltage()) * 360.0;
 
     // If the mechanism is inverted, flip the absolute read logic
     if (inverted) {

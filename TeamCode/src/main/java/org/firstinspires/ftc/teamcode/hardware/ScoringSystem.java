@@ -54,6 +54,7 @@ public class ScoringSystem {
   private boolean turretAimOverride = false; // if the aim of the turret is overridden
   private double horizontalAngleOverride = 0;
   private boolean tuning = false;
+  private boolean shutDown = false; // if the systems are shutting down at the end of auto
   private double verticalAngleOverride = 60;
   private double rpmOverride = 2000;
   private double distanceOverride = 1;
@@ -141,8 +142,8 @@ public class ScoringSystem {
    * @note call each loop
    */
   public void update(boolean updateTelemetry) {
+    // todo rework getting the sequence
     limelight.update();
-    ballSequence = limelight.getSequence();
     updateAiming();
     updateSpindex();
     updateIntake();
@@ -161,6 +162,14 @@ public class ScoringSystem {
 
   /** Updates everything to do with aiming the turret */
   private void updateAiming() {
+    turret.setHorizontalAngle(0); // todo remove
+    if (true) return;
+    if (shutDown) {
+      turret.setHorizontalAngle(0); // todo tune
+      turret.idle();
+      return;
+    }
+
     if (tuning) {
       turret.tuneShooting(rpmOverride, verticalAngleOverride);
 
@@ -183,7 +192,7 @@ public class ScoringSystem {
   /** Updates everything to do with the spindexer */
   private void updateSpindex() {
     spindex.setSequence(ballSequence);
-    if (state == State.SHOOTING && spindex.isReadyToShoot() && turret.isReadyToShoot()) {
+    if (state == State.SHOOTING && isReadyToShoot() && !shutDown) {
       spindex.shoot();
     }
 
@@ -204,6 +213,11 @@ public class ScoringSystem {
 
   /** Updates everything to do with the intake */
   private void updateIntake() {
+    if (shutDown) {
+      intake.stop();
+      return;
+    }
+
     if (clearingIntake) { // if clearing the intake
       if (intake.timer.isFinished()) { // if done clearing the intake
         clearingIntake = false;
@@ -530,6 +544,15 @@ public class ScoringSystem {
    */
   public Limelight.LimeLightMode getLimelightState() {
     return limelight.getMode();
+  }
+
+  /**
+   * Prepares systems for Autonomous shutdown
+   * @note only to be called at the end of Auto OpModes
+   */
+  public void prepForShutdown() {
+    spindex.prepForShutdown();
+    shutDown = true;
   }
 
   /**

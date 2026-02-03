@@ -107,7 +107,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @return true if flywheel is actually at speed, false otherwise
    */
   protected boolean isAtSpeed() {
-    return currentSpeed >= (targetSpeed - 140) && currentSpeed <= (targetSpeed + 140);
+    return currentSpeed >= (targetSpeed - 25) && currentSpeed <= (targetSpeed + 25);
   }
 
   /**
