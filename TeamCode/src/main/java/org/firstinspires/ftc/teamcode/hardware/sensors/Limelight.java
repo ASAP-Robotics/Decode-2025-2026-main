@@ -17,6 +17,7 @@
 package org.firstinspires.ftc.teamcode.hardware.sensors;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -69,9 +70,8 @@ public class Limelight {
   }
 
   /**
-   * @brief initializes limelight
-   *     mode, if false it will start navigation immediately and use the stored last detected
-   *     sequence
+   * @brief initializes limelight mode, if false it will start navigation immediately and use the
+   *     stored last detected sequence
    */
   public void init() {
     mode = LimeLightMode.NAVIGATION;
