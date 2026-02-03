@@ -548,6 +548,7 @@ public class ScoringSystem {
 
   /**
    * Prepares systems for Autonomous shutdown
+   *
    * @note only to be called at the end of Auto OpModes
    */
   public void prepForShutdown() {

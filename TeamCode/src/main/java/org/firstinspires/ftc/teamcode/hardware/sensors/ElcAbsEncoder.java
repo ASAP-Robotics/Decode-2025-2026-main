@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-
-
 package org.firstinspires.ftc.teamcode.hardware.sensors;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
