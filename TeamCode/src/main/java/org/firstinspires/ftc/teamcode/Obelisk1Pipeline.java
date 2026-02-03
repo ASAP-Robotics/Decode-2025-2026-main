@@ -59,6 +59,10 @@ public class Obelisk1Pipeline extends OpMode {
 
     @Override
     public void loop() {
+        for (int i = 0; i < apriltagSize.length; i++) {
+            apriltagSize[i] = 0.0;
+            aprilTagInSight[i] = false;
+        }
 
         LLResult result = limelight.getLatestResult();
 
@@ -97,6 +101,7 @@ public class Obelisk1Pipeline extends OpMode {
                     updateBallSequenceJson(tagId);
                     lastWrittenTagId = tagId;
                 }
+
             } else {
                 telemetry.addLine("No tag sizes recorded yet");
             }
