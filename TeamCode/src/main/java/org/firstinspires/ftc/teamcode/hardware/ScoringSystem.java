@@ -18,6 +18,10 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import android.util.Pair;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
+
+import com.acmerobotics.roadrunner.Pose2d;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -86,6 +90,36 @@ public class ScoringSystem {
     this.ballSequence = new BallSequenceFileReader().getSequence();
   }
 
+  public static Pose2d toPose2d(Pose2D p) {
+    if (p == null) return null;
+
+    double x = p.getX(DistanceUnit.INCH);
+    double y = p.getY(DistanceUnit.INCH);
+
+    // Road Runner wants radians
+    double headingRad = p.getHeading(AngleUnit.RADIANS);
+
+    return new Pose2d(x, y, headingRad);
+  }
+
+  public static Pose2D toPose2D(Pose2d p) {
+    if (p == null) return null;
+
+    double x = p.position.x;
+    double y = p.position.y;
+
+    // Road Runner heading is radians
+    double headingDeg = Math.toDegrees(p.heading.toDouble());
+
+    return new Pose2D(
+            DistanceUnit.INCH,
+            x,
+            y,
+            AngleUnit.DEGREES,
+            headingDeg
+    );
+  }
+
   /**
    * Initializes the artifact scoring system
    *
@@ -93,6 +127,7 @@ public class ScoringSystem {
    * @param auto if opMode is Auto (as opposed to TeleOp)
    * @note call when OpMode is initialized ("Init" is pressed)
    */
+
   public void init(boolean isPreloaded, boolean auto) {
     setIndicatorColor(RGBIndicator.Color.VIOLET);
     spindex.init(BallSequence.GPP, isPreloaded, auto);
@@ -394,6 +429,40 @@ public class ScoringSystem {
    */
   public void setRobotPosition(Pose2D position) {
     robotPosition = position;
+  }
+
+  public void setRobotPosition2d(Pose2d position) {
+    robotPosition = toPose2D(position);
+  }
+
+  public Pose2D getVirtualTargetPosition(
+          Pose2D robotPosition,
+          Pose2D targetPosition,
+          double robotVelX,
+          double robotVelY,
+          double ballTime
+  ) {
+    // How far the robot moves while the ball is in the air
+    double leadX = robotVelX * ballTime;
+    double leadY = robotVelY * ballTime;
+
+    // Shift the target backwards by that amount
+    double virtualX = targetPosition.getX(DistanceUnit.INCH) - leadX;
+    double virtualY = targetPosition.getY(DistanceUnit.INCH) - leadY;
+
+    double sx = robotPosition.getX(DistanceUnit.INCH);
+    double sy = robotPosition.getY(DistanceUnit.INCH);
+
+    double tx = virtualX;
+    double ty = virtualY;
+
+    double dx = tx - sx;
+    double dy = ty - sy;
+
+    double aimRad = Math.atan2(dy, dx);
+
+    // Heading doesn't matter for a point target
+    return new Pose2D(DistanceUnit.INCH,virtualX, virtualY, AngleUnit.DEGREES, Math.toDegrees(aimRad) );
   }
 
   public void setBallSequence(BallSequence sequence) {
