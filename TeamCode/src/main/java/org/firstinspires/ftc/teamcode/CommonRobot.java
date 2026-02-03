@@ -63,7 +63,7 @@ public abstract class CommonRobot {
     this.allianceColor = allianceColor;
 
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
-    Limelight limelight = new Limelight(rawLimelight, this.allianceColor, 0.001);
+    Limelight limelight = new Limelight(rawLimelight, this.allianceColor);
 
     TouchSensor spindexHomer = this.hardwareMap.get(TouchSensor.class, "spindexHomer");
     Motor spindexMotor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);

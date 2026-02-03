@@ -36,9 +36,7 @@ public class ElcAbsEncoder {
   private final AnalogInput absoluteEncoder;
   private final DcMotorEx incrementalEncoder;
 
-  // Datasheet Constants
-  private static final double MAX_VOLTAGE = 3.3; // [cite: 6]
-  private static final double TICKS_PER_REV = 4000.0; // [cite: 6]
+  private static final double TICKS_PER_REV = 4000.0;
 
   // State variables
   private double angleOffsetDegrees = 0.0;
@@ -92,7 +90,7 @@ public class ElcAbsEncoder {
   private double getAbsoluteAngle() {
     double voltage = absoluteEncoder.getVoltage();
 
-    // Clip voltage to expected range [cite: 6]
+    // Clip voltage to expected range
     voltage = Range.clip(voltage, 0, absoluteEncoder.getMaxVoltage());
 
     // Calculate Absolute Angle (0-360)

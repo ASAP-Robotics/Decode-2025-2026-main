@@ -100,7 +100,7 @@ public class ScoringSystem {
     spindex.init(BallSequence.GPP, isPreloaded, auto);
     turret.init(0);
     turret.setActive(!isPreloaded);
-    limelight.init(auto);
+    limelight.init();
   }
 
   /** To be called repeatedly while the robot is in init */
@@ -119,7 +119,6 @@ public class ScoringSystem {
     turret.enable(); // let the flywheel spin up
     turret.start();
     limelight.start();
-    if (search) limelight.detectSequence();
     state = isPreloaded ? State.FULL : State.INTAKING;
     timeSinceStart.reset();
     loopTime.reset();
@@ -492,15 +491,6 @@ public class ScoringSystem {
     intake.eject(); // set intake to eject at full speed
     intake.timer.start(); // start intake timer
     clearingIntake = true; // we are clearing the intake
-  }
-
-  /**
-   * @brief forces a re-check of the sequence to shoot
-   * @note intended for use in emergency game situations (when something has malfunctioned); not
-   *     intended to be used normally or regularly
-   */
-  public void emergencyRecheckSequence() {
-    limelight.detectSequence();
   }
 
   /**

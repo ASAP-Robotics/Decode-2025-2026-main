@@ -139,8 +139,8 @@ public class TeleOpRobot extends CommonRobot {
     // miscellaneous backup manual controls
     // turret rehome
     if (gamepad1.aWasPressed()) {
-      // scoringSystem.reSyncTurretEncoder();
-      scoringSystem.prepForShutdown(); // todo remove
+      scoringSystem.reSyncTurretEncoder();
+      //scoringSystem.prepForShutdown();
     }
     // color sensor enable toggle
     if (gamepad1.bWasPressed()) {
