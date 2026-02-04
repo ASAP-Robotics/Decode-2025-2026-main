@@ -27,6 +27,7 @@ import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.Follower;
+import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.jetbrains.annotations.TestOnly;
 
 public class Turret extends Flywheel<Turret.LookupTableItem> {
@@ -54,10 +55,11 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     }
   }
 
+  private static final double HORIZONTAL_WRAP_CENTER_DEGREES = -90.0;
   // amount position has to change to actually set servo
   private static final double SERVO_UPDATE_TOLERANCE = 0.5; // degrees
   // amount power has to change by to actually set (rotator) motor
-  private static final double MOTOR_UPDATE_TOLERANCE = 0.0025; // % power
+  private static final double MOTOR_UPDATE_TOLERANCE = 0.01; // % power
   // number of teeth on the gear attached to the turret
   private static final double TURRET_GEAR_TEETH = 120;
   // number of teeth on the gear attached to the motor
@@ -304,9 +306,13 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public void setHorizontalAngle(double degrees) {
     if (Double.isNaN(degrees)) return;
 
-    if (degrees > 180 + HORIZONTAL_HYSTERESIS || degrees < -180 - HORIZONTAL_HYSTERESIS) {
+    double min = HORIZONTAL_WRAP_CENTER_DEGREES - 180 - HORIZONTAL_HYSTERESIS;
+    double max = HORIZONTAL_WRAP_CENTER_DEGREES + 180 + HORIZONTAL_HYSTERESIS;
+
+    if (degrees > max || degrees < min) {
       // angle is wrapped to ensure the turret never turns more than ~one full rotation
-      targetHorizontalAngleDegrees = AngleUnit.normalizeDegrees(degrees);
+      targetHorizontalAngleDegrees =
+          MathUtils.normalizeAround(degrees, HORIZONTAL_WRAP_CENTER_DEGREES);
 
     } else {
       targetHorizontalAngleDegrees = degrees;
