@@ -57,6 +57,7 @@ public class MathUtils {
 
   /**
    * Normalizes an angle around a center point
+   *
    * @param angle the angle to normalize
    * @param center the angle to normalize around
    * @return the normalized angle
