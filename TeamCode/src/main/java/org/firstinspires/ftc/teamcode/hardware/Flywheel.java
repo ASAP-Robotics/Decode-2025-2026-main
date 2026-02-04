@@ -50,7 +50,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   protected final DcMotorEx flywheel;
   protected Follower speedSimulation; // simulation of flywheel speed
   protected SystemStatus flywheelStatus; // status of the flywheel
-  protected ControlMode controlMode = ControlMode.PIDF;
+  protected ControlMode controlMode = ControlMode.BANG_BANG;
   protected boolean isEnabled = false; // if the flywheel is enabled
   protected boolean isActive = true; // if the flywheel is active (as opposed to idling)
   private double idleSpeed; // the speed (RPM) of the flywheel when idle
@@ -70,7 +70,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @param idleSpeed the speed of the flywheel when idling (RPM)
    */
   public Flywheel(DcMotorEx motor, double idleSpeed) {
-    this.speedSimulation = new Follower(0, 0, 5, 100); // tune 100
+    this.speedSimulation = new Follower(0, 0, 5, 50); // tune 50
     this.flywheel = motor;
     this.idleSpeed = idleSpeed; // set the speed of the flywheel at idle
     this.LOOKUP_TABLE = fillLookupTable();

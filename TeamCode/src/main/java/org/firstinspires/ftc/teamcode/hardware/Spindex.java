@@ -269,7 +269,7 @@ public class Spindex implements System {
    */
   public void prepForShutdown() {
     state = SpindexState.UNINITIALIZED;
-    turnSpindexNoShoot(-10); // todo tune
+    turnSpindexNoShoot(10); // todo tune
   }
 
   /**
