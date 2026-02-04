@@ -54,6 +54,7 @@ public class ScoringSystem {
   private boolean turretAimOverride = false; // if the aim of the turret is overridden
   private double horizontalAngleOverride = 0;
   private boolean tuning = false;
+  private boolean shutDown = false; // if the systems are shutting down at the end of auto
   private double verticalAngleOverride = 60;
   private double rpmOverride = 2000;
   private double distanceOverride = 1;
@@ -99,7 +100,7 @@ public class ScoringSystem {
     spindex.init(BallSequence.GPP, isPreloaded, auto);
     turret.init(0);
     turret.setActive(!isPreloaded);
-    limelight.init(auto);
+    limelight.init();
   }
 
   /** To be called repeatedly while the robot is in init */
@@ -118,7 +119,6 @@ public class ScoringSystem {
     turret.enable(); // let the flywheel spin up
     turret.start();
     limelight.start();
-    if (search) limelight.detectSequence();
     state = isPreloaded ? State.FULL : State.INTAKING;
     timeSinceStart.reset();
     loopTime.reset();
@@ -141,8 +141,8 @@ public class ScoringSystem {
    * @note call each loop
    */
   public void update(boolean updateTelemetry) {
+    // todo rework getting the sequence
     limelight.update();
-    ballSequence = limelight.getSequence();
     updateAiming();
     updateSpindex();
     updateIntake();
@@ -161,6 +161,12 @@ public class ScoringSystem {
 
   /** Updates everything to do with aiming the turret */
   private void updateAiming() {
+    if (shutDown) {
+      turret.setHorizontalAngle(0);
+      turret.idle();
+      return;
+    }
+
     if (tuning) {
       turret.tuneShooting(rpmOverride, verticalAngleOverride);
 
@@ -176,17 +182,6 @@ public class ScoringSystem {
     }
      */
 
-    /*
-    Pose2D limelightPosition = limelight.getPosition();
-    if (limelightPosition != null && turret.isAtTarget()) {
-      double targetLimelightHeading =
-          robotPosition.getHeading(AngleUnit.DEGREES) + turret.getHorizontalAngleDegrees();
-      double limelightHeading = limelightPosition.getHeading(AngleUnit.DEGREES);
-      double headingError = targetLimelightHeading - limelightHeading;
-      if (Math.abs(headingError) >= 1) turret.changeHorizontalAngleOffsetDegrees(headingError);
-    }
-     */
-
     turret.setHorizontalAngle(getRelativeTargetAngle());
     turret.setTargetDistance(getTargetDistance());
   }
@@ -194,6 +189,9 @@ public class ScoringSystem {
   /** Updates everything to do with the spindexer */
   private void updateSpindex() {
     spindex.setSequence(ballSequence);
+    if (state == State.SHOOTING && isReadyToShoot() && !shutDown) {
+      spindex.shoot();
+    }
 
     switch (spindex.getState()) {
       case INTAKING:
@@ -201,19 +199,22 @@ public class ScoringSystem {
         break;
 
       case SHOOTING_READY:
-        if (state != State.FULL) switchModeToFull();
+        if (state != State.FULL && state != State.SHOOTING) switchModeToFull();
         break;
 
       case SHOOTING:
       case UNINITIALIZED:
         break;
     }
-
-    if (state == State.SHOOTING) emptyMag();
   }
 
   /** Updates everything to do with the intake */
   private void updateIntake() {
+    if (shutDown) {
+      intake.stop();
+      return;
+    }
+
     if (clearingIntake) { // if clearing the intake
       if (intake.timer.isFinished()) { // if done clearing the intake
         clearingIntake = false;
@@ -353,34 +354,17 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief switches the scoring system's mode to "shooting"
-   * @note does not do all that needs to be done when switching the mode to shooting
-   */
-  protected void switchModeToShooting() {
-    state = State.SHOOTING;
-    intake.intakeIdle(); // start the intake spinning
-    turret.activate(); // start the flywheel spinning (just in case)
-  }
-
-  /**
-   * @brief the internal logic for emptying the mag
-   */
-  protected void emptyMag() {
-    if (spindex.isReadyToShoot() && turret.isReadyToShoot()) {
-      spindex.shoot();
-    }
-  }
-
-  /**
    * Starts shooting a sequence of balls out of the turret
    *
    * @return true if the mag wasn't empty, false if the mag is empty
    */
   public boolean shoot() {
-    if (!spindex.isIndexValid(spindex.getShootableIndex())) return false;
+    if (spindex.isEmpty()) return false;
     // ^ return false if there are no balls in the mag
-    switchModeToShooting();
-    emptyMag(); // start emptying mag
+    spindex.prepToShootSequence(ballSequence);
+    state = State.SHOOTING;
+    intake.intakeIdle(); // start the intake spinning
+    turret.activate(); // start the flywheel spinning
     return true;
   }
 
@@ -508,15 +492,6 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief forces a re-check of the sequence to shoot
-   * @note intended for use in emergency game situations (when something has malfunctioned); not
-   *     intended to be used normally or regularly
-   */
-  public void emergencyRecheckSequence() {
-    limelight.detectSequence();
-  }
-
-  /**
    * Forces a re read of the turret's absolute encoder
    *
    * @note intended only as a driver backup
@@ -557,6 +532,16 @@ public class ScoringSystem {
    */
   public Limelight.LimeLightMode getLimelightState() {
     return limelight.getMode();
+  }
+
+  /**
+   * Prepares systems for Autonomous shutdown
+   *
+   * @note only to be called at the end of Auto OpModes
+   */
+  public void prepForShutdown() {
+    spindex.prepForShutdown();
+    shutDown = true;
   }
 
   /**
