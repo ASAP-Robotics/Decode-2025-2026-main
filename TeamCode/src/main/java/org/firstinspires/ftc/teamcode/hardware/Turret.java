@@ -23,7 +23,6 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
-import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalogWrapping;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
@@ -101,7 +100,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     angleSimulation = new Follower(0, 0, 1, 60); // tune 60
   }
 
-  public Turret(DcMotorEx flywheelMotor, Motor rotator, ElcAbsEncoderAnalog encoder, Axon hoodServo) {
+  public Turret(
+      DcMotorEx flywheelMotor, Motor rotator, ElcAbsEncoderAnalog encoder, Axon hoodServo) {
     this(flywheelMotor, rotator, encoder, hoodServo, 1500);
   }
 
@@ -332,11 +332,10 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     return motorDegreesToTurretDegrees(getRotatorDegrees()) - horizontalAngleOffsetDegrees;
   }
 
-  /**
-   * Calculates the angle offset for the turret
-   */
+  /** Calculates the angle offset for the turret */
   private void calculateTurretOffset() {
-    horizontalAngleOffsetDegrees = motorDegreesToTurretDegrees(encoder.getAngleNormalized() + getRotatorDegrees());
+    horizontalAngleOffsetDegrees =
+        motorDegreesToTurretDegrees(encoder.getAngleNormalized() + getRotatorDegrees());
   }
 
   /**
@@ -352,7 +351,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * Forces a re-calculation of the turret offset using the absolute encoder
    *
    * @note this is here mainly as a driver backup; even as a backup use with caution, can easily
-   * make a bad situation worse
+   *     make a bad situation worse
    */
   public void syncEncoder() {
     calculateTurretOffset();

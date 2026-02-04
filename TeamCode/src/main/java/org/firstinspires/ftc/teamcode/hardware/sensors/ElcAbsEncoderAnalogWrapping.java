@@ -7,10 +7,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.jetbrains.annotations.TestOnly;
 
 /**
- * Analog-only driver for the ELC Encoder V2.
- * - Uses ONLY the analog absolute output
- * - Software unwraps angle to allow multi-turn tracking
- * - Supports inversion and offsets
+ * Analog-only driver for the ELC Encoder V2. - Uses ONLY the analog absolute output - Software
+ * unwraps angle to allow multi-turn tracking - Supports inversion and offsets
  */
 public class ElcAbsEncoderAnalogWrapping {
 
@@ -31,16 +29,14 @@ public class ElcAbsEncoderAnalogWrapping {
    * Constructor
    *
    * @param hardwareMap OpMode hardware map
-   * @param analogName  Name of the Analog Input device
+   * @param analogName Name of the Analog Input device
    */
   public ElcAbsEncoderAnalogWrapping(HardwareMap hardwareMap, String analogName) {
     this.absoluteEncoder = hardwareMap.get(AnalogInput.class, analogName);
     reset();
   }
 
-  /**
-   * Resets multi-turn tracking and zeroes the encoder.
-   */
+  /** Resets multi-turn tracking and zeroes the encoder. */
   public void reset() {
     firstRead = true;
     revolutionCount = 0;
@@ -48,9 +44,7 @@ public class ElcAbsEncoderAnalogWrapping {
     lastAbsoluteAngle = getAbsoluteAngle();
   }
 
-  /**
-   * Returns raw absolute angle (0–360)
-   */
+  /** Returns raw absolute angle (0–360) */
   private double getAbsoluteAngle() {
     double voltage = absoluteEncoder.getVoltage();
     voltage = Range.clip(voltage, 0.0, absoluteEncoder.getMaxVoltage());
@@ -64,10 +58,7 @@ public class ElcAbsEncoderAnalogWrapping {
     return angle;
   }
 
-  /**
-   * Updates revolution tracking.
-   * Call this at least once per loop.
-   */
+  /** Updates revolution tracking. Call this at least once per loop. */
   private void update() {
     double currentAngle = getAbsoluteAngle();
 
@@ -89,40 +80,30 @@ public class ElcAbsEncoderAnalogWrapping {
     lastAbsoluteAngle = currentAngle;
   }
 
-  /**
-   * Returns continuous position in degrees (multi-turn).
-   */
+  /** Returns continuous position in degrees (multi-turn). */
   public double getAngle() {
     update();
     return (revolutionCount * 360.0) + lastAbsoluteAngle + angleOffsetDegrees;
   }
 
-  /**
-   * Returns position normalized to [-180, 180)
-   */
+  /** Returns position normalized to [-180, 180) */
   public double getAngleNormalized() {
     return AngleUnit.normalizeDegrees(getAngle());
   }
 
-  /**
-   * Sets the current position as zero.
-   */
+  /** Sets the current position as zero. */
   public void zero() {
     update();
     angleOffsetDegrees = -(revolutionCount * 360.0 + lastAbsoluteAngle);
   }
 
-  /**
-   * Inverts encoder direction.
-   */
+  /** Inverts encoder direction. */
   public void setInverted(boolean inverted) {
     this.inverted = inverted;
     reset();
   }
 
-  /**
-   * Debug helper
-   */
+  /** Debug helper */
   @TestOnly
   public double getRawVoltage() {
     return absoluteEncoder.getVoltage();

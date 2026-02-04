@@ -25,8 +25,7 @@ import org.jetbrains.annotations.TestOnly;
 /**
  * Analog-only driver for the ELC Encoder V2.
  *
- * <p>- Uses ONLY the analog absolute output
- * Supports inversion
+ * <p>- Uses ONLY the analog absolute output Supports inversion
  */
 public class ElcAbsEncoderAnalog {
   private final AnalogInput absoluteEncoder;
