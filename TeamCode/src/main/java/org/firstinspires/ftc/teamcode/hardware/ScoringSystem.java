@@ -31,6 +31,7 @@ import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
+import org.firstinspires.ftc.teamcode.utils.BallSequenceFileReader;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.jetbrains.annotations.TestOnly;
 
@@ -66,6 +67,7 @@ public class ScoringSystem {
   private final SimpleTimer fullWait = new SimpleTimer(0.5);
   private final ElapsedTime timeSinceStart = new ElapsedTime();
   private final ElapsedTime loopTime = new ElapsedTime();
+  private final boolean defaulted;
   private final LinkedList<Pair<Double, Double>> loopTimes = new LinkedList<>();
 
   public ScoringSystem(
@@ -86,6 +88,9 @@ public class ScoringSystem {
     this.allianceColor = allianceColor;
     this.telemetry = telemetry;
     this.targetPosition = this.allianceColor.getTargetLocation();
+    BallSequenceFileReader reader = new BallSequenceFileReader();
+    this.ballSequence = reader.getSequence();
+    this.defaulted = reader.isDefaulted();
   }
 
   /**
@@ -141,7 +146,6 @@ public class ScoringSystem {
    * @note call each loop
    */
   public void update(boolean updateTelemetry) {
-    // todo rework getting the sequence
     limelight.update();
     updateAiming();
     updateSpindex();
@@ -307,6 +311,7 @@ public class ScoringSystem {
     telemetry.addData("Ready to shoot", isReadyToShoot());
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("Sequence", ballSequence);
+    telemetry.addData("Defaulted", defaulted); // todo remove
 
     SystemReport spindexReport = spindex.getStatus();
     SystemReport turretReport = turret.getStatus();
