@@ -31,7 +31,8 @@ import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
 import org.firstinspires.ftc.teamcode.hardware.indicators.RGBIndicator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
-import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoder;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalogWrapping;
 import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
@@ -74,7 +75,7 @@ public abstract class CommonRobot {
     Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
     Axon turretHood = new Axon(rawTurretHood);
     Motor turretRotator = new Motor(hardwareMap, "turretRotator", Motor.GoBILDA.RPM_1150);
-    ElcAbsEncoder turretEncoder = new ElcAbsEncoder(hardwareMap, "turretEncoder", "turretRotator");
+    ElcAbsEncoderAnalog turretEncoder = new ElcAbsEncoderAnalog(hardwareMap, "turretEncoder");
     DcMotorEx flywheelMotor = this.hardwareMap.get(DcMotorEx.class, "flywheel");
     Turret turret = new Turret(flywheelMotor, turretRotator, turretEncoder, turretHood, 1500);
 

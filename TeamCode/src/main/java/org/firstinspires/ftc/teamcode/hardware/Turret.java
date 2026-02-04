@@ -22,7 +22,8 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoder;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalogWrapping;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
@@ -57,7 +58,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   // amount position has to change to actually set servo
   private static final double SERVO_UPDATE_TOLERANCE = 0.5; // degrees
   // amount power has to change by to actually set (rotator) motor
-  private static final double MOTOR_UPDATE_TOLERANCE = 0.01; // % power
+  private static final double MOTOR_UPDATE_TOLERANCE = 0.0025; // % power
   // number of teeth on the gear attached to the turret
   private static final double TURRET_GEAR_TEETH = 120;
   // number of teeth on the gear attached to the motor
@@ -67,7 +68,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private static final double HORIZONTAL_TOLERANCE = 3; // degrees
   protected Follower angleSimulation; // simulation of the horizontal angle of the turret
   protected SystemStatus turretStatus = SystemStatus.NOMINAL;
-  private final ElcAbsEncoder encoder;
+  private final ElcAbsEncoderAnalog encoder;
   private final Motor rotator;
   private final PIDController rotatorController;
   // ^ PID controller for horizontal rotation of turret, uses motor degrees as units
@@ -84,7 +85,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public Turret(
       DcMotorEx flywheelMotor,
       Motor rotator,
-      ElcAbsEncoder encoder,
+      ElcAbsEncoderAnalog encoder,
       Axon hoodServo,
       double idleSpeed) {
     super(flywheelMotor, idleSpeed);
@@ -94,13 +95,13 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.rotator.setInverted(true);
     this.rotator.setRunMode(Motor.RunMode.RawPower);
     this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-    this.rotatorController = new PIDController(0.025, 0.05, 0.0009);
+    this.rotatorController = new PIDController(0.03, 0.03, 0.0009);
     rotatorController.setTolerance(turretDegreesToMotorDegrees(1));
-    this.encoder.setInverted(true);
+    this.encoder.setInverted(true); // todo maybe don't invert
     angleSimulation = new Follower(0, 0, 1, 60); // tune 60
   }
 
-  public Turret(DcMotorEx flywheelMotor, Motor rotator, ElcAbsEncoder encoder, Axon hoodServo) {
+  public Turret(DcMotorEx flywheelMotor, Motor rotator, ElcAbsEncoderAnalog encoder, Axon hoodServo) {
     this(flywheelMotor, rotator, encoder, hoodServo, 1500);
   }
 
@@ -110,12 +111,14 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @note if angle is zero, the turret will not move
    */
   public void init(double horizontalAngle) {
-    encoder.synchronize();
     setHorizontalAngle(horizontalAngle);
     rotatorController.setSetPoint(turretDegreesToMotorDegrees(targetHorizontalAngleDegrees));
     rotator.set(0);
     if (horizontalAngle == 0) rotationEnabled = false;
     if (rotationEnabled) {
+      rotator.stopAndResetEncoder();
+      rotator.setRunMode(Motor.RunMode.RawPower);
+      calculateTurretOffset();
       hoodServo.setPosition(targetVerticalAngleDegrees);
       lastSetVerticalAngleDegrees = targetVerticalAngleDegrees;
     }
@@ -211,6 +214,11 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @brief to be called once, when the program is started
    */
   public void start() {
+    if (!rotationEnabled) {
+      rotator.stopAndResetEncoder();
+      rotator.setRunMode(Motor.RunMode.RawPower);
+      calculateTurretOffset();
+    }
     rotationEnabled = true;
   }
 
@@ -325,21 +333,29 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   }
 
   /**
+   * Calculates the angle offset for the turret
+   */
+  private void calculateTurretOffset() {
+    horizontalAngleOffsetDegrees = motorDegreesToTurretDegrees(encoder.getAngleNormalized() + getRotatorDegrees());
+  }
+
+  /**
    * @brief gets the current position of the rotator motor in degrees
    * @return the position of the rotator motor, according to the encoder, in degrees
    * @note this value is not adjusted using the horizontal angle offset
    */
   protected double getRotatorDegrees() {
-    return encoder.getPosition();
+    return -rotator.getCurrentPosition() / 4000.0 * 360.0;
   }
 
   /**
-   * Forces the absolute encoder to re-read it's position
+   * Forces a re-calculation of the turret offset using the absolute encoder
    *
-   * @note this is here mainly as a driver backup
+   * @note this is here mainly as a driver backup; even as a backup use with caution, can easily
+   * make a bad situation worse
    */
   public void syncEncoder() {
-    encoder.synchronize();
+    calculateTurretOffset();
   }
 
   /**

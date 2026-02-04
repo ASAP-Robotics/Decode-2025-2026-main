@@ -161,10 +161,8 @@ public class ScoringSystem {
 
   /** Updates everything to do with aiming the turret */
   private void updateAiming() {
-    turret.setHorizontalAngle(0); // todo remove
-    if (true) return;
     if (shutDown) {
-      turret.setHorizontalAngle(0); // todo tune
+      turret.setHorizontalAngle(0);
       turret.idle();
       return;
     }
