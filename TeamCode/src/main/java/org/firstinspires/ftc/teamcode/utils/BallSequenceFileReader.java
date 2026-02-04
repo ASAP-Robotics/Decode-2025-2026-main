@@ -17,21 +17,17 @@
 package org.firstinspires.ftc.teamcode.utils;
 
 import com.qualcomm.robotcore.util.ReadWriteFile;
-
+import java.io.File;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.json.JSONObject;
-
-import java.io.File;
 
 public class BallSequenceFileReader {
   private static final BallSequence DEFAULT_SEQUENCE = BallSequence.GPP;
   private BallSequence sequence;
   private boolean defaulted;
 
-  /**
-   * Reads the saved sequence from file
-   */
+  /** Reads the saved sequence from file */
   public BallSequenceFileReader() {
     try {
       File configFile = AppUtil.getInstance().getSettingsFile("ball_sequence.json");
@@ -64,6 +60,7 @@ public class BallSequenceFileReader {
 
   /**
    * Gets the ball sequence
+   *
    * @return the ball sequence
    */
   public BallSequence getSequence() {
@@ -72,6 +69,7 @@ public class BallSequenceFileReader {
 
   /**
    * Gets if the sequence was defaulted
+   *
    * @return true if the sequence couldn't be read and was defaulted, false otherwise
    */
   public boolean isDefaulted() {

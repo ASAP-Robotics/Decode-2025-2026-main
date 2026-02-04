@@ -17,20 +17,17 @@
 package org.firstinspires.ftc.teamcode.actions;
 
 import androidx.annotation.NonNull;
-
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.ReadWriteFile;
-
+import java.io.File;
+import java.util.List;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.json.JSONObject;
-
-import java.io.File;
-import java.util.List;
 
 public class ObeliskSearch implements Action {
 
@@ -83,16 +80,24 @@ public class ObeliskSearch implements Action {
     // Convert tag -> BallSequence (rich enum constant)
     BallSequence detectedSequence;
     switch (bestId) {
-      case 21: detectedSequence = BallSequence.GPP; break;
-      case 22: detectedSequence = BallSequence.PGP; break;
-      case 23: detectedSequence = BallSequence.PPG; break;
-      default: return true;
+      case 21:
+        detectedSequence = BallSequence.GPP;
+        break;
+      case 22:
+        detectedSequence = BallSequence.PGP;
+        break;
+      case 23:
+        detectedSequence = BallSequence.PPG;
+        break;
+      default:
+        return true;
     }
 
     // Save EXACTLY like your reference Limelight class
     try {
       String raw = ReadWriteFile.readFile(configFile);
-      JSONObject config = (raw != null && !raw.trim().isEmpty()) ? new JSONObject(raw) : new JSONObject();
+      JSONObject config =
+          (raw != null && !raw.trim().isEmpty()) ? new JSONObject(raw) : new JSONObject();
 
       config.put("sequence", detectedSequence.name());
       config.put("search_failed", false);
