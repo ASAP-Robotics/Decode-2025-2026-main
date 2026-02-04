@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,14 @@ import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 /**
- * @brief class to contain the behavior of the robot in TeliOp, to avoid code duplication
+ * @brief class to contain the behavior of the robot in TeleOp, to avoid code duplication
  */
 public class TeleOpRobot extends CommonRobot {
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
   protected MecanumWheelBase wheelBase;
   protected PinpointLocalizer pinpoint;
+  protected SimpleTimer telemetryTimer = new SimpleTimer(0.67);
   protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
   protected SimpleTimer odometryResetTimer = new SimpleTimer(2);
 
@@ -49,7 +50,7 @@ public class TeleOpRobot extends CommonRobot {
       AllianceColor allianceColor,
       Gamepad gamepad1,
       Gamepad gamepad2) {
-    super(hardwareMap, telemetry, allianceColor);
+    super(hardwareMap, telemetry, allianceColor, true);
 
     pinpoint = new PinpointLocalizer(hardwareMap, allianceColor.getAutoEndPosition());
 
@@ -67,20 +68,22 @@ public class TeleOpRobot extends CommonRobot {
    * @brief to be called once, when the opMode is initialized
    */
   public void init() {
+    clearSensorCache();
     SimpleTimer backup = new SimpleTimer(2);
     backup.start();
     while (pinpoint.getState() != GoBildaPinpointDriver.DeviceStatus.READY
         && !backup.isFinished()) {
+      clearSensorCache();
       pinpoint.update();
     }
     scoringSystem.init(false, false); // initialize scoring systems
-    scoringSystem.adjustTurretAngleOffset(allianceColor.getTurretOffset()); // tune
   }
 
   /**
    * @brief to be called repeatedly, while the opMode is in init
    */
   public void initLoop() {
+    clearSensorCache();
     scoringSystem.initLoop();
   }
 
@@ -88,6 +91,8 @@ public class TeleOpRobot extends CommonRobot {
    * @brief to be called once when the opMode is started
    */
   public void start() {
+    clearSensorCache();
+    telemetryTimer.start();
     scoringSystem.start(false, false); // start scoring systems up
     pinpointErrorTimer.start(); // maybe change
     odometryResetTimer.start();
@@ -97,6 +102,13 @@ public class TeleOpRobot extends CommonRobot {
    * @brief to be called repeatedly, every loop
    */
   public void loop() {
+    clearSensorCache();
+
+    boolean updateTelemetry = telemetryTimer.isFinished();
+    if (updateTelemetry) {
+      telemetryTimer.start();
+    }
+
     // manual sequence setting
     if (gamepad2.dpadDownWasPressed()) {
       scoringSystem.setBallSequence(BallSequence.PGP);
@@ -109,13 +121,12 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // shoot
-    if (gamepad2.right_trigger > 0.5) {
-      // mag.shootMag(); // shoot all balls in the mag, in a sequence if possible
-      scoringSystem.shootHalfSorted();
+    if (gamepad2.right_trigger > 0.67 || gamepad2.rightBumperWasPressed()) {
+      scoringSystem.shoot();
     }
 
     // eject
-    if (gamepad2.leftBumperWasPressed()) {
+    if (gamepad2.left_trigger > 0.67 || gamepad2.leftBumperWasPressed()) {
       scoringSystem.clearIntake();
     }
 
@@ -126,6 +137,23 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // miscellaneous backup manual controls
+    // turret rehome
+    if (gamepad1.aWasPressed()) {
+      scoringSystem.reSyncTurretEncoder();
+      // scoringSystem.prepForShutdown();
+    }
+    // color sensor enable toggle
+    if (gamepad1.bWasPressed()) {
+      scoringSystem.toggleColorSensorEnabled();
+    }
+    // unjam spindexer
+    if (gamepad1.xWasPressed()) {
+      scoringSystem.unJamSpindexer();
+    }
+    // home spindexer
+    if (gamepad1.yWasPressed()) {
+      scoringSystem.homeSpindexer();
+    }
     // override aiming
     if (gamepad2.bWasPressed()) {
       if (scoringSystem.isAimOverride()) {
@@ -176,9 +204,9 @@ public class TeleOpRobot extends CommonRobot {
             location.position.y,
             AngleUnit.RADIANS,
             location.heading.toDouble()));
-    scoringSystem.update();
+    scoringSystem.update(updateTelemetry);
 
-    telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
+    if (updateTelemetry) telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
 
     if (odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25) {
       Pose2D limelightPose = scoringSystem.getRobotPosition();
@@ -199,7 +227,7 @@ public class TeleOpRobot extends CommonRobot {
     wheelBase.update();
 
     // update telemetry
-    telemetry.update();
+    if (updateTelemetry) telemetry.update();
   }
 
   /**

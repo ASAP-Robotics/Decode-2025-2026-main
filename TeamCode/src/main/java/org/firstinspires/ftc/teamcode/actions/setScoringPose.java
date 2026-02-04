@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.actions; // file: MySetPositionAction.java
 
-
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import org.firstinspires.ftc.robotcore.external.navigation.*;
@@ -20,7 +19,7 @@ public class setScoringPose implements Action {
   public boolean run(TelemetryPacket packet) {
 
     scoringSystem.setRobotPosition(allianceColor.getAutoSSShootPosition());
-    scoringSystem.update();
+    scoringSystem.update(true);
     return false;
   }
 }

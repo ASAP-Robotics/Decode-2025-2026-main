@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,39 @@ import static java.lang.Math.min;
 import static org.firstinspires.ftc.teamcode.utils.MathUtils.map;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.teamcode.interfaces.System;
+import org.firstinspires.ftc.teamcode.types.SystemReport;
+import org.firstinspires.ftc.teamcode.types.SystemStatus;
+import org.firstinspires.ftc.teamcode.utils.Follower;
 
-/**
- * @brief wrapper around the `Servo` class to add encoder feedback
- */
-public class Axon {
+/** Wrapper around the `Servo` class to add encoder feedback and rudimentary fault detection */
+public class Axon implements System {
+  private static final double UPDATE_TOLERANCE_DEGREES = 1; // amount setpoint has to change by to
+  // actually set servo
+  private SystemStatus status = SystemStatus.NOMINAL; // the status of the servo
+  private final Follower follower; // backup follower to model servo movement if encoder fails
   private final Servo servo; // the servo being controlled
   private final AnalogInput encoder; // the encoder of the servo being controlled
   private final boolean dummy; // if true, the servo will always be "at target"
-  private double toleranceDegrees;
+  private final double toleranceDegrees;
+  private double targetPositionDegrees;
 
   /**
-   * @brief creates a dummy (no encoder) Axon with default parameters
+   * Creates a default Axon
+   *
+   * @param hardwareMap the hardware map
+   * @param servoName the name of the encoder
+   * @param encoderName the name of the servo
+   */
+  public Axon(HardwareMap hardwareMap, String servoName, String encoderName) {
+    this(hardwareMap.get(Servo.class, servoName), hardwareMap.get(AnalogInput.class, encoderName));
+  }
+
+  /**
+   * Creates a dummy (no encoder) Axon with default parameters
+   *
    * @param servo the servo to control
    */
   public Axon(Servo servo) {
@@ -41,7 +61,8 @@ public class Axon {
   }
 
   /**
-   * @brief creates an object of the `EncoderServo` class with default parameters
+   * Creates an object of the `EncoderServo` class with default parameters
+   *
    * @param servo the servo to control
    * @param encoder the encoder of the servo being controlled
    */
@@ -50,17 +71,8 @@ public class Axon {
   }
 
   /**
-   * @brief creates an object of the `EncoderServo` class with default parameters
-   * @param servo the servo to control
-   * @param encoder the encoder of the servo being controlled
-   * @param dummy if true, the servo will always be "at target"
-   */
-  public Axon(Servo servo, AnalogInput encoder, boolean dummy) {
-    this(servo, encoder, 5, dummy);
-  }
-
-  /**
-   * @brief creates an object of the `EncoderServo` class
+   * Creates an object of the `EncoderServo` class
+   *
    * @param servo the servo to control
    * @param encoder the encoder of the servo being controlled
    * @param toleranceDegrees the amount the angle read can differ from the target angle and the
@@ -71,11 +83,36 @@ public class Axon {
     this.encoder = encoder;
     this.dummy = dummy;
     this.toleranceDegrees = toleranceDegrees;
+    this.targetPositionDegrees = 0;
+    // 214 degrees per second, about the speed of an axon divided by 2
+    this.follower = dummy ? null : new Follower(getPosition(), 0, 0, 214);
+  }
+
+  public SystemReport getStatus() {
+    String message;
+    switch (status) {
+      case NOMINAL:
+        message = "Operational";
+        break;
+
+      case INOPERABLE:
+        message = "Inoperable";
+        break;
+
+      case FALLBACK:
+        message = "Encoder failure; performance will be degraded";
+        break;
+
+      default:
+        message = "Unknown state";
+    }
+    return new SystemReport(status, message);
   }
 
   /**
-   * @brief gets the amount the angle read can differ from the target angle and the servo still be
-   *     considered "at target"
+   * Gets the amount the angle read can differ from the target angle and the servo still be
+   * considered "at target"
+   *
    * @return the tolerance, in degrees
    */
   public double getToleranceDegrees() {
@@ -83,33 +120,31 @@ public class Axon {
   }
 
   /**
-   * @brief sets the amount the angle read can differ from the target angle and the servo still be *
-   *     considered "at target"
-   * @param toleranceDegrees the tolerance, in degrees
-   */
-  public void setToleranceDegrees(double toleranceDegrees) {
-    this.toleranceDegrees = toleranceDegrees;
-  }
-
-  /**
-   * @brief sets the target position of the servo
-   * @param degrees
+   * Sets the target position of the servo
+   *
+   * @param degrees the target position of the servo, in degrees
    */
   public void setPosition(double degrees) {
+    double oldTargetPositionDegrees = targetPositionDegrees;
+    targetPositionDegrees = degrees;
+    if (Math.abs(oldTargetPositionDegrees - degrees) <= UPDATE_TOLERANCE_DEGREES) return;
+    if (!dummy) follower.setTarget(degrees);
     servo.setPosition(degrees / 360);
   }
 
   /**
-   * @brief gets the target position of the servo
-   * @return the target position of the servo
+   * Gets the target position of the servo
+   *
+   * @return the target position of the servo, or 0 if it hasn't been set yet
    * @note this method doesn't return the *current position*, it returns the *target position*
    */
   public double getTargetPosition() {
-    return servo.getPosition() * 360;
+    return targetPositionDegrees;
   }
 
   /**
-   * @brief reads the current position of the servo
+   * Reads the current position of the servo
+   *
    * @return the current position of the servo, in degrees (from 0 to 360)
    * @note if this servo is a dummy this will always return 0
    */
@@ -120,14 +155,16 @@ public class Axon {
   }
 
   /**
-   * @brief gets if the servo is currently within tolerance of its target
+   * Gets if the servo is currently within tolerance of its target
+   *
    * @return true if the servo is at its target, false if it isn't at its target
    * @note if this servo is a dummy this will always return true
    */
-  public boolean isAtTarget() {
+  public boolean atTarget() {
     if (dummy) return true; // dummy servos are always at target
-    double target = getTargetPosition();
-    double position = getPosition();
-    return position >= (target - toleranceDegrees) && position <= (target + toleranceDegrees);
+    boolean encoderAtTarget = Math.abs(getTargetPosition() - getPosition()) <= toleranceDegrees;
+    boolean followerAtTarget = follower.isAtTarget();
+    status = followerAtTarget && !encoderAtTarget ? SystemStatus.FALLBACK : SystemStatus.NOMINAL;
+    return encoderAtTarget || followerAtTarget;
   }
 }

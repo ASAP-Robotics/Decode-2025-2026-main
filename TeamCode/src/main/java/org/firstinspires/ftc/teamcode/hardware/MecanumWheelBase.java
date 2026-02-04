@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,16 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class MecanumWheelBase {
+  private static final double POWER_TOLERANCE = 0.01; // size of power level increments
   private final DcMotorEx frontLeft, frontRight, backLeft, backRight;
   private final double sensitivityCurve; // exponent used to scale input throttle values
   private double rotation = 0; // number of degrees the robot is rotated relative to field forward
   private double rawThrottleX = 0, rawThrottleY = 0, rawThrottleZ = 0; // raw throttle values
   private double throttleX = 0, throttleY = 0, throttleZ = 0; // processed (robot) throttle values
+  private double powerFL = 0, powerFR = 0, powerBL = 0, powerBR = 0; // last set power values
   private double minAccelerationTime; // the time in seconds to go from 0 to full speed
   private boolean fieldCentric = false; // whether or not to use field-centric control
-  private ElapsedTime lastUpdateTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+  private final ElapsedTime lastUpdateTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
   public MecanumWheelBase(
       DcMotorEx frontLeft,
@@ -63,7 +65,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief stops all powered wheel movement (think E-stop)
+   * Stops all powered wheel movement (think E-stop)
+   *
    * @note call only when the "Stop" button is pressed; otherwise things will break
    */
   public void stop() {
@@ -87,7 +90,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief sets weather or not field-centric control will be used
+   * Sets weather or not field-centric control will be used
+   *
    * @param fieldCentric true for field-centric control, false for robot-centric control
    */
   public void setFieldCentric(boolean fieldCentric) {
@@ -95,7 +99,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief sets the minimum time that the robot can go from 0% to 100% throttle
+   * Sets the minimum time that the robot can go from 0% to 100% throttle
+   *
    * @param seconds the time in seconds to go from 0 to full speed
    */
   public void setAccelerationTime(double seconds) {
@@ -103,7 +108,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief sets the rotation of the robot relative to the field (for field-centric control)
+   * Sets the rotation of the robot relative to the field (for field-centric control)
+   *
    * @param degrees the number of degrees the robot is rotated relative to the field
    */
   public void setRotation(double degrees) {
@@ -111,7 +117,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief sets all throttle values controlling the wheel base
+   * Sets all throttle values controlling the wheel base
+   *
    * @param x the throttle controlling the x-axis speed
    * @param y the throttle controlling the y-axis speed
    * @param z the throttle controlling turning speed
@@ -125,7 +132,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief sets the throttle value controlling the x-axis motion of the wheel base
+   * Sets the throttle value controlling the x-axis motion of the wheel base
+   *
    * @param x the throttle controlling the x-axis speed
    * @note input must be between 1 and -1, values below 0 reverse direction
    */
@@ -134,7 +142,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief sets the throttle value controlling the x-axis motion of the wheel base
+   * Sets the throttle value controlling the x-axis motion of the wheel base
+   *
    * @param x the throttle controlling the x-axis speed
    * @param update weather or not the motors should be updated with the new value
    * @note input must be between 1 and -1, values below 0 reverse direction
@@ -145,7 +154,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief sets the throttle value controlling the y-axis motion of the wheel base
+   * Sets the throttle value controlling the y-axis motion of the wheel base
+   *
    * @param y the throttle controlling the y-axis speed
    * @note input must be between 1 and -1, values below 0 reverse direction
    */
@@ -154,7 +164,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief sets the throttle value controlling the y-axis motion of the wheel base
+   * Sets the throttle value controlling the y-axis motion of the wheel base
+   *
    * @param y the throttle controlling the y-axis speed
    * @param update weather or not the motors should be updated with the new value
    * @note input must be between 1 and -1, values below 0 reverse direction
@@ -165,7 +176,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief sets the throttle value controlling the turning motion of the wheel base
+   * Sets the throttle value controlling the turning motion of the wheel base
+   *
    * @param z the throttle controlling the turning speed
    * @note input must be between 1 and -1, values below 0 reverse direction
    */
@@ -174,7 +186,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief sets the throttle value controlling the turning motion of the wheel base
+   * Sets the throttle value controlling the turning motion of the wheel base
+   *
    * @param z the throttle controlling the turning speed
    * @param update weather or not the motors should be updated with the new value
    * @note input must be between 1 and -1, values below 0 reverse direction
@@ -185,7 +198,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief adjusts throttle inputs from 1 to -1 to fit a sensitivity curve
+   * Adjusts throttle inputs from 1 to -1 to fit a sensitivity curve
+   *
    * @param input the throttle input, from 1 to -1
    * @return the adjusted throttle output, from 1 to -1
    * @note if passed an input less than -1 or greater than 1, 0 will be returned
@@ -195,7 +209,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief adjusts throttle inputs from 1 to -1 to fit a sensitivity curve and limit acceleration
+   * Adjusts throttle inputs from 1 to -1 to fit a sensitivity curve and limit acceleration
+   *
    * @param input the throttle input, from 1 to -1
    * @param lastOutput the value used to calculate maximum output increase
    * @param maxIncrease the maximum amount the output is allowed to increase by
@@ -207,7 +222,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief adjusts throttle inputs from 1 to -1 to fit a sensitivity curve
+   * Adjusts throttle inputs from 1 to -1 to fit a sensitivity curve
+   *
    * @param input the throttle input, from 1 to -1
    * @param lastOutput the value used to calculate maximum output increase
    * @param maxIncrease the maximum amount the output is allowed to increase by
@@ -235,7 +251,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief rotates the vector of a pair of throttle inputs by the given number of degrees
+   * Rotates the vector of a pair of throttle inputs by the given number of degrees
+   *
    * @param degrees the number of degrees to rotate the throttle by
    * @param x the input x throttle value
    * @param y the input y throttle value
@@ -252,7 +269,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief sets motor target speeds according to throttle values
+   * Sets motor target speeds according to throttle values
+   *
    * @note this override uses robot-centric control. Call update(true) for field-centric control
    */
   public void update() {
@@ -260,7 +278,8 @@ public class MecanumWheelBase {
   }
 
   /**
-   * @brief sets motor target speeds according to throttle values
+   * Sets motor target speeds according to throttle values
+   *
    * @param fieldCentric driving will be field-centric if true, robot-centric if false
    */
   public void update(boolean fieldCentric) {
@@ -300,9 +319,21 @@ public class MecanumWheelBase {
     br /= maxTargetSpeed;
 
     // set motor target powers
-    frontLeft.setPower(fl);
-    frontRight.setPower(fr);
-    backLeft.setPower(bl);
-    backRight.setPower(br);
+    if (Math.abs(fl - powerFL) > POWER_TOLERANCE) {
+      frontLeft.setPower(fl);
+      powerFL = fl;
+    }
+    if (Math.abs(fr - powerFR) > POWER_TOLERANCE) {
+      frontRight.setPower(fr);
+      powerFR = fr;
+    }
+    if (Math.abs(bl - powerBL) > POWER_TOLERANCE) {
+      backLeft.setPower(bl);
+      powerBL = bl;
+    }
+    if (Math.abs(br - powerBR) > POWER_TOLERANCE) {
+      backRight.setPower(br);
+      powerBR = br;
+    }
   }
 }

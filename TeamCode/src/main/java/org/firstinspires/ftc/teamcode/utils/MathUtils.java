@@ -16,6 +16,8 @@
 
 package org.firstinspires.ftc.teamcode.utils;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 public class MathUtils {
   /**
    * @brief maps a number from one range to another
@@ -39,5 +41,29 @@ public class MathUtils {
    */
   public static double clamp(double val, double min, double max) {
     return Math.max(min, Math.min(max, val));
+  }
+
+  /**
+   * @brief finds the closest value to `input` that is equal to `desired` modulo `offset`
+   * @param input the initial, unadjusted input value
+   * @param desired the value we want to be close to
+   * @param offset the size of offset steps
+   * @return the optimized value
+   */
+  public static double closestWithOffset(double input, double desired, double offset) {
+    double numOffsets = Math.round((desired - input) / offset);
+    return input + numOffsets * offset;
+  }
+
+  /**
+   * Normalizes an angle around a center point
+   *
+   * @param angle the angle to normalize
+   * @param center the angle to normalize around
+   * @return the normalized angle
+   * @note units in degrees
+   */
+  public static double normalizeAround(double angle, double center) {
+    return AngleUnit.normalizeDegrees(angle - center) + center;
   }
 }

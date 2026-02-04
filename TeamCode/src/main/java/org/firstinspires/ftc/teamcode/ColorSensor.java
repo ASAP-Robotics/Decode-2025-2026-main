@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import org.firstinspires.ftc.teamcode.hardware.ColorSensorV3;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
 
 @TeleOp
 public class ColorSensor extends LinearOpMode {
@@ -13,10 +13,8 @@ public class ColorSensor extends LinearOpMode {
 
     waitForStart();
 
-    colorSensorV3.start();
-
     while (opModeIsActive()) {
-      colorSensorV3.update(telemetry);
+      colorSensorV3.update();
 
       telemetry.addData("Color", colorSensorV3.getColor());
       telemetry.update();

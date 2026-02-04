@@ -14,6 +14,6 @@ public class shootAction implements Action {
 
   @Override
   public boolean run(TelemetryPacket packet) {
-    return scoringSystem.shootHalfSorted();
+    return scoringSystem.shoot();
   }
 }
