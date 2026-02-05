@@ -31,6 +31,8 @@ import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
+import org.firstinspires.ftc.teamcode.utils.BallSequenceFileReader;
+import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.jetbrains.annotations.TestOnly;
 
@@ -54,6 +56,7 @@ public class ScoringSystem {
   private boolean turretAimOverride = false; // if the aim of the turret is overridden
   private double horizontalAngleOverride = 0;
   private boolean tuning = false;
+  private boolean shutDown = false; // if the systems are shutting down at the end of auto
   private double verticalAngleOverride = 60;
   private double rpmOverride = 2000;
   private double distanceOverride = 1;
@@ -85,6 +88,7 @@ public class ScoringSystem {
     this.allianceColor = allianceColor;
     this.telemetry = telemetry;
     this.targetPosition = this.allianceColor.getTargetLocation();
+    this.ballSequence = new BallSequenceFileReader().getSequence();
   }
 
   /**
@@ -99,7 +103,7 @@ public class ScoringSystem {
     spindex.init(BallSequence.GPP, isPreloaded, auto);
     turret.init(0);
     turret.setActive(!isPreloaded);
-    limelight.init(auto);
+    limelight.init();
   }
 
   /** To be called repeatedly while the robot is in init */
@@ -118,7 +122,6 @@ public class ScoringSystem {
     turret.enable(); // let the flywheel spin up
     turret.start();
     limelight.start();
-    if (search) limelight.detectSequence();
     state = isPreloaded ? State.FULL : State.INTAKING;
     timeSinceStart.reset();
     loopTime.reset();
@@ -142,7 +145,6 @@ public class ScoringSystem {
    */
   public void update(boolean updateTelemetry) {
     limelight.update();
-    ballSequence = limelight.getSequence();
     updateAiming();
     updateSpindex();
     updateIntake();
@@ -161,6 +163,12 @@ public class ScoringSystem {
 
   /** Updates everything to do with aiming the turret */
   private void updateAiming() {
+    if (shutDown) {
+      turret.setHorizontalAngle(0);
+      turret.idle();
+      return;
+    }
+
     if (tuning) {
       turret.tuneShooting(rpmOverride, verticalAngleOverride);
 
@@ -183,7 +191,7 @@ public class ScoringSystem {
   /** Updates everything to do with the spindexer */
   private void updateSpindex() {
     spindex.setSequence(ballSequence);
-    if (state == State.SHOOTING && spindex.isReadyToShoot() && turret.isReadyToShoot()) {
+    if (state == State.SHOOTING && isReadyToShoot() && !shutDown) {
       spindex.shoot();
     }
 
@@ -204,6 +212,11 @@ public class ScoringSystem {
 
   /** Updates everything to do with the intake */
   private void updateIntake() {
+    if (shutDown) {
+      intake.stop();
+      return;
+    }
+
     if (clearingIntake) { // if clearing the intake
       if (intake.timer.isFinished()) { // if done clearing the intake
         clearingIntake = false;
@@ -481,15 +494,6 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief forces a re-check of the sequence to shoot
-   * @note intended for use in emergency game situations (when something has malfunctioned); not
-   *     intended to be used normally or regularly
-   */
-  public void emergencyRecheckSequence() {
-    limelight.detectSequence();
-  }
-
-  /**
    * Forces a re read of the turret's absolute encoder
    *
    * @note intended only as a driver backup
@@ -509,12 +513,19 @@ public class ScoringSystem {
   /**
    * @brief gets the 2D position of the robot on the field according to limelight
    * @return the position of the robot, or null if either the target isn't visible or the camera
-   *     isn't still
+   *     isn't still or the set position is too different
    * @note this returns null under normal operation conditions, be careful
    */
   public Pose2D getRobotPosition() {
     Pose2D limelightPosition = limelight.getPosition();
     if (limelightPosition == null || !turret.isAtTarget()) return null;
+    Pose2D positionDifference = MathUtils.poseDifference(robotPosition, limelightPosition);
+    if (Math.hypot(
+                positionDifference.getX(DistanceUnit.INCH),
+                positionDifference.getY(DistanceUnit.INCH))
+            > 4
+        || Math.abs(positionDifference.getHeading(AngleUnit.DEGREES)) > 15) return null;
+
     double rotationDegrees = AngleUnit.normalizeDegrees(turret.getHorizontalAngleDegrees());
     double x = limelightPosition.getX(DistanceUnit.INCH);
     double y = limelightPosition.getY(DistanceUnit.INCH);
@@ -530,6 +541,16 @@ public class ScoringSystem {
    */
   public Limelight.LimeLightMode getLimelightState() {
     return limelight.getMode();
+  }
+
+  /**
+   * Prepares systems for Autonomous shutdown
+   *
+   * @note only to be called at the end of Auto OpModes
+   */
+  public void prepForShutdown() {
+    spindex.prepForShutdown();
+    shutDown = true;
   }
 
   /**

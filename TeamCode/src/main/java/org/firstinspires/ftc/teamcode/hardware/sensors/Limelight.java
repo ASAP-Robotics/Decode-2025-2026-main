@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +19,15 @@ package org.firstinspires.ftc.teamcode.hardware.sensors;
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.ReadWriteFile;
-import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
-import org.firstinspires.ftc.teamcode.types.BallSequence;
-import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class Limelight {
   protected static class Result {
@@ -50,67 +42,42 @@ public class Limelight {
 
   public enum LimeLightMode {
     NAVIGATION,
-    IDENTIFICATION,
     UNINITIALIZED
   }
 
   private static final double AVERAGE_TIME = 3; // time period to average location over, seconds
-  private static final double MAX_POSITION_DEVIATION = 4; // for average, inches
-  private static final double MAX_ANGLE_DEVIATION = 6.7; // for average, degrees
+  private static final double MAX_POSITION_DEVIATION = 3; // for average, inches
+  private static final double MAX_ANGLE_DEVIATION = 3; // for average, degrees
   private static final double OUTLIER_PERCENTAGE = 0.4; // the percent of values to trim as outliers
-  File configFile = AppUtil.getInstance().getSettingsFile("ball_sequence.json");
-  JSONObject config = new JSONObject(); // by default, config is blank
   private final Limelight3A limelight;
   private final AllianceColor allianceColor;
-  private BallSequence detectedSequence = BallSequence.GPP;
   private LimeLightMode mode;
-  private LinkedList<Result> results = new LinkedList<>();
+  private final LinkedList<Result> results = new LinkedList<>();
   private boolean isResultValid = false; // if the latest result is valid (contains a target)
-  private final SimpleTimer detectionTimer;
   private final ElapsedTime timeSinceStart; // timer to track time since object creation
 
   /**
    * @brief makes an object of the Limelight class
    * @param limelight the Limelight3A to use
    * @param allianceColor the alliance color of the robot
-   * @param searchTime the maximum amount of time (seconds) to search for a ball sequence for
    * @note search is intended to be true for auto, and false for teliop
    */
-  public Limelight(Limelight3A limelight, AllianceColor allianceColor, double searchTime) {
+  public Limelight(Limelight3A limelight, AllianceColor allianceColor) {
     this.limelight = limelight;
     this.allianceColor = allianceColor;
     this.mode = LimeLightMode.UNINITIALIZED;
-    this.detectionTimer = new SimpleTimer(searchTime);
     this.timeSinceStart = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   }
 
   /**
-   * @brief initializes limelight
-   * @param search if true, limelight will search for a sequence before switching to navigation
-   *     mode, if false it will start navigation immediately and use the stored last detected
-   *     sequence
+   * @brief initializes limelight mode, if false it will start navigation immediately and use the
+   *     stored last detected sequence
    */
-  public void init(boolean search) {
-    mode = search ? LimeLightMode.IDENTIFICATION : LimeLightMode.NAVIGATION;
-
-    switch (mode) {
-      case IDENTIFICATION:
-        detectionTimer.start();
-        break;
-
-      case NAVIGATION:
-        try {
-          config = new JSONObject(ReadWriteFile.readFile(configFile)); // get stored sequence
-          detectedSequence = BallSequence.valueOf(config.getString("sequence"));
-        } catch (JSONException ignored) {
-          // fail silently if config read failed
-          detectedSequence = BallSequence.PPG;
-        }
-        break;
-    }
+  public void init() {
+    mode = LimeLightMode.NAVIGATION;
 
     limelight.pipelineSwitch(getPipeline());
-    limelight.setPollRateHz(60);
+    limelight.setPollRateHz(50);
   }
 
   /**
@@ -148,99 +115,14 @@ public class Limelight {
     }
 
     if (!isPipelineCorrect()) limelight.pipelineSwitch(getPipeline());
-
-    if (mode == LimeLightMode.IDENTIFICATION) updateIdentification();
-  }
-
-  /**
-   * @brief updates stuff to do with detecting the ball sequence
-   * @note only call if mode is identification
-   */
-  private void updateIdentification() {
-    BallSequence oldSequence = detectedSequence;
-
-    List<LLResultTypes.FiducialResult> apriltags = results.getLast().result.getFiducialResults();
-    int bestId = NULL;
-    if (apriltags.size() == 2) {
-      // if limelight sees two apriltags
-      bestId = getBestId(apriltags);
-    }
-
-    for (BallSequence sequence : BallSequence.values()) {
-      // ^ for all possible ball sequences
-      if (sequence.getAprilTagId() == bestId) {
-        // ^ if the tag ID of the sequence matches the best tag
-        detectedSequence = sequence;
-        break;
-      }
-    }
-
-    boolean searchFailed = detectionTimer.isFinished();
-
-    if (detectedSequence != oldSequence || searchFailed) {
-      // ^ if a new ball sequence was detected
-      mode = LimeLightMode.NAVIGATION;
-
-      if (searchFailed) {
-        detectedSequence = BallSequence.GPP; // default to GPP if search failed
-      }
-
-      try {
-        config.put("sequence", detectedSequence.name());
-        config.put("search_failed", searchFailed);
-      } catch (JSONException ignored) {
-
-      }
-      ReadWriteFile.writeFile(configFile, config.toString()); // store detected sequence
-    }
-  }
-
-  /**
-   * @brief gets the best of a list of (two) apriltags
-   * @param apriltags the list of apriltags
-   * @return the ID of the tag to use
-   */
-  private int getBestId(List<LLResultTypes.FiducialResult> apriltags) {
-    // assumes far-left is negative, far-right is positive, and center is 0
-    double bestX = allianceColor == AllianceColor.RED ? 180 : -180;
-    int bestId = NULL;
-    for (LLResultTypes.FiducialResult tag : apriltags) {
-      switch (allianceColor) {
-        case RED:
-          if (tag.getTargetXDegrees() < bestX) {
-            // ^ if tag is further left than previous best
-            bestX = tag.getTargetXDegrees();
-            bestId = tag.getFiducialId();
-          }
-          break;
-
-        case BLUE:
-          if (tag.getTargetXDegrees() > bestX) {
-            // ^ if tag is further right than previous best
-            bestX = tag.getTargetXDegrees();
-            bestId = tag.getFiducialId();
-          }
-          break;
-      }
-    }
-    return bestId;
-  }
-
-  /**
-   * @brief gets the ball sequence detected by limelight or stored from last detection
-   * @return the ball sequence detected by limelight
-   * @note if a sequence hasn't been detected yet, this will return null
-   */
-  public BallSequence getSequence() {
-    return detectedSequence;
   }
 
   /**
    * @brief gets the position of limelight on the field, using FTC coordinates
-   * @return the 2D position of limelight on the field, or 0 if invalid
+   * @return the 2D position of limelight on the field, or null if invalid
    */
   public Pose2D getPosition() {
-    if (results == null || !isResultValid || results.isEmpty()) {
+    if (!isResultValid || results.isEmpty()) {
       return null;
     }
 
@@ -350,15 +232,6 @@ public class Limelight {
   }
 
   /**
-   * @brief gets if limelight is ready to use for navigation
-   * @return true if limelight has detected a valid ball sequence and switched to navigation mode,
-   *     false otherwise
-   */
-  public boolean isReadyToNavigate() {
-    return mode == LimeLightMode.NAVIGATION && detectedSequence != null;
-  }
-
-  /**
    * @brief gets the current mode of limelight
    * @return the mode limelight is in
    */
@@ -367,29 +240,15 @@ public class Limelight {
   }
 
   /**
-   * @brief forces limelight to (re) detect the ball sequence
-   */
-  public void detectSequence() {
-    mode = LimeLightMode.IDENTIFICATION;
-    detectionTimer.start();
-  }
-
-  /**
    * @brief gets the pipeline to use for the mode
    * @return the limelight pipeline to use
    * @note returns an invalid pipeline (-1) if mode is uninitialized
    */
   protected int getPipeline() {
-    switch (mode) {
-      case NAVIGATION:
-        return allianceColor.getLimelightPipeline();
-
-      case IDENTIFICATION:
-        return 0;
-
-      default:
-        return NULL;
+    if (mode == LimeLightMode.NAVIGATION) {
+      return allianceColor.getLimelightPipeline();
     }
+    return NULL;
   }
 
   /**

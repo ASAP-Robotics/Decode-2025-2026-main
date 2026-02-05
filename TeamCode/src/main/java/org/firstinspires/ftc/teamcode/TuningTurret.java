@@ -26,18 +26,19 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
-import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoder;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 
 @TeleOp(name = "Tuning turret", group = "Tuning")
 @Config
 public class TuningTurret extends LinearOpMode {
   public static int target_loop_time = 20;
-  public static double angle = 0;
-  public static double kD = 0.0009;
-  public static double kI = 0.05;
-  public static double kP = 0.025;
-  public static boolean sync = false;
+  public static double speed = 1000;
+  public static boolean active = false;
+  public static double kP = 400;
+  public static double kI = 1;
+  public static double kD = 0;
+  public static double kF = 16;
 
   @Override
   public void runOpMode() {
@@ -49,7 +50,7 @@ public class TuningTurret extends LinearOpMode {
     Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
     Axon turretHood = new Axon(rawTurretHood);
     Motor turretRotator = new Motor(hardwareMap, "turretRotator", Motor.GoBILDA.RPM_1150);
-    ElcAbsEncoder turretEncoder = new ElcAbsEncoder(hardwareMap, "turretEncoder", "turretRotator");
+    ElcAbsEncoderAnalog turretEncoder = new ElcAbsEncoderAnalog(hardwareMap, "turretEncoder");
     DcMotorEx flywheelMotor = this.hardwareMap.get(DcMotorEx.class, "flywheel");
     Turret turret = new Turret(flywheelMotor, turretRotator, turretEncoder, turretHood, 1500);
 
@@ -58,16 +59,13 @@ public class TuningTurret extends LinearOpMode {
     waitForStart();
     turret.start();
     turret.setTargetDistance(50);
+    turret.setHorizontalAngle(0);
     turret.enable();
-    turret.activate();
 
     while (opModeIsActive()) {
-      if (sync) {
-        turret.syncEncoder();
-        sync = false;
-      }
-      turret.tuneHorizontalPID(kP, kI, kD);
-      turret.setHorizontalAngle(angle);
+      turret.setActive(active);
+      turret.tunePIDF(kP, kI, kD, kF);
+      turret.tuneShooting(speed, 60);
       turret.update();
 
       // it shouldn't matter where this goes
@@ -77,9 +75,12 @@ public class TuningTurret extends LinearOpMode {
       loopTime.reset();
 
       dashboardTelemetry.addData("At target", turret.isAtTarget());
-      dashboardTelemetry.addData("Angle", turret.getHorizontalAngleDegrees());
-      dashboardTelemetry.addData("Target angle", turret.getTargetHorizontalAngleDegrees());
+      dashboardTelemetry.addData("At speed", turret.isAtSpeed());
+      dashboardTelemetry.addData("Speed", turret.getCurrentSpeed());
+      dashboardTelemetry.addData("Simulated speed", turret.getSimulationValue());
+      dashboardTelemetry.addData("Target speed", turret.getTargetSpeed());
       dashboardTelemetry.addData("Loop time", realLoopTime);
+      dashboardTelemetry.addData("Status", turret.getStatus().message);
 
       dashboardTelemetry.update();
     }

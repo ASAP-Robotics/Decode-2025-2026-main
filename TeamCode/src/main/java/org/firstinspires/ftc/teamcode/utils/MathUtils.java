@@ -16,6 +16,10 @@
 
 package org.firstinspires.ftc.teamcode.utils;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+
 public class MathUtils {
   /**
    * @brief maps a number from one range to another
@@ -51,5 +55,34 @@ public class MathUtils {
   public static double closestWithOffset(double input, double desired, double offset) {
     double numOffsets = Math.round((desired - input) / offset);
     return input + numOffsets * offset;
+  }
+
+  /**
+   * Normalizes an angle around a center point
+   *
+   * @param angle the angle to normalize
+   * @param center the angle to normalize around
+   * @return the normalized angle
+   * @note units in degrees
+   */
+  public static double normalizeAround(double angle, double center) {
+    return AngleUnit.normalizeDegrees(angle - center) + center;
+  }
+
+  /**
+   * Gets the difference between two positions
+   *
+   * @param pose1 the first position
+   * @param pose2 the second position
+   * @return the difference between the first and second positions
+   */
+  public static Pose2D poseDifference(Pose2D pose1, Pose2D pose2) {
+    return new Pose2D(
+        DistanceUnit.INCH,
+        pose1.getX(DistanceUnit.INCH) - pose2.getX(DistanceUnit.INCH),
+        pose1.getY(DistanceUnit.INCH) - pose2.getY(DistanceUnit.INCH),
+        AngleUnit.DEGREES,
+        AngleUnit.normalizeDegrees(
+            pose1.getHeading(AngleUnit.DEGREES) - pose2.getHeading(AngleUnit.DEGREES)));
   }
 }

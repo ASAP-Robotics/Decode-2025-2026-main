@@ -42,7 +42,7 @@ public class HomableRotator implements System {
 
   private static final double UPDATE_TOLERANCE =
       0.01; // amount power has to change by to actually set motor
-  protected static final double HOMING_INCREMENT_SIZE = 1; // degrees
+  protected static final double HOMING_INCREMENT_SIZE = -2; // degrees
 
   protected final Motor motor;
   protected final TouchSensor sensor;

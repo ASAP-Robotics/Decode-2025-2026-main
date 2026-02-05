@@ -77,9 +77,9 @@ public class Spindex implements System {
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // code assumptions: increasing angle shoots
-    new SpindexSlot(10, 350), // slot 0
-    new SpindexSlot(130, 110), // slot 1
-    new SpindexSlot(250, 230) // slot 2
+    new SpindexSlot(15, 350), // slot 0
+    new SpindexSlot(135, 110), // slot 1
+    new SpindexSlot(255, 230) // slot 2
   };
 
   private final SimpleTimer intakeDelay =
@@ -184,7 +184,7 @@ public class Spindex implements System {
         break;
 
       case UNINITIALIZED: // if the spindex is uninitialized
-        spinner.setAngle(0);
+        spinner.setAngle(-10);
         break;
     }
 
@@ -269,7 +269,7 @@ public class Spindex implements System {
    */
   public void prepForShutdown() {
     state = SpindexState.UNINITIALIZED;
-    turnSpindexNoShoot(-10);
+    turnSpindexNoShoot(10); // todo tune
   }
 
   /**
