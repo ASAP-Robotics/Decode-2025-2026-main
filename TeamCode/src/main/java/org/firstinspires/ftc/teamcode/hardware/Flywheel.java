@@ -106,6 +106,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
 
   /**
    * Gets the current speed of the flywheel
+   *
    * @return the last measured speed of the flywheel, in RPM
    */
   @TestOnly
@@ -115,6 +116,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
 
   /**
    * Gets the target speed of the flywheel
+   *
    * @return the target speed of the flywheel, in RPM
    */
   @TestOnly
@@ -139,6 +141,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
 
   /**
    * Tunes the PIDF coefficients of the flywheel motor
+   *
    * @param p the proportional coefficient
    * @param i the integral coefficient
    * @param d the derivative coefficient

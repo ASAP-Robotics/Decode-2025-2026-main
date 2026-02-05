@@ -71,6 +71,7 @@ public class MathUtils {
 
   /**
    * Gets the difference between two positions
+   *
    * @param pose1 the first position
    * @param pose2 the second position
    * @return the difference between the first and second positions
@@ -81,7 +82,7 @@ public class MathUtils {
         pose1.getX(DistanceUnit.INCH) - pose2.getX(DistanceUnit.INCH),
         pose1.getY(DistanceUnit.INCH) - pose2.getY(DistanceUnit.INCH),
         AngleUnit.DEGREES,
-        AngleUnit.normalizeDegrees(pose1.getHeading(AngleUnit.DEGREES) - pose2.getHeading(AngleUnit.DEGREES))
-    );
+        AngleUnit.normalizeDegrees(
+            pose1.getHeading(AngleUnit.DEGREES) - pose2.getHeading(AngleUnit.DEGREES)));
   }
 }

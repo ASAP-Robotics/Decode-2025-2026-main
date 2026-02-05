@@ -521,10 +521,10 @@ public class ScoringSystem {
     if (limelightPosition == null || !turret.isAtTarget()) return null;
     Pose2D positionDifference = MathUtils.poseDifference(robotPosition, limelightPosition);
     if (Math.hypot(
-        positionDifference.getX(DistanceUnit.INCH),
-        positionDifference.getY(DistanceUnit.INCH)) > 4
-        || Math.abs(positionDifference.getHeading(AngleUnit.DEGREES)) > 15
-    ) return null;
+                positionDifference.getX(DistanceUnit.INCH),
+                positionDifference.getY(DistanceUnit.INCH))
+            > 4
+        || Math.abs(positionDifference.getHeading(AngleUnit.DEGREES)) > 15) return null;
 
     double rotationDegrees = AngleUnit.normalizeDegrees(turret.getHorizontalAngleDegrees());
     double x = limelightPosition.getX(DistanceUnit.INCH);
