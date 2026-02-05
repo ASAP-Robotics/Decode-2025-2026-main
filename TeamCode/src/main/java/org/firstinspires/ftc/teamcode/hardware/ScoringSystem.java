@@ -420,57 +420,12 @@ public class ScoringSystem {
     robotPosition = toPose2D(position);
   }
 
-  public Pose2D getVirtualTargetPosition(
-          Pose2D robotPosition,
-          Pose2D targetPosition,
-          double robotVelX,
-          double robotVelY,
-          double ballTime
-  ) {
-    // How far the robot moves while the ball is in the air
-    double leadX = robotVelX * ballTime;
-    double leadY = robotVelY * ballTime;
-
-    // Shift the target backwards by that amount
-    double virtualX = targetPosition.getX(DistanceUnit.INCH) - leadX;
-    double virtualY = targetPosition.getY(DistanceUnit.INCH) - leadY;
-
-    double sx = robotPosition.getX(DistanceUnit.INCH);
-    double sy = robotPosition.getY(DistanceUnit.INCH);
-
-    double tx = virtualX;
-    double ty = virtualY;
-
-    double dx = tx - sx;
-    double dy = ty - sy;
-
-    double aimRad = Math.atan2(dy, dx);
-
-    // Heading doesn't matter for a point target
-    return new Pose2D(DistanceUnit.INCH,virtualX, virtualY, AngleUnit.DEGREES, Math.toDegrees(aimRad) );
-  }
-
-  public void setRobotPosition2d(Pose2d position) {
-    robotPosition = toPose2D(position);
-  }
-
-  /**
-   * Updates the current position of the robot on the field
-   * @brief gets virtual robot position while moving. used in shooting while moving.
-   * @param robotPosition the actual position of the robot
-   * @param targetPosition position of the target/basket or where you want to shoot (from alliance)
-   * @param robotVelX current velocity in the x direction
-   * @param robotVelY current velocity in the y direction
-   * @note returns VirtualRobot object. VirtualRobot.position hold the virtual position.
-   *
-   */
-  public VirtualRobot getVirtualRobotPosition(
+  public Pose2D getVirtualRobotPosition(
           Pose2D robotPosition,
           Pose2D targetPosition,
           double robotVelX,   // in/s (same frame as robotPosition)
           double robotVelY    // in/s
   ) {
-
 
     // distance from REAL robot to target (inches)
     double dx0 = targetPosition.getX(DistanceUnit.INCH) - robotPosition.getX(DistanceUnit.INCH);
@@ -492,16 +447,15 @@ public class ScoringSystem {
     // field aim angle FROM virtual robot TO real target
     double dx = targetPosition.getX(DistanceUnit.INCH) - virtualX;
     double dy = targetPosition.getY(DistanceUnit.INCH) - virtualY;
-    double aim = Math.toDegrees(Math.atan2(dy, dx));
+    double aimRad = Math.atan2(dy, dx);
 
-    VirtualRobot virtual = new VirtualRobot(new Pose2D(
+    // store aimRad in the pose heading (since that's what you want)
+    return new Pose2D(
             DistanceUnit.INCH,
             virtualX, virtualY,
             AngleUnit.RADIANS,
-            robotPosition.getHeading(AngleUnit.DEGREES)),aim);
-
-    // store aimRad in the pose heading (since that's what you want)
-    return virtual;
+            aimRad
+    );
   }
 
 

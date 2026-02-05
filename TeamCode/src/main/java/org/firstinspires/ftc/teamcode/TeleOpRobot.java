@@ -209,11 +209,10 @@ public class TeleOpRobot extends CommonRobot {
     // ^ directionless velocity of the robot, in inches per second
 
     Pose2D realRobot = new Pose2D(DistanceUnit.INCH, location.position.x, location.position.y, AngleUnit.RADIANS, location.heading.toDouble());
-    VirtualRobot virtual = scoringSystem.getVirtualRobotPosition(realRobot, allianceColor.getTargetLocation(), velocityPose.linearVel.x, velocityPose.linearVel.y);
-    scoringSystem.setRobotPosition(virtual.position);
-    telemetry.addLine("virtual x : " + virtual.position.getX(DistanceUnit.INCH) + " || real x : " + location.position.x);
-    telemetry.addLine("virtual y : " + virtual.position.getY(DistanceUnit.INCH) + " || real y : " + location.position.y);
-    telemetry.addLine("target angle : " + virtual.angle);
+    Pose2D virtual = scoringSystem.getVirtualRobotPosition(realRobot, allianceColor.getTargetLocation(), velocityPose.linearVel.x, velocityPose.linearVel.y);
+    scoringSystem.setRobotPosition(virtual);
+    telemetry.addLine("virtual x : " + virtual.getX(DistanceUnit.INCH) + " || real x : " + location.position.x);
+    telemetry.addLine("virtual y : " + virtual.getY(DistanceUnit.INCH) + " || real y : " + location.position.y);
     telemetry.addLine();
 
     scoringSystem.update(updateTelemetry);
