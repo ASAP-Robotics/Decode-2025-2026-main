@@ -62,9 +62,6 @@ public abstract class CommonRobot {
     this.telemetry = telemetry;
     this.allianceColor = allianceColor;
 
-    Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
-    Limelight limelight = new Limelight(rawLimelight, this.allianceColor);
-
     TouchSensor spindexHomer = this.hardwareMap.get(TouchSensor.class, "spindexHomer");
     Motor spindexMotor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
     Axon intakeBlocker = new Axon(this.hardwareMap, "intakeBlocker", "intakeBlockerEncoder");
@@ -89,7 +86,6 @@ public abstract class CommonRobot {
             intake,
             turret,
             spindex,
-            limelight,
             indicator1,
             indicator2,
             this.allianceColor,

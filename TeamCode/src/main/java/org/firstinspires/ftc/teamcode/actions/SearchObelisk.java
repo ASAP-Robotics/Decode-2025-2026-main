@@ -15,6 +15,7 @@ public class SearchObelisk implements Action {
 
   @Override
   public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-    return scoringSystem.getLimelightState() != Limelight.LimeLightMode.NAVIGATION;
+    return false; // todo
+    //return scoringSystem.getLimelightState() != Limelight.LimeLightMode.NAVIGATION;
   }
 }
