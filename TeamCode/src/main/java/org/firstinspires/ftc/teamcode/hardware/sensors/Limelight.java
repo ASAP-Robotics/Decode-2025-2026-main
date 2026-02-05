@@ -233,6 +233,9 @@ public class Limelight {
    */
   public Pose2D getRobotPosition(double turretAngleDegrees) {
     Pose2D limelightPosition = getPosition();
+    if (limelightPosition == null) {
+      return null;
+    }
 
     double rotationDegrees = AngleUnit.normalizeDegrees(turretAngleDegrees);
     double x = limelightPosition.getX(DistanceUnit.INCH);

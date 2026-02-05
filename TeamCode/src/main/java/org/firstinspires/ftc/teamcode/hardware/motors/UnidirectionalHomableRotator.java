@@ -84,7 +84,7 @@ public class UnidirectionalHomableRotator extends HomableRotator {
    */
   public void manualChangeTargetAngle(double change) {
     if (Double.isNaN(change) || Double.isInfinite(change)) return;
-    super.setAngle(getTargetAngle() + change);
+    super.setTargetAngle(getTargetAngle() + change);
   }
 
   /**
