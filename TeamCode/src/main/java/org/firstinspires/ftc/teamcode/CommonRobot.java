@@ -102,7 +102,7 @@ public abstract class CommonRobot {
    * @note MUST be called to get new sensor data if bulk reading enabled
    * @note returns without doing anything if bulk reading not enabled in constructor
    */
-  protected void clearSensorCache() {
+  public void clearSensorCache() {
     if (!bulkRead) return;
     // clears the cache on each hub
     for (LynxModule hub : allHubs) {
