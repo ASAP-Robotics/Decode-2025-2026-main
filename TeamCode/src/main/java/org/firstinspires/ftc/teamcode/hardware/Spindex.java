@@ -155,7 +155,7 @@ public class Spindex implements System {
           break;
         } // prepare to shoot if full
 
-        intakeBlocker.setPosition(INTAKE_FLAP_OPEN); // open intake
+        if (isAtTarget()) intakeBlocker.setPosition(INTAKE_FLAP_OPEN); // open intake
         currentIndex = getColorIndex(BallColor.EMPTY);
 
         turnSpindexNoShoot(spindex[currentIndex].intakePosition); // move spindex to position
