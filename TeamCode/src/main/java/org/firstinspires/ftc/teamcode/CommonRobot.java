@@ -17,7 +17,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -32,7 +31,6 @@ import org.firstinspires.ftc.teamcode.hardware.Turret;
 import org.firstinspires.ftc.teamcode.hardware.indicators.RGBIndicator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
-import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
@@ -83,13 +81,7 @@ public abstract class CommonRobot {
 
     scoringSystem =
         new ScoringSystem(
-            intake,
-            turret,
-            spindex,
-            indicator1,
-            indicator2,
-            this.allianceColor,
-            this.telemetry);
+            intake, turret, spindex, indicator1, indicator2, this.allianceColor, this.telemetry);
   }
 
   /**

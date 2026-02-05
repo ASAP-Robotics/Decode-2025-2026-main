@@ -470,6 +470,7 @@ public class ScoringSystem {
 
   /**
    * Gets the angle of the turret relative to straight
+   *
    * @return the angle of the turret, in degrees
    */
   public double getTurretAngle() {

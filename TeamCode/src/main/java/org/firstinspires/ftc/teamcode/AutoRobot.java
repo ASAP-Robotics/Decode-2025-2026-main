@@ -28,7 +28,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.actions.setScoringPose;
 import org.firstinspires.ftc.teamcode.actions.shootAction;
 import org.firstinspires.ftc.teamcode.actions.updateScoring;
-import org.firstinspires.ftc.teamcode.actions.updateTelemetry;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
@@ -71,106 +70,99 @@ public class AutoRobot extends CommonRobot {
 
     Actions.runBlocking(
         new ParallelAction( // BIGGEST BOI
-            new updateScoring(scoringSystem,this),
-            //new updateTelemetry(telemetry),
+            new updateScoring(scoringSystem, this),
+            // new updateTelemetry(telemetry),
             new SequentialAction( // BIG BOI
                 new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
                 new SequentialAction( // shoot 1
                     drive
                         .actionBuilder(allianceColor.getAutoStartPosition())
-                            //-----SHOOT1------\\
+                        // -----SHOOT1------\\
                         .splineToLinearHeading(
                             allianceColor.getAutoRRShootPosition(),
-                            (Math.PI / -8)* flipy,
+                            (Math.PI / -8) * flipy,
                             new TranslationalVelConstraint(250.0),
                             new ProfileAccelConstraint(-50, 180))
                         .build(),
-                     new shootAction(scoringSystem)
-                    ),
+                    new shootAction(scoringSystem)),
                 new SequentialAction( // pickup 1
                     drive
                         .actionBuilder(allianceColor.getAutoRRShootPosition())
                         // pickup first
                         .splineToLinearHeading(
                             new Pose2d(-11.6 * flipx, -52 * flipy, flipy * (Math.toRadians(-90))),
-                            (Math.PI / -2)* flipy,
+                            (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(175.0),
                             new ProfileAccelConstraint(-10, 110))
                         .waitSeconds(0.1)
                         // goback
                         .splineToLinearHeading(
                             new Pose2d(-5.1 * flipx, -45.3 * flipy, flipy * (Math.toRadians(-90))),
-                            (Math.PI / -2)* flipy,
+                            (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(250.0),
                             new ProfileAccelConstraint(-50, 180))
                         // hitgate
                         .splineToLinearHeading(
                             new Pose2d(-5.1 * flipx, -52 * flipy, flipy * (Math.toRadians(-90))),
-                            (Math.PI / -2)* flipy,
+                            (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(200.0),
                             new ProfileAccelConstraint(-30, 175))
                         .waitSeconds(0.5)
-                            //shoot 2
+                        // shoot 2
                         .strafeTo(allianceColor.getAutoRRShootPosition().position)
                         .build(),
-
-
-                new shootAction(scoringSystem)),
-
+                    new shootAction(scoringSystem)),
                 new SequentialAction( // pickup2
                     drive
                         .actionBuilder(allianceColor.getAutoRRShootPosition())
                         .splineToLinearHeading(
-                                //go to pickup2
+                            // go to pickup2
                             new Pose2d(14 * flipx, -27.9 * flipy, flipy * (Math.toRadians(-90))),
-                            (Math.PI / -2)* flipy,
+                            (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(250.0),
                             new ProfileAccelConstraint(-50, 180))
-                            //pickup2
+                        // pickup2
                         .splineToLinearHeading(
                             new Pose2d(15 * flipx, -60.9 * flipy, flipy * (Math.toRadians(-90))),
-                            (Math.PI / -2)* flipy,
+                            (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(160.0),
                             new ProfileAccelConstraint(-10, 75))
                         .waitSeconds(0.1)
-                            //go back to not hit gate
+                        // go back to not hit gate
                         .strafeTo(
                             (new Pose2d(15 * flipx, -49 * flipy, flipy * (Math.toRadians(-90))))
                                 .position)
-                            //shoot3
+                        // shoot3
                         .strafeTo(allianceColor.getAutoRRShootPosition().position)
                         .build(),
-                new shootAction(scoringSystem)),
-
+                    new shootAction(scoringSystem)),
                 new SequentialAction( // pickup 3
                     drive
                         .actionBuilder(allianceColor.getAutoRRShootPosition())
-                            //go to pickup3
+                        // go to pickup3
                         .splineToLinearHeading(
                             new Pose2d(37.1 * flipx, -28 * flipy, flipy * (Math.toRadians(-90))),
-                            (Math.PI / -2)* flipy,
+                            (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(250.0),
                             new ProfileAccelConstraint(-50, 180))
-                            //pickup3
+                        // pickup3
                         .splineToLinearHeading(
                             new Pose2d(37.1 * flipx, -59.2 * flipy, flipy * (Math.toRadians(-90))),
-                            (Math.PI / -2)* flipy,
+                            (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(175.0),
                             new ProfileAccelConstraint(-10, 110))
                         .waitSeconds(0.1)
-                            //shoot
+                        // shoot
                         .strafeTo(allianceColor.getAutoRRShootPosition().position)
                         .build(),
-
                     new shootAction(scoringSystem)),
-
                 new ParallelAction( // leave
                     drive
                         .actionBuilder(allianceColor.getAutoRRShootPosition())
-                            //leave
+                        // leave
                         .splineToLinearHeading(
                             new Pose2d(4.2 * flipx, -43.8 * flipy, flipy * (Math.toRadians(-90))),
-                            (Math.PI / -2)* flipy,
+                            (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(250.0),
                             new ProfileAccelConstraint(-50, 180))
                         .build()))));
