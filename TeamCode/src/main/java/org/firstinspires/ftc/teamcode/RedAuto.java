@@ -10,6 +10,7 @@ public class RedAuto extends LinearOpMode {
   @Override
   public void runOpMode() throws InterruptedException {
     if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
+      // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.RED);
       AutoRobot robot = new AutoRobot(hardwareMap, telemetry, AllianceColor.RED);
 
       robot.init();

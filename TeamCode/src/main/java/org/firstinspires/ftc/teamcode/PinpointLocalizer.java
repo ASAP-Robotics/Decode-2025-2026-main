@@ -33,7 +33,7 @@ public final class PinpointLocalizer implements Localizer {
     driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
     driver.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-    driver.setOffsets(0, 0, DistanceUnit.INCH); // TODO: set pod offsets
+    driver.setOffsets(-7.15, 0.09, DistanceUnit.INCH); // TODO: set pod offsets
 
     // TODO: reverse encoder directions if needed
     initialParDirection = GoBildaPinpointDriver.EncoderDirection.REVERSED;
