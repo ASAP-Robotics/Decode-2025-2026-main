@@ -33,11 +33,12 @@ import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 @Config
 public class TuningTurret extends LinearOpMode {
   public static int target_loop_time = 20;
-  public static double angle = 0;
-  public static double kP = 0.03;
-  public static double kI = 0.03;
-  public static double kD = 0.0009;
-  public static boolean sync = false;
+  public static double speed = 1000;
+  public static boolean active = false;
+  public static double kP = 400;
+  public static double kI = 1;
+  public static double kD = 0;
+  public static double kF = 16;
 
   @Override
   public void runOpMode() {
@@ -58,17 +59,13 @@ public class TuningTurret extends LinearOpMode {
     waitForStart();
     turret.start();
     turret.setTargetDistance(50);
+    turret.setHorizontalAngle(0);
     turret.enable();
-    turret.activate();
-    turret.tuneShooting(2500, 40);
 
     while (opModeIsActive()) {
-      if (sync) {
-        turret.syncEncoder();
-        sync = false;
-      }
-      turret.tuneHorizontalPID(kP, kI, kD);
-      turret.setHorizontalAngle(angle);
+      turret.setActive(active);
+      turret.tunePIDF(kP, kI, kD, kF);
+      turret.tuneShooting(speed, 60);
       turret.update();
 
       // it shouldn't matter where this goes
@@ -78,9 +75,12 @@ public class TuningTurret extends LinearOpMode {
       loopTime.reset();
 
       dashboardTelemetry.addData("At target", turret.isAtTarget());
-      dashboardTelemetry.addData("Angle", turret.getHorizontalAngleDegrees());
-      dashboardTelemetry.addData("Target angle", turret.getTargetHorizontalAngleDegrees());
+      dashboardTelemetry.addData("At speed", turret.isAtSpeed());
+      dashboardTelemetry.addData("Speed", turret.getCurrentSpeed());
+      dashboardTelemetry.addData("Simulated speed", turret.getSimulationValue());
+      dashboardTelemetry.addData("Target speed", turret.getTargetSpeed());
       dashboardTelemetry.addData("Loop time", realLoopTime);
+      dashboardTelemetry.addData("Status", turret.getStatus().message);
 
       dashboardTelemetry.update();
     }

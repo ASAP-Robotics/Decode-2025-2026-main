@@ -32,6 +32,7 @@ import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.BallSequenceFileReader;
+import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.jetbrains.annotations.TestOnly;
 
@@ -67,7 +68,6 @@ public class ScoringSystem {
   private final SimpleTimer fullWait = new SimpleTimer(0.5);
   private final ElapsedTime timeSinceStart = new ElapsedTime();
   private final ElapsedTime loopTime = new ElapsedTime();
-  private final boolean defaulted;
   private final LinkedList<Pair<Double, Double>> loopTimes = new LinkedList<>();
 
   public ScoringSystem(
@@ -88,9 +88,7 @@ public class ScoringSystem {
     this.allianceColor = allianceColor;
     this.telemetry = telemetry;
     this.targetPosition = this.allianceColor.getTargetLocation();
-    BallSequenceFileReader reader = new BallSequenceFileReader();
-    this.ballSequence = reader.getSequence();
-    this.defaulted = reader.isDefaulted();
+    this.ballSequence = new BallSequenceFileReader().getSequence();
   }
 
   /**
@@ -311,7 +309,6 @@ public class ScoringSystem {
     telemetry.addData("Ready to shoot", isReadyToShoot());
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("Sequence", ballSequence);
-    telemetry.addData("Defaulted", defaulted); // todo remove
 
     SystemReport spindexReport = spindex.getStatus();
     SystemReport turretReport = turret.getStatus();
@@ -516,12 +513,19 @@ public class ScoringSystem {
   /**
    * @brief gets the 2D position of the robot on the field according to limelight
    * @return the position of the robot, or null if either the target isn't visible or the camera
-   *     isn't still
+   *     isn't still or the set position is too different
    * @note this returns null under normal operation conditions, be careful
    */
   public Pose2D getRobotPosition() {
     Pose2D limelightPosition = limelight.getPosition();
     if (limelightPosition == null || !turret.isAtTarget()) return null;
+    Pose2D positionDifference = MathUtils.poseDifference(robotPosition, limelightPosition);
+    if (Math.hypot(
+                positionDifference.getX(DistanceUnit.INCH),
+                positionDifference.getY(DistanceUnit.INCH))
+            > 4
+        || Math.abs(positionDifference.getHeading(AngleUnit.DEGREES)) > 15) return null;
+
     double rotationDegrees = AngleUnit.normalizeDegrees(turret.getHorizontalAngleDegrees());
     double x = limelightPosition.getX(DistanceUnit.INCH);
     double y = limelightPosition.getY(DistanceUnit.INCH);
