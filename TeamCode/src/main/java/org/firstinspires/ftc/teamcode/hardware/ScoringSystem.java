@@ -25,14 +25,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.hardware.indicators.RGBIndicator;
-import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.BallSequenceFileReader;
-import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.jetbrains.annotations.TestOnly;
 
@@ -47,7 +45,6 @@ public class ScoringSystem {
   private final ActiveIntake intake; // the intake on the robot
   private final Turret turret; // the flywheel on the robot
   private final Spindex spindex; // the spindex on the robot
-  private final Limelight limelight; // the limelight camera on the turret
   private final RGBIndicator indicator1; // first indicator light
   private final RGBIndicator indicator2; // second indicator light
   protected State state = State.UNINITIALISED; // the state of the scoring system
@@ -74,7 +71,6 @@ public class ScoringSystem {
       ActiveIntake intake,
       Turret turret,
       Spindex spindex,
-      Limelight limelight,
       RGBIndicator indicator1,
       RGBIndicator indicator2,
       AllianceColor allianceColor,
@@ -82,7 +78,6 @@ public class ScoringSystem {
     this.intake = intake;
     this.turret = turret;
     this.spindex = spindex;
-    this.limelight = limelight;
     this.indicator1 = indicator1;
     this.indicator2 = indicator2;
     this.allianceColor = allianceColor;
@@ -103,7 +98,6 @@ public class ScoringSystem {
     spindex.init(BallSequence.GPP, isPreloaded, auto);
     turret.init(0);
     turret.setActive(!isPreloaded);
-    limelight.init();
   }
 
   /** To be called repeatedly while the robot is in init */
@@ -121,7 +115,6 @@ public class ScoringSystem {
     spindex.start();
     turret.enable(); // let the flywheel spin up
     turret.start();
-    limelight.start();
     state = isPreloaded ? State.FULL : State.INTAKING;
     timeSinceStart.reset();
     loopTime.reset();
@@ -144,7 +137,6 @@ public class ScoringSystem {
    * @note call each loop
    */
   public void update(boolean updateTelemetry) {
-    limelight.update();
     updateAiming();
     updateSpindex();
     updateIntake();
@@ -177,12 +169,6 @@ public class ScoringSystem {
       turret.setTargetDistance(distanceOverride);
       return;
     }
-    /*
-    else if (!limelight.isReadyToNavigate()) {
-      turret.setHorizontalAngle(allianceColor.getObeliskAngle());
-      return;
-    }
-     */
 
     turret.setHorizontalAngle(getRelativeTargetAngle());
     turret.setTargetDistance(getTargetDistance());
@@ -445,7 +431,7 @@ public class ScoringSystem {
    * @return true if ready to shoot, false otherwise
    */
   protected boolean isReadyToShoot() {
-    return turret.isReadyToShoot() && spindex.isReadyToShoot() /*&& limelight.isTargetInFrame()*/;
+    return turret.isReadyToShoot() && spindex.isReadyToShoot();
   }
 
   /**
@@ -483,6 +469,14 @@ public class ScoringSystem {
   }
 
   /**
+   * Gets the angle of the turret relative to straight
+   * @return the angle of the turret, in degrees
+   */
+  public double getTurretAngle() {
+    return turret.getHorizontalAngleDegrees();
+  }
+
+  /**
    * @brief sets the intake to eject at full speed (for some amount of time)
    * @note intended for external use only in emergency game situations (when something has
    *     malfunctioned); not intended for external use normally or regularly
@@ -511,39 +505,6 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief gets the 2D position of the robot on the field according to limelight
-   * @return the position of the robot, or null if either the target isn't visible or the camera
-   *     isn't still or the set position is too different
-   * @note this returns null under normal operation conditions, be careful
-   */
-  public Pose2D getRobotPosition() {
-    Pose2D limelightPosition = limelight.getPosition();
-    if (limelightPosition == null || !turret.isAtTarget()) return null;
-    Pose2D positionDifference = MathUtils.poseDifference(robotPosition, limelightPosition);
-    if (Math.hypot(
-                positionDifference.getX(DistanceUnit.INCH),
-                positionDifference.getY(DistanceUnit.INCH))
-            > 4
-        || Math.abs(positionDifference.getHeading(AngleUnit.DEGREES)) > 15) return null;
-
-    double rotationDegrees = AngleUnit.normalizeDegrees(turret.getHorizontalAngleDegrees());
-    double x = limelightPosition.getX(DistanceUnit.INCH);
-    double y = limelightPosition.getY(DistanceUnit.INCH);
-    double heading =
-        AngleUnit.normalizeDegrees(
-            limelightPosition.getHeading(AngleUnit.DEGREES) - rotationDegrees);
-    return new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading);
-  }
-
-  /**
-   * @brief gets the state limelight is in
-   * @return limelight's state
-   */
-  public Limelight.LimeLightMode getLimelightState() {
-    return limelight.getMode();
-  }
-
-  /**
    * Prepares systems for Autonomous shutdown
    *
    * @note only to be called at the end of Auto OpModes
@@ -563,7 +524,7 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief overrides aiming, switching control away from pinpoint / limelight
+   * @brief overrides aiming, switching control away from pinpoint / odometry math
    * @param distance the distance from the target, in inches
    * @param angle the angle to turn the turret to
    */
@@ -594,7 +555,7 @@ public class ScoringSystem {
   }
 
   /**
-   * @brief switches aiming control back to limelight (from manual override)
+   * @brief switches aiming control back to odometry math (from manual override)
    */
   public void autoAim() {
     turretAimOverride = false;

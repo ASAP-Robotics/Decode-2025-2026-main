@@ -77,6 +77,17 @@ public class UnidirectionalHomableRotator extends HomableRotator {
   }
 
   /**
+   * Changes the target angle of the motor by a given amount, *DISREGARDING DIRECTION*
+   *
+   * @param change the amount to change the target angle by
+   * @note only use when you are *exactly* sure what you are doing
+   */
+  public void manualChangeTargetAngle(double change) {
+    if (Double.isNaN(change) || Double.isInfinite(change)) return;
+    super.setAngle(getTargetAngle() + change);
+  }
+
+  /**
    * Calculates the actual setpoint to be applied from a given target angle
    *
    * @param degrees the angle to convert to a setpoint
