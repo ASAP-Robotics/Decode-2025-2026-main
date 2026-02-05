@@ -46,8 +46,8 @@ public class Limelight {
   }
 
   private static final double AVERAGE_TIME = 3; // time period to average location over, seconds
-  private static final double MAX_POSITION_DEVIATION = 4; // for average, inches
-  private static final double MAX_ANGLE_DEVIATION = 6.7; // for average, degrees
+  private static final double MAX_POSITION_DEVIATION = 3; // for average, inches
+  private static final double MAX_ANGLE_DEVIATION = 3; // for average, degrees
   private static final double OUTLIER_PERCENTAGE = 0.4; // the percent of values to trim as outliers
   private final Limelight3A limelight;
   private final AllianceColor allianceColor;
@@ -119,7 +119,7 @@ public class Limelight {
 
   /**
    * @brief gets the position of limelight on the field, using FTC coordinates
-   * @return the 2D position of limelight on the field, or 0 if invalid
+   * @return the 2D position of limelight on the field, or null if invalid
    */
   public Pose2D getPosition() {
     if (!isResultValid || results.isEmpty()) {

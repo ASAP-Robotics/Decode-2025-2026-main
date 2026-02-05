@@ -97,7 +97,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
     this.rotatorController = new PIDController(0.03, 0.03, 0.0009);
     rotatorController.setTolerance(turretDegreesToMotorDegrees(1));
-    this.encoder.setInverted(true); // todo maybe don't invert
+    this.encoder.setInverted(true);
     angleSimulation = new Follower(0, 0, 1, 60); // tune 60
   }
 
@@ -132,25 +132,25 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   protected LookupTableItem[] fillLookupTable() {
     // note: "distance" numbers *MUST* go from low to high
     return new LookupTableItem[] {
-      new LookupTableItem(0, 2050, 90),
-      new LookupTableItem(29.3, 2050, 90),
-      new LookupTableItem(33.4, 2000, 65),
-      new LookupTableItem(36.5, 2000, 60),
-      new LookupTableItem(45.5, 2020, 55),
-      new LookupTableItem(56.5, 2100, 50),
-      new LookupTableItem(67, 2200, 50),
-      new LookupTableItem(75.6, 2350, 50),
-      new LookupTableItem(81.4, 2500, 50),
-      new LookupTableItem(93.5, 2600, 50),
-      new LookupTableItem(100.8, 2620, 45),
-      new LookupTableItem(108.3, 2700, 45),
-      new LookupTableItem(117.3, 2740, 35),
-      new LookupTableItem(128.7, 2870, 35),
-      new LookupTableItem(136.7, 3000, 35),
-      new LookupTableItem(155.8, 3200, 30),
-      new LookupTableItem(164.8, 3280, 25),
-      new LookupTableItem(250, 3280, 25)
-    }; // preliminary values
+        // Extrapolated 0 point (based on 28.2 values)
+        new LookupTableItem(0, 1900, 160),
+
+        // Tuned Data (Sorted Low to High)
+        new LookupTableItem(28.2, 1900, 160),
+        new LookupTableItem(34.2, 1900, 60),
+        new LookupTableItem(42.9, 2040, 50),
+        new LookupTableItem(46.7, 2160, 42),
+        new LookupTableItem(60.1, 2350, 33),
+        new LookupTableItem(75.6, 2450, 28),
+        new LookupTableItem(93.3, 2600, 30),
+        new LookupTableItem(107.1, 2800, 20),
+        new LookupTableItem(118.4, 2950, 15),
+        new LookupTableItem(133.8, 3100, 10),
+        new LookupTableItem(164.6, 3300, 10),
+
+        // Extrapolated "infinite" point (based on 164.6 values)
+        new LookupTableItem(Double.POSITIVE_INFINITY, 3300, 10)
+    };
   }
 
   @Override

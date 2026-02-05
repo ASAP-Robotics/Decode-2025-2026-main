@@ -40,17 +40,11 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
     public abstract double getRpm();
   }
 
-  public enum ControlMode {
-    PIDF,
-    BANG_BANG
-  }
-
   private static final double RPM_TARGET_TOLERANCE = 10;
   private final double MOTOR_TICKS_PER_REV = 28; // ticks per revolution of flywheel motor
   protected final DcMotorEx flywheel;
   protected Follower speedSimulation; // simulation of flywheel speed
   protected SystemStatus flywheelStatus; // status of the flywheel
-  protected ControlMode controlMode = ControlMode.BANG_BANG;
   protected boolean isEnabled = false; // if the flywheel is enabled
   protected boolean isActive = true; // if the flywheel is active (as opposed to idling)
   private double idleSpeed; // the speed (RPM) of the flywheel when idle
@@ -70,11 +64,11 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @param idleSpeed the speed of the flywheel when idling (RPM)
    */
   public Flywheel(DcMotorEx motor, double idleSpeed) {
-    this.speedSimulation = new Follower(0, 0, 5, 50); // tune 50
+    this.speedSimulation = new Follower(0, 0, 5, 100); // tune 100
     this.flywheel = motor;
     this.idleSpeed = idleSpeed; // set the speed of the flywheel at idle
     this.LOOKUP_TABLE = fillLookupTable();
-    this.flywheel.setVelocityPIDFCoefficients(300, 1, 0, 16);
+    this.flywheel.setVelocityPIDFCoefficients(400, 1, 0, 16);
     // set motor to use speed-based control
     this.flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     // set motor to spin freely if set to 0% power
@@ -106,8 +100,31 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @brief checks if the measured flywheel speed is at target
    * @return true if flywheel is actually at speed, false otherwise
    */
-  protected boolean isAtSpeed() {
-    return currentSpeed >= (targetSpeed - 25) && currentSpeed <= (targetSpeed + 25);
+  public boolean isAtSpeed() {
+    return currentSpeed >= (targetSpeed - 50) && currentSpeed <= (targetSpeed + 100);
+  }
+
+  /**
+   * Gets the current speed of the flywheel
+   * @return the last measured speed of the flywheel, in RPM
+   */
+  @TestOnly
+  public double getCurrentSpeed() {
+    return currentSpeed;
+  }
+
+  /**
+   * Gets the target speed of the flywheel
+   * @return the target speed of the flywheel, in RPM
+   */
+  @TestOnly
+  public double getTargetSpeed() {
+    return targetSpeed;
+  }
+
+  @TestOnly
+  public double getSimulationValue() {
+    return speedSimulation.getValue();
   }
 
   /**
@@ -121,14 +138,15 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   }
 
   /**
-   * Sets the control mode of the flywheel when active
-   *
-   * @param mode the control mode to use when active
-   * @note the idea is thet flywheel switches to bang-bang when shooting, and PIDF the rest of the
-   *     time
+   * Tunes the PIDF coefficients of the flywheel motor
+   * @param p the proportional coefficient
+   * @param i the integral coefficient
+   * @param d the derivative coefficient
+   * @param f the feedforward coefficient
    */
-  public void setControlMode(ControlMode mode) {
-    controlMode = mode;
+  @TestOnly
+  public void tunePIDF(double p, double i, double d, double f) {
+    this.flywheel.setVelocityPIDFCoefficients(p, i, d, f);
   }
 
   /**
@@ -271,28 +289,19 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    */
   private void idleMotor() {
     targetSpeed = idleSpeed;
-    if (currentSpeed - 200 <= idleSpeed) {
-      if (flywheelRunMode != DcMotor.RunMode.RUN_USING_ENCODER) {
-        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER); // use speed-based control
-        flywheelRunMode = DcMotor.RunMode.RUN_USING_ENCODER;
-      }
 
-      if (Math.abs(idleSpeed - lastSetSpeed) > RPM_TARGET_TOLERANCE) {
-        double ticksPerSec = (idleSpeed / 60.0) * MOTOR_TICKS_PER_REV;
-        flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PID controller
-        lastSetSpeed = idleSpeed;
-      }
+    if (flywheelRunMode != DcMotor.RunMode.RUN_WITHOUT_ENCODER) {
+      flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+      flywheelRunMode = DcMotor.RunMode.RUN_WITHOUT_ENCODER;
+    }
 
-    } else { // if flywheel is going much too fast
-      if (flywheelRunMode != DcMotor.RunMode.RUN_WITHOUT_ENCODER) {
-        flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // use power-based control
-        flywheelRunMode = DcMotor.RunMode.RUN_WITHOUT_ENCODER;
-      }
+    if (currentSpeed > targetSpeed && lastSetSpeed != Double.NEGATIVE_INFINITY) {
+      flywheel.setPower(0);
+      lastSetSpeed = Double.NEGATIVE_INFINITY; // so speed will be set when switching back to PIDF
 
-      if (lastSetSpeed != 0) {
-        flywheel.setPower(0); // spin freely
-        lastSetSpeed = 0;
-      }
+    } else if (currentSpeed < targetSpeed && lastSetSpeed != Double.POSITIVE_INFINITY) {
+      flywheel.setPower(0.75);
+      lastSetSpeed = Double.POSITIVE_INFINITY; // so speed will be set when switching back to PIDF
     }
   }
 
@@ -301,37 +310,17 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @note use `setTargetDistance()` to set the distance from the target
    */
   private void startMotor() {
-    double rpm = getRPMLookup(targetDistance);
-    targetSpeed = rpm; // store target speed
-    DcMotor.RunMode targetRunMode =
-        controlMode == ControlMode.PIDF
-            ? DcMotor.RunMode.RUN_USING_ENCODER
-            : DcMotor.RunMode.RUN_WITHOUT_ENCODER;
+    targetSpeed = getRPMLookup(targetDistance); // store target speed
 
-    if (flywheelRunMode != targetRunMode) {
-      flywheel.setMode(targetRunMode);
-      flywheelRunMode = targetRunMode;
+    if (flywheelRunMode != DcMotor.RunMode.RUN_USING_ENCODER) {
+      flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+      flywheelRunMode = DcMotor.RunMode.RUN_USING_ENCODER;
     }
 
-    switch (controlMode) {
-      case BANG_BANG:
-        if (currentSpeed > rpm) {
-          flywheel.setPower(0);
-
-        } else {
-          flywheel.setPower(1);
-        }
-        lastSetSpeed = Double.NEGATIVE_INFINITY; // so speed will be set when switching back to PIDF
-        break;
-
-      case PIDF:
-      default:
-        if (Math.abs(rpm - lastSetSpeed) > RPM_TARGET_TOLERANCE) {
-          double ticksPerSec = (rpm / 60.0) * MOTOR_TICKS_PER_REV;
-          flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PIDF controller
-          lastSetSpeed = rpm;
-        }
-        break;
+    if (Math.abs(targetSpeed - lastSetSpeed) > RPM_TARGET_TOLERANCE) {
+      double ticksPerSec = (targetSpeed / 60.0) * MOTOR_TICKS_PER_REV;
+      flywheel.setVelocity(ticksPerSec); // set the speed using the built-in PIDF controller
+      lastSetSpeed = targetSpeed;
     }
   }
 

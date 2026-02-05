@@ -17,6 +17,8 @@
 package org.firstinspires.ftc.teamcode.utils;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public class MathUtils {
   /**
@@ -65,5 +67,21 @@ public class MathUtils {
    */
   public static double normalizeAround(double angle, double center) {
     return AngleUnit.normalizeDegrees(angle - center) + center;
+  }
+
+  /**
+   * Gets the difference between two positions
+   * @param pose1 the first position
+   * @param pose2 the second position
+   * @return the difference between the first and second positions
+   */
+  public static Pose2D poseDifference(Pose2D pose1, Pose2D pose2) {
+    return new Pose2D(
+        DistanceUnit.INCH,
+        pose1.getX(DistanceUnit.INCH) - pose2.getX(DistanceUnit.INCH),
+        pose1.getY(DistanceUnit.INCH) - pose2.getY(DistanceUnit.INCH),
+        AngleUnit.DEGREES,
+        AngleUnit.normalizeDegrees(pose1.getHeading(AngleUnit.DEGREES) - pose2.getHeading(AngleUnit.DEGREES))
+    );
   }
 }
