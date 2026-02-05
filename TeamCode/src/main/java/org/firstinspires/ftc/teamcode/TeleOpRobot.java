@@ -208,13 +208,23 @@ public class TeleOpRobot extends CommonRobot {
     // ^ directionless velocity of the robot, in inches per second
 
     // update scoring systems
-    scoringSystem.setRobotPosition(
+    /*scoringSystem.setRobotPosition(
         new Pose2D(
             DistanceUnit.INCH,
             location.position.x,
             location.position.y,
             AngleUnit.RADIANS,
-            location.heading.toDouble()));
+            location.heading.toDouble()));*/
+    scoringSystem.setRobotPosition(scoringSystem.getVirtualRobotPosition(
+            new Pose2D(
+                    DistanceUnit.INCH,
+                    location.position.x,
+                    location.position.y,
+                    AngleUnit.RADIANS,
+                    location.heading.toDouble()),
+            allianceColor.getTargetLocation(),
+            velocityPose.linearVel.x,
+            velocityPose.linearVel.y));
     scoringSystem.update(updateTelemetry);
 
     if (updateTelemetry) telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());

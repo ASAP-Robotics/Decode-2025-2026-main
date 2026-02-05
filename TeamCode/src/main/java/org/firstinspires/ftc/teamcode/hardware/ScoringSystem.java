@@ -45,6 +45,8 @@ public class ScoringSystem {
     INTAKING,
     SHOOTING
   }
+  private final double ballTimeSlope =0.00715145; // the slope for the ball time equation
+  private final double ballTimeOffset = -0.0353098; // the offset for the ball time equation
 
   private final ActiveIntake intake; // the intake on the robot
   private final Turret turret; // the flywheel on the robot
@@ -413,35 +415,44 @@ public class ScoringSystem {
     robotPosition = toPose2D(position);
   }
 
-  public Pose2D getVirtualTargetPosition(
+  public Pose2D getVirtualRobotPosition(
           Pose2D robotPosition,
           Pose2D targetPosition,
-          double robotVelX,
-          double robotVelY,
-          double ballTime
+          double robotVelX,   // in/s (same frame as robotPosition)
+          double robotVelY    // in/s
   ) {
-    // How far the robot moves while the ball is in the air
+
+    // distance from REAL robot to target (inches)
+    double dx0 = targetPosition.getX(DistanceUnit.INCH) - robotPosition.getX(DistanceUnit.INCH);
+    double dy0 = targetPosition.getY(DistanceUnit.INCH) - robotPosition.getY(DistanceUnit.INCH);
+    double distance = Math.hypot(dx0, dy0);
+
+    // time-of-flight estimate (seconds) — clamp so it can't go negative
+    double ballTime = ballTimeSlope * distance + ballTimeOffset;
+    ballTime = Math.max(ballTime, 0.0);
+
+    // how far robot moves during flight (inches)
     double leadX = robotVelX * ballTime;
     double leadY = robotVelY * ballTime;
 
-    // Shift the target backwards by that amount
-    double virtualX = targetPosition.getX(DistanceUnit.INCH) - leadX;
-    double virtualY = targetPosition.getY(DistanceUnit.INCH) - leadY;
+    // VIRTUAL ROBOT = where the robot will be after ballTime
+    double virtualX = robotPosition.getX(DistanceUnit.INCH) + leadX;
+    double virtualY = robotPosition.getY(DistanceUnit.INCH) + leadY;
 
-    double sx = robotPosition.getX(DistanceUnit.INCH);
-    double sy = robotPosition.getY(DistanceUnit.INCH);
-
-    double tx = virtualX;
-    double ty = virtualY;
-
-    double dx = tx - sx;
-    double dy = ty - sy;
-
+    // field aim angle FROM virtual robot TO real target
+    double dx = targetPosition.getX(DistanceUnit.INCH) - virtualX;
+    double dy = targetPosition.getY(DistanceUnit.INCH) - virtualY;
     double aimRad = Math.atan2(dy, dx);
 
-    // Heading doesn't matter for a point target
-    return new Pose2D(DistanceUnit.INCH,virtualX, virtualY, AngleUnit.DEGREES, Math.toDegrees(aimRad) );
+    // store aimRad in the pose heading (since that's what you want)
+    return new Pose2D(
+            DistanceUnit.INCH,
+            virtualX, virtualY,
+            AngleUnit.RADIANS,
+            aimRad
+    );
   }
+
 
   public void setBallSequence(BallSequence sequence) {
     ballSequence = sequence;
@@ -507,7 +518,7 @@ public class ScoringSystem {
    * @brief gets the distance to the target (from the robot), in inches
    * @return the number of inches from the robot to the target
    */
-  protected double getTargetDistance() {
+  public double getTargetDistance() {
     double distX = targetPosition.getX(DistanceUnit.INCH) - robotPosition.getX(DistanceUnit.INCH);
     double distY = targetPosition.getY(DistanceUnit.INCH) - robotPosition.getY(DistanceUnit.INCH);
     double dist = Math.hypot(Math.abs(distX), Math.abs(distY));
