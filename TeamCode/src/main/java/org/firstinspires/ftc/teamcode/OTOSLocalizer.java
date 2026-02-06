@@ -68,6 +68,11 @@ public class OTOSLocalizer implements Localizer {
   }
 
   @Override
+  public void recalibrate() {
+
+  }
+
+  @Override
   public GoBildaPinpointDriver.DeviceStatus getState() {
     return null;
   }

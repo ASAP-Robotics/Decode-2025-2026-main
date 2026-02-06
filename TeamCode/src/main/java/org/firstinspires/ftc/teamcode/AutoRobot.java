@@ -16,6 +16,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import static android.os.SystemClock.sleep;
+
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
@@ -53,7 +55,7 @@ public class AutoRobot extends CommonRobot {
 
 
   public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
-    super(hardwareMap, telemetry, allianceColor, true);
+    super(hardwareMap, telemetry, allianceColor, false);
     beginPose = allianceColor.getAutoStartPosition();
     drive = new MecanumDrive(hardwareMap, beginPose);
   }
@@ -63,12 +65,19 @@ public class AutoRobot extends CommonRobot {
     limelight = hardwareMap.get(Limelight3A.class, "limelight");
     limelight.pipelineSwitch(5);
     limelight.start();
-    SimpleTimer backup = new SimpleTimer(10);
+    SimpleTimer backup = new SimpleTimer(2);
     backup.start();
+    drive.localizer.recalibrate();
+
+    sleep(1000);
+
     while (drive.localizer.getState() != GoBildaPinpointDriver.DeviceStatus.READY
         && !backup.isFinished()) {
       drive.localizer.update();
     }
+
+    sleep(1000);
+
     scoringSystem.init(true, true);
   }
 

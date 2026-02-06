@@ -150,6 +150,11 @@ public final class TwoDeadWheelLocalizer implements Localizer {
   }
 
   @Override
+  public void recalibrate() {
+
+  }
+
+  @Override
   public GoBildaPinpointDriver.DeviceStatus getState() {
     return null;
   }
