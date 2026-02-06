@@ -93,7 +93,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
    */
   public boolean isReadyToShoot() {
-    return isEnabled && isActive && (isAtSpeed() /*|| speedSimulation.isAtTarget()*/);
+    return isEnabled && isActive && (isAtSpeed() || speedSimulation.isAtTarget());
   }
 
   /**
@@ -102,7 +102,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    */
   public boolean isAtSpeed() {
     readCurrentSpeed();
-    return currentSpeed >= (targetSpeed - 25) && currentSpeed <= (targetSpeed + 50);
+    return currentSpeed >= (targetSpeed - 40) && currentSpeed <= (targetSpeed + 50);
   }
 
   /**
