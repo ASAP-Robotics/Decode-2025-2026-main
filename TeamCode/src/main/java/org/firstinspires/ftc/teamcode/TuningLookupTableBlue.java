@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 @TeleOp
-public class TuningLookupTable extends LinearOpMode {
+public class TuningLookupTableBlue extends LinearOpMode {
   @Override
   public void runOpMode() throws InterruptedException {
     TuningLookupTableRobot robot =
