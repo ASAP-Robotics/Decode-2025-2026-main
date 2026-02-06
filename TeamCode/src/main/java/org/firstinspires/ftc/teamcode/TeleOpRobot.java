@@ -138,9 +138,7 @@ public class TeleOpRobot extends CommonRobot {
             location.position.x,
             location.position.y,
             AngleUnit.RADIANS,
-            location.heading.toDouble()
-        )
-    );
+            location.heading.toDouble()));
 
     updateDriverControls();
 
@@ -178,9 +176,7 @@ public class TeleOpRobot extends CommonRobot {
     wheelBase.stop(); // stop all powered movement in wheels
   }
 
-  /**
-   * Handles backup driver inputs
-   */
+  /** Handles backup driver inputs */
   private void updateDriverControls() {
     if (gamepad2.left_trigger > 0.67) { // hyper shift
       // manual sequence setting
@@ -223,9 +219,7 @@ public class TeleOpRobot extends CommonRobot {
                 new Pose2d(
                     location.getX(DistanceUnit.INCH),
                     location.getY(DistanceUnit.INCH),
-                    location.getHeading(AngleUnit.RADIANS)
-                )
-            );
+                    location.getHeading(AngleUnit.RADIANS)));
       }
 
     } else { // normal

@@ -93,7 +93,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
    */
   public boolean isReadyToShoot() {
-    return isEnabled && isActive && (isAtSpeed()/*|| speedSimulation.isAtTarget()*/);
+    return isEnabled && isActive && (isAtSpeed() /*|| speedSimulation.isAtTarget()*/);
   }
 
   /**
@@ -115,9 +115,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
     return currentSpeed;
   }
 
-  /**
-   * Reads the current speed of the flywheel
-   */
+  /** Reads the current speed of the flywheel */
   protected void readCurrentSpeed() {
     double ticksPerSec =
         this.flywheel.getVelocity(); // get the speed of the motor in ticks per second
