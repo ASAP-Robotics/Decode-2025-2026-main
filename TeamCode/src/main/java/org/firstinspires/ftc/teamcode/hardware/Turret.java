@@ -340,7 +340,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   /** Calculates the angle offset for the turret */
   private void calculateTurretOffset() {
     horizontalAngleOffsetDegrees =
-        motorDegreesToTurretDegrees(encoder.getAngleNormalized() + getRotatorDegrees());
+        motorDegreesToTurretDegrees(encoder.getAngleNormalized() + getRotatorDegrees()) + 4.5;
   }
 
   /**

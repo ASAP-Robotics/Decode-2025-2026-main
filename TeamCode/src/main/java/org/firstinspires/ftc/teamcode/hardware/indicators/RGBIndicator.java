@@ -45,7 +45,7 @@ public class RGBIndicator {
 
   private static final double UPDATE_TOLERANCE = 0.01;
   private final Servo led; // light is controlled by servo PWM control
-  private final Follower follower = new Follower(0, 0, 0, 0.1);
+  private final Follower follower = new Follower(0, 0, 0, 0.2);
   private Color color = null;
   private double lastSetValue = Double.NEGATIVE_INFINITY;
   private boolean atColor = false;

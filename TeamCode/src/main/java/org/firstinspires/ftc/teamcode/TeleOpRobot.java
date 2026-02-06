@@ -116,89 +116,13 @@ public class TeleOpRobot extends CommonRobot {
       telemetryTimer.start();
     }
 
-    // manual sequence setting
-    if (gamepad2.dpadDownWasPressed()) {
-      scoringSystem.setBallSequence(BallSequence.PGP);
-
-    } else if (gamepad2.dpadLeftWasPressed()) {
-      scoringSystem.setBallSequence(BallSequence.GPP);
-
-    } else if (gamepad2.dpadRightWasPressed()) {
-      scoringSystem.setBallSequence(BallSequence.PPG);
-    }
-
-    // shoot
-    if (gamepad2.right_trigger > 0.67 || gamepad2.rightBumperWasPressed()) {
-      scoringSystem.shoot();
-    }
-
-    // eject
-    if (gamepad2.left_trigger > 0.67 || gamepad2.leftBumperWasPressed()) {
-      scoringSystem.clearIntake();
-    }
-
-    if (gamepad2.xWasPressed()) {
-      scoringSystem.setIntakeFull(BallColor.PURPLE);
-    } else if (gamepad2.aWasPressed()) {
-      scoringSystem.setIntakeFull(BallColor.GREEN);
-    }
-
-    // miscellaneous backup manual controls
-    // turret rehome
-    if (gamepad1.aWasPressed()) {
-      scoringSystem.reSyncTurretEncoder();
-      // scoringSystem.prepForShutdown();
-    }
-    // color sensor enable toggle
-    if (gamepad1.bWasPressed()) {
-      scoringSystem.toggleColorSensorEnabled();
-    }
-    // unjam spindexer
-    if (gamepad1.xWasPressed()) {
-      scoringSystem.unJamSpindexer();
-    }
-    // home spindexer
-    if (gamepad1.yWasPressed()) {
-      scoringSystem.homeSpindexer();
-    }
-    // override aiming
-    if (gamepad2.bWasPressed()) {
-      if (scoringSystem.isAimOverride()) {
-        scoringSystem.autoAim();
-
-      } else {
-        scoringSystem.overrideAiming(75, 0); // TODO: tune distance
-      }
-    }
-    // reset odometry
-    if (gamepad2.yWasPressed()) {
-      Pose2D location = scoringSystem.allianceColor.getResetLocation();
-      pinpoint =
-          new PinpointLocalizer(
-              hardwareMap,
-              new Pose2d(
-                  location.getX(DistanceUnit.INCH),
-                  location.getY(DistanceUnit.INCH),
-                  location.getHeading(AngleUnit.RADIANS)));
-    }
-    // adjust turret offset
-    if (gamepad1.dpadLeftWasPressed()) {
-      scoringSystem.adjustTurretAngleOffset(1);
-    } else if (gamepad1.dpadRightWasPressed()) {
-      scoringSystem.adjustTurretAngleOffset(-1);
-    } else if (gamepad1.dpadDownWasPressed()) {
-      scoringSystem.adjustTurretAngleOffset(5);
-    } else if (gamepad1.dpadUpWasPressed()) {
-      scoringSystem.adjustTurretAngleOffset(-5);
-    }
-
     // get robot position
     PoseVelocity2d velocityPose = pinpoint.update();
     boolean faulted = pinpoint.isFaulted();
     if (!faulted) pinpointErrorTimer.start();
 
     if (faulted && pinpointErrorTimer.isFinished()) {
-      scoringSystem.overrideAiming(75, 0); // TODO: tune distance
+      scoringSystem.overrideAiming(75, 180); // TODO: tune distance
     }
 
     Pose2d location = pinpoint.getPose();
@@ -214,7 +138,12 @@ public class TeleOpRobot extends CommonRobot {
             location.position.x,
             location.position.y,
             AngleUnit.RADIANS,
-            location.heading.toDouble()));
+            location.heading.toDouble()
+        )
+    );
+
+    updateDriverControls();
+
     scoringSystem.update(updateTelemetry);
 
     if (updateTelemetry) telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
@@ -247,5 +176,97 @@ public class TeleOpRobot extends CommonRobot {
   public void stop() {
     scoringSystem.stop(); // stop all powered movement in scoring systems
     wheelBase.stop(); // stop all powered movement in wheels
+  }
+
+  /**
+   * Handles backup driver inputs
+   */
+  private void updateDriverControls() {
+    if (gamepad2.left_trigger > 0.67) { // hyper shift
+      // manual sequence setting
+      if (gamepad2.dpadDownWasPressed()) {
+        scoringSystem.setBallSequence(BallSequence.PGP);
+
+      } else if (gamepad2.dpadLeftWasPressed()) {
+        scoringSystem.setBallSequence(BallSequence.GPP);
+
+      } else if (gamepad2.dpadRightWasPressed()) {
+        scoringSystem.setBallSequence(BallSequence.PPG);
+      }
+
+      // turret rehome !*!*!*! use with caution !*!*!*!
+      if (gamepad2.yWasPressed()) {
+        scoringSystem.reSyncTurretEncoder();
+      }
+
+      // home spindexer
+      if (gamepad2.aWasPressed()) {
+        scoringSystem.homeSpindexer();
+      }
+
+      // override aiming
+      if (gamepad2.bWasPressed()) {
+        if (scoringSystem.isAimOverride()) {
+          scoringSystem.autoAim();
+
+        } else {
+          scoringSystem.overrideAiming(75, 180); // TODO: tune distance
+        }
+      }
+
+      // reset odometry !*!*!*! use with caution !*!*!*!
+      if (gamepad2.xWasPressed()) {
+        Pose2D location = scoringSystem.allianceColor.getResetLocation();
+        pinpoint =
+            new PinpointLocalizer(
+                hardwareMap,
+                new Pose2d(
+                    location.getX(DistanceUnit.INCH),
+                    location.getY(DistanceUnit.INCH),
+                    location.getHeading(AngleUnit.RADIANS)
+                )
+            );
+      }
+
+    } else { // normal
+      // unjam spindexer
+      if (gamepad2.bWasPressed()) {
+        scoringSystem.unJamSpindexer();
+      }
+
+      // color sensor enable toggle
+      if (gamepad2.yWasPressed()) {
+        scoringSystem.toggleColorSensorEnabled();
+      }
+
+      // manual intake full
+      if (gamepad2.xWasPressed()) {
+        scoringSystem.setIntakeFull(BallColor.PURPLE);
+      } else if (gamepad2.aWasPressed()) {
+        scoringSystem.setIntakeFull(BallColor.GREEN);
+      }
+
+      // adjust turret offset
+      if (gamepad2.dpadLeftWasPressed()) {
+        scoringSystem.adjustTurretAngleOffset(1);
+      } else if (gamepad2.dpadRightWasPressed()) {
+        scoringSystem.adjustTurretAngleOffset(-1);
+      } else if (gamepad2.dpadDownWasPressed()) {
+        scoringSystem.adjustTurretAngleOffset(5);
+      } else if (gamepad2.dpadUpWasPressed()) {
+        scoringSystem.adjustTurretAngleOffset(-5);
+      }
+    }
+
+    // shoot
+    if (gamepad2.right_trigger > 0.67 || gamepad2.rightBumperWasPressed()) {
+      scoringSystem.shoot();
+    }
+
+    // eject intake, unjam spindexer
+    if (gamepad2.leftBumperWasPressed()) {
+      scoringSystem.clearIntake();
+      scoringSystem.unJamSpindexer();
+    }
   }
 }

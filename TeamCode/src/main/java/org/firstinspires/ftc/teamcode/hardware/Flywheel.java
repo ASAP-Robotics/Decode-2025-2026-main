@@ -102,7 +102,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    */
   public boolean isAtSpeed() {
     readCurrentSpeed();
-    return currentSpeed >= (targetSpeed - 50) && currentSpeed <= (targetSpeed + 100);
+    return currentSpeed >= (targetSpeed - 25) && currentSpeed <= (targetSpeed + 50);
   }
 
   /**
