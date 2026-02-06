@@ -23,8 +23,10 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.actions.ObeliskSearch;
 import org.firstinspires.ftc.teamcode.actions.setScoringPose;
 // import org.firstinspires.ftc.teamcode.actions.shootAction;
 import org.firstinspires.ftc.teamcode.actions.updateTelemetry;
@@ -32,63 +34,53 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 /** class to contain the behavior of the robot in Auto, to avoid code duplication */
-public class SimpleAuto extends CommonRobot {
-  // stuff (variables, etc., see TeliOpRobot) goes here;
-  private int flipx = 1; // flip over the y axis
-  private int flipy = 1; // flip over the x axis
-  private double rotate = 0;
-  protected final Pose2d beginPose;
-  protected MecanumDrive drive;
+import com.acmerobotics.roadrunner.Action;
 
+public class SimpleAuto extends CommonRobot {
+
+  private Limelight3A limelight;
   public SimpleAuto(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     super(hardwareMap, telemetry, allianceColor, true);
-    beginPose = allianceColor.getAutoStartPosition();
+    Pose2d beginPose = allianceColor.getAutoStartPosition();
     drive = new MecanumDrive(hardwareMap, beginPose);
   }
+
+  @Override
+  public void initLoop() {
+
+  }
+  public void stop() {}
+
+  @Override
+  public void loop() {}
+
+  protected MecanumDrive drive;
+  private Action obeliskSearchAction;
 
   public void init() {
     SimpleTimer backup = new SimpleTimer(2);
     backup.start();
     while (drive.localizer.getState() != GoBildaPinpointDriver.DeviceStatus.READY
-        && !backup.isFinished()) {
+            && !backup.isFinished()) {
       drive.localizer.update();
     }
-    // scoringSystem.init(true, true);
-  }
 
-  public void initLoop() {
-    // scoringSystem.initLoop();
   }
 
   public void start() {
-    // scoringSystem.start(false, false); // start scoring systems up
-    if (allianceColor == AllianceColor.BLUE) {
-      // flipx = -1;
-      rotate = Math.PI;
-      flipy = -1;
-    }
+    limelight = hardwareMap.get(Limelight3A.class, "limelight");
+    limelight.pipelineSwitch(5);
+    limelight.start();
+
+
+    // ✅ Instantiate it (constructor args depend on your ObeliskSearch class)
+    obeliskSearchAction = new ObeliskSearch(limelight,telemetry);
 
     Actions.runBlocking(
-        new ParallelAction( // BIGGEST BOI
-            // new updateScoring(scoringSystem),
-            new updateTelemetry(telemetry),
-            new SequentialAction( // BIG BOI
-                new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
-                new SequentialAction( // shoot 1
-                    drive
-                        .actionBuilder(beginPose)
-                        .splineToLinearHeading(
-                            new Pose2d(-7 * flipx, 31 * flipy, flipy * (Math.toRadians(90))),
-                            flipy * (Math.PI / 4),
-                            new TranslationalVelConstraint(250.0),
-                            new ProfileAccelConstraint(-50, 180))
-                        .build() // ,
-                    // new shootAction(scoringSystem)
-                    ))));
+            new ParallelAction(
+                    new updateTelemetry(telemetry),
+                    obeliskSearchAction
+            )
+    );
   }
-
-  public void stop() {}
-
-  @Override
-  public void loop() {}
 }
