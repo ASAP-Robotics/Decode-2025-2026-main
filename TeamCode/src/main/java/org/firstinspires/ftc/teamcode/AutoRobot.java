@@ -28,7 +28,6 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.actions.ObeliskSearch;
-import org.firstinspires.ftc.teamcode.actions.SearchObelisk;
 import org.firstinspires.ftc.teamcode.actions.setScoringPose;
 import org.firstinspires.ftc.teamcode.actions.shootAction;
 import org.firstinspires.ftc.teamcode.actions.updateScoring;
@@ -48,7 +47,6 @@ public class AutoRobot extends CommonRobot {
   protected MecanumDrive drive;
 
   private ObeliskSearch ObeliskSearch;
-
 
   public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     super(hardwareMap, telemetry, allianceColor, true);
@@ -75,7 +73,7 @@ public class AutoRobot extends CommonRobot {
     limelight = hardwareMap.get(Limelight3A.class, "limelight");
     limelight.pipelineSwitch(5);
     limelight.start();
-    obeliskSearchAction = new ObeliskSearch(limelight,telemetry);
+    obeliskSearchAction = new ObeliskSearch(limelight, telemetry);
     scoringSystem.start(true, false); // start scoring systems up
     if (allianceColor == AllianceColor.RED) {
       // flipx = -1;
@@ -89,8 +87,7 @@ public class AutoRobot extends CommonRobot {
             // new updateTelemetry(telemetry),
             new SequentialAction( // BIG BOI
                 new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
-                obeliskSearchAction,// shoot 1
-
+                obeliskSearchAction, // shoot 1
                 new SequentialAction( // shoot 1
                     drive
                         .actionBuilder(allianceColor.getAutoStartPosition())

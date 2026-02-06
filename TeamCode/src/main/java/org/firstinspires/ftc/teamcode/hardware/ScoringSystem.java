@@ -96,8 +96,11 @@ public class ScoringSystem {
   public void init(boolean isPreloaded, boolean auto) {
     setIndicatorColor(RGBIndicator.Color.VIOLET);
     spindex.init(BallSequence.GPP, isPreloaded, auto);
-    if(auto) {turret.init(allianceColor.getObeliskOffset());}
-    else {turret.init(0);}
+    if (auto) {
+      turret.init(allianceColor.getObeliskOffset());
+    } else {
+      turret.init(0);
+    }
     turret.setActive(!isPreloaded);
   }
 
