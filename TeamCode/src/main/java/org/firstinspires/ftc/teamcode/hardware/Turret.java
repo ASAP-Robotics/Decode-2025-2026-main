@@ -95,7 +95,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.rotator.setInverted(true);
     this.rotator.setRunMode(Motor.RunMode.RawPower);
     this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-    this.rotatorController = new PIDController(0.03, 0.03, 0.0009);
+    this.rotatorController = new PIDController(0.015, 0.03, 0.0007);
     rotatorController.setTolerance(turretDegreesToMotorDegrees(1));
     this.encoder.setInverted(true);
     angleSimulation = new Follower(0, 0, 1, 60); // tune 60
