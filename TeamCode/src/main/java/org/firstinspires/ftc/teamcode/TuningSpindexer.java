@@ -31,11 +31,11 @@ import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotat
 @TeleOp(name = "Tuning spindexer", group = "Tuning")
 @Config
 public class TuningSpindexer extends LinearOpMode {
-  public static int sleep = 10;
+  public static int target_loop_time = 20;
   public static double angle = 0;
-  public static double kD = 0.002;
+  public static double kD = 0.001;
   public static double kI = 0.05;
-  public static double kP = 0.1;
+  public static double kP = 0.05;
 
   public static boolean home = false;
   public static UnidirectionalHomableRotator.DirectionConstraint direction =
@@ -62,7 +62,11 @@ public class TuningSpindexer extends LinearOpMode {
     intake.intake();
 
     while (opModeIsActive()) {
-      sleep(sleep);
+      // it shouldn't matter where this goes
+      double rawLoopTime = loopTime.milliseconds();
+      sleep((long) Math.max(target_loop_time - rawLoopTime, 0));
+      double realLoopTime = loopTime.milliseconds();
+      loopTime.reset();
 
       if (home) {
         spindex.home();
@@ -77,7 +81,7 @@ public class TuningSpindexer extends LinearOpMode {
       intake.update();
 
       dashboardTelemetry.addData("At target", spindex.atTarget());
-      dashboardTelemetry.addData("Loop time", loopTime.milliseconds());
+      dashboardTelemetry.addData("Loop time", realLoopTime);
       loopTime.reset();
 
       dashboardTelemetry.update();

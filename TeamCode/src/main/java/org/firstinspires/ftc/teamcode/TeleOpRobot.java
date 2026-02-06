@@ -19,6 +19,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -27,6 +28,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
+import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -40,6 +42,7 @@ public class TeleOpRobot extends CommonRobot {
   protected Gamepad gamepad2;
   protected MecanumWheelBase wheelBase;
   protected PinpointLocalizer pinpoint;
+  protected Limelight limelight;
   protected SimpleTimer telemetryTimer = new SimpleTimer(0.67);
   protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
   protected SimpleTimer odometryResetTimer = new SimpleTimer(2);
@@ -51,6 +54,8 @@ public class TeleOpRobot extends CommonRobot {
       Gamepad gamepad1,
       Gamepad gamepad2) {
     super(hardwareMap, telemetry, allianceColor, true);
+    Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
+    this.limelight = new Limelight(rawLimelight, this.allianceColor);
 
     pinpoint = new PinpointLocalizer(hardwareMap, allianceColor.getAutoEndPosition());
 
@@ -76,6 +81,7 @@ public class TeleOpRobot extends CommonRobot {
       clearSensorCache();
       pinpoint.update();
     }
+    limelight.init();
     scoringSystem.init(false, false); // initialize scoring systems
   }
 
@@ -93,6 +99,7 @@ public class TeleOpRobot extends CommonRobot {
   public void start() {
     clearSensorCache();
     telemetryTimer.start();
+    limelight.start();
     scoringSystem.start(false, false); // start scoring systems up
     pinpointErrorTimer.start(); // maybe change
     odometryResetTimer.start();
@@ -160,7 +167,7 @@ public class TeleOpRobot extends CommonRobot {
         scoringSystem.autoAim();
 
       } else {
-        scoringSystem.overrideAiming(50, 0); // TODO: tune distance
+        scoringSystem.overrideAiming(75, 0); // TODO: tune distance
       }
     }
     // reset odometry
@@ -189,8 +196,12 @@ public class TeleOpRobot extends CommonRobot {
     PoseVelocity2d velocityPose = pinpoint.update();
     boolean faulted = pinpoint.isFaulted();
     if (!faulted) pinpointErrorTimer.start();
-    Pose2d location =
-        faulted && pinpointErrorTimer.isFinished() ? new Pose2d(0, 0, 0) : pinpoint.getPose();
+
+    if (faulted && pinpointErrorTimer.isFinished()) {
+      scoringSystem.overrideAiming(75, 0); // TODO: tune distance
+    }
+
+    Pose2d location = pinpoint.getPose();
     double velocity =
         Math.hypot(Math.abs(velocityPose.linearVel.x), Math.abs(velocityPose.linearVel.y));
     double angleVel = Math.abs(velocityPose.angVel);
@@ -209,7 +220,7 @@ public class TeleOpRobot extends CommonRobot {
     if (updateTelemetry) telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
 
     if (odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25) {
-      Pose2D limelightPose = scoringSystem.getRobotPosition();
+      Pose2D limelightPose = limelight.getRobotPosition(scoringSystem.getTurretAngle());
       if (limelightPose != null) {
         pinpoint.setPose(
             new Pose2d(

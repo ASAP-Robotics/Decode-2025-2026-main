@@ -17,7 +17,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -32,7 +31,6 @@ import org.firstinspires.ftc.teamcode.hardware.Turret;
 import org.firstinspires.ftc.teamcode.hardware.indicators.RGBIndicator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
-import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
@@ -62,9 +60,6 @@ public abstract class CommonRobot {
     this.telemetry = telemetry;
     this.allianceColor = allianceColor;
 
-    Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
-    Limelight limelight = new Limelight(rawLimelight, this.allianceColor);
-
     TouchSensor spindexHomer = this.hardwareMap.get(TouchSensor.class, "spindexHomer");
     Motor spindexMotor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
     Axon intakeBlocker = new Axon(this.hardwareMap, "intakeBlocker", "intakeBlockerEncoder");
@@ -86,14 +81,7 @@ public abstract class CommonRobot {
 
     scoringSystem =
         new ScoringSystem(
-            intake,
-            turret,
-            spindex,
-            limelight,
-            indicator1,
-            indicator2,
-            this.allianceColor,
-            this.telemetry);
+            intake, turret, spindex, indicator1, indicator2, this.allianceColor, this.telemetry);
   }
 
   /**
@@ -102,7 +90,7 @@ public abstract class CommonRobot {
    * @note MUST be called to get new sensor data if bulk reading enabled
    * @note returns without doing anything if bulk reading not enabled in constructor
    */
-  protected void clearSensorCache() {
+  public void clearSensorCache() {
     if (!bulkRead) return;
     // clears the cache on each hub
     for (LynxModule hub : allHubs) {

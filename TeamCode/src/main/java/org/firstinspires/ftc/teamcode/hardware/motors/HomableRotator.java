@@ -151,7 +151,7 @@ public class HomableRotator implements System {
   }
 
   /**
-   * Changes the target angle of the motor b a given amount
+   * Changes the target angle of the motor by a given amount
    *
    * @param change the amount to change the target angle by
    */

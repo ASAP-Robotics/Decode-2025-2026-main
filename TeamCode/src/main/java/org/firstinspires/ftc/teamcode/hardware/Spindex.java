@@ -97,7 +97,7 @@ public class Spindex implements System {
   public Spindex(
       Motor spinner, TouchSensor homingSwitch, Axon intakeBlocker, ColorSensorV3 colorSensor) {
     this.spinner =
-        new UnidirectionalHomableRotator(spinner, homingSwitch, 0.1, 0.05, 0.001, 1, true);
+        new UnidirectionalHomableRotator(spinner, homingSwitch, 0.05, 0.05, 0.001, 1, true);
     this.intakeBlocker = intakeBlocker;
     this.colorSensor = colorSensor;
   }
@@ -155,7 +155,7 @@ public class Spindex implements System {
           break;
         } // prepare to shoot if full
 
-        intakeBlocker.setPosition(INTAKE_FLAP_OPEN); // open intake
+        if (isAtTarget()) intakeBlocker.setPosition(INTAKE_FLAP_OPEN); // open intake
         currentIndex = getColorIndex(BallColor.EMPTY);
 
         turnSpindexNoShoot(spindex[currentIndex].intakePosition); // move spindex to position
@@ -257,7 +257,7 @@ public class Spindex implements System {
     intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake (just in case)
     state = SpindexState.SHOOTING;
     spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.FORWARD_ONLY);
-    spinner.changeTargetAngle(360.0);
+    spinner.manualChangeTargetAngle(400.0);
     // this empties the entire mag; we don't ever need to only partially shoot it
   }
 
@@ -269,7 +269,7 @@ public class Spindex implements System {
    */
   public void prepForShutdown() {
     state = SpindexState.UNINITIALIZED;
-    turnSpindexNoShoot(10); // todo tune
+    turnSpindexNoShoot(10);
   }
 
   /**
@@ -587,7 +587,7 @@ public class Spindex implements System {
             : UnidirectionalHomableRotator.DirectionConstraint.NONE);
 
     // spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.NONE); //
-    // todo fix
+    // todo figure out why this was broken and why this fixed it
     spinner.setAngle(target);
   }
 

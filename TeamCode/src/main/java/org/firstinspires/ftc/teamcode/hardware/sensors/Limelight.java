@@ -224,6 +224,28 @@ public class Limelight {
   }
 
   /**
+   * @brief gets the 2D position of the robot on the field according to limelight
+   * @param turretAngleDegrees the angle of the turret relative to straight forward, in degrees
+   * @return the position of the robot, or null if either the target isn't visible or the camera
+   *     isn't still or the set position is too different
+   * @note this returns null under normal operation conditions, be careful
+   */
+  public Pose2D getRobotPosition(double turretAngleDegrees) {
+    Pose2D limelightPosition = getPosition();
+    if (limelightPosition == null) {
+      return null;
+    }
+
+    double rotationDegrees = AngleUnit.normalizeDegrees(turretAngleDegrees);
+    double x = limelightPosition.getX(DistanceUnit.INCH);
+    double y = limelightPosition.getY(DistanceUnit.INCH);
+    double heading =
+        AngleUnit.normalizeDegrees(
+            limelightPosition.getHeading(AngleUnit.DEGREES) - rotationDegrees);
+    return new Pose2D(DistanceUnit.INCH, x, y, AngleUnit.DEGREES, heading);
+  }
+
+  /**
    * @brief gets if a valid target is in frame (the latest frame/result was valid)
    * @note intended for use mainly once mode is navigation
    */
