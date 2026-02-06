@@ -76,6 +76,7 @@ public class TeleOpRobot extends CommonRobot {
     clearSensorCache();
     SimpleTimer backup = new SimpleTimer(2);
     backup.start();
+    // pinpoint.recalibrate();
     while (pinpoint.getState() != GoBildaPinpointDriver.DeviceStatus.READY
         && !backup.isFinished()) {
       clearSensorCache();

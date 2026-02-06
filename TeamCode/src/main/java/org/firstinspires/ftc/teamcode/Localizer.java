@@ -23,5 +23,7 @@ public interface Localizer {
    */
   PoseVelocity2d update();
 
+  void recalibrate();
+
   GoBildaPinpointDriver.DeviceStatus getState();
 }
