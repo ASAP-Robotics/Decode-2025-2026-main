@@ -18,19 +18,15 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.actions.ObeliskSearch;
-
 import org.firstinspires.ftc.teamcode.actions.updateTelemetry;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
-
-/** class to contain the behavior of the robot in Auto, to avoid code duplication */
 import com.acmerobotics.roadrunner.Action;
 
 public class SimpleAuto extends CommonRobot {
