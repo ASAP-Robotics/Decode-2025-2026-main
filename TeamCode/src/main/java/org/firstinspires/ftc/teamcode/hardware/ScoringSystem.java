@@ -119,7 +119,13 @@ public class ScoringSystem {
     spindex.start();
     turret.enable(); // let the flywheel spin up
     turret.start();
-    state = isPreloaded ? State.FULL : State.INTAKING;
+
+    if (isPreloaded) {
+      switchModeToFull();
+    } else {
+      switchModeToIntaking();
+    }
+
     timeSinceStart.reset();
     loopTime.reset();
   }
