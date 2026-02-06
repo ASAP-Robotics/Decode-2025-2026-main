@@ -53,7 +53,6 @@ public class AutoRobot extends CommonRobot {
 
   private ObeliskSearch ObeliskSearch;
 
-
   public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     super(hardwareMap, telemetry, allianceColor, false);
     beginPose = allianceColor.getAutoStartPosition();
@@ -92,15 +91,14 @@ public class AutoRobot extends CommonRobot {
       flipy = -1;
     }
 
-
     Actions.runBlocking(
         new ParallelAction( // BIGGEST BOI
             new updateScoring(scoringSystem, this, telemetry),
             // new updateTelemetry(telemetry),
             new SequentialAction( // BIG BOI
                 new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
-                    new ObeliskSearch(limelight,telemetry),// shoot 1
-                    new setAiming(distance, angle,flipy,scoringSystem),
+                new ObeliskSearch(limelight, telemetry), // shoot 1
+                new setAiming(distance, angle, flipy, scoringSystem),
                 new SequentialAction( // shoot 1
                     drive
                         .actionBuilder(allianceColor.getAutoStartPosition())
