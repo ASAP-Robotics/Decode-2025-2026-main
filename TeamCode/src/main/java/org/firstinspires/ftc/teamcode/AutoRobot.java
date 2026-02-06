@@ -57,6 +57,7 @@ public class AutoRobot extends CommonRobot {
   }
 
   public void init() {
+    flipy = 1;
     SimpleTimer backup = new SimpleTimer(2);
     backup.start();
     while (drive.localizer.getState() != GoBildaPinpointDriver.DeviceStatus.READY
@@ -157,7 +158,7 @@ public class AutoRobot extends CommonRobot {
                         .actionBuilder(allianceColor.getAutoRRShootPosition())
                         // go to pickup3
                         .splineToLinearHeading(
-                            new Pose2d(37.1 * flipx, -28 * flipy, flipy * (Math.toRadians(-90))),
+                            new Pose2d(37.1 * flipx, -25 * flipy, flipy * (Math.toRadians(-90))),
                             (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(250.0),
                             new ProfileAccelConstraint(-50, 180))
