@@ -85,7 +85,7 @@ public class AutoRobot extends CommonRobot {
 
     Actions.runBlocking(
         new ParallelAction( // BIGGEST BOI
-            new updateScoring(scoringSystem, this),
+            new updateScoring(scoringSystem, this, telemetry),
             // new updateTelemetry(telemetry),
             new SequentialAction( // BIG BOI
                 new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
