@@ -16,6 +16,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
@@ -23,8 +24,11 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.actions.ObeliskSearch;
+import org.firstinspires.ftc.teamcode.actions.SearchObelisk;
 import org.firstinspires.ftc.teamcode.actions.setScoringPose;
 import org.firstinspires.ftc.teamcode.actions.shootAction;
 import org.firstinspires.ftc.teamcode.actions.updateScoring;
@@ -37,8 +41,14 @@ public class AutoRobot extends CommonRobot {
   private int flipx = 1; // flip over the y axis
   private int flipy = 1; // flip over the x axis
   private double rotate = 0;
+  private Action obeliskSearchAction;
   protected final Pose2d beginPose;
+
+  private Limelight3A limelight;
   protected MecanumDrive drive;
+
+  private ObeliskSearch ObeliskSearch;
+
 
   public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     super(hardwareMap, telemetry, allianceColor, true);
@@ -47,6 +57,7 @@ public class AutoRobot extends CommonRobot {
   }
 
   public void init() {
+    flipy = 1;
     SimpleTimer backup = new SimpleTimer(2);
     backup.start();
     while (drive.localizer.getState() != GoBildaPinpointDriver.DeviceStatus.READY
@@ -61,6 +72,10 @@ public class AutoRobot extends CommonRobot {
   }
 
   public void start() {
+    limelight = hardwareMap.get(Limelight3A.class, "limelight");
+    limelight.pipelineSwitch(5);
+    limelight.start();
+    obeliskSearchAction = new ObeliskSearch(limelight,telemetry);
     scoringSystem.start(true, false); // start scoring systems up
     if (allianceColor == AllianceColor.RED) {
       // flipx = -1;
@@ -74,6 +89,8 @@ public class AutoRobot extends CommonRobot {
             // new updateTelemetry(telemetry),
             new SequentialAction( // BIG BOI
                 new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
+                obeliskSearchAction,// shoot 1
+
                 new SequentialAction( // shoot 1
                     drive
                         .actionBuilder(allianceColor.getAutoStartPosition())
@@ -141,7 +158,7 @@ public class AutoRobot extends CommonRobot {
                         .actionBuilder(allianceColor.getAutoRRShootPosition())
                         // go to pickup3
                         .splineToLinearHeading(
-                            new Pose2d(37.1 * flipx, -28 * flipy, flipy * (Math.toRadians(-90))),
+                            new Pose2d(37.1 * flipx, -25 * flipy, flipy * (Math.toRadians(-90))),
                             (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(250.0),
                             new ProfileAccelConstraint(-50, 180))

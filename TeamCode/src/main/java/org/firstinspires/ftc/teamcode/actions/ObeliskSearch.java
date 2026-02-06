@@ -25,6 +25,8 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 import java.io.File;
 import java.util.List;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.json.JSONObject;
@@ -34,15 +36,23 @@ public class ObeliskSearch implements Action {
   private final Limelight3A limelight;
   private boolean wrote = false;
 
+
   private final File configFile = AppUtil.getInstance().getSettingsFile("ball_sequence.json");
 
-  public ObeliskSearch(Limelight3A limelight) {
+
+  private final Telemetry telemetry;
+
+
+  public ObeliskSearch(Limelight3A limelight, Telemetry telemetry) {
     this.limelight = limelight;
+    this.telemetry = telemetry;
   }
 
   @Override
   public boolean run(@NonNull TelemetryPacket packet) {
     if (wrote) return false; // done
+
+
 
     LLResult result = limelight.getLatestResult();
 
@@ -92,6 +102,8 @@ public class ObeliskSearch implements Action {
       default:
         return true;
     }
+    telemetry.addData("Obelisk Tag", bestId == -1 ? "none" : bestId);
+    telemetry.update();
 
     // Save EXACTLY like your reference Limelight class
     try {
@@ -113,5 +125,6 @@ public class ObeliskSearch implements Action {
       packet.put("saveError", e.getMessage());
       return true; // keep trying
     }
+
   }
 }
