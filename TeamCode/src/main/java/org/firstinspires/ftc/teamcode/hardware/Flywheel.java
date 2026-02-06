@@ -93,7 +93,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
    */
   public boolean isReadyToShoot() {
-    return isEnabled && isActive && (isAtSpeed() || speedSimulation.isAtTarget());
+    return isEnabled && isActive && (isAtSpeed()/*|| speedSimulation.isAtTarget()*/);
   }
 
   /**
@@ -101,6 +101,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @return true if flywheel is actually at speed, false otherwise
    */
   public boolean isAtSpeed() {
+    readCurrentSpeed();
     return currentSpeed >= (targetSpeed - 50) && currentSpeed <= (targetSpeed + 100);
   }
 
@@ -112,6 +113,15 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   @TestOnly
   public double getCurrentSpeed() {
     return currentSpeed;
+  }
+
+  /**
+   * Reads the current speed of the flywheel
+   */
+  protected void readCurrentSpeed() {
+    double ticksPerSec =
+        this.flywheel.getVelocity(); // get the speed of the motor in ticks per second
+    currentSpeed = (ticksPerSec * 60.0) / MOTOR_TICKS_PER_REV; // convert to RPM, store
   }
 
   /**
@@ -262,9 +272,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @note call every loop
    */
   public void update() {
-    double ticksPerSec =
-        this.flywheel.getVelocity(); // get the speed of the motor in ticks per second
-    currentSpeed = (ticksPerSec * 60.0) / MOTOR_TICKS_PER_REV; // convert to RPM, store
+    readCurrentSpeed();
 
     if (isEnabled) { // if flywheel is enabled
       if (isActive) { // if flywheel is active

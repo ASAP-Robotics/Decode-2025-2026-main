@@ -277,6 +277,9 @@ public class ScoringSystem {
         setIndicatorColor(color);
         break;
     }
+
+    indicator1.update();
+    indicator2.update();
   }
 
   /** Updates (or adds the data of) the telemetry from the scoring systems */
