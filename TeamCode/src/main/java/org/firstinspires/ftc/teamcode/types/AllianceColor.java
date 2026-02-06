@@ -25,7 +25,7 @@ public enum AllianceColor {
   RED(
       24,
       2,
-      -50,
+      30,
       new Pose2d(-38.5, 54.6, Math.toRadians(-90)), // starting pose
       new Pose2d(-11.3, 24.7, Math.toRadians(90)), // roadrunner shooting pose
       new Pose2D(DistanceUnit.INCH, -13, 24, AngleUnit.DEGREES, 90), // scoring system shooting pose
@@ -35,7 +35,7 @@ public enum AllianceColor {
   BLUE(
       20,
       1,
-      0,
+      -30,
       new Pose2d(-38.5, -54.6, Math.toRadians(90)), // starting pose
       new Pose2d(-11.3, -24.7, Math.toRadians(-90)), // roadrunner shooting pose
       new Pose2D(
