@@ -18,6 +18,7 @@ package org.firstinspires.ftc.teamcode.hardware.indicators;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.teamcode.utils.Follower;
 
 /** Simple class to control a GoBILDA "RGB Indicator light (PWM controlled)" */
 public class RGBIndicator {
@@ -41,11 +42,27 @@ public class RGBIndicator {
     }
   }
 
+  private static final double UPDATE_TOLERANCE = 0.01;
   private final Servo led; // light is controlled by servo PWM control
+  private final Follower follower = new Follower(0, 0, 0, 0.2);
   private Color color = null;
+  private double lastSetValue = Double.NEGATIVE_INFINITY;
+  private boolean atColor = false;
 
   public RGBIndicator(HardwareMap hardwareMap, String deviceName) {
     this.led = hardwareMap.get(Servo.class, deviceName);
+  }
+
+  public void update() {
+    if (atColor) return;
+    double value = follower.getValue();
+
+    if (Math.abs(value - lastSetValue) > UPDATE_TOLERANCE) {
+      led.setPosition(value);
+      lastSetValue = value;
+    }
+
+    if (follower.isAtTarget()) atColor = true;
   }
 
   public RGBIndicator(Servo led) {
@@ -60,7 +77,8 @@ public class RGBIndicator {
   public void setColor(Color color) {
     if (color == this.color) return;
     this.color = color;
-    led.setPosition(color.num);
+    atColor = false;
+    follower.setTarget(color.num);
   }
 
   /**

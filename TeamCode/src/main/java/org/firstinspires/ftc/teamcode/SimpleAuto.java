@@ -16,26 +16,23 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.actions.ObeliskSearch;
-
 import org.firstinspires.ftc.teamcode.actions.updateTelemetry;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
-/** class to contain the behavior of the robot in Auto, to avoid code duplication */
-import com.acmerobotics.roadrunner.Action;
-
 public class SimpleAuto extends CommonRobot {
 
   private Limelight3A limelight;
+
   public SimpleAuto(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor) {
     super(hardwareMap, telemetry, allianceColor, true);
     Pose2d beginPose = allianceColor.getAutoStartPosition();
@@ -43,9 +40,8 @@ public class SimpleAuto extends CommonRobot {
   }
 
   @Override
-  public void initLoop() {
+  public void initLoop() {}
 
-  }
   public void stop() {}
 
   @Override
@@ -58,10 +54,9 @@ public class SimpleAuto extends CommonRobot {
     SimpleTimer backup = new SimpleTimer(2);
     backup.start();
     while (drive.localizer.getState() != GoBildaPinpointDriver.DeviceStatus.READY
-            && !backup.isFinished()) {
+        && !backup.isFinished()) {
       drive.localizer.update();
     }
-
   }
 
   public void start() {
@@ -69,15 +64,9 @@ public class SimpleAuto extends CommonRobot {
     limelight.pipelineSwitch(5);
     limelight.start();
 
-
     // ✅ Instantiate it (constructor args depend on your ObeliskSearch class)
-    obeliskSearchAction = new ObeliskSearch(limelight,telemetry);
+    obeliskSearchAction = new ObeliskSearch(limelight, telemetry);
 
-    Actions.runBlocking(
-            new ParallelAction(
-                    new updateTelemetry(telemetry),
-                    obeliskSearchAction
-            )
-    );
+    Actions.runBlocking(new ParallelAction(new updateTelemetry(telemetry), obeliskSearchAction));
   }
 }
