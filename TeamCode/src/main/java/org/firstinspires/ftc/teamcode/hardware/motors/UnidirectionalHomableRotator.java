@@ -17,6 +17,7 @@
 package org.firstinspires.ftc.teamcode.hardware.motors;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 
@@ -37,7 +38,7 @@ public class UnidirectionalHomableRotator extends HomableRotator {
   protected DirectionConstraint directionConstraint = DirectionConstraint.NONE;
 
   public UnidirectionalHomableRotator(
-      Motor motor,
+      MotorEx motor,
       TouchSensor sensor,
       double kp,
       double ki,

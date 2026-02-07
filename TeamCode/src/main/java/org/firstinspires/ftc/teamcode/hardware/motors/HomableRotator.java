@@ -16,16 +16,23 @@
 
 package org.firstinspires.ftc.teamcode.hardware.motors;
 
+import android.util.Pair;
+
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.Follower;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
+
+import java.util.LinkedList;
 
 /**
  * Class to contain a motor that is set to a given angle setpoint, which can be homed via a button
@@ -40,17 +47,34 @@ public class HomableRotator implements System {
     UNINITIALIZED
   }
 
+  private static class Reading {
+    public final double timestamp;
+    public final double current;
+    public final double angle;
+
+    public Reading(double timestamp, double current, double angle) {
+      this.timestamp = timestamp;
+      this.current = current;
+      this.angle = angle;
+    }
+  }
+
   private static final double UPDATE_TOLERANCE =
       0.01; // amount power has to change by to actually set motor
   protected static final double HOMING_INCREMENT_SIZE = -2; // degrees
+  protected static final double READING_TIME = 1; // seconds
+  protected static final double STALL_CURRENT = 1; // amps
+  protected static final double STALL_ANGLE_DEVIATION = 15; // degrees, must have moved more than this to not be stalled
 
-  protected final Motor motor;
+  protected final MotorEx motor;
   protected final TouchSensor sensor;
   protected final PIDController motorController;
   protected final Follower motorSimulation;
   protected final SimpleTimer disableTimer = new SimpleTimer(1);
   protected final Follower homingSetpointFollower;
+  protected final ElapsedTime timeSinceStart = new ElapsedTime();
   protected final boolean inverted;
+  private final LinkedList<Reading> readings = new LinkedList<>();
   protected State state = State.UNINITIALIZED;
   protected boolean disabled = false;
   protected boolean homed = false;
@@ -59,7 +83,7 @@ public class HomableRotator implements System {
   protected double currentMotorPower = 0;
 
   public HomableRotator(
-      Motor motor,
+      MotorEx motor,
       TouchSensor sensor,
       double kp,
       double ki,
@@ -92,11 +116,53 @@ public class HomableRotator implements System {
     motorController.reset();
     setTargetAngle(0);
     motorController.setSetPoint(targetAngle);
+    timeSinceStart.reset();
   }
 
-  public void update() {
-    if (state == State.UNINITIALIZED) return;
+  public Pair<Double, Double> update() {
+    if (state == State.UNINITIALIZED) return new Pair<>(Double.NaN, Double.NaN);
     measureCurrentAngle();
+
+    double now = timeSinceStart.seconds();
+
+    readings.addLast(
+        new Reading(
+            now,
+            motor.motorEx.getCurrent(CurrentUnit.AMPS),
+            currentAngle
+        )
+    );
+
+    while (!readings.isEmpty() && now - readings.getFirst().timestamp > READING_TIME) {
+      readings.removeFirst();
+    }
+
+    double angleSpread = 6.7;
+    double currentAverage = 6.7;
+
+    if (!readings.isEmpty()) {
+      double currentSum = 0;
+      double minAngle = Double.POSITIVE_INFINITY;
+      double maxAngle = Double.NEGATIVE_INFINITY;
+
+      for (Reading reading : readings) {
+        currentSum += reading.current;
+        if (reading.angle > maxAngle) maxAngle = reading.angle;
+        if (reading.angle < minAngle) minAngle = reading.angle;
+      }
+
+      double current = currentSum / readings.size();
+
+      if (current > STALL_CURRENT
+          && maxAngle > minAngle
+          && maxAngle - minAngle < STALL_ANGLE_DEVIATION
+      ) {
+        disable();
+      }
+
+      currentAverage = current;
+      angleSpread = maxAngle - minAngle;
+    }
 
     if (disabled && disableTimer.isFinished()) {
       disabled = false;
@@ -132,6 +198,8 @@ public class HomableRotator implements System {
         motorSimulation.setTarget(value);
       }
     }
+
+    return new Pair<>(currentAverage, angleSpread);
   }
 
   /**
