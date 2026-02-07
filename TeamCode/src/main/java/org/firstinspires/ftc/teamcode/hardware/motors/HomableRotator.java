@@ -230,12 +230,12 @@ public class HomableRotator implements System {
     currentMotorPower = 0;
     motor.stopAndResetEncoder();
 
-    //measureCurrentAngle();
+    // measureCurrentAngle();
 
     motorController.reset();
     motorController.setSetPoint(targetAngle);
-    //homingSetpointFollower.setValue(getCurrentAngle());
-    //homingSetpointFollower.setTarget(Double.NEGATIVE_INFINITY); // tune?
+    // homingSetpointFollower.setValue(getCurrentAngle());
+    // homingSetpointFollower.setTarget(Double.NEGATIVE_INFINITY); // tune?
   }
 
   /**
