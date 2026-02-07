@@ -44,8 +44,8 @@ public class AutoRobot extends CommonRobot {
   private int flipy = 1; // flip over the x axis
   private double rotate = 0;
   private Action obeliskSearchAction;
-  private final double distance = 58.4;
-  private final double angle = -49;
+  private final double distance = 60.4;
+  private final double angle = -51;
   protected final Pose2d beginPose;
 
   private Limelight3A limelight;
@@ -117,8 +117,8 @@ public class AutoRobot extends CommonRobot {
                         .splineToLinearHeading(
                             new Pose2d(-11.6 * flipx, -52 * flipy, flipy * (Math.toRadians(-90))),
                             (Math.PI / -2) * flipy,
-                            new TranslationalVelConstraint(180.0),
-                            new ProfileAccelConstraint(-50, 180))
+                            new TranslationalVelConstraint(175.0),
+                            new ProfileAccelConstraint(-10, 130))
                         .waitSeconds(0.1)
                         // goback
                         .splineToLinearHeading(
@@ -128,7 +128,7 @@ public class AutoRobot extends CommonRobot {
                             new ProfileAccelConstraint(-50, 180))
                         // hitgate
                         .splineToLinearHeading(
-                            new Pose2d(-4.4 * flipx, -52 * flipy, flipy * (Math.toRadians(-90))),
+                            new Pose2d(-4.8 * flipx, -52 * flipy, flipy * (Math.toRadians(-90))),
                             (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(200.0),
                             new ProfileAccelConstraint(-30, 175))
@@ -150,13 +150,14 @@ public class AutoRobot extends CommonRobot {
                         .splineToLinearHeading(
                             new Pose2d(15 * flipx, -61.5 * flipy, flipy * (Math.toRadians(-90))),
                             (Math.PI / -2) * flipy,
-                                new TranslationalVelConstraint(180.0),
-                                new ProfileAccelConstraint(-50, 180))
+                            new TranslationalVelConstraint(175.0),
+                            new ProfileAccelConstraint(-10, 100))
                         .waitSeconds(0.1)
                         // go back to not hit gate
                         .strafeTo(
-                            (new Pose2d(15 * flipx, -49 * flipy, flipy * (Math.toRadians(-90))))
-                                .position)
+                            (new Pose2d(15 * flipx, -46 * flipy, flipy * (Math.toRadians(-90))))
+                                .position, new TranslationalVelConstraint(175.0),
+                                new ProfileAccelConstraint(-10, 70))
                         // shoot3
                         .strafeTo(allianceColor.getAutoRRShootPosition().position)
                         .build(),
@@ -174,8 +175,8 @@ public class AutoRobot extends CommonRobot {
                         .splineToLinearHeading(
                             new Pose2d(37.1 * flipx, -61.5 * flipy, flipy * (Math.toRadians(-90))),
                             (Math.PI / -2) * flipy,
-                                new TranslationalVelConstraint(180.0),
-                                new ProfileAccelConstraint(-50, 180))
+                            new TranslationalVelConstraint(175.0),
+                            new ProfileAccelConstraint(-10, 130))
                         .waitSeconds(0.1)
                         // shoot
                         .strafeTo(allianceColor.getAutoRRShootPosition().position)

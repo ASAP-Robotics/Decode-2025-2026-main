@@ -67,7 +67,7 @@ public class Spindex implements System {
 
   private static final double INTAKE_FLAP_CLOSED = 335;
   private static final double INTAKE_FLAP_OPEN = 248;
-  private static final double INTAKE_DELAY_SECONDS = 0.5;
+  private static final double INTAKE_DELAY_SECONDS = 0.3;
 
   SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
   SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report

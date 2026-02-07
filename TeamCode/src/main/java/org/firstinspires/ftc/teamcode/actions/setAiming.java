@@ -20,6 +20,7 @@ public class setAiming implements Action {
 
   @Override
   public boolean run(TelemetryPacket packet) {
+    scoringSystem.tuneAiming(2320,32);
     scoringSystem.overrideAiming(this.distance, this.flipy * this.angle);
     scoringSystem.update(true);
     return false;
