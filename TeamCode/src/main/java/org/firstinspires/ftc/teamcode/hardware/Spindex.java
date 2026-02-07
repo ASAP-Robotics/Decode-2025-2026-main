@@ -19,8 +19,6 @@ package org.firstinspires.ftc.teamcode.hardware;
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
 import android.util.Pair;
-
-import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
@@ -191,7 +189,7 @@ public class Spindex implements System {
         break;
     }
 
-    Pair<Double, Double> toReturn =  spinner.update();
+    Pair<Double, Double> toReturn = spinner.update();
 
     oldIntakeColor = intakeColor; // store old intake color
     if (colorSensorEnabled && state.checkSensor && isAtTarget()) {

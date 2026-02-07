@@ -17,13 +17,13 @@
 package org.firstinspires.ftc.teamcode.hardware.motors;
 
 import android.util.Pair;
-
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import java.util.LinkedList;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.interfaces.System;
@@ -31,8 +31,6 @@ import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.Follower;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
-
-import java.util.LinkedList;
 
 /**
  * Class to contain a motor that is set to a given angle setpoint, which can be homed via a button
@@ -64,7 +62,8 @@ public class HomableRotator implements System {
   protected static final double HOMING_INCREMENT_SIZE = -2; // degrees
   protected static final double READING_TIME = 1; // seconds
   protected static final double STALL_CURRENT = 1; // amps
-  protected static final double STALL_ANGLE_DEVIATION = 15; // degrees, must have moved more than this to not be stalled
+  protected static final double STALL_ANGLE_DEVIATION =
+      15; // degrees, must have moved more than this to not be stalled
 
   protected final MotorEx motor;
   protected final TouchSensor sensor;
@@ -125,13 +124,7 @@ public class HomableRotator implements System {
 
     double now = timeSinceStart.seconds();
 
-    readings.addLast(
-        new Reading(
-            now,
-            motor.motorEx.getCurrent(CurrentUnit.AMPS),
-            currentAngle
-        )
-    );
+    readings.addLast(new Reading(now, motor.motorEx.getCurrent(CurrentUnit.AMPS), currentAngle));
 
     while (!readings.isEmpty() && now - readings.getFirst().timestamp > READING_TIME) {
       readings.removeFirst();
@@ -155,8 +148,7 @@ public class HomableRotator implements System {
 
       if (current > STALL_CURRENT
           && maxAngle > minAngle
-          && maxAngle - minAngle < STALL_ANGLE_DEVIATION
-      ) {
+          && maxAngle - minAngle < STALL_ANGLE_DEVIATION) {
         disable();
       }
 
