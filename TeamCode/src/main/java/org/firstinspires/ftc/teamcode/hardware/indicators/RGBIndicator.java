@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.utils.Follower;
 public class RGBIndicator {
   public enum Color {
     OFF(0.0),
-    RED(0.277),
+    RED(0.288),
     ORANGE(0.333),
     YELLOW(0.388),
     SAGE(0.444),
@@ -44,7 +44,7 @@ public class RGBIndicator {
 
   private static final double UPDATE_TOLERANCE = 0.01;
   private final Servo led; // light is controlled by servo PWM control
-  private final Follower follower = new Follower(0, 0, 0, 0.2);
+  private final Follower follower = new Follower(0, 0, 0, 0.15);
   private Color color = null;
   private double lastSetValue = Double.NEGATIVE_INFINITY;
   private boolean atColor = false;

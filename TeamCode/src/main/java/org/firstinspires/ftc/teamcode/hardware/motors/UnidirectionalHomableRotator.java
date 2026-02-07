@@ -96,7 +96,7 @@ public class UnidirectionalHomableRotator extends HomableRotator {
    */
   private double calculateSetAngle(double degrees, DirectionConstraint constraint) {
     // double currentAngle = atTarget() ? getTargetAngle() : getCurrentAngle();
-    double currentAngle = getTargetAngle(); // chat strategy
+    double currentAngle = getTargetAngle();
 
     switch (constraint) {
       case FORWARD_ONLY:

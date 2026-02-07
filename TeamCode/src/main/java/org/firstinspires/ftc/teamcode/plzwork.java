@@ -57,7 +57,7 @@ public class plzwork extends CommonRobot {
    * @brief to be called once when the "start" button is pressed
    */
   public void start() {
-    scoringSystem.start(true, false); // start scoring systems up
+    scoringSystem.start(true); // start scoring systems up
   }
 
   /**

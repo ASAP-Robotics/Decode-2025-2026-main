@@ -108,6 +108,7 @@ public class ScoringSystem {
   public void initLoop() {
     spindex.update();
     turret.update();
+    updateIndicators();
   }
 
   /**
@@ -115,7 +116,7 @@ public class ScoringSystem {
    *
    * @note call when OpMode is started ("Start" is pressed)
    */
-  public void start(boolean isPreloaded, boolean search) {
+  public void start(boolean isPreloaded) {
     spindex.start();
     turret.enable(); // let the flywheel spin up
     turret.start();
@@ -252,11 +253,15 @@ public class ScoringSystem {
   private void updateIndicators() {
     switch (state) {
       case UNINITIALISED:
-        setIndicatorColor(RGBIndicator.Color.VIOLET);
+        if (spindex.isAtTarget() && turret.isAtTarget()) {
+          setIndicatorColor(RGBIndicator.Color.GREEN);
+        } else {
+          setIndicatorColor(RGBIndicator.Color.VIOLET);
+        }
         break;
 
       case SHOOTING:
-        setIndicatorColor(RGBIndicator.Color.BLUE);
+        setIndicatorColor(RGBIndicator.Color.WHITE);
         break;
 
       case FULL:
@@ -264,7 +269,7 @@ public class ScoringSystem {
           setIndicatorColor(RGBIndicator.Color.GREEN);
 
         } else {
-          setIndicatorColor(RGBIndicator.Color.WHITE);
+          setIndicatorColor(RGBIndicator.Color.BLUE);
         }
         break;
 
