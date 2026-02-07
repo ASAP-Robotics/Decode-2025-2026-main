@@ -17,6 +17,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -61,7 +62,7 @@ public abstract class CommonRobot {
     this.allianceColor = allianceColor;
 
     TouchSensor spindexHomer = this.hardwareMap.get(TouchSensor.class, "spindexHomer");
-    Motor spindexMotor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
+    MotorEx spindexMotor = new MotorEx(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
     Axon intakeBlocker = new Axon(this.hardwareMap, "intakeBlocker", "intakeBlockerEncoder");
     ColorSensorV3 colorSensor = new ColorSensorV3(this.hardwareMap, "colorSensor");
     Spindex spindex = new Spindex(spindexMotor, spindexHomer, intakeBlocker, colorSensor);

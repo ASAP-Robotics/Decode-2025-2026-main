@@ -18,7 +18,8 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
-import com.arcrobotics.ftclib.hardware.motors.Motor;
+import android.util.Pair;
+import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
@@ -65,8 +66,8 @@ public class Spindex implements System {
     }
   }
 
-  private static final double INTAKE_FLAP_CLOSED = 335;
-  private static final double INTAKE_FLAP_OPEN = 248;
+  private static final double INTAKE_FLAP_CLOSED = 325;
+  private static final double INTAKE_FLAP_OPEN = 240;
   private static final double INTAKE_DELAY_SECONDS = 0.5;
 
   SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
@@ -95,7 +96,7 @@ public class Spindex implements System {
       BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
   public Spindex(
-      Motor spinner, TouchSensor homingSwitch, Axon intakeBlocker, ColorSensorV3 colorSensor) {
+      MotorEx spinner, TouchSensor homingSwitch, Axon intakeBlocker, ColorSensorV3 colorSensor) {
     this.spinner =
         new UnidirectionalHomableRotator(spinner, homingSwitch, 0.05, 0.05, 0.001, 1, true);
     this.intakeBlocker = intakeBlocker;
@@ -135,8 +136,8 @@ public class Spindex implements System {
   }
 
   /** Updates everything to do with the spindex */
-  public void update() {
-    if (!enabled) return;
+  public Pair<Double, Double> update() {
+    if (!enabled) return new Pair<>(Double.NaN, Double.NaN);
 
     sensorReport = colorSensor.getStatus();
     spinnerReport = spinner.getStatus();
@@ -188,7 +189,7 @@ public class Spindex implements System {
         break;
     }
 
-    spinner.update();
+    Pair<Double, Double> toReturn = spinner.update();
 
     oldIntakeColor = intakeColor; // store old intake color
     if (colorSensorEnabled && state.checkSensor && isAtTarget()) {
@@ -197,6 +198,8 @@ public class Spindex implements System {
     } else {
       intakeColor = BallColor.INVALID;
     }
+
+    return toReturn;
   }
 
   public SystemReport getStatus() {
