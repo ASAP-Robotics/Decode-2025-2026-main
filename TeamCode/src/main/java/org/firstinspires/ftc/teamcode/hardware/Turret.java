@@ -146,10 +146,10 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
       new LookupTableItem(117.9, 2850, 10),
       new LookupTableItem(121.7, 2900, 10),
       new LookupTableItem(131.4, 2950, 10),
-      new LookupTableItem(139, 3600, 10),
+      new LookupTableItem(139, 3100, 10),
 
       // Extrapolated "infinite" point
-      new LookupTableItem(Double.POSITIVE_INFINITY, 3600, 10)
+      new LookupTableItem(Double.POSITIVE_INFINITY, 3100, 10)
     };
   }
 
