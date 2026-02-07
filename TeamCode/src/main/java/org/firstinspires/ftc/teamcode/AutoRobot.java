@@ -85,7 +85,7 @@ public class AutoRobot extends CommonRobot {
   }
 
   public void start() {
-    scoringSystem.start(true, false); // start scoring systems up
+    scoringSystem.start(true); // start scoring systems up
 
     if (allianceColor == AllianceColor.RED) {
       flipy = -1;

@@ -49,6 +49,7 @@ public class HomableRotator implements System {
   protected final PIDController motorController;
   protected final Follower motorSimulation;
   protected final SimpleTimer disableTimer = new SimpleTimer(1);
+  protected final Follower homingSetpointFollower;
   protected final boolean inverted;
   protected State state = State.UNINITIALIZED;
   protected boolean disabled = false;
@@ -75,6 +76,7 @@ public class HomableRotator implements System {
     this.motor.set(0);
     this.motorSimulation =
         new Follower(0, 0, tolerance, this.motor.getMaxRPM() / 12); // tune 12 (1/2 of max speed)
+    this.homingSetpointFollower = new Follower(0, 0, 0, 60); // tune 60 (degrees / second)
     this.inverted = inverted;
   }
 
@@ -111,7 +113,7 @@ public class HomableRotator implements System {
       currentMotorPower = targetMotorPower;
     }
 
-    if (state == State.HOMING && motorController.atSetPoint()) {
+    if (state == State.HOMING) {
       if (sensor.isPressed()) {
         homed = true;
         state = State.NORMAL;
@@ -119,10 +121,15 @@ public class HomableRotator implements System {
         currentMotorPower = 0;
         motor.stopAndResetEncoder();
         motorController.reset();
-        setTargetAngle(0);
+        targetAngle = 0;
+        motorController.setSetPoint(0);
+        motorSimulation.setTarget(0);
 
       } else {
-        changeTargetAngle(HOMING_INCREMENT_SIZE);
+        double value = homingSetpointFollower.getValue();
+        targetAngle = value;
+        motorController.setSetPoint(value);
+        motorSimulation.setTarget(value);
       }
     }
   }
@@ -216,14 +223,19 @@ public class HomableRotator implements System {
 
   /** Starts homing the motor */
   public void home() {
+    motor.set(0);
     homed = false;
     targetAngle = 0;
     state = State.HOMING;
-    motor.set(0);
     currentMotorPower = 0;
     motor.stopAndResetEncoder();
+
+    measureCurrentAngle();
+
     motorController.reset();
     motorController.setSetPoint(targetAngle);
+    homingSetpointFollower.setValue(getCurrentAngle());
+    homingSetpointFollower.setTarget(Double.NEGATIVE_INFINITY); // tune?
   }
 
   /**
