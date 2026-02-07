@@ -137,9 +137,9 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
       // Tuned Data (Sorted Low to High)
       new LookupTableItem(36.2, 1900, 60),
-      new LookupTableItem(44.9, 2040, 50),
-      new LookupTableItem(49.5, 2160, 45),
-      new LookupTableItem(58.3, 2300, 36),
+      new LookupTableItem(44.9, 2040, 55),
+      new LookupTableItem(49.5, 2140, 50),
+      new LookupTableItem(58.3, 2280, 40),
       new LookupTableItem(68.4, 2400, 32),
       new LookupTableItem(73.8, 2450, 31),
       new LookupTableItem(103.1, 2700, 25),
