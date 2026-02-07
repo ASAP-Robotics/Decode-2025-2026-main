@@ -157,7 +157,9 @@ public class AutoRobot extends CommonRobot {
                             new ProfileAccelConstraint(-10, 100))
                         .waitSeconds(0.1)
                         // go back to not hit gate
-                       // .strafeTo((new Pose2d(15 * flipx, -46 * flipy, flipy * (Math.toRadians(-90)))).position, new TranslationalVelConstraint(175.0), new ProfileAccelConstraint(-10, 70))
+                        // .strafeTo((new Pose2d(15 * flipx, -46 * flipy, flipy *
+                        // (Math.toRadians(-90)))).position, new TranslationalVelConstraint(175.0),
+                        // new ProfileAccelConstraint(-10, 70))
                         // shoot3
                         .strafeTo(allianceColor.getAutoRRShootPosition().position)
                         .build(),
@@ -190,13 +192,9 @@ public class AutoRobot extends CommonRobot {
                             new Pose2d(4.2 * flipx, -43.8 * flipy, flipy * (Math.toRadians(-90))),
                             (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(250.0),
-                            new ProfileAccelConstraint(-50, 180)
-                        ).build(),
-                        new AutoEndShutdowAction(scoringSystem)
-                )
-            )
-        )
-    );
+                            new ProfileAccelConstraint(-50, 180))
+                        .build(),
+                    new AutoEndShutdowAction(scoringSystem)))));
   }
 
   public void stop() {}
