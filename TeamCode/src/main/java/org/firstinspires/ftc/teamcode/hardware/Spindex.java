@@ -67,7 +67,7 @@ public class Spindex implements System {
 
   private static final double INTAKE_FLAP_CLOSED = 335;
   private static final double INTAKE_FLAP_OPEN = 248;
-  private static final double INTAKE_DELAY_SECONDS = 0.3;
+  private static final double INTAKE_DELAY_SECONDS = 0.5;
 
   SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
   SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
@@ -77,9 +77,9 @@ public class Spindex implements System {
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // code assumptions: increasing angle shoots
-    new SpindexSlot(15, 350), // slot 0
-    new SpindexSlot(135, 110), // slot 1
-    new SpindexSlot(255, 230) // slot 2
+    new SpindexSlot(17, 350), // slot 0
+    new SpindexSlot(137, 110), // slot 1
+    new SpindexSlot(257, 230) // slot 2
   };
 
   private final SimpleTimer intakeDelay =
@@ -184,7 +184,7 @@ public class Spindex implements System {
         break;
 
       case UNINITIALIZED: // if the spindex is uninitialized
-        spinner.setAngle(-10);
+        spinner.setAngle(10);
         break;
     }
 

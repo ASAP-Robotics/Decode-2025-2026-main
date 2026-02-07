@@ -113,7 +113,7 @@ public class HomableRotator implements System {
       currentMotorPower = targetMotorPower;
     }
 
-    if (state == State.HOMING) {
+    if (state == State.HOMING && motorController.atSetPoint()) {
       if (sensor.isPressed()) {
         homed = true;
         state = State.NORMAL;
@@ -126,7 +126,7 @@ public class HomableRotator implements System {
         motorSimulation.setTarget(0);
 
       } else {
-        double value = homingSetpointFollower.getValue();
+        double value = targetAngle + HOMING_INCREMENT_SIZE;
         targetAngle = value;
         motorController.setSetPoint(value);
         motorSimulation.setTarget(value);
@@ -230,12 +230,12 @@ public class HomableRotator implements System {
     currentMotorPower = 0;
     motor.stopAndResetEncoder();
 
-    measureCurrentAngle();
+    //measureCurrentAngle();
 
     motorController.reset();
     motorController.setSetPoint(targetAngle);
-    homingSetpointFollower.setValue(getCurrentAngle());
-    homingSetpointFollower.setTarget(Double.NEGATIVE_INFINITY); // tune?
+    //homingSetpointFollower.setValue(getCurrentAngle());
+    //homingSetpointFollower.setTarget(Double.NEGATIVE_INFINITY); // tune?
   }
 
   /**

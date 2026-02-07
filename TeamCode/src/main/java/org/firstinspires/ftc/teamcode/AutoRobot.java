@@ -29,6 +29,7 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.actions.AutoEndShutdowAction;
 import org.firstinspires.ftc.teamcode.actions.ObeliskSearch;
 import org.firstinspires.ftc.teamcode.actions.setAiming;
 import org.firstinspires.ftc.teamcode.actions.setScoringPose;
@@ -68,14 +69,14 @@ public class AutoRobot extends CommonRobot {
     backup.start();
     drive.localizer.recalibrate();
 
-    sleep(1000);
+    sleep(2000);
 
     while (drive.localizer.getState() != GoBildaPinpointDriver.DeviceStatus.READY
         && !backup.isFinished()) {
       drive.localizer.update();
     }
 
-    sleep(1000);
+    sleep(2000);
 
     scoringSystem.init(true, true);
   }
@@ -115,14 +116,14 @@ public class AutoRobot extends CommonRobot {
                         .actionBuilder(allianceColor.getAutoRRShootPosition())
                         // pickup first
                         .splineToLinearHeading(
-                            new Pose2d(-11.6 * flipx, -52 * flipy, flipy * (Math.toRadians(-90))),
+                            new Pose2d(-11.6 * flipx, -54 * flipy, flipy * (Math.toRadians(-90))),
                             (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(175.0),
                             new ProfileAccelConstraint(-10, 130))
                         .waitSeconds(0.1)
                         // goback
                         .splineToLinearHeading(
-                            new Pose2d(-4.8 * flipx, -45.3 * flipy, flipy * (Math.toRadians(-90))),
+                            new Pose2d(-4.8 * flipx, -44.3 * flipy, flipy * (Math.toRadians(-90))),
                             (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(250.0),
                             new ProfileAccelConstraint(-50, 180))
@@ -154,10 +155,7 @@ public class AutoRobot extends CommonRobot {
                             new ProfileAccelConstraint(-10, 100))
                         .waitSeconds(0.1)
                         // go back to not hit gate
-                        .strafeTo(
-                            (new Pose2d(15 * flipx, -46 * flipy, flipy * (Math.toRadians(-90))))
-                                .position, new TranslationalVelConstraint(175.0),
-                                new ProfileAccelConstraint(-10, 70))
+                       // .strafeTo((new Pose2d(15 * flipx, -46 * flipy, flipy * (Math.toRadians(-90)))).position, new TranslationalVelConstraint(175.0), new ProfileAccelConstraint(-10, 70))
                         // shoot3
                         .strafeTo(allianceColor.getAutoRRShootPosition().position)
                         .build(),
@@ -173,7 +171,7 @@ public class AutoRobot extends CommonRobot {
                             new ProfileAccelConstraint(-50, 180))
                         // pickup3
                         .splineToLinearHeading(
-                            new Pose2d(37.1 * flipx, -61.5 * flipy, flipy * (Math.toRadians(-90))),
+                            new Pose2d(37.1 * flipx, -62.5 * flipy, flipy * (Math.toRadians(-90))),
                             (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(175.0),
                             new ProfileAccelConstraint(-10, 130))
@@ -190,8 +188,13 @@ public class AutoRobot extends CommonRobot {
                             new Pose2d(4.2 * flipx, -43.8 * flipy, flipy * (Math.toRadians(-90))),
                             (Math.PI / -2) * flipy,
                             new TranslationalVelConstraint(250.0),
-                            new ProfileAccelConstraint(-50, 180))
-                        .build()))));
+                            new ProfileAccelConstraint(-50, 180)
+                        ).build(),
+                        new AutoEndShutdowAction(scoringSystem)
+                )
+            )
+        )
+    );
   }
 
   public void stop() {}
