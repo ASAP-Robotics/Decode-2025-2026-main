@@ -153,11 +153,15 @@ public class ScoringSystem {
     updateIntake();
     intake.update();
     turret.update();
-    spindex.update();
+    Pair<Double, Double> reading = spindex.update();
+    if (updateTelemetry) {
+      telemetry.addData("Av current", reading.first);
+      telemetry.addData("Angle spread", reading.second);
+    }
     updateIndicators();
     if (updateTelemetry) updateTelemetry();
     double now = timeSinceStart.milliseconds();
-    loopTimes.push(new Pair<>(loopTime.milliseconds(), now));
+    loopTimes.addLast(new Pair<>(loopTime.milliseconds(), now));
     loopTime.reset();
     while (!loopTimes.isEmpty() && now - loopTimes.getFirst().second > 1000) {
       loopTimes.removeFirst();

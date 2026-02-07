@@ -19,6 +19,7 @@ package org.firstinspires.ftc.teamcode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -53,7 +54,7 @@ public class TuningSpindexer extends LinearOpMode {
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
     TouchSensor sensor = hardwareMap.get(TouchSensor.class, "spindexHomer");
-    Motor motor = new Motor(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
+    MotorEx motor = new MotorEx(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
     UnidirectionalHomableRotator spindex =
         new UnidirectionalHomableRotator(motor, sensor, 0.1, 0.05, 0.001, 1, true);
 
