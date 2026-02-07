@@ -28,6 +28,7 @@ import java.util.List;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.json.JSONObject;
 
 public class ObeliskSearch implements Action {
@@ -38,10 +39,12 @@ public class ObeliskSearch implements Action {
   private final File configFile = AppUtil.getInstance().getSettingsFile("ball_sequence.json");
 
   private final Telemetry telemetry;
+  SimpleTimer maxtime = new SimpleTimer(1);
 
   public ObeliskSearch(Limelight3A limelight, Telemetry telemetry) {
     this.limelight = limelight;
     this.telemetry = telemetry;
+    maxtime.start();
   }
 
   @Override
@@ -76,13 +79,14 @@ public class ObeliskSearch implements Action {
     packet.put("bestId", bestId);
     packet.put("bestArea", bestArea);
 
-    if (bestId == -1) {
+    if (bestId == -1 && !maxtime.isFinished()) {
       // no relevant tag seen yet
       return true;
     }
 
+
     // Convert tag -> BallSequence (rich enum constant)
-    BallSequence detectedSequence;
+    BallSequence detectedSequence = BallSequence.GPP;
     switch (bestId) {
       case 21:
         detectedSequence = BallSequence.GPP;
@@ -103,7 +107,7 @@ public class ObeliskSearch implements Action {
     try {
       String raw = ReadWriteFile.readFile(configFile);
       JSONObject config =
-          (raw != null && !raw.trim().isEmpty()) ? new JSONObject(raw) : new JSONObject();
+              (raw != null && !raw.trim().isEmpty()) ? new JSONObject(raw) : new JSONObject();
 
       config.put("sequence", detectedSequence.name());
       config.put("search_failed", false);
