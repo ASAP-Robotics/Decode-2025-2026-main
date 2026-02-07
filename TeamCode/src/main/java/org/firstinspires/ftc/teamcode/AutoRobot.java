@@ -99,7 +99,7 @@ public class AutoRobot extends CommonRobot {
             new SequentialAction( // BIG BOI
                 new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
                 new ObeliskSearch(limelight, telemetry), // shoot 1
-                new setAiming(distance, angle, flipy, scoringSystem),
+                new setAiming(distance, angle,2200,32,flipy, scoringSystem),
                 new SequentialAction( // shoot 1
                     drive
                         .actionBuilder(allianceColor.getAutoStartPosition())
@@ -112,8 +112,10 @@ public class AutoRobot extends CommonRobot {
                         .build(),
                     new shootAction(scoringSystem)),
                 new SequentialAction( // pickup 1
+                        new setAiming(distance, angle,2320,32, flipy, scoringSystem),
                     drive
                         .actionBuilder(allianceColor.getAutoRRShootPosition())
+
                         // pickup first
                         .splineToLinearHeading(
                             new Pose2d(-11.6 * flipx, -54 * flipy, flipy * (Math.toRadians(-90))),
