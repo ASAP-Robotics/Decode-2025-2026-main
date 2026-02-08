@@ -98,7 +98,7 @@ public class AutoRobot extends CommonRobot {
             // new updateTelemetry(telemetry),
             new SequentialAction( // BIG BOI
                 new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
-                new ObeliskSearch(limelight, telemetry), // shoot 1
+                //new ObeliskSearch(limelight, telemetry), // shoot 1
                 new setAiming(distance, angle, 2200, 32, flipy, scoringSystem),
                 new SequentialAction( // shoot 1
                     drive
