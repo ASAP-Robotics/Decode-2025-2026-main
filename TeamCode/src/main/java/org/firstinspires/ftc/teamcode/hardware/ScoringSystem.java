@@ -34,6 +34,7 @@ import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
+import org.firstinspires.ftc.teamcode.types.VirtualRobot;
 import org.firstinspires.ftc.teamcode.utils.BallSequenceFileReader;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.jetbrains.annotations.TestOnly;
@@ -437,12 +438,23 @@ public class ScoringSystem {
     robotPosition = toPose2D(position);
   }
 
-  public Pose2D getVirtualRobotPosition(
+  /**
+   * Updates the current position of the robot on the field
+   * @brief gets virtual robot position while moving. used in shooting while moving.
+   * @param robotPosition the actual position of the robot
+   * @param targetPosition position of the target/basket or where you want to shoot (from alliance)
+   * @param robotVelX current velocity in the x direction
+   * @param robotVelY current velocity in the y direction
+   * @note returns VirtualRobot object. VirtualRobot.position hold the virtual position.
+   *
+   */
+  public VirtualRobot getVirtualRobotPosition(
           Pose2D robotPosition,
           Pose2D targetPosition,
           double robotVelX,   // in/s (same frame as robotPosition)
           double robotVelY    // in/s
   ) {
+
 
     // distance from REAL robot to target (inches)
     double dx0 = targetPosition.getX(DistanceUnit.INCH) - robotPosition.getX(DistanceUnit.INCH);
@@ -464,15 +476,16 @@ public class ScoringSystem {
     // field aim angle FROM virtual robot TO real target
     double dx = targetPosition.getX(DistanceUnit.INCH) - virtualX;
     double dy = targetPosition.getY(DistanceUnit.INCH) - virtualY;
-    double aimRad = Math.atan2(dy, dx);
+    double aim = Math.toDegrees(Math.atan2(dy, dx));
 
-    // store aimRad in the pose heading (since that's what you want)
-    return new Pose2D(
+    VirtualRobot virtual = new VirtualRobot(new Pose2D(
             DistanceUnit.INCH,
             virtualX, virtualY,
             AngleUnit.RADIANS,
-            aimRad
-    );
+            robotPosition.getHeading(AngleUnit.DEGREES)),aim);
+
+    // store aimRad in the pose heading (since that's what you want)
+    return virtual;
   }
 
 

@@ -32,6 +32,7 @@ import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.types.VirtualRobot;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 /**
@@ -100,7 +101,7 @@ public class TeleOpRobot extends CommonRobot {
     clearSensorCache();
     telemetryTimer.start();
     limelight.start();
-    scoringSystem.start(false, false); // start scoring systems up
+    scoringSystem.start( false); // start scoring systems up
     pinpointErrorTimer.start(); // maybe change
     odometryResetTimer.start();
   }
@@ -207,24 +208,14 @@ public class TeleOpRobot extends CommonRobot {
     double angleVel = Math.abs(velocityPose.angVel);
     // ^ directionless velocity of the robot, in inches per second
 
-    // update scoring systems
-    /*scoringSystem.setRobotPosition(
-        new Pose2D(
-            DistanceUnit.INCH,
-            location.position.x,
-            location.position.y,
-            AngleUnit.RADIANS,
-            location.heading.toDouble()));*/
-    scoringSystem.setRobotPosition(scoringSystem.getVirtualRobotPosition(
-            new Pose2D(
-                    DistanceUnit.INCH,
-                    location.position.x,
-                    location.position.y,
-                    AngleUnit.RADIANS,
-                    location.heading.toDouble()),
-            allianceColor.getTargetLocation(),
-            velocityPose.linearVel.x,
-            velocityPose.linearVel.y));
+    Pose2D realRobot = new Pose2D(DistanceUnit.INCH, location.position.x, location.position.y, AngleUnit.RADIANS, location.heading.toDouble());
+    VirtualRobot virtual = scoringSystem.getVirtualRobotPosition(realRobot, allianceColor.getTargetLocation(), velocityPose.linearVel.x, velocityPose.linearVel.y);
+    scoringSystem.setRobotPosition(virtual.position);
+    telemetry.addLine("virtual x : " + virtual.position.getX(DistanceUnit.INCH) + " || real x : " + location.position.x);
+    telemetry.addLine("virtual y : " + virtual.position.getY(DistanceUnit.INCH) + " || real y : " + location.position.y);
+    telemetry.addLine("target angle : " + virtual.angle);
+    telemetry.addLine();
+
     scoringSystem.update(updateTelemetry);
 
     if (updateTelemetry) telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
