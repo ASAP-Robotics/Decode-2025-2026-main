@@ -54,6 +54,11 @@ public class ObeliskSearch implements Action {
       t.reset();
       started = true;
     }
+    if (wrote) return false; // done
+    if (!started) {
+      t.reset();
+      started = true;
+    }
     if (wrote) return false;
 
     if (t.seconds() >= 1.0) {
