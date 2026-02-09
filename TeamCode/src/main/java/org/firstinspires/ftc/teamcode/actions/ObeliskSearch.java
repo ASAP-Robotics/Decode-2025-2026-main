@@ -95,7 +95,7 @@ public class ObeliskSearch implements Action {
     }
 
     // Convert tag -> BallSequence (rich enum constant)
-    BallSequence detectedSequence;
+    BallSequence detectedSequence = BallSequence.GPP;
     switch (bestId) {
       case 21:
         detectedSequence = BallSequence.GPP;
