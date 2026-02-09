@@ -101,7 +101,7 @@ public class TeleOpRobot extends CommonRobot {
     clearSensorCache();
     telemetryTimer.start();
     limelight.start();
-    scoringSystem.start( false); // start scoring systems up
+    scoringSystem.start(false, false); // start scoring systems up
     pinpointErrorTimer.start(); // maybe change
     odometryResetTimer.start();
   }

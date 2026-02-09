@@ -146,7 +146,6 @@ public class ScoringSystem {
   public void initLoop() {
     spindex.update();
     turret.update();
-    updateIndicators();
   }
 
   /**
@@ -154,17 +153,11 @@ public class ScoringSystem {
    *
    * @note call when OpMode is started ("Start" is pressed)
    */
-  public void start(boolean isPreloaded) {
+  public void start(boolean isPreloaded, boolean search) {
     spindex.start();
     turret.enable(); // let the flywheel spin up
     turret.start();
-
-    if (isPreloaded) {
-      switchModeToFull();
-    } else {
-      switchModeToIntaking();
-    }
-
+    state = isPreloaded ? State.FULL : State.INTAKING;
     timeSinceStart.reset();
     loopTime.reset();
   }
@@ -191,15 +184,11 @@ public class ScoringSystem {
     updateIntake();
     intake.update();
     turret.update();
-    Pair<Double, Double> reading = spindex.update();
-    if (updateTelemetry) {
-      telemetry.addData("Av current", reading.first);
-      telemetry.addData("Angle spread", reading.second);
-    }
+    spindex.update();
     updateIndicators();
     if (updateTelemetry) updateTelemetry();
     double now = timeSinceStart.milliseconds();
-    loopTimes.addLast(new Pair<>(loopTime.milliseconds(), now));
+    loopTimes.push(new Pair<>(loopTime.milliseconds(), now));
     loopTime.reset();
     while (!loopTimes.isEmpty() && now - loopTimes.getFirst().second > 1000) {
       loopTimes.removeFirst();
@@ -295,15 +284,11 @@ public class ScoringSystem {
   private void updateIndicators() {
     switch (state) {
       case UNINITIALISED:
-        if (spindex.isAtTarget() && turret.isAtTarget()) {
-          setIndicatorColor(RGBIndicator.Color.GREEN);
-        } else {
-          setIndicatorColor(RGBIndicator.Color.VIOLET);
-        }
+        setIndicatorColor(RGBIndicator.Color.VIOLET);
         break;
 
       case SHOOTING:
-        setIndicatorColor(RGBIndicator.Color.WHITE);
+        setIndicatorColor(RGBIndicator.Color.BLUE);
         break;
 
       case FULL:
@@ -311,7 +296,7 @@ public class ScoringSystem {
           setIndicatorColor(RGBIndicator.Color.GREEN);
 
         } else {
-          setIndicatorColor(RGBIndicator.Color.BLUE);
+          setIndicatorColor(RGBIndicator.Color.WHITE);
         }
         break;
 
@@ -334,9 +319,6 @@ public class ScoringSystem {
         setIndicatorColor(color);
         break;
     }
-
-    indicator1.update();
-    indicator2.update();
   }
 
   /** Updates (or adds the data of) the telemetry from the scoring systems */
