@@ -54,11 +54,10 @@ public class ObeliskSearch implements Action {
       t.reset();
       started = true;
     }
-    if (wrote) return false; // done
+    if (wrote) return false;
 
     if (t.seconds() >= 1.0) {
-      packet.put("timeout", true);
-      // optionally write search_failed=true here
+
       return false;
     }
 
