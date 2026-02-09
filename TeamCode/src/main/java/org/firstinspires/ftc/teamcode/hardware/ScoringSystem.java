@@ -153,11 +153,17 @@ public class ScoringSystem {
    *
    * @note call when OpMode is started ("Start" is pressed)
    */
-  public void start(boolean isPreloaded, boolean search) {
+  public void start(boolean isPreloaded) {
     spindex.start();
     turret.enable(); // let the flywheel spin up
     turret.start();
-    state = isPreloaded ? State.FULL : State.INTAKING;
+
+    if (isPreloaded) {
+      switchModeToFull();
+    } else {
+      switchModeToIntaking();
+    }
+
     timeSinceStart.reset();
     loopTime.reset();
   }
