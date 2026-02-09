@@ -62,7 +62,8 @@ public class ObeliskSearch implements Action {
     if (wrote) return false;
 
     if (t.seconds() >= 1.0) {
-
+      packet.put("timeout", true);
+      // optionally write search_failed=true here
       return false;
     }
 
@@ -100,7 +101,7 @@ public class ObeliskSearch implements Action {
     }
 
     // Convert tag -> BallSequence (rich enum constant)
-    BallSequence detectedSequence = BallSequence.GPP;
+    BallSequence detectedSequence;
     switch (bestId) {
       case 21:
         detectedSequence = BallSequence.GPP;
