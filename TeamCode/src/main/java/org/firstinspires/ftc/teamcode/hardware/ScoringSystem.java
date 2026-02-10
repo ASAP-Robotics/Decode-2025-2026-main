@@ -41,6 +41,8 @@ public class ScoringSystem {
     INTAKING,
     SHOOTING
   }
+  private final double ballTimeSlope =0.00715145; // the slope for the ball time equation
+  private final double ballTimeOffset = -0.0353098; // the offset for the ball time equation
 
   private final ActiveIntake intake; // the intake on the robot
   private final Turret turret; // the flywheel on the robot
@@ -498,6 +500,55 @@ public class ScoringSystem {
   public double getTurretAngle() {
     return turret.getHorizontalAngleDegrees();
   }
+
+  public Pose2D getVirtualRobotPosition(
+          Pose2D robotPosition,
+          Pose2D targetPosition,
+          double robotVelX,   // in/s (same frame as robotPosition)
+          double robotVelY    // in/s
+  ) {
+    if(robotVelX<5 && robotVelX>-5 && robotVelY<5 && robotVelY>-5) return robotPosition;
+
+
+    // distance from REAL robot to target (inches)
+    double dx0 = targetPosition.getX(DistanceUnit.INCH) - robotPosition.getX(DistanceUnit.INCH);
+    double dy0 = targetPosition.getY(DistanceUnit.INCH) - robotPosition.getY(DistanceUnit.INCH);
+    double distance = Math.hypot(dx0, dy0);
+
+
+    // time-of-flight estimate (seconds) — clamp so it can't go negative
+    double ballTime = ballTimeSlope * distance + ballTimeOffset;
+    ballTime = Math.max(ballTime, 0.0);
+
+
+    // how far robot moves during flight (inches)
+    double leadX = robotVelX * ballTime;
+    double leadY = robotVelY * ballTime;
+
+
+    // VIRTUAL ROBOT = where the robot will be after ballTime
+    double virtualX = robotPosition.getX(DistanceUnit.INCH) + leadX;
+    double virtualY = robotPosition.getY(DistanceUnit.INCH) + leadY;
+
+
+    // field aim angle FROM virtual robot TO real target
+    double dx = targetPosition.getX(DistanceUnit.INCH) - virtualX;
+    double dy = targetPosition.getY(DistanceUnit.INCH) - virtualY;
+    double aim = Math.toDegrees(Math.atan2(dy, dx));
+
+
+    Pose2D virtual = new Pose2D(
+            DistanceUnit.INCH,
+            virtualX, virtualY,
+            AngleUnit.RADIANS,
+            robotPosition.getHeading(AngleUnit.DEGREES));
+
+
+    // store aimRad in the pose heading (since that's what you want)
+    return virtual;
+  }
+
+
 
   /**
    * @brief sets the intake to eject at full speed (for some amount of time)
