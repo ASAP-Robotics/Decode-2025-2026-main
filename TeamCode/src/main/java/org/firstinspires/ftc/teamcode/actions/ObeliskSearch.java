@@ -22,6 +22,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 import java.io.File;
 import java.util.List;
@@ -35,6 +36,9 @@ public class ObeliskSearch implements Action {
   private final Limelight3A limelight;
   private boolean wrote = false;
 
+  final ElapsedTime t = new ElapsedTime();
+  boolean started = false;
+
   private final File configFile = AppUtil.getInstance().getSettingsFile("ball_sequence.json");
 
   private final Telemetry telemetry;
@@ -46,7 +50,22 @@ public class ObeliskSearch implements Action {
 
   @Override
   public boolean run(@NonNull TelemetryPacket packet) {
+    if (!started) {
+      t.reset();
+      started = true;
+    }
     if (wrote) return false; // done
+    if (!started) {
+      t.reset();
+      started = true;
+    }
+    if (wrote) return false;
+
+    if (t.seconds() >= 1.0) {
+      packet.put("timeout", true);
+      // optionally write search_failed=true here
+      return false;
+    }
 
     LLResult result = limelight.getLatestResult();
 
@@ -82,7 +101,7 @@ public class ObeliskSearch implements Action {
     }
 
     // Convert tag -> BallSequence (rich enum constant)
-    BallSequence detectedSequence;
+    BallSequence detectedSequence = BallSequence.GPP;
     switch (bestId) {
       case 21:
         detectedSequence = BallSequence.GPP;
