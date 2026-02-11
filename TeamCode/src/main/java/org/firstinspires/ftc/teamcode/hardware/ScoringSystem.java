@@ -502,17 +502,17 @@ public class ScoringSystem {
   }
 
   public Pose2D getVirtualRobotPosition(
-          Pose2D robotPosition,
+          Pose2D robotPose,
           Pose2D targetPosition,
           double robotVelX,   // in/s (same frame as robotPosition)
-          double robotVelY    // in/s
+          double robotVelY
   ) {
-    if(robotVelX<5 && robotVelX>-5 && robotVelY<5 && robotVelY>-5) return robotPosition;
+    if(Math.abs(robotVelX)<2 && Math.abs(robotVelY)<2) return robotPose;
 
 
     // distance from REAL robot to target (inches)
-    double dx0 = targetPosition.getX(DistanceUnit.INCH) - robotPosition.getX(DistanceUnit.INCH);
-    double dy0 = targetPosition.getY(DistanceUnit.INCH) - robotPosition.getY(DistanceUnit.INCH);
+    double dx0 = targetPosition.getX(DistanceUnit.INCH) - robotPose.getX(DistanceUnit.INCH);
+    double dy0 = targetPosition.getY(DistanceUnit.INCH) - robotPose.getY(DistanceUnit.INCH);
     double distance = Math.hypot(dx0, dy0);
 
 
@@ -527,8 +527,8 @@ public class ScoringSystem {
 
 
     // VIRTUAL ROBOT = where the robot will be after ballTime
-    double virtualX = robotPosition.getX(DistanceUnit.INCH) + leadX;
-    double virtualY = robotPosition.getY(DistanceUnit.INCH) + leadY;
+    double virtualX = robotPose.getX(DistanceUnit.INCH) + leadX;
+    double virtualY = robotPose.getY(DistanceUnit.INCH) + leadY;
 
 
     // field aim angle FROM virtual robot TO real target
@@ -540,8 +540,8 @@ public class ScoringSystem {
     Pose2D virtual = new Pose2D(
             DistanceUnit.INCH,
             virtualX, virtualY,
-            AngleUnit.RADIANS,
-            robotPosition.getHeading(AngleUnit.DEGREES));
+            AngleUnit.DEGREES,
+            robotPose.getHeading(AngleUnit.DEGREES));
 
 
     // store aimRad in the pose heading (since that's what you want)

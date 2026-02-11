@@ -136,9 +136,9 @@ public class TeleOpRobot extends CommonRobot {
     Pose2D realRobot = new Pose2D(DistanceUnit.INCH, location.position.x, location.position.y, AngleUnit.RADIANS, location.heading.toDouble());
     Pose2D virtual = scoringSystem.getVirtualRobotPosition(realRobot, allianceColor.getTargetLocation(), velocityPose.linearVel.x, velocityPose.linearVel.y);
     scoringSystem.setRobotPosition(virtual);
-    telemetry.addLine("virtual x : " + virtual.getX(DistanceUnit.INCH) + " || real x : " + location.position.x);
-    telemetry.addLine("virtual y : " + virtual.getY(DistanceUnit.INCH) + " || real y : " + location.position.y);
-    telemetry.addLine();
+   // telemetry.addLine("virtual x : " + Math.round(virtual.getX(DistanceUnit.INCH)) + " || real x : " + Math.round(location.position.x));
+    //telemetry.addLine("virtual y : " + Math.round(virtual.getY(DistanceUnit.INCH)) + " || real y : " + Math.round(location.position.y));
+
 
     updateDriverControls();
 
