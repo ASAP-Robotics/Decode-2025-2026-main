@@ -84,7 +84,6 @@ public class ObeliskSearch implements Action {
       return true;
     }
 
-
     // Convert tag -> BallSequence (rich enum constant)
     BallSequence detectedSequence = BallSequence.GPP;
     switch (bestId) {
@@ -107,7 +106,7 @@ public class ObeliskSearch implements Action {
     try {
       String raw = ReadWriteFile.readFile(configFile);
       JSONObject config =
-              (raw != null && !raw.trim().isEmpty()) ? new JSONObject(raw) : new JSONObject();
+          (raw != null && !raw.trim().isEmpty()) ? new JSONObject(raw) : new JSONObject();
 
       config.put("sequence", detectedSequence.name());
       config.put("search_failed", false);
