@@ -204,4 +204,3 @@ public class AutoRobot extends CommonRobot {
   @Override
   public void loop() {}
 }
-
