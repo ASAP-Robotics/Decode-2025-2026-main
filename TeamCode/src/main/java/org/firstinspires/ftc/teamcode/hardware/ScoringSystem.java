@@ -43,6 +43,7 @@ public class ScoringSystem {
   }
   private final double ballTimeSlope =0.00715145; // the slope for the ball time equation
   private final double ballTimeOffset = -0.0353098; // the offset for the ball time equation
+  private final double balltimeConstant = 0.25;
 
   private final ActiveIntake intake; // the intake on the robot
   private final Turret turret; // the flywheel on the robot
@@ -532,12 +533,11 @@ public class ScoringSystem {
 
 
     // time-of-flight estimate (seconds) — clamp so it can't go negative
-    double ballTime = ballTimeSlope * distance + ballTimeOffset;
-    ballTime = Math.max(ballTime, 0.0);
+    double ballTime = ballTimeSlope * distance + ballTimeOffset + balltimeConstant;
 
 
     // how far robot moves during flight (inches)
-    double leadX = robotVelX * ballTime;
+    double leadX = robotVelX * -ballTime;
     double leadY = robotVelY * ballTime;
 
 
