@@ -373,6 +373,7 @@ public class ScoringSystem {
 
   /**
    * Cancels any shot that may be being performed
+   *
    * @note takes no action whatsoever if state isn't SHOOTING
    * @note intended only as a driver backup
    */
@@ -417,6 +418,7 @@ public class ScoringSystem {
 
   /**
    * Manually sets the spindex as empty
+   *
    * @note only to be used as a manual backup
    */
   public void setSpindexEmpty() {

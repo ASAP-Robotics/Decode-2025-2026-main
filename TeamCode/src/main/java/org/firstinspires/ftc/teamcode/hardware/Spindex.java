@@ -18,7 +18,6 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
-import android.util.Pair;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
@@ -262,6 +261,7 @@ public class Spindex implements System {
 
   /**
    * Cancels any shot the spindexer may be taking
+   *
    * @note takes no action whatsoever if state isn't SHOOTING
    * @note intended only as a driver backup
    */
@@ -396,6 +396,7 @@ public class Spindex implements System {
 
   /**
    * Manually sets the contents of the spindexer
+   *
    * @param contents an array with exactly three items, containing the colors of ball in each slot
    * @note only to be used as a manual backup
    */
@@ -409,6 +410,7 @@ public class Spindex implements System {
 
   /**
    * Sets the spindexer empty manually
+   *
    * @note only to be used as a manual backup
    */
   public void setEmpty() {

@@ -16,7 +16,6 @@
 
 package org.firstinspires.ftc.teamcode.hardware.motors;
 
-import android.util.Pair;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
@@ -332,9 +331,13 @@ public class HomableRotator implements System {
 
   public SystemReport getStatus() {
     SystemStatus status =
-        disabled ? SystemStatus.INOPERABLE :
-            (state == State.NORMAL && motorSimulation.isAtTarget() && !motorController.atSetPoint()
-            ? SystemStatus.FALLBACK : SystemStatus.NOMINAL);
+        disabled
+            ? SystemStatus.INOPERABLE
+            : (state == State.NORMAL
+                    && motorSimulation.isAtTarget()
+                    && !motorController.atSetPoint()
+                ? SystemStatus.FALLBACK
+                : SystemStatus.NOMINAL);
 
     return new SystemReport(status);
   }
