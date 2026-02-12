@@ -118,8 +118,8 @@ public class HomableRotator implements System {
     timeSinceStart.reset();
   }
 
-  public Pair<Double, Double> update() {
-    if (state == State.UNINITIALIZED) return new Pair<>(Double.NaN, Double.NaN);
+  public void update() {
+    if (state == State.UNINITIALIZED) return;
     measureCurrentAngle();
 
     double now = timeSinceStart.seconds();
@@ -129,9 +129,6 @@ public class HomableRotator implements System {
     while (!readings.isEmpty() && now - readings.getFirst().timestamp > READING_TIME) {
       readings.removeFirst();
     }
-
-    double angleSpread = 6.7;
-    double currentAverage = 6.7;
 
     if (!readings.isEmpty()) {
       double currentSum = 0;
@@ -151,9 +148,6 @@ public class HomableRotator implements System {
           && maxAngle - minAngle < STALL_ANGLE_DEVIATION) {
         disable();
       }
-
-      currentAverage = current;
-      angleSpread = maxAngle - minAngle;
     }
 
     if (disabled && disableTimer.isFinished()) {
@@ -190,8 +184,6 @@ public class HomableRotator implements System {
         motorSimulation.setTarget(value);
       }
     }
-
-    return new Pair<>(currentAverage, angleSpread);
   }
 
   /**
@@ -339,10 +331,10 @@ public class HomableRotator implements System {
   }
 
   public SystemReport getStatus() {
-    org.firstinspires.ftc.teamcode.types.SystemStatus status =
-        state == State.NORMAL && motorSimulation.isAtTarget() && !motorController.atSetPoint()
-            ? SystemStatus.INOPERABLE
-            : SystemStatus.NOMINAL;
+    SystemStatus status =
+        disabled ? SystemStatus.INOPERABLE :
+            (state == State.NORMAL && motorSimulation.isAtTarget() && !motorController.atSetPoint()
+            ? SystemStatus.FALLBACK : SystemStatus.NOMINAL);
 
     return new SystemReport(status);
   }

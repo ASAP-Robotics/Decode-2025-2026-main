@@ -136,8 +136,8 @@ public class Spindex implements System {
   }
 
   /** Updates everything to do with the spindex */
-  public Pair<Double, Double> update() {
-    if (!enabled) return new Pair<>(Double.NaN, Double.NaN);
+  public void update() {
+    if (!enabled) return;
 
     sensorReport = colorSensor.getStatus();
     spinnerReport = spinner.getStatus();
@@ -189,7 +189,7 @@ public class Spindex implements System {
         break;
     }
 
-    Pair<Double, Double> toReturn = spinner.update();
+    spinner.update();
 
     oldIntakeColor = intakeColor; // store old intake color
     if (colorSensorEnabled && state.checkSensor && isAtTarget()) {
@@ -198,8 +198,6 @@ public class Spindex implements System {
     } else {
       intakeColor = BallColor.INVALID;
     }
-
-    return toReturn;
   }
 
   public SystemReport getStatus() {
@@ -219,19 +217,19 @@ public class Spindex implements System {
 
     } else if (sensorStatus == SystemStatus.INOPERABLE) {
       status = SystemStatus.INOPERABLE;
-      message = "🟥Broken (Color sensor); use backups controls. Is it unplugged?";
+      message = "🟥Broken (Color sensor); use backup controls. Is it unplugged?";
 
     } else if (spinnerStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
-      message = "🟨Backup (Spinner); performance will be degraded. Is it jammed?";
+      message = "🟨Backup (Spinner); will be slower. Is it jammed?";
 
     } else if (blockerStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
-      message = "🟨Backup (Intake blocker); performance will be degraded. Is it jammed?";
+      message = "🟨Backup (Intake blocker); will be slower. Is it jammed?";
 
     } else if (sensorStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
-      message = "🟨Backup (Color sensor); use backups controls";
+      message = "🟨Backup (Color sensor); use backup controls";
     }
 
     return new SystemReport(status, message);
