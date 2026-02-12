@@ -407,6 +407,14 @@ public class ScoringSystem {
   }
 
   /**
+   * Manually sets the spindex as empty
+   * @note only to be used as a manual backup
+   */
+  public void setSpindexEmpty() {
+    spindex.setEmpty();
+  }
+
+  /**
    * Sets if the color sensor on the spindexer is enabled
    *
    * @param enabled true if enabled, false if disabled

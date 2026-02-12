@@ -382,6 +382,29 @@ public class Spindex implements System {
   }
 
   /**
+   * Manually sets the contents of the spindexer
+   * @param contents an array with exactly three items, containing the colors of ball in each slot
+   * @note only to be used as a manual backup
+   */
+  public void setSpindexContents(BallColor[] contents) {
+    if (contents == null || contents.length != spindex.length) return;
+
+    for (int i = 0; i < contents.length; i++) {
+      spindex[i].color = contents[i];
+    }
+  }
+
+  /**
+   * Sets the spindexer empty manually
+   * @note only to be used as a manual backup
+   */
+  public void setEmpty() {
+    for (SpindexSlot slot : spindex) {
+      slot.color = BallColor.EMPTY;
+    }
+  }
+
+  /**
    * Returns the spindex index that is currently active
    *
    * @return the index that is at the intake, or NULL (-1) if the spindex isn't at an intake index
