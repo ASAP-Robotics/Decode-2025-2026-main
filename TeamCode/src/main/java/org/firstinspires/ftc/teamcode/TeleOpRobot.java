@@ -199,6 +199,11 @@ public class TeleOpRobot extends CommonRobot {
       limelightEnabled = !limelightEnabled;
     }
 
+    // cancel shot
+    if (gamepad1.xWasPressed()) {
+      scoringSystem.cancelShot();
+    }
+
     if (gamepad2.left_trigger > TRIGGER_PRESSED_THRESHOLD) { // hyper shift
       // manual sequence setting
       if (gamepad2.dpadDownWasPressed()) {

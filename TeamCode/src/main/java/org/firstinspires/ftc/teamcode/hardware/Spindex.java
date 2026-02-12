@@ -168,7 +168,7 @@ public class Spindex implements System {
         break;
 
       case SHOOTING_READY: // if the spindex is preparing to shoot
-        intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake (just in case)
+        prepToShootSequence(sequence);
         // move spindex to position if flap closed
         if (intakeBlocker.atTarget()) turnSpindexNoShoot(spindex[currentIndex].shootPosition);
         break;
@@ -176,9 +176,7 @@ public class Spindex implements System {
       case SHOOTING: // if the spindex is shooting
         intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake (just in case)
         if (spinner.atTarget()) { // if spindex is done turning around
-          for (SpindexSlot slot : spindex) { // spindex is now empty
-            slot.color = BallColor.EMPTY;
-          }
+          setEmpty();
           currentIndex = getColorIndex(BallColor.EMPTY);
           state = SpindexState.INTAKING; // spindex back to intaking mode
         }
@@ -260,6 +258,21 @@ public class Spindex implements System {
     spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.FORWARD_ONLY);
     spinner.manualChangeTargetAngle(400.0);
     // this empties the entire mag; we don't ever need to only partially shoot it
+  }
+
+  /**
+   * Cancels any shot the spindexer may be taking
+   * @note takes no action whatsoever if state isn't SHOOTING
+   * @note intended only as a driver backup
+   */
+  public void cancelShot() {
+    if (state == SpindexState.SHOOTING) {
+      // if we are shooting, the spindexer can't be empty
+      spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY);
+      spinner.setAngle(spinner.getNormalizedCurrentAngle());
+      state = SpindexState.SHOOTING_READY;
+      prepToShootSequence(sequence);
+    }
   }
 
   /**

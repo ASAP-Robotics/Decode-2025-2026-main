@@ -230,16 +230,13 @@ public class ScoringSystem {
         break;
 
       case FULL:
+      case SHOOTING:
         if (intake.isIntaking()) {
           if (spindex.isAtTarget() && fullWait.isFinished()) clearIntake();
 
         } else {
           intake.ejectIdle();
         }
-        break;
-
-      case SHOOTING:
-        intake.intakeIdle();
         break;
 
       case INTAKING:
@@ -372,6 +369,18 @@ public class ScoringSystem {
     intake.intakeIdle(); // start the intake spinning
     turret.activate(); // start the flywheel spinning
     return true;
+  }
+
+  /**
+   * Cancels any shot that may be being performed
+   * @note takes no action whatsoever if state isn't SHOOTING
+   * @note intended only as a driver backup
+   */
+  public void cancelShot() {
+    if (state == State.SHOOTING) {
+      state = State.FULL;
+      spindex.cancelShot();
+    }
   }
 
   /**
