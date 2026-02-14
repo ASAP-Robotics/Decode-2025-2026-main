@@ -26,17 +26,17 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.actions.AutoEndShutdowAction;
-import org.firstinspires.ftc.teamcode.actions.ObeliskSearch;
 import org.firstinspires.ftc.teamcode.actions.setAiming;
 import org.firstinspires.ftc.teamcode.actions.setScoringPose;
 import org.firstinspires.ftc.teamcode.actions.shootAction;
 import org.firstinspires.ftc.teamcode.actions.updateScoring;
 import org.firstinspires.ftc.teamcode.hardware.sensors.SearchLimelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
+import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.utils.BallSequenceFileWriter;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 /** class to contain the behavior of the robot in Auto, to avoid code duplication */
@@ -84,8 +84,10 @@ public class AutoRobot extends CommonRobot {
   }
 
   public void start() {
+    BallSequence sequence = limelight.getSequence(); // get ball sequence
+    new BallSequenceFileWriter().writeSequence(sequence); // save sequence to file
     scoringSystem.start(true); // start scoring systems up
-    scoringSystem.setBallSequence(limelight.getSequence());
+    scoringSystem.setBallSequence(sequence); // set ball sequence
 
     if (allianceColor == AllianceColor.RED) {
       flipy = -1;
