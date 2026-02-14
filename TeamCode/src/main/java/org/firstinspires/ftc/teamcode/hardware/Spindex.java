@@ -20,7 +20,6 @@ import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
@@ -71,7 +70,8 @@ public class Spindex implements System {
   private static final double INTAKE_FLAP_OPEN = 240;
   private static final double INTAKE_DELAY_SECONDS = 0.5;
   private static final double SHOOT_DELAY_SECONDS = 0.1; // todo tune
-  private static final double ANGLE_COMPARISON_THRESHOLD = 0.1; // diff between to angle to be the same
+  private static final double ANGLE_COMPARISON_THRESHOLD =
+      0.1; // diff between to angle to be the same
 
   SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
   SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
@@ -255,12 +255,11 @@ public class Spindex implements System {
     currentIndex = getBestStartIndex(sequence); // set new index
     state = SpindexState.SHOOTING_READY; // spindex in shooting mode
     if ( // this might be redundant
-        Math.abs(
+    Math.abs(
             AngleUnit.normalizeDegrees(spinner.getTargetAngle())
-            - AngleUnit.normalizeDegrees(spindex[currentIndex].shootPosition
-        )
-        ) >= ANGLE_COMPARISON_THRESHOLD
-    ) shootDelay.start(); // start delay if spinner hasn't been set yet
+                - AngleUnit.normalizeDegrees(spindex[currentIndex].shootPosition))
+        >= ANGLE_COMPARISON_THRESHOLD)
+      shootDelay.start(); // start delay if spinner hasn't been set yet
   }
 
   /**
@@ -657,12 +656,10 @@ public class Spindex implements System {
    *     otherwise
    */
   private boolean isSpindexPosition(double positionToCheck) {
-    return
-        Math.abs(
+    return Math.abs(
             AngleUnit.normalizeDegrees(spinner.getTargetAngle())
-                - AngleUnit.normalizeDegrees(positionToCheck)
-        )
-            < ANGLE_COMPARISON_THRESHOLD;
+                - AngleUnit.normalizeDegrees(positionToCheck))
+        < ANGLE_COMPARISON_THRESHOLD;
   }
 
   /**
