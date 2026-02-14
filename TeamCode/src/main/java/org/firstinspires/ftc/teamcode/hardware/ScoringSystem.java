@@ -153,11 +153,7 @@ public class ScoringSystem {
     updateIntake();
     intake.update();
     turret.update();
-    Pair<Double, Double> reading = spindex.update();
-    if (updateTelemetry) {
-      telemetry.addData("Av current", reading.first);
-      telemetry.addData("Angle spread", reading.second);
-    }
+    spindex.update();
     updateIndicators();
     if (updateTelemetry) updateTelemetry();
     double now = timeSinceStart.milliseconds();
@@ -234,16 +230,13 @@ public class ScoringSystem {
         break;
 
       case FULL:
+      case SHOOTING:
         if (intake.isIntaking()) {
           if (spindex.isAtTarget() && fullWait.isFinished()) clearIntake();
 
         } else {
           intake.ejectIdle();
         }
-        break;
-
-      case SHOOTING:
-        intake.intakeIdle();
         break;
 
       case INTAKING:
@@ -373,9 +366,22 @@ public class ScoringSystem {
     // ^ return false if there are no balls in the mag
     spindex.prepToShootSequence(ballSequence);
     state = State.SHOOTING;
-    intake.intakeIdle(); // start the intake spinning
+    intake.ejectIdle(); // start the intake spinning
     turret.activate(); // start the flywheel spinning
     return true;
+  }
+
+  /**
+   * Cancels any shot that may be being performed
+   *
+   * @note takes no action whatsoever if state isn't SHOOTING
+   * @note intended only as a driver backup
+   */
+  public void cancelShot() {
+    if (state == State.SHOOTING) {
+      state = State.FULL;
+      spindex.cancelShot();
+    }
   }
 
   /**
@@ -408,6 +414,15 @@ public class ScoringSystem {
    */
   public void setIntakeFull(BallColor ball) {
     spindex.setIntakeColor(ball);
+  }
+
+  /**
+   * Manually sets the spindex as empty
+   *
+   * @note only to be used as a manual backup
+   */
+  public void setSpindexEmpty() {
+    spindex.setEmpty();
   }
 
   /**

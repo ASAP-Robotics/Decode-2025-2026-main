@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 public class updateScoring implements Action {
-  private Telemetry telemetry;
+  private final Telemetry telemetry;
   private final ScoringSystem scoringSystem;
   private final AutoRobot robot;
   private final SimpleTimer telemetryUpdateTimer = new SimpleTimer(0.67);

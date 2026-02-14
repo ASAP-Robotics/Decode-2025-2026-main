@@ -38,6 +38,10 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
  * @brief class to contain the behavior of the robot in TeleOp, to avoid code duplication
  */
 public class TeleOpRobot extends CommonRobot {
+  private static final double MANUAL_SHOOTING_DIST = 75; // inches
+  private static final double MANUAL_SHOOTING_ANGLE = 180; // degrees from straight (intake)
+  private static final double TRIGGER_PRESSED_THRESHOLD = 0.67;
+
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
   protected MecanumWheelBase wheelBase;
@@ -46,6 +50,7 @@ public class TeleOpRobot extends CommonRobot {
   protected SimpleTimer telemetryTimer = new SimpleTimer(0.67);
   protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
   protected SimpleTimer odometryResetTimer = new SimpleTimer(2);
+  private boolean limelightEnabled = true; // if limelight can reset location
 
   public TeleOpRobot(
       HardwareMap hardwareMap,
@@ -123,7 +128,7 @@ public class TeleOpRobot extends CommonRobot {
     if (!faulted) pinpointErrorTimer.start();
 
     if (faulted && pinpointErrorTimer.isFinished()) {
-      scoringSystem.overrideAiming(75, 180); // TODO: tune distance
+      scoringSystem.overrideAiming(MANUAL_SHOOTING_DIST, MANUAL_SHOOTING_ANGLE);
     }
 
     Pose2d location = pinpoint.getPose();
@@ -145,9 +150,12 @@ public class TeleOpRobot extends CommonRobot {
 
     scoringSystem.update(updateTelemetry);
 
-    if (updateTelemetry) telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
+    if (updateTelemetry) {
+      telemetry.addData("Limelight enabled", limelightEnabled);
+      telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
+    }
 
-    if (odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25) {
+    if (limelightEnabled && odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25) {
       Pose2D limelightPose = limelight.getRobotPosition(scoringSystem.getTurretAngle());
       if (limelightPose != null) {
         pinpoint.setPose(
@@ -179,7 +187,24 @@ public class TeleOpRobot extends CommonRobot {
 
   /** Handles backup driver inputs */
   private void updateDriverControls() {
-    if (gamepad2.left_trigger > 0.67) { // hyper shift
+    // TODO: re-remap controls
+    // temporary
+    // manual set empty
+    if (gamepad1.aWasPressed()) {
+      scoringSystem.setSpindexEmpty();
+    }
+
+    // toggle limelight adjustments
+    if (gamepad1.bWasPressed()) {
+      limelightEnabled = !limelightEnabled;
+    }
+
+    // cancel shot
+    if (gamepad1.xWasPressed()) {
+      scoringSystem.cancelShot();
+    }
+
+    if (gamepad2.left_trigger > TRIGGER_PRESSED_THRESHOLD) { // hyper shift
       // manual sequence setting
       if (gamepad2.dpadDownWasPressed()) {
         scoringSystem.setBallSequence(BallSequence.PGP);
@@ -207,7 +232,7 @@ public class TeleOpRobot extends CommonRobot {
           scoringSystem.autoAim();
 
         } else {
-          scoringSystem.overrideAiming(75, 180); // TODO: tune distance
+          scoringSystem.overrideAiming(MANUAL_SHOOTING_DIST, MANUAL_SHOOTING_ANGLE);
         }
       }
 
@@ -254,7 +279,7 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // shoot
-    if (gamepad2.right_trigger > 0.67 || gamepad2.rightBumperWasPressed()) {
+    if (gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD || gamepad2.rightBumperWasPressed()) {
       scoringSystem.shoot();
     }
 
