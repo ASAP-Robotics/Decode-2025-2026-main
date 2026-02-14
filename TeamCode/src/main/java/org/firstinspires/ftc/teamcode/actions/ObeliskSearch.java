@@ -31,6 +31,7 @@ import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.json.JSONObject;
 
+@Deprecated
 public class ObeliskSearch implements Action {
 
   private final Limelight3A limelight;
@@ -85,7 +86,7 @@ public class ObeliskSearch implements Action {
     }
 
     // Convert tag -> BallSequence (rich enum constant)
-    BallSequence detectedSequence = BallSequence.GPP;
+    BallSequence detectedSequence;
     switch (bestId) {
       case 21:
         detectedSequence = BallSequence.GPP;
@@ -99,7 +100,7 @@ public class ObeliskSearch implements Action {
       default:
         return true;
     }
-    telemetry.addData("Obelisk Tag", bestId == -1 ? "none" : bestId);
+    telemetry.addData("Obelisk Tag", bestId);
     telemetry.update();
 
     // Save EXACTLY like your reference Limelight class
