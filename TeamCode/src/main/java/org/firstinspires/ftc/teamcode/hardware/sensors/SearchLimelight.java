@@ -22,8 +22,8 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.teamcode.types.BallSequence;
 import java.util.List;
+import org.firstinspires.ftc.teamcode.types.BallSequence;
 
 /**
  * Simple class to use a Limelight camera to look at the Obelisk and find the correct ball sequence
@@ -32,24 +32,20 @@ public class SearchLimelight {
   private static final int LIMELIGHT_PIPELINE = 5;
   private static final BallSequence DEFAULT_SEQUENCE = BallSequence.GPP;
   private final Limelight3A limelight;
-private BallSequence validSequence = DEFAULT_SEQUENCE;
+  private BallSequence validSequence = DEFAULT_SEQUENCE;
   private boolean detected = false;
 
   public SearchLimelight(HardwareMap hardwareMap) {
     this.limelight = hardwareMap.get(Limelight3A.class, "limelight");
   }
 
-  /**
-   * Starts the Limelight looking for the sequence
-   */
+  /** Starts the Limelight looking for the sequence */
   public void init() {
     limelight.pipelineSwitch(LIMELIGHT_PIPELINE);
     limelight.start();
   }
 
-  /**
-   * Checks for tags indicating the sequence
-   */
+  /** Checks for tags indicating the sequence */
   public void update() {
     LLResult result = limelight.getLatestResult();
 
@@ -78,6 +74,7 @@ private BallSequence validSequence = DEFAULT_SEQUENCE;
 
   /**
    * Gets the sequence detected by the Limelight, or GPP if none have been detected
+   *
    * @return the detected, or default, sequence
    */
   public BallSequence getSequence() {
@@ -86,6 +83,7 @@ private BallSequence validSequence = DEFAULT_SEQUENCE;
 
   /**
    * Gets if the Limelight has seen tags indicating the sequence yet
+   *
    * @return true if tags have been seen, false if the default is being used
    */
   public boolean isDetected() {

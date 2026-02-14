@@ -17,12 +17,10 @@
 package org.firstinspires.ftc.teamcode.utils;
 
 import com.qualcomm.robotcore.util.ReadWriteFile;
-
+import java.io.File;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.json.JSONObject;
-
-import java.io.File;
 
 public class BallSequenceFileWriter {
   private final File configFile;
@@ -33,6 +31,7 @@ public class BallSequenceFileWriter {
 
   /**
    * Writes a ball sequence to the config file
+   *
    * @param sequence the sequence to record
    * @return true if the sequence was successfully written to the file, false if file writing failed
    */
