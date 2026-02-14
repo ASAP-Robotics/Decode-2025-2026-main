@@ -366,7 +366,7 @@ public class ScoringSystem {
     // ^ return false if there are no balls in the mag
     spindex.prepToShootSequence(ballSequence);
     state = State.SHOOTING;
-    intake.intakeIdle(); // start the intake spinning
+    intake.ejectIdle(); // start the intake spinning
     turret.activate(); // start the flywheel spinning
     return true;
   }
