@@ -423,9 +423,7 @@ public class Spindex implements System {
     }
   }
 
-  /**
-   * Sets the spindexer empty, and starts intaking
-   */
+  /** Sets the spindexer empty, and starts intaking */
   public void setEmpty() {
     for (SpindexSlot slot : spindex) {
       slot.color = BallColor.EMPTY;
