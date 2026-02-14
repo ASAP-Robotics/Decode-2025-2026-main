@@ -187,8 +187,6 @@ public class Spindex implements System {
         intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake (just in case)
         if (spinner.atTarget()) { // if spindex is done turning around
           setEmpty();
-          currentIndex = getColorIndex(BallColor.EMPTY);
-          state = SpindexState.INTAKING; // spindex back to intaking mode
         }
         break;
 
@@ -426,14 +424,15 @@ public class Spindex implements System {
   }
 
   /**
-   * Sets the spindexer empty manually
-   *
-   * @note only to be used as a manual backup
+   * Sets the spindexer empty, and starts intaking
    */
   public void setEmpty() {
     for (SpindexSlot slot : spindex) {
       slot.color = BallColor.EMPTY;
     }
+
+    currentIndex = getColorIndex(BallColor.EMPTY);
+    state = SpindexState.INTAKING; // spindex back to intaking mode
   }
 
   /**
