@@ -16,21 +16,16 @@ public class setAiming implements Action {
   public setAiming(
       double distance,
       double angle,
-      int rpm,
-      int hoodangle,
       int flipy,
       ScoringSystem scoringSystem) {
     this.scoringSystem = scoringSystem;
     this.distance = distance;
     this.angle = angle;
     this.flipy = flipy;
-    this.rpm = rpm;
-    this.hoodangle = hoodangle;
   }
 
   @Override
   public boolean run(TelemetryPacket packet) {
-    scoringSystem.tuneAiming(this.rpm, this.hoodangle);
     scoringSystem.overrideAiming(this.distance, this.flipy * this.angle);
     scoringSystem.update(true);
     return false;
