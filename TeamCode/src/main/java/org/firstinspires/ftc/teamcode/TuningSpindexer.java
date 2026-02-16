@@ -28,6 +28,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
 
 @TeleOp(name = "Tuning spindexer", group = "Tuning")
 @Config
@@ -53,10 +54,10 @@ public class TuningSpindexer extends LinearOpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
-    TouchSensor sensor = hardwareMap.get(TouchSensor.class, "spindexHomer");
+    ElcAbsEncoderAnalog encoder = new ElcAbsEncoderAnalog(hardwareMap, "spindexEncoder");
     MotorEx motor = new MotorEx(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
     UnidirectionalHomableRotator spindex =
-        new UnidirectionalHomableRotator(motor, sensor, 0.1, 0.05, 0.001, 1, true);
+        new UnidirectionalHomableRotator(motor, encoder, 0.1, 0.05, 0.001, 1, true);
 
     waitForStart();
     spindex.start();

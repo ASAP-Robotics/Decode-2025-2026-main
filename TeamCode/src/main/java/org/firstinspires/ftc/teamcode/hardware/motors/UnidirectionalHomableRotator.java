@@ -17,7 +17,7 @@
 package org.firstinspires.ftc.teamcode.hardware.motors;
 
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.qualcomm.robotcore.hardware.TouchSensor;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 
 /**
@@ -38,13 +38,13 @@ public class UnidirectionalHomableRotator extends HomableRotator {
 
   public UnidirectionalHomableRotator(
       MotorEx motor,
-      TouchSensor sensor,
+      ElcAbsEncoderAnalog encoder,
       double kp,
       double ki,
       double kd,
       double tolerance,
       boolean inverted) {
-    super(motor, sensor, kp, ki, kd, tolerance, inverted);
+    super(motor, encoder, kp, ki, kd, tolerance, inverted);
   }
 
   /**

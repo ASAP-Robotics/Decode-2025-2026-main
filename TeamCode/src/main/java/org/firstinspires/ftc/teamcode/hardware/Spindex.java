@@ -18,11 +18,16 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
+import android.util.Pair;
+
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
@@ -77,6 +82,7 @@ public class Spindex implements System {
   SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
   SystemReport blockerReport = new SystemReport(SystemStatus.NOMINAL); // latest blocker report
   private final UnidirectionalHomableRotator spinner; // the motor that rotates the mag's divider
+  private final ElcAbsEncoderAnalog encoder; // the absolute encoder on the spindexer
   private final Axon intakeBlocker; // servo moving flap to close intake while shooting
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
@@ -100,12 +106,20 @@ public class Spindex implements System {
   private BallColor oldIntakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
-  public Spindex(
-      MotorEx spinner, TouchSensor homingSwitch, Axon intakeBlocker, ColorSensorV3 colorSensor) {
+  public Spindex(HardwareMap hardwareMap) {
     this.spinner =
-        new UnidirectionalHomableRotator(spinner, homingSwitch, 0.05, 0.05, 0.001, 1, true);
-    this.intakeBlocker = intakeBlocker;
-    this.colorSensor = colorSensor;
+        new UnidirectionalHomableRotator(
+            new MotorEx(hardwareMap, "spindex", Motor.GoBILDA.RPM_117),
+            new ElcAbsEncoderAnalog(hardwareMap, "spindexEncoder"),
+            0.05,
+            0.05,
+            0.001,
+            1,
+            true
+        );
+    this.encoder = new ElcAbsEncoderAnalog(hardwareMap, "spindexEncoder");
+    this.intakeBlocker = new Axon(hardwareMap, "intakeBlocker", "intakeBlockerEncoder");
+    this.colorSensor = new ColorSensorV3(hardwareMap, "colorSensor");
   }
 
   /**
@@ -115,10 +129,7 @@ public class Spindex implements System {
    */
   public void init(BallSequence preloadedSequence, boolean isPreloaded, boolean auto) {
     enabled = auto;
-    spinner.start();
-    if (enabled) {
-      spinner.home();
-    }
+    if (enabled) spinner.start();
     if (enabled) intakeBlocker.setPosition(isPreloaded ? INTAKE_FLAP_CLOSED : INTAKE_FLAP_OPEN);
 
     if (isPreloaded) { // if the spindex is preloaded
@@ -138,9 +149,7 @@ public class Spindex implements System {
 
   /** Starts up the spindex */
   public void start() {
-    if (!enabled) {
-      spinner.home();
-    }
+    if (!enabled) spinner.start();
     enabled = true;
   }
 
