@@ -18,12 +18,9 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
-import android.util.Pair;
-
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
@@ -82,7 +79,6 @@ public class Spindex implements System {
   SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
   SystemReport blockerReport = new SystemReport(SystemStatus.NOMINAL); // latest blocker report
   private final UnidirectionalHomableRotator spinner; // the motor that rotates the mag's divider
-  private final ElcAbsEncoderAnalog encoder; // the absolute encoder on the spindexer
   private final Axon intakeBlocker; // servo moving flap to close intake while shooting
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
@@ -117,7 +113,6 @@ public class Spindex implements System {
             1,
             true
         );
-    this.encoder = new ElcAbsEncoderAnalog(hardwareMap, "spindexEncoder");
     this.intakeBlocker = new Axon(hardwareMap, "intakeBlocker", "intakeBlockerEncoder");
     this.colorSensor = new ColorSensorV3(hardwareMap, "colorSensor");
   }
