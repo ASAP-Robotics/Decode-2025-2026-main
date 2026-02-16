@@ -18,9 +18,9 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
-import android.util.Pair;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
@@ -69,6 +69,9 @@ public class Spindex implements System {
   private static final double INTAKE_FLAP_CLOSED = 325;
   private static final double INTAKE_FLAP_OPEN = 240;
   private static final double INTAKE_DELAY_SECONDS = 0.5;
+  private static final double SHOOT_DELAY_SECONDS = 0.1; // todo tune
+  private static final double ANGLE_COMPARISON_THRESHOLD =
+      0.1; // diff between to angle to be the same
 
   SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
   SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
@@ -85,6 +88,8 @@ public class Spindex implements System {
 
   private final SimpleTimer intakeDelay =
       new SimpleTimer(INTAKE_DELAY_SECONDS); // timer to let ball get all the way in before moving
+  private final SimpleTimer shootDelay =
+      new SimpleTimer(SHOOT_DELAY_SECONDS); // timer to let ramp drop before shooting
   private SpindexState state = SpindexState.UNINITIALIZED; // the current state of the spindex
   private BallSequence sequence = BallSequence.GPP; // the sequence that is to be shot
   private boolean enabled = true; // if spindex can move, sense, etc.
@@ -111,7 +116,9 @@ public class Spindex implements System {
   public void init(BallSequence preloadedSequence, boolean isPreloaded, boolean auto) {
     enabled = auto;
     spinner.start();
-    if (enabled) spinner.home();
+    if (enabled) {
+      spinner.home();
+    }
     if (enabled) intakeBlocker.setPosition(isPreloaded ? INTAKE_FLAP_CLOSED : INTAKE_FLAP_OPEN);
 
     if (isPreloaded) { // if the spindex is preloaded
@@ -131,13 +138,15 @@ public class Spindex implements System {
 
   /** Starts up the spindex */
   public void start() {
-    if (!enabled) spinner.home();
+    if (!enabled) {
+      spinner.home();
+    }
     enabled = true;
   }
 
   /** Updates everything to do with the spindex */
-  public Pair<Double, Double> update() {
-    if (!enabled) return new Pair<>(Double.NaN, Double.NaN);
+  public void update() {
+    if (!enabled) return;
 
     sensorReport = colorSensor.getStatus();
     spinnerReport = spinner.getStatus();
@@ -168,19 +177,16 @@ public class Spindex implements System {
         break;
 
       case SHOOTING_READY: // if the spindex is preparing to shoot
-        intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake (just in case)
+        prepToShootSequence(sequence);
         // move spindex to position if flap closed
         if (intakeBlocker.atTarget()) turnSpindexNoShoot(spindex[currentIndex].shootPosition);
+        if (!spinner.atTarget()) shootDelay.start();
         break;
 
       case SHOOTING: // if the spindex is shooting
         intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake (just in case)
         if (spinner.atTarget()) { // if spindex is done turning around
-          for (SpindexSlot slot : spindex) { // spindex is now empty
-            slot.color = BallColor.EMPTY;
-          }
-          currentIndex = getColorIndex(BallColor.EMPTY);
-          state = SpindexState.INTAKING; // spindex back to intaking mode
+          setEmpty();
         }
         break;
 
@@ -189,7 +195,7 @@ public class Spindex implements System {
         break;
     }
 
-    Pair<Double, Double> toReturn = spinner.update();
+    spinner.update();
 
     oldIntakeColor = intakeColor; // store old intake color
     if (colorSensorEnabled && state.checkSensor && isAtTarget()) {
@@ -198,8 +204,6 @@ public class Spindex implements System {
     } else {
       intakeColor = BallColor.INVALID;
     }
-
-    return toReturn;
   }
 
   public SystemReport getStatus() {
@@ -219,19 +223,19 @@ public class Spindex implements System {
 
     } else if (sensorStatus == SystemStatus.INOPERABLE) {
       status = SystemStatus.INOPERABLE;
-      message = "🟥Broken (Color sensor); use backups controls. Is it unplugged?";
+      message = "🟥Broken (Color sensor); use backup controls. Is it unplugged?";
 
     } else if (spinnerStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
-      message = "🟨Backup (Spinner); performance will be degraded. Is it jammed?";
+      message = "🟨Backup (Spinner); will be slower. Is it jammed?";
 
     } else if (blockerStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
-      message = "🟨Backup (Intake blocker); performance will be degraded. Is it jammed?";
+      message = "🟨Backup (Intake blocker); will be slower. Is it jammed?";
 
     } else if (sensorStatus == SystemStatus.FALLBACK) {
       status = SystemStatus.FALLBACK;
-      message = "🟨Backup (Color sensor); use backups controls";
+      message = "🟨Backup (Color sensor); use backup controls";
     }
 
     return new SystemReport(status, message);
@@ -248,6 +252,12 @@ public class Spindex implements System {
     intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake
     currentIndex = getBestStartIndex(sequence); // set new index
     state = SpindexState.SHOOTING_READY; // spindex in shooting mode
+    if ( // this might be redundant
+    Math.abs(
+            AngleUnit.normalizeDegrees(spinner.getTargetAngle())
+                - AngleUnit.normalizeDegrees(spindex[currentIndex].shootPosition))
+        >= ANGLE_COMPARISON_THRESHOLD)
+      shootDelay.start(); // start delay if spinner hasn't been set yet
   }
 
   /**
@@ -262,6 +272,22 @@ public class Spindex implements System {
     spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.FORWARD_ONLY);
     spinner.manualChangeTargetAngle(400.0);
     // this empties the entire mag; we don't ever need to only partially shoot it
+  }
+
+  /**
+   * Cancels any shot the spindexer may be taking
+   *
+   * @note takes no action whatsoever if state isn't SHOOTING
+   * @note intended only as a driver backup
+   */
+  public void cancelShot() {
+    if (state == SpindexState.SHOOTING) {
+      // if we are shooting, the spindexer can't be empty
+      spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY);
+      spinner.setAngle(spinner.getNormalizedCurrentAngle());
+      state = SpindexState.SHOOTING_READY;
+      prepToShootSequence(sequence);
+    }
   }
 
   /**
@@ -381,6 +407,30 @@ public class Spindex implements System {
       toReturn[i] = spindex[i].color;
     }
     return toReturn;
+  }
+
+  /**
+   * Manually sets the contents of the spindexer
+   *
+   * @param contents an array with exactly three items, containing the colors of ball in each slot
+   * @note only to be used as a manual backup
+   */
+  public void setSpindexContents(BallColor[] contents) {
+    if (contents == null || contents.length != spindex.length) return;
+
+    for (int i = 0; i < contents.length; i++) {
+      spindex[i].color = contents[i];
+    }
+  }
+
+  /** Sets the spindexer empty, and starts intaking */
+  public void setEmpty() {
+    for (SpindexSlot slot : spindex) {
+      slot.color = BallColor.EMPTY;
+    }
+
+    currentIndex = getColorIndex(BallColor.EMPTY);
+    state = SpindexState.INTAKING; // spindex back to intaking mode
   }
 
   /**
@@ -530,6 +580,7 @@ public class Spindex implements System {
     return state == SpindexState.SHOOTING_READY
         && !isEmpty()
         && isAtTarget()
+        && shootDelay.isFinished()
         && isIndexValid(currentIndex);
   }
 
@@ -602,7 +653,10 @@ public class Spindex implements System {
    *     otherwise
    */
   private boolean isSpindexPosition(double positionToCheck) {
-    return spinner.getNormalizedCurrentAngle() == positionToCheck;
+    return Math.abs(
+            AngleUnit.normalizeDegrees(spinner.getTargetAngle())
+                - AngleUnit.normalizeDegrees(positionToCheck))
+        < ANGLE_COMPARISON_THRESHOLD;
   }
 
   /**
