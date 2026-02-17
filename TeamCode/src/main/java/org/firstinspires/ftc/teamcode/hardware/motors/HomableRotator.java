@@ -216,6 +216,7 @@ public class HomableRotator implements System {
 
   /**
    * Gets the current base angle of the motor, without any offsets
+   *
    * @return the angle of the motor according to the non-absolute encoder before offsets
    * @note CAN return invalid (NaN / infinite / otherwise bad) data
    */
@@ -262,6 +263,7 @@ public class HomableRotator implements System {
 
   /**
    * Calculates the absolute position of the motor
+   *
    * @note stops the motor for a bit
    */
   public void home() {
@@ -269,7 +271,8 @@ public class HomableRotator implements System {
     currentMotorPower = 0;
     motor.stopAndResetEncoder();
 
-    angleOffset = AngleUnit.normalizeDegrees(baseMeasureCurrentAngle() - encoder.getAngleNormalized());
+    angleOffset =
+        AngleUnit.normalizeDegrees(baseMeasureCurrentAngle() - encoder.getAngleNormalized());
 
     measureCurrentAngle();
     homed = true;
