@@ -24,7 +24,8 @@ import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
 public class EncoderTest extends LinearOpMode {
   @Override
   public void runOpMode() {
-    ElcAbsEncoderAnalog encoder = new ElcAbsEncoderAnalog(hardwareMap, "spindexEncoder");
+    ElcAbsEncoderAnalog encoder = new ElcAbsEncoderAnalog(hardwareMap, "turretEncoder");
+    encoder.setInverted(true);
 
     waitForStart();
 

@@ -70,8 +70,8 @@ public class Spindex implements System {
 
   private static final double INTAKE_FLAP_CLOSED = 325;
   private static final double INTAKE_FLAP_OPEN = 240;
-  private static final double INTAKE_DELAY_SECONDS = 0.5;
-  private static final double SHOOT_DELAY_SECONDS = 0.1; // todo tune
+  private static final double INTAKE_DELAY_SECONDS = 0.1;
+  private static final double SHOOT_DELAY_SECONDS = 0.2; // todo tune
   private static final double ANGLE_COMPARISON_THRESHOLD =
       0.1; // diff between to angle to be the same
 
@@ -110,7 +110,7 @@ public class Spindex implements System {
             0.015,
             0.0,
             0.0,
-            1,
+            3,
             true);
     this.intakeBlocker = new Axon(hardwareMap, "intakeBlocker", "intakeBlockerEncoder");
     this.colorSensor = new ColorSensorV3(hardwareMap, "colorSensor");
