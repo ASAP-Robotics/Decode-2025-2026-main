@@ -23,20 +23,20 @@ import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
 
 @TeleOp(name = "Tuning spindexer", group = "Tuning")
 @Config
 public class TuningSpindexer extends LinearOpMode {
   public static int target_loop_time = 20;
   public static double angle = 0;
-  public static double kD = 0.001;
-  public static double kI = 0.05;
-  public static double kP = 0.05;
+  public static double kD = 0.0;
+  public static double kI = 0.0;
+  public static double kP = 0.015;
 
   public static boolean home = false;
   public static UnidirectionalHomableRotator.DirectionConstraint direction =
@@ -53,10 +53,10 @@ public class TuningSpindexer extends LinearOpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
-    TouchSensor sensor = hardwareMap.get(TouchSensor.class, "spindexHomer");
+    ElcAbsEncoderAnalog encoder = new ElcAbsEncoderAnalog(hardwareMap, "spindexEncoder");
     MotorEx motor = new MotorEx(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
     UnidirectionalHomableRotator spindex =
-        new UnidirectionalHomableRotator(motor, sensor, 0.1, 0.05, 0.001, 1, true);
+        new UnidirectionalHomableRotator(motor, encoder, 0.015, 0.0, 0.0, 1, true); // true
 
     waitForStart();
     spindex.start();
