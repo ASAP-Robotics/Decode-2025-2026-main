@@ -91,7 +91,7 @@ public class HomableRotator implements System {
     this.encoder = encoder;
     this.motorController = new PIDController(kp, ki, kd);
     this.motorController.setTolerance(tolerance);
-    this.motor.setInverted(inverted);
+    this.motor.setInverted(!inverted);
     this.motor.setRunMode(Motor.RunMode.RawPower);
     this.motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
     this.motor.set(0);
@@ -220,7 +220,7 @@ public class HomableRotator implements System {
    * @note CAN return invalid (NaN / infinite / otherwise bad) data
    */
   private double baseMeasureCurrentAngle() {
-    return motor.getCurrentPosition() / COUNTS_PER_REV * (inverted ? -360 : 360);
+    return motor.getCurrentPosition() / COUNTS_PER_REV * 360;
   }
 
   /** Measures the current angle of the motor */
