@@ -50,9 +50,13 @@ public class ScoringSystem {
   protected State state = State.UNINITIALISED; // the state of the scoring system
   private BallSequence ballSequence = BallSequence.GPP; // the sequence being shot
   public final AllianceColor allianceColor; // the alliance we are on
-  private boolean turretAimOverride = false; // if the aim of the turret is overridden
+  //private boolean turretAimOverride = false; // if the aim of the turret is overridden
+  private boolean turretVerticalAngleOverride = false;
+  private boolean turretHorizontalAngleOverride = false;
+  private boolean turretRPMOverride = false;
+  private boolean turretDistanceOverride = false;
   private double horizontalAngleOverride = 0;
-  private boolean tuning = false;
+  //private boolean tuning = false;
   private boolean shutDown = false; // if the systems are shutting down at the end of auto
   private double verticalAngleOverride = 60;
   private double rpmOverride = 2000;
@@ -172,17 +176,27 @@ public class ScoringSystem {
       return;
     }
 
-    if (tuning) {
-      turret.tuneShooting(rpmOverride, verticalAngleOverride);
-
-    } else if (turretAimOverride) {
+    if (turretHorizontalAngleOverride) {
       turret.setHorizontalAngle(horizontalAngleOverride);
-      turret.setTargetDistance(distanceOverride);
-      return;
+
+    } else {
+      turret.setHorizontalAngle(getRelativeTargetAngle());
     }
 
-    turret.setHorizontalAngle(getRelativeTargetAngle());
-    turret.setTargetDistance(getTargetDistance());
+    if (turretDistanceOverride) {
+      turret.setTargetDistance(distanceOverride);
+
+    } else {
+      turret.setTargetDistance(getTargetDistance());
+    }
+
+    if (turretVerticalAngleOverride) {
+      turret.overrideVerticalAngle(verticalAngleOverride);
+    }
+
+    if (turretRPMOverride) {
+      turret.overrideRpm(rpmOverride);
+    }
   }
 
   /** Updates everything to do with the spindexer */
@@ -567,17 +581,33 @@ public class ScoringSystem {
    * @param angle the angle to turn the turret to
    */
   public void overrideAiming(double distance, double angle) {
-    turretAimOverride = true;
+    turretDistanceOverride = true;
     distanceOverride = distance;
+    turretHorizontalAngleOverride = true;
     horizontalAngleOverride = angle;
   }
 
   /**
-   * @brief gets if the aiming of the turret is override
+   * Manually sets the aiming values for Auto
+   * @param horizontalAngle the horizontal angle for the turret to go to
+   * @param verticalAngle the angle of the hood flap
+   * @param RPM the flywheel speed
+   */
+  public void manualAimForAuto(double horizontalAngle, double verticalAngle, double RPM) {
+    turretHorizontalAngleOverride = true;
+    horizontalAngleOverride = horizontalAngle;
+    turretVerticalAngleOverride = true;
+    verticalAngleOverride = verticalAngle;
+    turretRPMOverride = true;
+    rpmOverride = RPM;
+  }
+
+  /**
+   * @brief gets if the aiming of the turret is overridden at all
    * @return false if the robot is auto aiming, true if the robot is using an aim override
    */
   public boolean isAimOverride() {
-    return turretAimOverride;
+    return turretDistanceOverride || turretRPMOverride || turretHorizontalAngleOverride || turretVerticalAngleOverride;
   }
 
   /**
@@ -587,16 +617,20 @@ public class ScoringSystem {
    */
   @TestOnly
   public void tuneAiming(double RPM, double angle) {
-    tuning = true;
+    turretRPMOverride = true;
     rpmOverride = RPM;
+    turretVerticalAngleOverride = true;
     verticalAngleOverride = angle;
   }
 
   /**
-   * @brief switches aiming control back to odometry math (from manual override)
+   * @brief switches all aiming control back to automatic control (from manual override)
    */
   public void autoAim() {
-    turretAimOverride = false;
+    turretVerticalAngleOverride = false;
+    turretHorizontalAngleOverride = false;
+    turretRPMOverride = false;
+    turretDistanceOverride = false;
   }
 
   /**

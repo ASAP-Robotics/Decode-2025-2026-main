@@ -50,7 +50,7 @@ public class TuningTurret extends LinearOpMode {
     Motor turretRotator = new Motor(hardwareMap, "turretRotator", Motor.GoBILDA.RPM_1150);
     ElcAbsEncoderAnalog turretEncoder = new ElcAbsEncoderAnalog(hardwareMap, "turretEncoder");
     DcMotorEx flywheelMotor = this.hardwareMap.get(DcMotorEx.class, "flywheel");
-    Turret turret = new Turret(flywheelMotor, turretRotator, turretEncoder, turretHood, 1500);
+    Turret turret = new Turret(flywheelMotor, turretRotator, turretEncoder, turretHood, 1900);
 
     turret.init(0);
 
