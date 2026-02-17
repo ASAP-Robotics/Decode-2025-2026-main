@@ -36,7 +36,7 @@ public class TuningSpindexer extends LinearOpMode {
   public static double angle = 0;
   public static double kD = 0.0;
   public static double kI = 0.0;
-  public static double kP = 0.01;
+  public static double kP = 0.015;
 
   public static boolean home = false;
   public static UnidirectionalHomableRotator.DirectionConstraint direction =
@@ -56,7 +56,7 @@ public class TuningSpindexer extends LinearOpMode {
     ElcAbsEncoderAnalog encoder = new ElcAbsEncoderAnalog(hardwareMap, "spindexEncoder");
     MotorEx motor = new MotorEx(hardwareMap, "spindex", Motor.GoBILDA.RPM_117);
     UnidirectionalHomableRotator spindex =
-        new UnidirectionalHomableRotator(motor, encoder, 0.01, 0.0, 0.0, 1, true); // true
+        new UnidirectionalHomableRotator(motor, encoder, 0.015, 0.0, 0.0, 1, true); // true
 
     waitForStart();
     spindex.start();

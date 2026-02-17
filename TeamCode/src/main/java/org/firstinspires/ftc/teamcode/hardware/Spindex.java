@@ -107,9 +107,9 @@ public class Spindex implements System {
         new UnidirectionalHomableRotator(
             new MotorEx(hardwareMap, "spindex", Motor.GoBILDA.RPM_117),
             new ElcAbsEncoderAnalog(hardwareMap, "spindexEncoder"),
-            0.05,
-            0.05,
-            0.001,
+            0.015,
+            0.0,
+            0.0,
             1,
             true
         );

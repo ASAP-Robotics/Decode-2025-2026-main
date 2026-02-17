@@ -53,7 +53,7 @@ public class HomableRotator implements System {
     }
   }
 
-  private static final double ANGLE_OFFSET = 0; // offset between encoder and hardware zero
+  private static final double ANGLE_OFFSET = -90; // offset between encoder and hardware zero
   private static final double COUNTS_PER_REV = 4000; // CPR of the digital encoder
   private static final double UPDATE_TOLERANCE =
       0.01; // amount power has to change by to actually set motor
