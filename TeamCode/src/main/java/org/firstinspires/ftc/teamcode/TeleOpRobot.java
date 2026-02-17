@@ -138,17 +138,44 @@ public class TeleOpRobot extends CommonRobot {
     // ^ directionless velocity of the robot, in inches per second
 
     // update scoring systems
-    Pose2D realRobot = new Pose2D(DistanceUnit.INCH, location.position.x, location.position.y, AngleUnit.RADIANS, location.heading.toDouble());
-    Pose2D virtual = scoringSystem.getVirtualRobotPosition(realRobot, allianceColor.getTargetLocation(), velocityPose.linearVel.x, velocityPose.linearVel.y);
-    scoringSystem.setRobotPosition(virtual);
-   // telemetry.addLine("virtual x : " + Math.round(virtual.getX(DistanceUnit.INCH)) + " || real x : " + Math.round(location.position.x));
-    //telemetry.addLine("virtual y : " + Math.round(virtual.getY(DistanceUnit.INCH)) + " || real y : " + Math.round(location.position.y));
+    Pose2D realRobot = new Pose2D(
+            DistanceUnit.INCH,
+            location.position.x,
+            location.position.y,
+            AngleUnit.RADIANS,
+            location.heading.toDouble());
 
+    Pose2D virtual = scoringSystem.getVirtualRobotPosition(
+            realRobot,
+            allianceColor.getTargetLocation(),
+            velocityPose.linearVel.x,
+            velocityPose.linearVel.y);
+
+    scoringSystem.setRobotPosition(virtual);
 
     updateDriverControls();
 
     scoringSystem.update(updateTelemetry);
 
+    if (updateTelemetry) {
+      telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
+
+      // DEBUG TELEMETRY - Remove after tuning
+      telemetry.addData("--- Virtual Robot Position ---", "");
+      telemetry.addData("Real X", Math.round(realRobot.getX(DistanceUnit.INCH) * 10) / 10.0);
+      telemetry.addData("Real Y", Math.round(realRobot.getY(DistanceUnit.INCH) * 10) / 10.0);
+      telemetry.addData("Virtual X", Math.round(virtual.getX(DistanceUnit.INCH) * 10) / 10.0);
+      telemetry.addData("Virtual Y", Math.round(virtual.getY(DistanceUnit.INCH) * 10) / 10.0);
+      telemetry.addData("Velocity X", Math.round(velocityPose.linearVel.x * 10) / 10.0);
+      telemetry.addData("Velocity Y", Math.round(velocityPose.linearVel.y * 10) / 10.0);
+      telemetry.addData("Velocity Magnitude", Math.round(velocity * 10) / 10.0);
+      telemetry.addData("Target Distance", Math.round(
+              Math.hypot(
+                      allianceColor.getTargetLocation().getX(DistanceUnit.INCH) - virtual.getX(DistanceUnit.INCH),
+                      allianceColor.getTargetLocation().getY(DistanceUnit.INCH) - virtual.getY(DistanceUnit.INCH)
+              ) * 10) / 10.0);
+      telemetry.addData("Turret Angle", Math.round(scoringSystem.getTurretAngle() * 10) / 10.0);
+    }
     if (updateTelemetry) {
       telemetry.addData("Limelight enabled", limelightEnabled);
       telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());

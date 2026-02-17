@@ -107,7 +107,7 @@ public class AutoRobot extends CommonRobot {
             new SequentialAction( // BIG BOI
                 new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
                 //new ObeliskSearch(limelight, telemetry),
-                new setAiming(30, -65, flipy, scoringSystem),
+                new setAiming(30, -67, flipy, scoringSystem),
                 new shootAction(scoringSystem),
                 new setAiming(90, -49, flipy, scoringSystem),
                   new SequentialAction( // shoot 1
@@ -128,7 +128,7 @@ public class AutoRobot extends CommonRobot {
                                     new Pose2d(15, -61.5 * flipy, flipy * (Math.toRadians(-90))).position,
                                     new TranslationalVelConstraint(250.0),
                                     new ProfileAccelConstraint(-30, pickupAcc))
-                        .waitSeconds(0.2)
+                        .waitSeconds(0)
                             // shoot 2
                         .strafeToLinearHeading(new Vector2d(secondShootX,secondShootY*flipy),flipy * (Math.toRadians(-90)),new TranslationalVelConstraint(250.0),
                                     new ProfileAccelConstraint(-50, fastAcc))
@@ -150,7 +150,7 @@ public class AutoRobot extends CommonRobot {
                             new TranslationalVelConstraint(250.0),
                             new ProfileAccelConstraint(-50, fastAcc))
                             //GATE PICKUP
-                            .waitSeconds(1.5)
+                            .waitSeconds(1.25)
                         // shoot3
                             .strafeToLinearHeading(new Vector2d(secondShootX,secondShootY*flipy),flipy * (Math.toRadians(-90)),new TranslationalVelConstraint(250.0),
                                     new ProfileAccelConstraint(-50, fastAcc))
@@ -182,7 +182,7 @@ public class AutoRobot extends CommonRobot {
                                     // go to pickup 4
                                     .splineToLinearHeading(
                                             // pickup PPG first slot
-                                            new Pose2d(-13.75, -49 * flipy, flipy * (Math.toRadians(-90))),
+                                            new Pose2d(-14.5, -49 * flipy, flipy * (Math.toRadians(-90))),
                                             (Math.PI / -2) * flipy,
                                             new TranslationalVelConstraint(180.0),
                                             new ProfileAccelConstraint(-50, pickupAcc))

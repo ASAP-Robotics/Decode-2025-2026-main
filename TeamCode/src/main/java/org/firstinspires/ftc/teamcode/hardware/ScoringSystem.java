@@ -494,7 +494,7 @@ public class ScoringSystem {
     double distX = robotPosition.getX(DistanceUnit.INCH) - targetPosition.getX(DistanceUnit.INCH);
     double distY = robotPosition.getY(DistanceUnit.INCH) - targetPosition.getY(DistanceUnit.INCH);
 
-    double angle = AngleUnit.DEGREES.fromRadians(Math.atan(distY / distX));
+    double angle = AngleUnit.DEGREES.fromRadians(Math.atan2(distY , distX));
 
     return Double.isNaN(angle) ? 0 : angle; // just in case
   }
@@ -505,7 +505,7 @@ public class ScoringSystem {
    * @note this value isn't normalized between -180 and 180 degrees
    */
   protected double getRelativeTargetAngle() {
-    return getAbsoluteTargetAngle() - robotPosition.getHeading(AngleUnit.DEGREES) + 180;
+    return getAbsoluteTargetAngle() - robotPosition.getHeading(AngleUnit.DEGREES);
   }
 
   /**
@@ -533,7 +533,7 @@ public class ScoringSystem {
 
 
     // time-of-flight estimate (seconds) — clamp so it can't go negative
-    double ballTime = ballTimeSlope * distance + ballTimeOffset + balltimeConstant;
+    double ballTime = 1;
 
 
     // how far robot moves during flight (inches)
@@ -549,7 +549,6 @@ public class ScoringSystem {
     // field aim angle FROM virtual robot TO real target
     double dx = targetPosition.getX(DistanceUnit.INCH) - virtualX;
     double dy = targetPosition.getY(DistanceUnit.INCH) - virtualY;
-    double aim = Math.toDegrees(Math.atan2(dy, dx));
 
 
     Pose2D virtual = new Pose2D(
