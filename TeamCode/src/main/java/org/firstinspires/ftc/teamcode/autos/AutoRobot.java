@@ -18,6 +18,7 @@ package org.firstinspires.ftc.teamcode.autos;
 
 import static android.os.SystemClock.sleep;
 
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -36,9 +37,8 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 public class AutoRobot extends CommonRobot {
   // stuff (variables, etc., see TeleOpRobot) goes here;
   private int flipy = 1; // flip over the x axis
-  private double rotate = 0;
+  protected final Pose2d beginPose;
 
-  private final double angle = -53;
   protected Pose2d beginPose;
 
   private ParallelAction auto;
@@ -51,6 +51,7 @@ public class AutoRobot extends CommonRobot {
   }
 
   private AutoPaths autoPaths;
+
 
   private final SearchLimelight limelight;
   protected MecanumDrive drive;
@@ -97,6 +98,7 @@ public class AutoRobot extends CommonRobot {
     backup.start();
     drive.localizer.recalibrate();
 
+
     sleep(2000);
 
     while (drive.localizer.getState() != GoBildaPinpointDriver.DeviceStatus.READY
@@ -107,6 +109,7 @@ public class AutoRobot extends CommonRobot {
     sleep(2000);
 
     scoringSystem.init(true, true);
+
   }
 
   public void initLoop() {
@@ -119,6 +122,10 @@ public class AutoRobot extends CommonRobot {
     new BallSequenceFileWriter().writeSequence(sequence); // save sequence to file
     scoringSystem.start(true); // start scoring systems up
     scoringSystem.setBallSequence(sequence); // set ball sequence
+
+    if (allianceColor == AllianceColor.RED) {
+      flipy = -1;
+    }
 
     Actions.runBlocking(auto);
   }
