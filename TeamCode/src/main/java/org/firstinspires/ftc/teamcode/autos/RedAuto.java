@@ -1,7 +1,9 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.autos;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.tuning.TuningOpModes;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
@@ -11,7 +13,7 @@ public class RedAuto extends LinearOpMode {
   public void runOpMode() throws InterruptedException {
     if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
       // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.RED);
-      AutoRobot robot = new AutoRobot(hardwareMap, telemetry, AllianceColor.RED);
+      AutoRobot robot = new AutoRobot(hardwareMap, telemetry, AllianceColor.RED, AutoRobot.paths.FARSIDE);
 
       robot.init();
 

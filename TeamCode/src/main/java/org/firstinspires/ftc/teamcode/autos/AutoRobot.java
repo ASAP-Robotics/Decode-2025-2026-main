@@ -1,0 +1,116 @@
+/*
+ * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.firstinspires.ftc.teamcode.autos;
+
+import static android.os.SystemClock.sleep;
+
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.CommonRobot;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.hardware.sensors.SearchLimelight;
+import org.firstinspires.ftc.teamcode.types.AllianceColor;
+import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.utils.BallSequenceFileWriter;
+import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
+
+/** class to contain the behavior of the robot in Auto, to avoid code duplication */
+public class AutoRobot extends CommonRobot {
+  // stuff (variables, etc., see TeliOpRobot) goes here;
+  private int flipx = 1; // flip over the y axis
+  private int flipy = 1; // flip over the x axis
+  private Action obeliskSearchAction;
+  private static final double distance = 60.4;
+  private static final double angle = -51;
+  protected final Pose2d beginPose;
+
+  private ParallelAction auto;
+  public enum paths {
+    FARSIDE,
+    CLOSE15,
+    CLOSE12
+  }
+  private AutoPaths autoPaths;
+
+
+  private final SearchLimelight limelight;
+  protected MecanumDrive drive;
+
+  public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor, paths path) {
+    super(hardwareMap, telemetry, allianceColor, false);
+    beginPose = allianceColor.getAutoStartPosition();
+    limelight = new SearchLimelight(hardwareMap);
+    autoPaths = new AutoPaths(allianceColor);
+    drive = new MecanumDrive(hardwareMap, beginPose);
+    switch(path){
+      case FARSIDE :
+        auto = autoPaths.getFarSideAuto(scoringSystem,drive);
+        break;
+      case CLOSE15 :
+        auto = autoPaths.getCloseSide15Auto(scoringSystem,drive);
+    }
+  }
+
+  public void init() {
+    limelight.init();
+    flipy = 1;
+    SimpleTimer backup = new SimpleTimer(2);
+    backup.start();
+    drive.localizer.recalibrate();
+
+
+    sleep(2000);
+
+    while (drive.localizer.getState() != GoBildaPinpointDriver.DeviceStatus.READY
+        && !backup.isFinished()) {
+      drive.localizer.update();
+    }
+
+    sleep(2000);
+
+    scoringSystem.init(true, true);
+
+  }
+
+  public void initLoop() {
+    scoringSystem.initLoop();
+    limelight.update();
+  }
+
+  public void start() {
+    BallSequence sequence = limelight.getSequence(); // get ball sequence
+    new BallSequenceFileWriter().writeSequence(sequence); // save sequence to file
+    scoringSystem.start(true); // start scoring systems up
+    scoringSystem.setBallSequence(sequence); // set ball sequence
+
+    if (allianceColor == AllianceColor.RED) {
+      flipy = -1;
+    }
+
+    Actions.runBlocking(auto);
+  }
+
+  public void stop() {}
+
+  @Override
+  public void loop() {}
+}

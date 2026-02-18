@@ -175,7 +175,8 @@ public class ScoringSystem {
     if (tuning) {
       turret.tuneShooting(rpmOverride, verticalAngleOverride);
 
-    } else if (turretAimOverride) {
+    }
+    if (turretAimOverride) {
       turret.setHorizontalAngle(horizontalAngleOverride);
       turret.setTargetDistance(distanceOverride);
       return;

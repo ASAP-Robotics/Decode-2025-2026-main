@@ -30,7 +30,7 @@ public enum AllianceColor {
       new Pose2d(-11.3, 24.7, Math.toRadians(90)), // roadrunner shooting pose
       new Pose2D(DistanceUnit.INCH, -13, 24, AngleUnit.DEGREES, 90), // scoring system shooting pose
       new Pose2d(4.2, 43.8, Math.toRadians(90)), // auto end position
-      new Pose2D(DistanceUnit.INCH, -66, 66, AngleUnit.DEGREES, 0), // target location
+      new Pose2D(DistanceUnit.INCH, -63, 60, AngleUnit.DEGREES, 0), // target location
       new Pose2D(DistanceUnit.INCH, 63, -63, AngleUnit.DEGREES, 0)), // reset location
   BLUE(
       20,
@@ -41,7 +41,7 @@ public enum AllianceColor {
       new Pose2D(
           DistanceUnit.INCH, -13, -24, AngleUnit.DEGREES, -90), // scoring system shooting pose
       new Pose2d(4.2, -43.8, Math.toRadians(-90)), // auto end position
-      new Pose2D(DistanceUnit.INCH, -66, -66, AngleUnit.DEGREES, 0), // target location
+      new Pose2D(DistanceUnit.INCH, -63, -60, AngleUnit.DEGREES, 0), // target location
       new Pose2D(DistanceUnit.INCH, 63, 63, AngleUnit.DEGREES, 0)); // reset location
 
   private final int aprilTagId;
