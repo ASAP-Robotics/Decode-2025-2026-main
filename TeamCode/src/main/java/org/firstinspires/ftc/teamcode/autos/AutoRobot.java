@@ -50,6 +50,7 @@ public class AutoRobot extends CommonRobot {
     CLOSE12
   }
   private AutoPaths autoPaths;
+  private paths path;
 
 
   private final SearchLimelight limelight;
@@ -61,13 +62,8 @@ public class AutoRobot extends CommonRobot {
     limelight = new SearchLimelight(hardwareMap);
     autoPaths = new AutoPaths(allianceColor);
     drive = new MecanumDrive(hardwareMap, beginPose);
-    switch(path){
-      case FARSIDE :
-        auto = autoPaths.getFarSideAuto(scoringSystem,drive);
-        break;
-      case CLOSE15 :
-        auto = autoPaths.getCloseSide15Auto(scoringSystem,drive);
-    }
+    this.path = path;
+
   }
 
   public void init() {
@@ -101,6 +97,13 @@ public class AutoRobot extends CommonRobot {
     new BallSequenceFileWriter().writeSequence(sequence); // save sequence to file
     scoringSystem.start(true); // start scoring systems up
     scoringSystem.setBallSequence(sequence); // set ball sequence
+    switch(path){
+      case FARSIDE :
+        auto = autoPaths.getFarSideAuto(scoringSystem,drive);
+        break;
+      case CLOSE15 :
+        auto = autoPaths.getCloseSide15Auto(scoringSystem,drive);
+    }
 
     if (allianceColor == AllianceColor.RED) {
       flipy = -1;
