@@ -30,7 +30,7 @@ import org.firstinspires.ftc.teamcode.utils.Follower;
 
 /** Wrapper around the `Servo` class to add encoder feedback and rudimentary fault detection */
 public class Axon implements System {
-  private static final double UPDATE_TOLERANCE_DEGREES = 1; // amount setpoint has to change by to
+  private static final double UPDATE_TOLERANCE_DEGREES = 0.5; // amount setpoint has to change by to
   // actually set servo
   private SystemStatus status = SystemStatus.NOMINAL; // the status of the servo
   private final Follower follower; // backup follower to model servo movement if encoder fails
@@ -125,10 +125,9 @@ public class Axon implements System {
    * @param degrees the target position of the servo, in degrees
    */
   public void setPosition(double degrees) {
-    double oldTargetPositionDegrees = targetPositionDegrees;
-    targetPositionDegrees = degrees;
-    if (Math.abs(oldTargetPositionDegrees - degrees) <= UPDATE_TOLERANCE_DEGREES) return;
+    if (Math.abs(targetPositionDegrees - degrees) < UPDATE_TOLERANCE_DEGREES) return;
     if (!dummy) follower.setTarget(degrees);
+    targetPositionDegrees = degrees;
     servo.setPosition(degrees / 360);
   }
 
