@@ -53,8 +53,8 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   private double targetDistance = 0; // the distance (inches) to the target
   private double lastSetSpeed = 0; // the last RPM the flywheel was set to spin at
   private DcMotor.RunMode flywheelRunMode = DcMotor.RunMode.RUN_USING_ENCODER;
-  protected double testingSpeed = 2000;
-  protected boolean testing = false;
+  protected double speedOverride = 2000;
+  private boolean overrideRPM = false;
 
   protected T[] LOOKUP_TABLE; // lookup table of distance, rpm, etc.
 
@@ -138,13 +138,12 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   }
 
   /**
-   * @brief manually sets RPM, use to tune lookup table
+   * @brief manually sets RPM, use to tune lookup table and to shoot in Auto
    * @param rpm the speed to spin the flywheel at
    */
-  @TestOnly
   protected void overrideRpm(double rpm) {
-    testing = true;
-    testingSpeed = rpm;
+    overrideRPM = true;
+    speedOverride = rpm;
   }
 
   /**
@@ -358,7 +357,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    *     of distance
    */
   protected double getRPMLookup(double distance) {
-    if (testing) return testingSpeed; // used for tuning lookup table
+    if (overrideRPM) return speedOverride; // used for tuning lookup table
     try {
       int indexOver = LOOKUP_TABLE.length - 1;
       int indexUnder = 0;

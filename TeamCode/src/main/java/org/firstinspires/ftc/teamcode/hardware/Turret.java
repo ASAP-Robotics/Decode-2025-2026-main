@@ -81,6 +81,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private double lastSetVerticalAngleDegrees = Double.NEGATIVE_INFINITY;
   private double currentRotatorPower = 0;
   private boolean rotationEnabled = true; // if turret can move side to side
+  private boolean overrideVerticalAngle = false;
 
   public Turret(
       DcMotorEx flywheelMotor,
@@ -103,7 +104,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
   public Turret(
       DcMotorEx flywheelMotor, Motor rotator, ElcAbsEncoderAnalog encoder, Axon hoodServo) {
-    this(flywheelMotor, rotator, encoder, hoodServo, 1500);
+    this(flywheelMotor, rotator, encoder, hoodServo, 1900);
   }
 
   /**
@@ -231,7 +232,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public void update() {
     super.update();
 
-    double targetServoDegrees = testing ? testingVerticalAngleDegrees : targetVerticalAngleDegrees;
+    double targetServoDegrees =
+        overrideVerticalAngle ? testingVerticalAngleDegrees : targetVerticalAngleDegrees;
     if (Math.abs(targetServoDegrees - lastSetVerticalAngleDegrees) > SERVO_UPDATE_TOLERANCE) {
       hoodServo.setPosition(targetServoDegrees);
       lastSetVerticalAngleDegrees = targetServoDegrees;
@@ -265,22 +267,22 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   }
 
   /**
-   * @brief used for tuning the lookup table, provides manual control of the turret
+   * @brief used for tuning the lookup table and shooting in Auto, provides manual control of the
+   *     turret
    * @param rpm the rpm to spin the flywheel at
    * @param angle the angle to move the hood servo to
    */
-  @TestOnly
   public void tuneShooting(double rpm, double angle) {
     overrideRpm(rpm);
     overrideVerticalAngle(angle);
   }
 
   /**
-   * @brief used for tuning, overrides the vertical angle
+   * @brief used for tuning and shooting in Auto, overrides the vertical angle
    * @param angleDegrees the angle to set the flap at
    */
-  protected void overrideVerticalAngle(double angleDegrees) {
-    testing = true;
+  public void overrideVerticalAngle(double angleDegrees) {
+    overrideVerticalAngle = true;
     testingVerticalAngleDegrees = angleDegrees;
   }
 
