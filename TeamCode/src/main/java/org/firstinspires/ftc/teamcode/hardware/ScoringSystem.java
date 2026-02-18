@@ -50,13 +50,13 @@ public class ScoringSystem {
   protected State state = State.UNINITIALISED; // the state of the scoring system
   private BallSequence ballSequence = BallSequence.GPP; // the sequence being shot
   public final AllianceColor allianceColor; // the alliance we are on
-  //private boolean turretAimOverride = false; // if the aim of the turret is overridden
+  // private boolean turretAimOverride = false; // if the aim of the turret is overridden
   private boolean turretVerticalAngleOverride = false;
   private boolean turretHorizontalAngleOverride = false;
   private boolean turretRPMOverride = false;
   private boolean turretDistanceOverride = false;
   private double horizontalAngleOverride = 0;
-  //private boolean tuning = false;
+  // private boolean tuning = false;
   private boolean shutDown = false; // if the systems are shutting down at the end of auto
   private double verticalAngleOverride = 60;
   private double rpmOverride = 2000;
@@ -589,6 +589,7 @@ public class ScoringSystem {
 
   /**
    * Manually sets the aiming values for Auto
+   *
    * @param horizontalAngle the horizontal angle for the turret to go to
    * @param verticalAngle the angle of the hood flap
    * @param RPM the flywheel speed
@@ -607,7 +608,10 @@ public class ScoringSystem {
    * @return false if the robot is auto aiming, true if the robot is using an aim override
    */
   public boolean isAimOverride() {
-    return turretDistanceOverride || turretRPMOverride || turretHorizontalAngleOverride || turretVerticalAngleOverride;
+    return turretDistanceOverride
+        || turretRPMOverride
+        || turretHorizontalAngleOverride
+        || turretVerticalAngleOverride;
   }
 
   /**

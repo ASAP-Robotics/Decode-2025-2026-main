@@ -267,7 +267,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   }
 
   /**
-   * @brief used for tuning the lookup table and shooting in Auto, provides manual control of the turret
+   * @brief used for tuning the lookup table and shooting in Auto, provides manual control of the
+   *     turret
    * @param rpm the rpm to spin the flywheel at
    * @param angle the angle to move the hood servo to
    */
