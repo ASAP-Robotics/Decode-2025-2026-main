@@ -16,6 +16,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
@@ -37,10 +38,12 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 /**
  * @brief class to contain the behavior of the robot in TeleOp, to avoid code duplication
  */
+
 public class TeleOpRobot extends CommonRobot {
   private static final double MANUAL_SHOOTING_DIST = 75; // inches
   private static final double MANUAL_SHOOTING_ANGLE = 180; // degrees from straight (intake)
   private static final double TRIGGER_PRESSED_THRESHOLD = 0.67;
+
 
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
@@ -138,13 +141,12 @@ public class TeleOpRobot extends CommonRobot {
     // ^ directionless velocity of the robot, in inches per second
 
     // update scoring systems
-    scoringSystem.setRobotPosition(
-        new Pose2D(
-            DistanceUnit.INCH,
-            location.position.x,
-            location.position.y,
-            AngleUnit.RADIANS,
-            location.heading.toDouble()));
+    Pose2D realRobot = new Pose2D(DistanceUnit.INCH, location.position.x, location.position.y, AngleUnit.RADIANS, location.heading.toDouble());
+    Pose2D virtual = scoringSystem.getVirtualRobotPosition(realRobot, allianceColor.getTargetLocation(), velocityPose.linearVel.x, velocityPose.linearVel.y);
+    scoringSystem.setRobotPosition(virtual);
+   // telemetry.addLine("virtual x : " + Math.round(virtual.getX(DistanceUnit.INCH)) + " || real x : " + Math.round(location.position.x));
+    //telemetry.addLine("virtual y : " + Math.round(virtual.getY(DistanceUnit.INCH)) + " || real y : " + Math.round(location.position.y));
+
 
     updateDriverControls();
 
@@ -279,7 +281,10 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // shoot
-    if (gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD || gamepad2.rightBumperWasPressed()) {
+    //if (gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD || gamepad2.rightBumperWasPressed()) {
+  //    scoringSystem.shoot();
+  //  }
+    if (gamepad1.right_trigger > TRIGGER_PRESSED_THRESHOLD || gamepad1.rightBumperWasPressed()) {
       scoringSystem.shoot();
     }
 

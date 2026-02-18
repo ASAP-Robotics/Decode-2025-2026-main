@@ -34,11 +34,13 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     protected final double distance;
     protected final double rpm;
     protected final double angle;
+    private final double ballTime;
 
-    public LookupTableItem(double distance, double rpm, double angle) {
+    public LookupTableItem(double distance, double rpm, double angle, double ballTime) {
       this.distance = distance;
       this.rpm = rpm;
       this.angle = angle;
+      this.ballTime = ballTime;
     }
 
     public double getDistance() {
@@ -52,6 +54,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     public double getAngle() {
       return angle;
     }
+    public double getBallTime(){return ballTime;}
   }
 
   private static final double HORIZONTAL_WRAP_CENTER_DEGREES = -90.0;
@@ -134,31 +137,31 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     // note: "distance" numbers *MUST* go from low to high
     return new LookupTableItem[] {
       // Extrapolated 0 point
-      new LookupTableItem(0, 1900, 160),
+      new LookupTableItem(0, 1900, 160,1),
 
       // Tuned Data (Sorted Low to High)
-            new LookupTableItem(33.5, 2000, 110),
-            new LookupTableItem(41.0, 2100, 51),
-            new LookupTableItem(49.3, 2150, 50),
-            new LookupTableItem(52.9, 2300, 37),
-            new LookupTableItem(55.2, 2300, 38),
-            new LookupTableItem(56.7, 2350, 38),
-            new LookupTableItem(63.1, 2350, 39),
-            new LookupTableItem(66.4, 2400, 30),
-            new LookupTableItem(70.8, 2400, 29),
-            new LookupTableItem(78.3, 2500, 28),
-            new LookupTableItem(81.3, 2600, 26),
-            new LookupTableItem(85.6, 2600, 26),
-            new LookupTableItem(93.3, 2600, 30),
-            new LookupTableItem(95.4, 2600, 30),
-            new LookupTableItem(96.3, 2800, 15),
-            new LookupTableItem(104.1, 2800, 20),
-            new LookupTableItem(106.6, 2870, 12),
-            new LookupTableItem(122.2, 3000, 5),
-            new LookupTableItem(138.5, 3180, 0),
+            new LookupTableItem(33.5, 2000, 110,.82),
+            new LookupTableItem(41.0, 2100, 51,.65),
+            new LookupTableItem(49.3, 2150, 50,.64),
+            new LookupTableItem(52.9, 2300, 37,.51),
+            new LookupTableItem(55.2, 2300, 38,.57),
+            new LookupTableItem(56.7, 2350, 38,.55),
+            new LookupTableItem(63.1, 2350, 39,.6),
+            new LookupTableItem(66.4, 2400, 30,.55),
+            new LookupTableItem(70.8, 2400, 29,.55),
+            new LookupTableItem(78.3, 2500, 29,.57),
+            new LookupTableItem(81.3, 2600, 26,.6),
+            new LookupTableItem(85.6, 2600, 26,.66),
+            new LookupTableItem(93.3, 2600, 30,.71),
+            new LookupTableItem(95.4, 2600, 30,.71),
+            new LookupTableItem(96.3, 2800, 15,.61),
+            new LookupTableItem(104.1, 2800, 20,.67),
+            new LookupTableItem(106.6, 2870, 12,.65),
+            new LookupTableItem(122.2, 3000, 5,.76),
+            new LookupTableItem(138.5, 3180, 0,.89),
 
       // Extrapolated "infinite" point
-      new LookupTableItem(Double.POSITIVE_INFINITY, 3100, 10)
+      new LookupTableItem(Double.POSITIVE_INFINITY, 3100, 10,1)
     };
   }
 
