@@ -13,7 +13,7 @@ public class ServoPos extends LinearOpMode {
 
   @Override
   public void runOpMode() throws InterruptedException {
-    Axon servo = new Axon(hardwareMap.get(Servo.class, "intakeBlocker"));
+    Axon servo = new Axon(hardwareMap.get(Servo.class, "turretHood"));
     waitForStart();
 
     while (opModeIsActive()) {
