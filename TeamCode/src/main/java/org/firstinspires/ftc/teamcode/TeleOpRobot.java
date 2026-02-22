@@ -32,6 +32,7 @@ import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.utils.PositionFileReader;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 /**
@@ -62,7 +63,7 @@ public class TeleOpRobot extends CommonRobot {
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
     this.limelight = new Limelight(rawLimelight, this.allianceColor);
 
-    pinpoint = new PinpointLocalizer(hardwareMap, allianceColor.getAutoEndPosition());
+    pinpoint = new PinpointLocalizer(hardwareMap, new PositionFileReader().getPosition());
 
     this.gamepad1 = gamepad1;
     this.gamepad2 = gamepad2;
