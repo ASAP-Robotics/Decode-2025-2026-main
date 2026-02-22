@@ -321,9 +321,16 @@ public class ScoringSystem {
     avLoopTime /= loopTimes.size();
 
     telemetry.addData("State", state.toString());
-    telemetry.addData("Ready to shoot", isReadyToShoot());
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("Sequence", ballSequence);
+
+    boolean readyToShoot = isReadyToShoot();
+    telemetry.addData("Ready to shoot", readyToShoot);
+
+    if (!readyToShoot) {
+      telemetry.addData("Turret ready to shoot", turret.isReadyToShoot());
+      telemetry.addData("Spindex ready to shoot", spindex.isReadyToShoot());
+    }
 
     SystemReport spindexReport = spindex.getStatus();
     SystemReport turretReport = turret.getStatus();
@@ -341,13 +348,9 @@ public class ScoringSystem {
     telemetry.addData("Color sensor enabled", spindex.isColorSensorEnabled());
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
     telemetry.addData("Target distance", turret.getTargetDistance());
-    telemetry.addData("Turret at target", turret.isAtTarget());
-    telemetry.addData("Spindex at target", spindex.isAtTarget());
-    telemetry.addData("Intake color", spindex.getIntakeColor());
     telemetry.addData("Spindex state", spindex.getState());
     telemetry.addData("Loop time (ms)", avLoopTime);
-    telemetry.addData("Max loop time (ms)", maxLoopTime);
-    telemetry.addData("Min loop time (ms)", minLoopTime);
+    telemetry.addData("Loop time jitter (ms)", maxLoopTime - minLoopTime);
   }
 
   /**
