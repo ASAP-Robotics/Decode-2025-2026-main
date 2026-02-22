@@ -18,10 +18,9 @@ package org.firstinspires.ftc.teamcode.utils;
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.util.ReadWriteFile;
+import java.io.File;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.json.JSONObject;
-
-import java.io.File;
 
 public class PositionFileWriter {
   private final File configFile;
@@ -32,6 +31,7 @@ public class PositionFileWriter {
 
   /**
    * Writes a Pose2d to the config file
+   *
    * @param position the position to save
    * @return true if saved successfully, false if saving failed
    */
