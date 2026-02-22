@@ -17,17 +17,21 @@
 package org.firstinspires.ftc.teamcode.hardware.sensors;
 
 import android.graphics.Color;
+
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.LinkedList;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
-
+@Config
 public class ColorSensorV3 implements System {
   protected static class Reading {
     public final double timestamp;
@@ -42,25 +46,33 @@ public class ColorSensorV3 implements System {
   protected SystemStatus status = SystemStatus.NOMINAL;
   protected final ColorSensor colorSensor;
   protected final DistanceSensor distanceSensor;
+  public static double purple = 225.0;
+  public static double purpleTolerance = 10;
+  public static double green = 157.0;
+  public static double greenTolerance = 10;
+  public static double greenHueMin = 0.7;
   protected BallColor color = BallColor.INVALID;
   protected ElapsedTime timeSinceStart = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   protected LinkedList<Reading> readings = new LinkedList<>();
   protected static final double DISCONNECT_TIME = 1.0; // seconds
-  protected static final double BALL_DISTANCE_THRESHOLD = 1.5; // inches
+  protected static final double BALL_DISTANCE_THRESHOLD = 1.25; // inches\
 
-  public ColorSensorV3(HardwareMap hardwareMap, String deviceName) {
+  //private final Telemetry telemetry;
+
+  public ColorSensorV3(HardwareMap hardwareMap, String deviceName/*, Telemetry telemetry*/) {
     this.colorSensor = hardwareMap.get(ColorSensor.class, deviceName);
     this.distanceSensor = hardwareMap.get(DistanceSensor.class, deviceName);
     this.colorSensor.enableLed(true);
+    //this.telemetry = telemetry;
     this.timeSinceStart.reset();
   }
 
   /**
-   * @brief updates the color sensor readings, call every loop
+   * Updates the color sensor readings, call every loop
    */
   public void update() {
     double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-    // telemetry.addData("Dist", distance);
+    //telemetry.addData("Dist", distance);
 
     if (distance <= BALL_DISTANCE_THRESHOLD) {
       float[] hsv = new float[3];
@@ -68,13 +80,14 @@ public class ColorSensorV3 implements System {
       float h = hsv[0];
       float s = hsv[1];
       float v = hsv[2];
-      // telemetry.addData("Hue", h);
-      // telemetry.addData("Sat", s);
-      // telemetry.addData("Val", v);
-      if (h >= 130 && h <= 195 && s >= 0.6) { // green
+      //telemetry.addData("Hue", h);
+      //telemetry.addData("Sat", s);
+      //telemetry.addData("Val", v);
+
+      if (Math.abs(h - green) <= greenTolerance && s >= greenHueMin) { // green
         color = BallColor.GREEN; // intake has a green ball in it
 
-      } else if (h >= 195 && h <= 260) { // purple
+      } else if (Math.abs(h - purple) <= purpleTolerance) { // purple
         color = BallColor.PURPLE; // intake has a purple ball in it
 
       } else { // color can't be determined
@@ -125,7 +138,7 @@ public class ColorSensorV3 implements System {
   }
 
   /**
-   * @brief gets the detected ball color
+   * Gets the detected ball color
    * @return the ball color
    * @note if the sensor is disconnected, returns invalid
    */

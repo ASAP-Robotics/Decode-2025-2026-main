@@ -319,6 +319,7 @@ public class ScoringSystem {
 
   /** Updates (or adds the data of) the telemetry from the scoring systems */
   private void updateTelemetry() {
+
     double avLoopTime = 0;
     double minLoopTime = Double.POSITIVE_INFINITY;
     double maxLoopTime = Double.NEGATIVE_INFINITY;
@@ -376,7 +377,7 @@ public class ScoringSystem {
   protected void switchModeToIntaking() {
     state = State.INTAKING;
     intake.intake(); // start the intake spinning
-    //turret.idle(); // flywheel doesn't need to at full speed
+    turret.idle(); // flywheel doesn't need to at full speed
   }
 
   protected double getBallTime(double distance) {

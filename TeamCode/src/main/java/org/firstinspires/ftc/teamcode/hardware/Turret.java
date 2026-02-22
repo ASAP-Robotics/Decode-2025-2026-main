@@ -149,7 +149,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
             new LookupTableItem(63.1, 2350, 39,.6),
             new LookupTableItem(66.4, 2400, 30,.55),
             new LookupTableItem(70.8, 2400, 29,.55),
-            new LookupTableItem(78.3, 2500, 29,.57),
+            new LookupTableItem(78.3, 2500, 28,.57),
             new LookupTableItem(81.3, 2600, 26,.6),
             new LookupTableItem(85.6, 2600, 26,.66),
             new LookupTableItem(93.3, 2600, 30,.71),

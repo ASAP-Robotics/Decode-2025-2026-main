@@ -21,12 +21,21 @@ import static android.os.SystemClock.sleep;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ProfileAccelConstraint;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.CommonRobot;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.actions.AutoEndShutdowAction;
+import org.firstinspires.ftc.teamcode.actions.setAiming;
+import org.firstinspires.ftc.teamcode.actions.setScoringPose;
+import org.firstinspires.ftc.teamcode.actions.shootAction;
+import org.firstinspires.ftc.teamcode.actions.updateScoring;
 import org.firstinspires.ftc.teamcode.hardware.sensors.SearchLimelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -35,13 +44,12 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 /** class to contain the behavior of the robot in Auto, to avoid code duplication */
 public class AutoRobot extends CommonRobot {
-  // stuff (variables, etc., see TeliOpRobot) goes here;
-  private int flipx = 1; // flip over the y axis
+  // stuff (variables, etc., see TeleOpRobot) goes here;
   private int flipy = 1; // flip over the x axis
-  private Action obeliskSearchAction;
-  private static final double distance = 60.4;
-  private static final double angle = -51;
-  protected final Pose2d beginPose;
+  private double rotate = 0;
+
+  private final double angle = -53;
+  protected Pose2d beginPose;
 
   private ParallelAction auto;
   public enum paths {
@@ -50,7 +58,6 @@ public class AutoRobot extends CommonRobot {
     CLOSE12
   }
   private AutoPaths autoPaths;
-  private paths path;
 
 
   private final SearchLimelight limelight;
@@ -58,11 +65,31 @@ public class AutoRobot extends CommonRobot {
 
   public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor, paths path) {
     super(hardwareMap, telemetry, allianceColor, false);
-    beginPose = allianceColor.getAutoStartPosition();
+
     limelight = new SearchLimelight(hardwareMap);
     autoPaths = new AutoPaths(allianceColor);
-    drive = new MecanumDrive(hardwareMap, beginPose);
-    this.path = path;
+    if (allianceColor == AllianceColor.RED) {
+      flipy = -1;
+    }
+
+    beginPose = new Pose2d(0,0,0);
+    switch(path){
+      case FARSIDE :
+          beginPose = new Pose2d(63,-8.6*flipy,Math.toRadians(-90)*flipy);
+          drive = new MecanumDrive(hardwareMap, beginPose);
+          auto = autoPaths.getFarSideAuto(scoringSystem,drive,telemetry);
+        break;
+      case CLOSE15 :
+          beginPose = allianceColor.getAutoStartPosition();
+          drive = new MecanumDrive(hardwareMap, beginPose);
+          auto = autoPaths.getCloseSide15Auto(scoringSystem,drive,telemetry);
+        break;
+      case CLOSE12:
+          beginPose = allianceColor.getAutoStartPosition();
+          drive = new MecanumDrive(hardwareMap, beginPose);
+          auto = autoPaths.getCloseSide12Auto(scoringSystem,drive,telemetry);
+        break;
+    }
 
   }
 
@@ -97,17 +124,6 @@ public class AutoRobot extends CommonRobot {
     new BallSequenceFileWriter().writeSequence(sequence); // save sequence to file
     scoringSystem.start(true); // start scoring systems up
     scoringSystem.setBallSequence(sequence); // set ball sequence
-    switch(path){
-      case FARSIDE :
-        auto = autoPaths.getFarSideAuto(scoringSystem,drive);
-        break;
-      case CLOSE15 :
-        auto = autoPaths.getCloseSide15Auto(scoringSystem,drive);
-    }
-
-    if (allianceColor == AllianceColor.RED) {
-      flipy = -1;
-    }
 
     Actions.runBlocking(auto);
   }

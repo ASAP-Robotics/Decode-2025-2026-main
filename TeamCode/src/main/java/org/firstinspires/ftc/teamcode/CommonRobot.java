@@ -58,7 +58,7 @@ public abstract class CommonRobot {
     this.telemetry = telemetry;
     this.allianceColor = allianceColor;
 
-    Spindex spindex = new Spindex(hardwareMap);
+    Spindex spindex = new Spindex(hardwareMap, telemetry);
 
     Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
     Axon turretHood = new Axon(rawTurretHood);

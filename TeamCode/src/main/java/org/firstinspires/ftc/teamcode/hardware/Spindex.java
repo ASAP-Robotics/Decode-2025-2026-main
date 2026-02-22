@@ -21,6 +21,8 @@ import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
@@ -70,7 +72,7 @@ public class Spindex implements System {
 
   private static final double INTAKE_FLAP_CLOSED = 325;
   private static final double INTAKE_FLAP_OPEN = 240;
-  private static final double INTAKE_DELAY_SECONDS = 0.1;
+  private static final double INTAKE_DELAY_SECONDS = 0.01;
   private static final double SHOOT_DELAY_SECONDS = 0.2; // todo tune
   private static final double ANGLE_COMPARISON_THRESHOLD =
       0.1; // diff between to angle to be the same
@@ -102,7 +104,7 @@ public class Spindex implements System {
   private BallColor oldIntakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
-  public Spindex(HardwareMap hardwareMap) {
+  public Spindex(HardwareMap hardwareMap, Telemetry telemetry) {
     this.spinner =
         new UnidirectionalHomableRotator(
             new MotorEx(hardwareMap, "spindex", Motor.GoBILDA.RPM_117),
