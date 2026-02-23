@@ -195,7 +195,7 @@ public class Spindex implements System {
         break;
 
       case UNINITIALIZED: // if the spindex is uninitialized
-        spinner.setAngle(10);
+        spinner.setAngle(spindex[0].intakePosition);
         break;
     }
 
@@ -302,13 +302,13 @@ public class Spindex implements System {
    */
   public void prepForShutdown() {
     state = SpindexState.UNINITIALIZED;
-    turnSpindexNoShoot(10);
+    turnSpindexNoShoot(spindex[0].intakePosition);
   }
 
   /**
-   * Homes the spindexer
+   * "Homes" the spindexer (reads the absolute analog encoder)
    *
-   * @note only intended as a manual driver backup; normally not needed or helpful
+   * @note only intended as a manual driver backup; normally not needed
    */
   public void reHome() {
     spinner.home();
@@ -435,6 +435,8 @@ public class Spindex implements System {
 
     currentIndex = getColorIndex(BallColor.EMPTY);
     state = SpindexState.INTAKING; // spindex back to intaking mode
+
+    spinner.home();
   }
 
   /**
