@@ -281,10 +281,10 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // shoot
-    //if (gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD || gamepad2.rightBumperWasPressed()) {
-  //    scoringSystem.shoot();
-  //  }
+
     if (gamepad1.right_trigger > TRIGGER_PRESSED_THRESHOLD || gamepad1.rightBumperWasPressed()) {
+      scoringSystem.shoot();
+    } else if (gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD || gamepad2.rightBumperWasPressed()) {
       scoringSystem.shoot();
     }
 

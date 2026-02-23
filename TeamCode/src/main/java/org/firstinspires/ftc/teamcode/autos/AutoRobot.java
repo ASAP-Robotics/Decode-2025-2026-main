@@ -55,7 +55,8 @@ public class AutoRobot extends CommonRobot {
   public enum paths {
     FARSIDE,
     CLOSE15,
-    CLOSE12
+    CLOSE12,
+    ClOSE15_2GATE,
   }
   private AutoPaths autoPaths;
 
@@ -88,6 +89,11 @@ public class AutoRobot extends CommonRobot {
           beginPose = allianceColor.getAutoStartPosition();
           drive = new MecanumDrive(hardwareMap, beginPose);
           auto = autoPaths.getCloseSide12Auto(scoringSystem,drive,telemetry);
+        break;
+      case ClOSE15_2GATE:
+        beginPose = allianceColor.getAutoStartPosition();
+        drive = new MecanumDrive(hardwareMap, beginPose);
+        auto = autoPaths.getCloseSide15Auto2Gate(scoringSystem,drive,telemetry);
         break;
     }
 

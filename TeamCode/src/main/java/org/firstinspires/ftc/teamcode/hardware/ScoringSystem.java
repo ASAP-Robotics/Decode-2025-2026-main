@@ -136,6 +136,10 @@ public class ScoringSystem {
 
     if (isPreloaded) {
       switchModeToFull();
+      intake.stop();
+      clearingIntake = true;
+      intake.timer.start();
+
     } else {
       switchModeToIntaking();
     }

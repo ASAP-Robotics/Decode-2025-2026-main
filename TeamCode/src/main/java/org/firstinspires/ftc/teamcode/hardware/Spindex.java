@@ -85,9 +85,9 @@ public class Spindex implements System {
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // code assumptions: increasing angle shoots
-    new SpindexSlot(17, 350), // slot 0
-    new SpindexSlot(137, 110), // slot 1
-    new SpindexSlot(257, 230) // slot 2
+    new SpindexSlot(-103, 230), // slot 0
+    new SpindexSlot(17, -10), // slot 1
+    new SpindexSlot(137, 110) // slot 2
   };
 
   private final SimpleTimer intakeDelay =
@@ -109,10 +109,10 @@ public class Spindex implements System {
         new UnidirectionalHomableRotator(
             new MotorEx(hardwareMap, "spindex", Motor.GoBILDA.RPM_117),
             new ElcAbsEncoderAnalog(hardwareMap, "spindexEncoder"),
-            0.015,
+            0.016,
+            0.016,
             0.0,
-            0.0,
-            3,
+            5,
             true);
     this.intakeBlocker = new Axon(hardwareMap, "intakeBlocker", "intakeBlockerEncoder");
     this.colorSensor = new ColorSensorV3(hardwareMap, "colorSensor");

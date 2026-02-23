@@ -68,7 +68,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private static final double MOTOR_GEAR_TEETH = 24;
   // amount horizontal angle can go over 180 or under -180 degrees before wrapping
   private static final double HORIZONTAL_HYSTERESIS = 10;
-  private static final double HORIZONTAL_TOLERANCE = 3; // degrees
+  private static final double HORIZONTAL_TOLERANCE = 5; // degrees
   protected Follower angleSimulation; // simulation of the horizontal angle of the turret
   protected SystemStatus turretStatus = SystemStatus.NOMINAL;
   private final ElcAbsEncoderAnalog encoder;
@@ -77,7 +77,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   // ^ PID controller for horizontal rotation of turret, uses motor degrees as units
   private final Axon hoodServo;
   private double targetHorizontalAngleDegrees = 0;
-  private double horizontalAngleOffsetDegrees = 0;
+  private double horizontalAngleOffsetDegrees = -2;
   // target angle for servo moving flap
   private double targetVerticalAngleDegrees = 50;
   private double testingVerticalAngleDegrees = 50;
@@ -353,7 +353,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   /** Calculates the angle offset for the turret */
   private void calculateTurretOffset() {
     horizontalAngleOffsetDegrees =
-        motorDegreesToTurretDegrees(encoder.getAngleNormalized() + getRotatorDegrees()) + 4.5;
+        motorDegreesToTurretDegrees(encoder.getAngleNormalized() + getRotatorDegrees()) + 2;
   }
 
   /**
