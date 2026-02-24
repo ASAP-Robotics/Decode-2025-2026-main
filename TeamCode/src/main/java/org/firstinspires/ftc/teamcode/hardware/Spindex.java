@@ -21,6 +21,7 @@ import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
@@ -70,7 +71,7 @@ public class Spindex implements System {
 
   private static final double INTAKE_FLAP_CLOSED = 325;
   private static final double INTAKE_FLAP_OPEN = 240;
-  private static final double INTAKE_DELAY_SECONDS = 0.1;
+  private static final double INTAKE_DELAY_SECONDS = 0.01;
   private static final double SHOOT_DELAY_SECONDS = 0.2; // todo tune
   private static final double ANGLE_COMPARISON_THRESHOLD =
       0.1; // diff between to angle to be the same
@@ -83,9 +84,9 @@ public class Spindex implements System {
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // code assumptions: increasing angle shoots
-    new SpindexSlot(17, 350), // slot 0
-    new SpindexSlot(137, 110), // slot 1
-    new SpindexSlot(257, 230) // slot 2
+    new SpindexSlot(-103, 230), // slot 0
+    new SpindexSlot(17, -10), // slot 1
+    new SpindexSlot(137, 110) // slot 2
   };
 
   private final SimpleTimer intakeDelay =
@@ -102,15 +103,15 @@ public class Spindex implements System {
   private BallColor oldIntakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
-  public Spindex(HardwareMap hardwareMap) {
+  public Spindex(HardwareMap hardwareMap, Telemetry telemetry) {
     this.spinner =
         new UnidirectionalHomableRotator(
             new MotorEx(hardwareMap, "spindex", Motor.GoBILDA.RPM_117),
             new ElcAbsEncoderAnalog(hardwareMap, "spindexEncoder"),
-            0.015,
+            0.016,
+            0.016,
             0.0,
-            0.0,
-            3,
+            5,
             true);
     this.intakeBlocker = new Axon(hardwareMap, "intakeBlocker", "intakeBlockerEncoder");
     this.colorSensor = new ColorSensorV3(hardwareMap, "colorSensor");

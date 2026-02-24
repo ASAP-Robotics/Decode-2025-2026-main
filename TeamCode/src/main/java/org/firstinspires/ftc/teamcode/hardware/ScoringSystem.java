@@ -17,6 +17,7 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import android.util.Pair;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -31,9 +32,11 @@ import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.BallSequenceFileReader;
+import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.jetbrains.annotations.TestOnly;
 
+@Config
 public class ScoringSystem {
   public enum State {
     UNINITIALISED,
@@ -42,8 +45,14 @@ public class ScoringSystem {
     SHOOTING
   }
 
+  public static double ballTime = 1;
+
+  private final double ballTimeSlope = 0.00715145; // the slope for the ball time equation
+  private final double ballTimeOffset = -0.0353098; // the offset for the ball time equation
+  public static double balltimeConstant = 0.05;
   private final ActiveIntake intake; // the intake on the robot
   private final Turret turret; // the flywheel on the robot
+  protected Turret.LookupTableItem[] LOOKUP_TABLE;
   private final Spindex spindex; // the spindex on the robot
   private final RGBIndicator indicator1; // first indicator light
   private final RGBIndicator indicator2; // second indicator light
@@ -106,6 +115,7 @@ public class ScoringSystem {
       turret.init(0);
     }
     turret.setActive(!isPreloaded);
+    LOOKUP_TABLE = turret.fillLookupTable();
   }
 
   /** To be called repeatedly while the robot is in init */
@@ -127,6 +137,10 @@ public class ScoringSystem {
 
     if (isPreloaded) {
       switchModeToFull();
+      intake.stop();
+      clearingIntake = true;
+      intake.timer.start();
+
     } else {
       switchModeToIntaking();
     }
@@ -310,6 +324,7 @@ public class ScoringSystem {
 
   /** Updates (or adds the data of) the telemetry from the scoring systems */
   private void updateTelemetry() {
+
     double avLoopTime = 0;
     double minLoopTime = Double.POSITIVE_INFINITY;
     double maxLoopTime = Double.NEGATIVE_INFINITY;
@@ -321,9 +336,16 @@ public class ScoringSystem {
     avLoopTime /= loopTimes.size();
 
     telemetry.addData("State", state.toString());
-    telemetry.addData("Ready to shoot", isReadyToShoot());
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
     telemetry.addData("Sequence", ballSequence);
+
+    boolean readyToShoot = isReadyToShoot();
+    telemetry.addData("Ready to shoot", readyToShoot);
+
+    if (!readyToShoot) {
+      telemetry.addData("Turret ready to shoot", turret.isReadyToShoot());
+      telemetry.addData("Spindex ready to shoot", spindex.isReadyToShoot());
+    }
 
     SystemReport spindexReport = spindex.getStatus();
     SystemReport turretReport = turret.getStatus();
@@ -341,13 +363,9 @@ public class ScoringSystem {
     telemetry.addData("Color sensor enabled", spindex.isColorSensorEnabled());
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
     telemetry.addData("Target distance", turret.getTargetDistance());
-    telemetry.addData("Turret at target", turret.isAtTarget());
-    telemetry.addData("Spindex at target", spindex.isAtTarget());
-    telemetry.addData("Intake color", spindex.getIntakeColor());
     telemetry.addData("Spindex state", spindex.getState());
     telemetry.addData("Loop time (ms)", avLoopTime);
-    telemetry.addData("Max loop time (ms)", maxLoopTime);
-    telemetry.addData("Min loop time (ms)", minLoopTime);
+    telemetry.addData("Loop time jitter (ms)", maxLoopTime - minLoopTime);
   }
 
   /**
@@ -368,6 +386,30 @@ public class ScoringSystem {
     state = State.INTAKING;
     intake.intake(); // start the intake spinning
     turret.idle(); // flywheel doesn't need to at full speed
+  }
+
+  protected double getBallTime(double distance) {
+    try {
+      int indexOver = LOOKUP_TABLE.length - 1;
+      int indexUnder = 0;
+      for (int i = 0; i < LOOKUP_TABLE.length; i++) {
+        if (LOOKUP_TABLE[i].getDistance() >= distance) {
+          indexOver = i;
+          indexUnder = indexOver - 1; // assuming values go from low to high
+          break;
+        }
+      }
+
+      return balltimeConstant
+          + MathUtils.map(
+              distance,
+              LOOKUP_TABLE[indexUnder].getDistance(),
+              LOOKUP_TABLE[indexOver].getDistance(),
+              LOOKUP_TABLE[indexUnder].getBallTime(),
+              LOOKUP_TABLE[indexOver].getBallTime());
+    } catch (Exception e) { // most probably if distance is outside of lookup table
+      return 0;
+    }
   }
 
   /**
@@ -526,6 +568,53 @@ public class ScoringSystem {
    */
   public double getTurretAngle() {
     return turret.getHorizontalAngleDegrees();
+  }
+
+  public Pose2D getVirtualRobotPosition(
+      Pose2D robotPose,
+      Pose2D targetPosition,
+      double robotVelX, // in/s (same frame as robotPosition)
+      double robotVelY) {
+    if (Math.abs(robotVelX) < 2 && Math.abs(robotVelY) < 2) return robotPose;
+
+    // distance from REAL robot to target (inches)
+    double dx0 = targetPosition.getX(DistanceUnit.INCH) - robotPose.getX(DistanceUnit.INCH);
+    double dy0 = targetPosition.getY(DistanceUnit.INCH) - robotPose.getY(DistanceUnit.INCH);
+    double distance = Math.hypot(dx0, dy0);
+
+    ballTime = getBallTime(distance);
+
+    // time-of-flight estimate (seconds) — clamp so it can't go negative
+    double h = robotPose.getHeading(AngleUnit.RADIANS);
+    double cos = Math.cos(h);
+    double sin = Math.sin(h);
+
+    // If robotVelX = forward, robotVelY = left:
+    double fieldVelX = robotVelX * cos - robotVelY * sin;
+    double fieldVelY = robotVelX * sin + robotVelY * cos;
+
+    // how far robot moves during flight (inches)
+    double leadX = fieldVelX * ballTime;
+    double leadY = fieldVelY * ballTime;
+
+    // VIRTUAL ROBOT = where the robot will be after ballTime
+    double virtualX = robotPose.getX(DistanceUnit.INCH) + leadX;
+    double virtualY = robotPose.getY(DistanceUnit.INCH) + leadY;
+
+    // field aim angle FROM virtual robot TO real target
+    double dx = targetPosition.getX(DistanceUnit.INCH) - virtualX;
+    double dy = targetPosition.getY(DistanceUnit.INCH) - virtualY;
+
+    Pose2D virtual =
+        new Pose2D(
+            DistanceUnit.INCH,
+            virtualX,
+            virtualY,
+            AngleUnit.DEGREES,
+            robotPose.getHeading(AngleUnit.DEGREES));
+
+    // store aimRad in the pose heading (since that's what you want)
+    return virtual;
   }
 
   /**
