@@ -33,7 +33,7 @@ public class TuningLookupTableRobot extends TeleOpRobot {
       AllianceColor allianceColor,
       Gamepad gamepad1,
       Gamepad gamepad2) {
-    super(hardwareMap, telemetry, allianceColor, gamepad1, gamepad2);
+    super(hardwareMap, telemetry, allianceColor, gamepad1, gamepad2, false);
   }
 
   @Override

@@ -54,13 +54,15 @@ public class TeleOpRobot extends CommonRobot {
   private boolean limelightEnabled = true; // if limelight can reset location
   private int limelightUpdates = 0; // how many times limelight has reset the robot's location
   private final ElapsedTime timeSinceLastLimelightUpdate = new ElapsedTime();
+  private final boolean fieldCentric;
 
   public TeleOpRobot(
       HardwareMap hardwareMap,
       Telemetry telemetry,
       AllianceColor allianceColor,
       Gamepad gamepad1,
-      Gamepad gamepad2) {
+      Gamepad gamepad2,
+      boolean fieldCentric) {
     super(hardwareMap, telemetry, allianceColor, true);
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
     this.limelight = new Limelight(rawLimelight, this.allianceColor);
@@ -69,6 +71,7 @@ public class TeleOpRobot extends CommonRobot {
 
     this.gamepad1 = gamepad1;
     this.gamepad2 = gamepad2;
+    this.fieldCentric = fieldCentric;
 
     DcMotorEx frontLeft = this.hardwareMap.get(DcMotorEx.class, "leftFront");
     DcMotorEx frontRight = this.hardwareMap.get(DcMotorEx.class, "rightFront");
@@ -189,10 +192,17 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // update wheelbase
-    wheelBase.setRotation(
-        AngleUnit.DEGREES.fromRadians(location.heading.toDouble())); // for field-centric control
-    wheelBase.setThrottle(gamepad1.right_stick_x, gamepad1.right_stick_y, gamepad1.left_stick_x);
-    wheelBase.update();
+    if (!fieldCentric) {
+      wheelBase.setRotation(
+          AngleUnit.DEGREES.fromRadians(location.heading.toDouble())); // for field-centric control
+      wheelBase.setThrottle(gamepad1.right_stick_x, gamepad1.right_stick_y, gamepad1.left_stick_x);
+      wheelBase.update();
+    } else {
+      wheelBase.setRotation(
+          AngleUnit.DEGREES.fromRadians(location.heading.toDouble())); // for field-centric control
+      wheelBase.setThrottle(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
+      wheelBase.update(true);
+    }
 
     // update telemetry
     if (updateTelemetry) telemetry.update();
