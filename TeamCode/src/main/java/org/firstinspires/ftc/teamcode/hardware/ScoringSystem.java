@@ -17,7 +17,6 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import android.util.Pair;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.Arrays;
@@ -36,6 +35,7 @@ import org.firstinspires.ftc.teamcode.utils.BallSequenceFileReader;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.jetbrains.annotations.TestOnly;
+
 @Config
 public class ScoringSystem {
   public enum State {
@@ -44,9 +44,10 @@ public class ScoringSystem {
     INTAKING,
     SHOOTING
   }
+
   public static double ballTime = 1;
 
-  private final double ballTimeSlope =0.00715145; // the slope for the ball time equation
+  private final double ballTimeSlope = 0.00715145; // the slope for the ball time equation
   private final double ballTimeOffset = -0.0353098; // the offset for the ball time equation
   public static double balltimeConstant = 0.05;
   private final ActiveIntake intake; // the intake on the robot
@@ -399,7 +400,8 @@ public class ScoringSystem {
         }
       }
 
-      return  balltimeConstant + MathUtils.map(
+      return balltimeConstant
+          + MathUtils.map(
               distance,
               LOOKUP_TABLE[indexUnder].getDistance(),
               LOOKUP_TABLE[indexOver].getDistance(),
@@ -408,7 +410,6 @@ public class ScoringSystem {
     } catch (Exception e) { // most probably if distance is outside of lookup table
       return 0;
     }
-
   }
 
   /**
@@ -570,14 +571,11 @@ public class ScoringSystem {
   }
 
   public Pose2D getVirtualRobotPosition(
-          Pose2D robotPose,
-          Pose2D targetPosition,
-          double robotVelX,   // in/s (same frame as robotPosition)
-          double robotVelY
-  ) {
-    if(Math.abs(robotVelX)<2 && Math.abs(robotVelY)<2) return robotPose;
-
-
+      Pose2D robotPose,
+      Pose2D targetPosition,
+      double robotVelX, // in/s (same frame as robotPosition)
+      double robotVelY) {
+    if (Math.abs(robotVelX) < 2 && Math.abs(robotVelY) < 2) return robotPose;
 
     // distance from REAL robot to target (inches)
     double dx0 = targetPosition.getX(DistanceUnit.INCH) - robotPose.getX(DistanceUnit.INCH);
@@ -586,13 +584,12 @@ public class ScoringSystem {
 
     ballTime = getBallTime(distance);
 
-
     // time-of-flight estimate (seconds) — clamp so it can't go negative
     double h = robotPose.getHeading(AngleUnit.RADIANS);
     double cos = Math.cos(h);
     double sin = Math.sin(h);
 
-// If robotVelX = forward, robotVelY = left:
+    // If robotVelX = forward, robotVelY = left:
     double fieldVelX = robotVelX * cos - robotVelY * sin;
     double fieldVelY = robotVelX * sin + robotVelY * cos;
 
@@ -600,30 +597,25 @@ public class ScoringSystem {
     double leadX = fieldVelX * ballTime;
     double leadY = fieldVelY * ballTime;
 
-
-
     // VIRTUAL ROBOT = where the robot will be after ballTime
     double virtualX = robotPose.getX(DistanceUnit.INCH) + leadX;
     double virtualY = robotPose.getY(DistanceUnit.INCH) + leadY;
-
 
     // field aim angle FROM virtual robot TO real target
     double dx = targetPosition.getX(DistanceUnit.INCH) - virtualX;
     double dy = targetPosition.getY(DistanceUnit.INCH) - virtualY;
 
-
-    Pose2D virtual = new Pose2D(
+    Pose2D virtual =
+        new Pose2D(
             DistanceUnit.INCH,
-            virtualX, virtualY,
+            virtualX,
+            virtualY,
             AngleUnit.DEGREES,
             robotPose.getHeading(AngleUnit.DEGREES));
-
 
     // store aimRad in the pose heading (since that's what you want)
     return virtual;
   }
-
-
 
   /**
    * @brief sets the intake to eject at full speed (for some amount of time)

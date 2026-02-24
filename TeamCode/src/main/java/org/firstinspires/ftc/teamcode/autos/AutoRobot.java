@@ -18,24 +18,14 @@ package org.firstinspires.ftc.teamcode.autos;
 
 import static android.os.SystemClock.sleep;
 
-import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.ProfileAccelConstraint;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.TranslationalVelConstraint;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.CommonRobot;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.actions.AutoEndShutdowAction;
-import org.firstinspires.ftc.teamcode.actions.setAiming;
-import org.firstinspires.ftc.teamcode.actions.setScoringPose;
-import org.firstinspires.ftc.teamcode.actions.shootAction;
-import org.firstinspires.ftc.teamcode.actions.updateScoring;
 import org.firstinspires.ftc.teamcode.hardware.sensors.SearchLimelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -52,19 +42,21 @@ public class AutoRobot extends CommonRobot {
   protected Pose2d beginPose;
 
   private ParallelAction auto;
+
   public enum paths {
     FARSIDE,
     CLOSE15,
     CLOSE12,
     ClOSE15_2GATE,
   }
-  private AutoPaths autoPaths;
 
+  private AutoPaths autoPaths;
 
   private final SearchLimelight limelight;
   protected MecanumDrive drive;
 
-  public AutoRobot(HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor, paths path) {
+  public AutoRobot(
+      HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor, paths path) {
     super(hardwareMap, telemetry, allianceColor, false);
 
     limelight = new SearchLimelight(hardwareMap);
@@ -73,30 +65,29 @@ public class AutoRobot extends CommonRobot {
       flipy = -1;
     }
 
-    beginPose = new Pose2d(0,0,0);
-    switch(path){
-      case FARSIDE :
-          beginPose = new Pose2d(63,-8.6*flipy,Math.toRadians(-90)*flipy);
-          drive = new MecanumDrive(hardwareMap, beginPose);
-          auto = autoPaths.getFarSideAuto(scoringSystem,drive,telemetry);
+    beginPose = new Pose2d(0, 0, 0);
+    switch (path) {
+      case FARSIDE:
+        beginPose = new Pose2d(63, -8.6 * flipy, Math.toRadians(-90) * flipy);
+        drive = new MecanumDrive(hardwareMap, beginPose);
+        auto = autoPaths.getFarSideAuto(scoringSystem, drive, telemetry);
         break;
-      case CLOSE15 :
-          beginPose = allianceColor.getAutoStartPosition();
-          drive = new MecanumDrive(hardwareMap, beginPose);
-          auto = autoPaths.getCloseSide15Auto(scoringSystem,drive,telemetry);
+      case CLOSE15:
+        beginPose = allianceColor.getAutoStartPosition();
+        drive = new MecanumDrive(hardwareMap, beginPose);
+        auto = autoPaths.getCloseSide15Auto(scoringSystem, drive, telemetry);
         break;
       case CLOSE12:
-          beginPose = allianceColor.getAutoStartPosition();
-          drive = new MecanumDrive(hardwareMap, beginPose);
-          auto = autoPaths.getCloseSide12Auto(scoringSystem,drive,telemetry);
+        beginPose = allianceColor.getAutoStartPosition();
+        drive = new MecanumDrive(hardwareMap, beginPose);
+        auto = autoPaths.getCloseSide12Auto(scoringSystem, drive, telemetry);
         break;
       case ClOSE15_2GATE:
         beginPose = allianceColor.getAutoStartPosition();
         drive = new MecanumDrive(hardwareMap, beginPose);
-        auto = autoPaths.getCloseSide15Auto2Gate(scoringSystem,drive,telemetry);
+        auto = autoPaths.getCloseSide15Auto2Gate(scoringSystem, drive, telemetry);
         break;
     }
-
   }
 
   public void init() {
@@ -105,7 +96,6 @@ public class AutoRobot extends CommonRobot {
     SimpleTimer backup = new SimpleTimer(2);
     backup.start();
     drive.localizer.recalibrate();
-
 
     sleep(2000);
 
@@ -117,7 +107,6 @@ public class AutoRobot extends CommonRobot {
     sleep(2000);
 
     scoringSystem.init(true, true);
-
   }
 
   public void initLoop() {
