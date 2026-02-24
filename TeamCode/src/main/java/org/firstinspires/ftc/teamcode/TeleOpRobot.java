@@ -170,6 +170,8 @@ public class TeleOpRobot extends CommonRobot {
       telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
       telemetry.addData("Limelight updates", limelightUpdates);
       telemetry.addData("Last Limelight update (s)", timeSinceLastLimelightUpdate.seconds());
+      telemetry.addData("Velocity", velocity);
+      telemetry.addData("Angular velocity", angleVel);
     }
 
     if (limelightEnabled && odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25) {
