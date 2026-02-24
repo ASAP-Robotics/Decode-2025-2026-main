@@ -138,13 +138,24 @@ public class TeleOpRobot extends CommonRobot {
     // ^ directionless velocity of the robot, in inches per second
 
     // update scoring systems
-    scoringSystem.setRobotPosition(
+    Pose2D realRobot =
         new Pose2D(
             DistanceUnit.INCH,
             location.position.x,
             location.position.y,
             AngleUnit.RADIANS,
-            location.heading.toDouble()));
+            location.heading.toDouble());
+    Pose2D virtual =
+        scoringSystem.getVirtualRobotPosition(
+            realRobot,
+            allianceColor.getTargetLocation(),
+            velocityPose.linearVel.x,
+            velocityPose.linearVel.y);
+    scoringSystem.setRobotPosition(virtual);
+    // telemetry.addLine("virtual x : " + Math.round(virtual.getX(DistanceUnit.INCH)) + " || real x
+    // : " + Math.round(location.position.x));
+    // telemetry.addLine("virtual y : " + Math.round(virtual.getY(DistanceUnit.INCH)) + " || real y
+    // : " + Math.round(location.position.y));
 
     updateDriverControls();
 
@@ -279,7 +290,11 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // shoot
-    if (gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD || gamepad2.rightBumperWasPressed()) {
+
+    if (gamepad1.right_trigger > TRIGGER_PRESSED_THRESHOLD || gamepad1.rightBumperWasPressed()) {
+      scoringSystem.shoot();
+    } else if (gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD
+        || gamepad2.rightBumperWasPressed()) {
       scoringSystem.shoot();
     }
 

@@ -34,11 +34,13 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     protected final double distance;
     protected final double rpm;
     protected final double angle;
+    private final double ballTime;
 
-    public LookupTableItem(double distance, double rpm, double angle) {
+    public LookupTableItem(double distance, double rpm, double angle, double ballTime) {
       this.distance = distance;
       this.rpm = rpm;
       this.angle = angle;
+      this.ballTime = ballTime;
     }
 
     public double getDistance() {
@@ -51,6 +53,10 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
     public double getAngle() {
       return angle;
+    }
+
+    public double getBallTime() {
+      return ballTime;
     }
   }
 
@@ -65,7 +71,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private static final double MOTOR_GEAR_TEETH = 24;
   // amount horizontal angle can go over 180 or under -180 degrees before wrapping
   private static final double HORIZONTAL_HYSTERESIS = 10;
-  private static final double HORIZONTAL_TOLERANCE = 3; // degrees
+  private static final double HORIZONTAL_TOLERANCE = 5; // degrees
   protected Follower angleSimulation; // simulation of the horizontal angle of the turret
   protected SystemStatus turretStatus = SystemStatus.NOMINAL;
   private final ElcAbsEncoderAnalog encoder;
@@ -74,7 +80,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   // ^ PID controller for horizontal rotation of turret, uses motor degrees as units
   private final Axon hoodServo;
   private double targetHorizontalAngleDegrees = 0;
-  private double horizontalAngleOffsetDegrees = 0;
+  private double horizontalAngleOffsetDegrees = -2;
   // target angle for servo moving flap
   private double targetVerticalAngleDegrees = 50;
   private double testingVerticalAngleDegrees = 50;
@@ -134,23 +140,31 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     // note: "distance" numbers *MUST* go from low to high
     return new LookupTableItem[] {
       // Extrapolated 0 point
-      new LookupTableItem(0, 1900, 160),
+      new LookupTableItem(0, 1900, 160, 1),
 
       // Tuned Data (Sorted Low to High)
-      new LookupTableItem(36.2, 1900, 60),
-      new LookupTableItem(44.9, 2040, 55),
-      new LookupTableItem(49.5, 2140, 50),
-      new LookupTableItem(58.3, 2280, 40),
-      new LookupTableItem(68.4, 2400, 32),
-      new LookupTableItem(73.8, 2450, 31),
-      new LookupTableItem(103.1, 2700, 25),
-      new LookupTableItem(117.9, 2850, 10),
-      new LookupTableItem(121.7, 2900, 10),
-      new LookupTableItem(131.4, 2950, 10),
-      new LookupTableItem(139, 3100, 10),
+      new LookupTableItem(33.5, 2000, 110, .82),
+      new LookupTableItem(41.0, 2100, 51, .65),
+      new LookupTableItem(49.3, 2150, 50, .64),
+      new LookupTableItem(52.9, 2300, 37, .51),
+      new LookupTableItem(55.2, 2300, 38, .57),
+      new LookupTableItem(56.7, 2350, 38, .55),
+      new LookupTableItem(63.1, 2350, 39, .6),
+      new LookupTableItem(66.4, 2400, 30, .55),
+      new LookupTableItem(70.8, 2400, 29, .55),
+      new LookupTableItem(78.3, 2500, 28, .57),
+      new LookupTableItem(81.3, 2600, 26, .6),
+      new LookupTableItem(85.6, 2600, 26, .66),
+      new LookupTableItem(93.3, 2600, 30, .71),
+      new LookupTableItem(95.4, 2600, 30, .71),
+      new LookupTableItem(96.3, 2800, 15, .61),
+      new LookupTableItem(104.1, 2800, 20, .67),
+      new LookupTableItem(106.6, 2870, 12, .65),
+      new LookupTableItem(122.2, 3000, 5, .76),
+      new LookupTableItem(138.5, 3180, 0, .89),
 
       // Extrapolated "infinite" point
-      new LookupTableItem(Double.POSITIVE_INFINITY, 3100, 10)
+      new LookupTableItem(Double.POSITIVE_INFINITY, 3100, 10, 1)
     };
   }
 
@@ -342,7 +356,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   /** Calculates the angle offset for the turret */
   private void calculateTurretOffset() {
     horizontalAngleOffsetDegrees =
-        motorDegreesToTurretDegrees(encoder.getAngleNormalized() + getRotatorDegrees()) + 4.5;
+        motorDegreesToTurretDegrees(encoder.getAngleNormalized() + getRotatorDegrees()) + 2;
   }
 
   /**

@@ -26,7 +26,7 @@ public enum AllianceColor {
       24,
       2,
       150,
-      new Pose2d(-39, 54.6, Math.toRadians(90)), // starting pose
+      new Pose2d(-41, 54, Math.toRadians(90)), // starting pose
       new Pose2d(-11.3, 24.7, Math.toRadians(90)), // roadrunner shooting pose
       new Pose2D(DistanceUnit.INCH, -13, 24, AngleUnit.DEGREES, 90), // scoring system shooting pose
       new Pose2d(0.0, 0.0, Math.toRadians(0.0)), // auto end position
@@ -36,7 +36,7 @@ public enum AllianceColor {
       20,
       1,
       -150,
-      new Pose2d(-39, -54.6, Math.toRadians(-90)), // starting pose
+      new Pose2d(-41, -54, Math.toRadians(-90)), // starting pose
       new Pose2d(-11.3, -24.7, Math.toRadians(-90)), // roadrunner shooting pose
       new Pose2D(
           DistanceUnit.INCH, -13, -24, AngleUnit.DEGREES, -90), // scoring system shooting pose
