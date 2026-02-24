@@ -25,7 +25,7 @@ public class MainTeleOpRed extends LinearOpMode {
   @Override
   public void runOpMode() {
     TeleOpRobot robot =
-        new TeleOpRobot(hardwareMap, telemetry, AllianceColor.RED, gamepad1, gamepad2,false);
+        new TeleOpRobot(hardwareMap, telemetry, AllianceColor.RED, gamepad1, gamepad2, false);
 
     robot.init();
 

@@ -18,7 +18,6 @@ package org.firstinspires.ftc.teamcode.autos;
 
 import static android.os.SystemClock.sleep;
 
-import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -51,7 +50,6 @@ public class AutoRobot extends CommonRobot {
   }
 
   private AutoPaths autoPaths;
-
 
   private final SearchLimelight limelight;
   protected MecanumDrive drive;
@@ -98,7 +96,6 @@ public class AutoRobot extends CommonRobot {
     backup.start();
     drive.localizer.recalibrate();
 
-
     sleep(2000);
 
     while (drive.localizer.getState() != GoBildaPinpointDriver.DeviceStatus.READY
@@ -109,7 +106,6 @@ public class AutoRobot extends CommonRobot {
     sleep(2000);
 
     scoringSystem.init(true, true);
-
   }
 
   public void initLoop() {

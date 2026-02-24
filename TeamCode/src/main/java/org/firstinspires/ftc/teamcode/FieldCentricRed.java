@@ -22,26 +22,25 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 @TeleOp(name = "Red Field Centric", group = "1A_Drive")
 public class FieldCentricRed extends LinearOpMode {
-    @Override
-    public void runOpMode() {
-        TeleOpRobot robot =
-                new TeleOpRobot(hardwareMap, telemetry, AllianceColor.RED, gamepad1, gamepad2,true);
+  @Override
+  public void runOpMode() {
+    TeleOpRobot robot =
+        new TeleOpRobot(hardwareMap, telemetry, AllianceColor.RED, gamepad1, gamepad2, true);
 
-        robot.init();
+    robot.init();
 
-        while (opModeInInit()) {
-            robot.initLoop();
-        }
-
-        waitForStart();
-
-        robot.start();
-
-        while (opModeIsActive()) {
-            robot.loop();
-        }
-
-        robot.stop();
+    while (opModeInInit()) {
+      robot.initLoop();
     }
-}
 
+    waitForStart();
+
+    robot.start();
+
+    while (opModeIsActive()) {
+      robot.loop();
+    }
+
+    robot.stop();
+  }
+}
