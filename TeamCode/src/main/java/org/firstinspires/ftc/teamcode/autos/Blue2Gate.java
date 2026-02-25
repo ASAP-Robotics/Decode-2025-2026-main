@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.tuning.TuningOpModes;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
-@Autonomous(name = "Blue Auto")
+@Autonomous(name = "Blue Auto 15 2 Gate")
 public class Blue2Gate extends LinearOpMode {
   @Override
   public void runOpMode() throws InterruptedException {
@@ -28,6 +28,8 @@ public class Blue2Gate extends LinearOpMode {
       while (opModeIsActive()) {
         robot.loop();
       }
+
+      robot.stop();
     }
   }
 }

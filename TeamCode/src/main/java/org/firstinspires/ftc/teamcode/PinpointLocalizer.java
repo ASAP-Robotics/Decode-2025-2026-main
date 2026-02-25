@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import java.util.Objects;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
+import org.firstinspires.ftc.teamcode.utils.PositionFileReader;
+import org.firstinspires.ftc.teamcode.utils.PositionFileWriter;
 
 @Config
 public final class PinpointLocalizer implements Localizer {
@@ -26,7 +28,7 @@ public final class PinpointLocalizer implements Localizer {
   private Pose2d txWorldPinpoint;
   private Pose2d txPinpointRobot = new Pose2d(0, 0, 0);
 
-  public PinpointLocalizer(HardwareMap hardwareMap, Pose2d initialPose) {
+  public PinpointLocalizer(HardwareMap hardwareMap, Pose2d initialPose, boolean teleOp) {
     // TODO: make sure your config has a Pinpoint device with this name
     //   see
     // https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
@@ -41,14 +43,23 @@ public final class PinpointLocalizer implements Localizer {
 
     driver.setEncoderDirections(initialParDirection, initialPerpDirection);
 
-    driver.resetPosAndIMU();
+    if (teleOp) {
+      PositionFileReader reader = new PositionFileReader();
+      txWorldPinpoint = reader.getPosition();
+      if (reader.isDefaulted()) driver.resetPosAndIMU();
 
-    txWorldPinpoint = initialPose;
+    } else {
+      driver.resetPosAndIMU();
+
+      txWorldPinpoint = initialPose;
+      new PositionFileWriter().writePosition(txWorldPinpoint); // save offset
+    }
   }
 
   @Override
   public void setPose(Pose2d pose) {
     txWorldPinpoint = pose.times(txPinpointRobot.inverse());
+    new PositionFileWriter().writePosition(txWorldPinpoint); // save offset
   }
 
   @Override

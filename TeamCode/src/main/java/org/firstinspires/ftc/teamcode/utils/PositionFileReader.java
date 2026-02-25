@@ -16,62 +16,64 @@
 
 package org.firstinspires.ftc.teamcode.utils;
 
+import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 import java.io.File;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
-import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.json.JSONObject;
 
-public class BallSequenceFileReader {
-  private static final BallSequence DEFAULT_SEQUENCE = BallSequence.GPP;
-  private BallSequence sequence;
+public class PositionFileReader {
+  private static final Pose2d DEFAULT_POSITION = new Pose2d(0, 0, 0);
+  private Pose2d position;
   private boolean defaulted;
 
-  /** Reads the saved sequence from file */
-  public BallSequenceFileReader() {
+  /** Reads the saved position from file */
+  public PositionFileReader() {
     try {
-      File configFile = AppUtil.getInstance().getSettingsFile("ball_sequence.json");
+      File configFile = AppUtil.getInstance().getSettingsFile("auto_end_position.json");
       String raw = ReadWriteFile.readFile(configFile);
 
       if (raw == null || raw.trim().isEmpty()) {
-        sequence = DEFAULT_SEQUENCE;
+        position = DEFAULT_POSITION;
         defaulted = true;
         return;
       }
 
       JSONObject config = new JSONObject(raw);
 
-      if (!config.has("sequence")) {
-        sequence = DEFAULT_SEQUENCE;
+      if (config.getInt("version") != 1) {
+        position = DEFAULT_POSITION;
         defaulted = true;
         return;
       }
 
-      String seq = config.getString("sequence");
+      double x = config.getDouble("x");
+      double y = config.getDouble("y");
+      double heading = config.getDouble("heading");
 
-      sequence = BallSequence.valueOf(seq);
+      position = new Pose2d(x, y, heading);
       defaulted = false;
 
     } catch (Exception e) {
       // File missing, bad JSON, or invalid enum
-      sequence = DEFAULT_SEQUENCE;
+      position = DEFAULT_POSITION;
       defaulted = true;
     }
   }
 
   /**
-   * Gets the ball sequence
+   * Gets the position
    *
-   * @return the ball sequence
+   * @return the position
    */
-  public BallSequence getSequence() {
-    return sequence;
+  public Pose2d getPosition() {
+    return position;
   }
 
   /**
-   * Gets if the sequence was defaulted
+   * Gets if the position was defaulted
    *
-   * @return true if the sequence couldn't be read and was defaulted, false otherwise
+   * @return true if the position couldn't be read and was defaulted, false otherwise
    */
   public boolean isDefaulted() {
     return defaulted;

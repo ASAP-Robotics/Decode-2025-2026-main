@@ -16,35 +16,38 @@
 
 package org.firstinspires.ftc.teamcode.utils;
 
+import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 import java.io.File;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
-import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.json.JSONObject;
 
-public class BallSequenceFileWriter {
+public class PositionFileWriter {
   private final File configFile;
 
-  public BallSequenceFileWriter() {
-    this.configFile = AppUtil.getInstance().getSettingsFile("ball_sequence.json");
+  public PositionFileWriter() {
+    this.configFile = AppUtil.getInstance().getSettingsFile("auto_end_position.json");
   }
 
   /**
-   * Writes a ball sequence to the config file
+   * Writes a Pose2d to the config file
    *
-   * @param sequence the sequence to record
-   * @return true if the sequence was successfully written to the file, false if file writing failed
+   * @param position the position to save
+   * @return true if saved successfully, false if saving failed
    */
-  public boolean writeSequence(BallSequence sequence) {
-    if (sequence == null) return false;
+  public boolean writePosition(Pose2d position) {
+    if (position == null) return false;
 
     try {
       JSONObject config = new JSONObject();
 
       config.put("version", 1);
-      config.put("sequence", sequence.name());
+      config.put("x", position.position.x);
+      config.put("y", position.position.y);
+      config.put("heading", position.heading.toDouble());
 
       ReadWriteFile.writeFile(configFile, config.toString());
+
       return true;
 
     } catch (Exception e) {
