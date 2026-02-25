@@ -2,14 +2,12 @@ package org.firstinspires.ftc.teamcode.autos;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.tuning.TuningOpModes;
-import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 @Autonomous(name = "Far Blue Auto")
 public class FarBlueAuto extends LinearOpMode {
   @Override
   public void runOpMode() throws InterruptedException {
+    /*
     if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
       // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.BLUE);
       FarSideAutoRobot robot = new FarSideAutoRobot(hardwareMap, telemetry, AllianceColor.BLUE);
@@ -28,5 +26,6 @@ public class FarBlueAuto extends LinearOpMode {
         robot.loop();
       }
     }
+     */
   }
 }

@@ -23,6 +23,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -51,6 +52,8 @@ public class TeleOpRobot extends CommonRobot {
   protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
   protected SimpleTimer odometryResetTimer = new SimpleTimer(2);
   private boolean limelightEnabled = true; // if limelight can reset location
+  private int limelightUpdates = 0; // how many times limelight has reset the robot's location
+  private final ElapsedTime timeSinceLastLimelightUpdate = new ElapsedTime();
   private final boolean fieldCentric;
 
   public TeleOpRobot(
@@ -112,6 +115,7 @@ public class TeleOpRobot extends CommonRobot {
     scoringSystem.start(false); // start scoring systems up
     pinpointErrorTimer.start(); // maybe change
     odometryResetTimer.start();
+    timeSinceLastLimelightUpdate.reset();
   }
 
   /**
@@ -167,6 +171,10 @@ public class TeleOpRobot extends CommonRobot {
     if (updateTelemetry) {
       telemetry.addData("Limelight enabled", limelightEnabled);
       telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
+      telemetry.addData("Limelight updates", limelightUpdates);
+      telemetry.addData("Last Limelight update (s)", timeSinceLastLimelightUpdate.seconds());
+      telemetry.addData("Velocity", velocity);
+      telemetry.addData("Angular velocity", angleVel);
     }
 
     if (limelightEnabled && odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25) {
@@ -178,6 +186,8 @@ public class TeleOpRobot extends CommonRobot {
                 limelightPose.getY(DistanceUnit.INCH),
                 limelightPose.getHeading(AngleUnit.RADIANS)));
         odometryResetTimer.start();
+        limelightUpdates++;
+        timeSinceLastLimelightUpdate.reset();
       }
     }
 
