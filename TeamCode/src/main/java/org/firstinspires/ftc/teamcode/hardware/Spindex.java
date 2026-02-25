@@ -435,8 +435,6 @@ public class Spindex implements System {
 
     currentIndex = getColorIndex(BallColor.EMPTY);
     state = SpindexState.INTAKING; // spindex back to intaking mode
-
-    spinner.home();
   }
 
   /**
