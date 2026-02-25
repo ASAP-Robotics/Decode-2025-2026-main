@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 public class FarBlueAuto extends LinearOpMode {
   @Override
   public void runOpMode() throws InterruptedException {
+    /*
     if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
       // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.BLUE);
       FarSideAutoRobot robot = new FarSideAutoRobot(hardwareMap, telemetry, AllianceColor.BLUE);
@@ -28,5 +29,6 @@ public class FarBlueAuto extends LinearOpMode {
         robot.loop();
       }
     }
+     */
   }
 }

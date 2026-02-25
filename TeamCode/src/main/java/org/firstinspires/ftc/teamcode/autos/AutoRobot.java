@@ -38,8 +38,6 @@ public class AutoRobot extends CommonRobot {
   private int flipy = 1; // flip over the x axis
   protected final Pose2d beginPose;
 
-  protected Pose2d beginPose;
-
   private ParallelAction auto;
 
   public enum paths {
@@ -64,7 +62,6 @@ public class AutoRobot extends CommonRobot {
       flipy = -1;
     }
 
-    beginPose = new Pose2d(0, 0, 0);
     switch (path) {
       case FARSIDE:
         beginPose = new Pose2d(63, -8.6 * flipy, Math.toRadians(-90) * flipy);
@@ -85,6 +82,10 @@ public class AutoRobot extends CommonRobot {
         beginPose = allianceColor.getAutoStartPosition();
         drive = new MecanumDrive(hardwareMap, beginPose);
         auto = autoPaths.getCloseSide15Auto2Gate(scoringSystem, drive, telemetry);
+        break;
+
+      default:
+        beginPose = new Pose2d(0, 0, 0);
         break;
     }
   }
