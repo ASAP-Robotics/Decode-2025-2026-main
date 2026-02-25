@@ -276,10 +276,8 @@ public class TeleOpRobot extends CommonRobot {
                 new Pose2d(
                     location.getX(DistanceUnit.INCH),
                     location.getY(DistanceUnit.INCH),
-                    location.getHeading(AngleUnit.RADIANS)
-                ),
-                false
-            );
+                    location.getHeading(AngleUnit.RADIANS)),
+                false);
       }
 
     } else { // normal
