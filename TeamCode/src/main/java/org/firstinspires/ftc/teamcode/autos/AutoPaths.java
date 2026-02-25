@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.autos;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
@@ -20,7 +18,7 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 public class AutoPaths {
   private int flipy = 1;
-  private AllianceColor allianceColor;
+  private final AllianceColor allianceColor;
 
   AutoPaths(AllianceColor color) {
     allianceColor = color;

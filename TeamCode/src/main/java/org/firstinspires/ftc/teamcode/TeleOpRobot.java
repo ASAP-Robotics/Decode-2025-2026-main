@@ -68,7 +68,7 @@ public class TeleOpRobot extends CommonRobot {
     Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
     this.limelight = new Limelight(rawLimelight, this.allianceColor);
 
-    pinpoint = new PinpointLocalizer(hardwareMap, new PositionFileReader().getPosition());
+    pinpoint = new PinpointLocalizer(hardwareMap, new PositionFileReader().getPosition(), true);
 
     this.gamepad1 = gamepad1;
     this.gamepad2 = gamepad2;
@@ -88,7 +88,6 @@ public class TeleOpRobot extends CommonRobot {
     clearSensorCache();
     SimpleTimer backup = new SimpleTimer(2);
     backup.start();
-    // pinpoint.recalibrate();
     while (pinpoint.getState() != GoBildaPinpointDriver.DeviceStatus.READY
         && !backup.isFinished()) {
       clearSensorCache();
@@ -277,7 +276,10 @@ public class TeleOpRobot extends CommonRobot {
                 new Pose2d(
                     location.getX(DistanceUnit.INCH),
                     location.getY(DistanceUnit.INCH),
-                    location.getHeading(AngleUnit.RADIANS)));
+                    location.getHeading(AngleUnit.RADIANS)
+                ),
+                false
+            );
       }
 
     } else { // normal
