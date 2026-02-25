@@ -70,7 +70,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   // number of teeth on the gear attached to the motor
   private static final double MOTOR_GEAR_TEETH = 24;
   // amount horizontal angle can go over 180 or under -180 degrees before wrapping
-  private static final double HORIZONTAL_HYSTERESIS = 10;
+  private static final double HORIZONTAL_HYSTERESIS = 20;
   private static final double HORIZONTAL_TOLERANCE = 5; // degrees
   protected Follower angleSimulation; // simulation of the horizontal angle of the turret
   protected SystemStatus turretStatus = SystemStatus.NOMINAL;
