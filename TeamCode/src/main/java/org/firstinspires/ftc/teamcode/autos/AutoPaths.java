@@ -313,7 +313,7 @@ public class AutoPaths {
                         new ProfileAccelConstraint(-50, 80))
                     .build(),
                 new shootAction(scoringSystem)),
-            new setAiming(90, -46, 2500, 24, flipy, scoringSystem),
+            new setAiming(90, -44, 2500, 24, flipy, scoringSystem),
             new SequentialAction( // pickup 1 PGP
                 drive
                     .actionBuilder(allianceColor.getAutoRRShootPosition())
@@ -325,11 +325,11 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 200))
                     .splineToLinearHeading(
-                        new Pose2d(14, -59 * flipy, flipy * (Math.toRadians(-90))),
+                        new Pose2d(14, -60 * flipy, flipy * (Math.toRadians(-90))),
                         (Math.PI / -2) * flipy,
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-30, 200))
-                    .waitSeconds(0.25)
+                    .waitSeconds(0.15)
                     // shoot 2
                     .strafeToLinearHeading(
                         new Vector2d(secondShootX, secondShootY * flipy),
@@ -350,18 +350,20 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .splineToLinearHeading(
-                        new Pose2d(13.25, -61 * flipy, flipy * Math.toRadians(-100)),
+                        new Pose2d(13, -58 * flipy, flipy * Math.toRadians(-120)),
                         flipy * Math.PI / -1,
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
-                    .waitSeconds(.5)
+                    .waitSeconds(.75)
                     .strafeToLinearHeading(
-                        new Pose2d(16, -62.5 * flipy, flipy * Math.toRadians(-100)).position,
+                        new Vector2d(13.25, -55 * flipy), flipy * Math.toRadians(-120))
+                    .strafeToLinearHeading(
+                        new Pose2d(16, -62.5 * flipy, flipy * Math.toRadians(-90)).position,
                         flipy * Math.toRadians(-90),
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     // GATE PICKUP
-                    .waitSeconds(1.15)
+                    .waitSeconds(.29)
                     // shoot3
                     .strafeToLinearHeading(
                         new Vector2d(secondShootX, secondShootY * flipy),
@@ -377,23 +379,25 @@ public class AutoPaths {
                         (new Pose2d(
                             secondShootX, secondShootY * flipy, flipy * (Math.toRadians(-90)))))
                     .splineToLinearHeading(
-                        new Pose2d(15, -30 * flipy, flipy * Math.toRadians(-110)),
+                        new Pose2d(15, -30 * flipy, flipy * Math.toRadians(-120)),
                         flipy * Math.PI / -1,
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .splineToLinearHeading(
-                        new Pose2d(13.25, -61 * flipy, flipy * Math.toRadians(-100)),
+                        new Pose2d(13, -58 * flipy, flipy * Math.toRadians(-120)),
                         flipy * Math.PI / -1,
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
-                    .waitSeconds(.5)
+                    .waitSeconds(.75)
                     .strafeToLinearHeading(
-                        new Pose2d(16, -62.5 * flipy, flipy * Math.toRadians(-100)).position,
+                        new Vector2d(13.25, -55 * flipy), flipy * Math.toRadians(-120))
+                    .strafeToLinearHeading(
+                        new Pose2d(16, -62.5 * flipy, flipy * Math.toRadians(-90)).position,
                         flipy * Math.toRadians(-90),
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     // GATE PICKUP
-                    .waitSeconds(1.15)
+                    .waitSeconds(.29)
                     // shoot3
                     .strafeToLinearHeading(
                         new Vector2d(secondShootX, secondShootY * flipy),

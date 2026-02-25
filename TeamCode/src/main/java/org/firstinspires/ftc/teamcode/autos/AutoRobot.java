@@ -36,10 +36,7 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 public class AutoRobot extends CommonRobot {
   // stuff (variables, etc., see TeleOpRobot) goes here;
   private int flipy = 1; // flip over the x axis
-  private double rotate = 0;
-
-  private final double angle = -53;
-  protected Pose2d beginPose;
+  protected final Pose2d beginPose;
 
   private ParallelAction auto;
 
@@ -65,7 +62,6 @@ public class AutoRobot extends CommonRobot {
       flipy = -1;
     }
 
-    beginPose = new Pose2d(0, 0, 0);
     switch (path) {
       case FARSIDE:
         beginPose = new Pose2d(63, -8.6 * flipy, Math.toRadians(-90) * flipy);
@@ -86,6 +82,10 @@ public class AutoRobot extends CommonRobot {
         beginPose = allianceColor.getAutoStartPosition();
         drive = new MecanumDrive(hardwareMap, beginPose);
         auto = autoPaths.getCloseSide15Auto2Gate(scoringSystem, drive, telemetry);
+        break;
+
+      default:
+        beginPose = new Pose2d(0, 0, 0);
         break;
     }
   }
@@ -119,6 +119,10 @@ public class AutoRobot extends CommonRobot {
     new BallSequenceFileWriter().writeSequence(sequence); // save sequence to file
     scoringSystem.start(true); // start scoring systems up
     scoringSystem.setBallSequence(sequence); // set ball sequence
+
+    if (allianceColor == AllianceColor.RED) {
+      flipy = -1;
+    }
 
     Actions.runBlocking(auto);
   }
