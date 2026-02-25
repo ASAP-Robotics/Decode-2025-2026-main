@@ -8,26 +8,26 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 @Autonomous(name = "Red Auto")
 public class Red2Gate extends LinearOpMode {
-    @Override
-    public void runOpMode() throws InterruptedException {
-        if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
-            // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.RED);
-            AutoRobot robot =
-                    new AutoRobot(hardwareMap, telemetry, AllianceColor.RED, AutoRobot.paths.ClOSE15_2GATE);
+  @Override
+  public void runOpMode() throws InterruptedException {
+    if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
+      // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.RED);
+      AutoRobot robot =
+          new AutoRobot(hardwareMap, telemetry, AllianceColor.RED, AutoRobot.paths.ClOSE15_2GATE);
 
-            robot.init();
+      robot.init();
 
-            while (opModeInInit()) {
-                robot.initLoop();
-            }
+      while (opModeInInit()) {
+        robot.initLoop();
+      }
 
-            waitForStart();
+      waitForStart();
 
-            robot.start();
+      robot.start();
 
-            while (opModeIsActive()) {
-                robot.loop();
-            }
-        }
+      while (opModeIsActive()) {
+        robot.loop();
+      }
     }
+  }
 }
