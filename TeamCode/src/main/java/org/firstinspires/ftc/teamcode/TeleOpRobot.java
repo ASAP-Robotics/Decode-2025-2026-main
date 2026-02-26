@@ -220,22 +220,8 @@ public class TeleOpRobot extends CommonRobot {
   private void updateDriverControls() {
     // TODO: re-remap controls
     // temporary
-    // manual set empty
-    if (gamepad1.aWasPressed()) {
-      scoringSystem.setSpindexEmpty();
-    }
 
-    // toggle limelight adjustments
-    if (gamepad1.bWasPressed()) {
-      limelightEnabled = !limelightEnabled;
-    }
-
-    // cancel shot
-    if (gamepad1.xWasPressed()) {
-      scoringSystem.cancelShot();
-    }
-
-    if (gamepad2.left_trigger > TRIGGER_PRESSED_THRESHOLD) { // hyper shift
+    if (gamepad2.left_trigger > TRIGGER_PRESSED_THRESHOLD) { // HYPER SHIFT
       // manual sequence setting
       if (gamepad2.dpadDownWasPressed()) {
         scoringSystem.setBallSequence(BallSequence.PGP);
@@ -280,6 +266,22 @@ public class TeleOpRobot extends CommonRobot {
                 false);
       }
 
+    } else if (gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD) { // HYPER ALT
+      // manual set empty
+      if (gamepad2.aWasPressed()) {
+        scoringSystem.setSpindexEmpty();
+      }
+
+      // toggle limelight adjustments
+      if (gamepad2.bWasPressed()) {
+        limelightEnabled = !limelightEnabled;
+      }
+
+      // cancel shot
+      if (gamepad2.xWasPressed()) {
+        scoringSystem.cancelShot();
+      }
+
     } else { // normal
       // unjam spindexer
       if (gamepad2.bWasPressed()) {
@@ -311,10 +313,8 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // shoot
-
-    if (gamepad1.right_trigger > TRIGGER_PRESSED_THRESHOLD || gamepad1.rightBumperWasPressed()) {
-      scoringSystem.shoot();
-    } else if (gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD
+    if (gamepad1.right_trigger > TRIGGER_PRESSED_THRESHOLD
+        || gamepad1.rightBumperWasPressed()
         || gamepad2.rightBumperWasPressed()) {
       scoringSystem.shoot();
     }
