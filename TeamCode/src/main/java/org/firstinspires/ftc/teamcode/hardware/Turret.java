@@ -23,6 +23,7 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
+import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.SystemReport;
 import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.Follower;
@@ -83,6 +84,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private final Axon hoodServo;
   private double targetHorizontalAngleDegrees = 0;
   private double horizontalAngleOffsetDegrees = -2;
+  private double horizontalAngleOffsetDegreesConstant = 2;
   // target angle for servo moving flap
   private double targetVerticalAngleDegrees = 50;
   private double testingVerticalAngleDegrees = 50;
@@ -92,11 +94,11 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private boolean overrideVerticalAngle = false;
 
   public Turret(
-      DcMotorEx flywheelMotor,
-      Motor rotator,
-      ElcAbsEncoderAnalog encoder,
-      Axon hoodServo,
-      double idleSpeed) {
+          DcMotorEx flywheelMotor,
+          Motor rotator,
+          ElcAbsEncoderAnalog encoder,
+          Axon hoodServo,
+          double idleSpeed) {
     super(flywheelMotor, idleSpeed);
     this.rotator = rotator;
     this.encoder = encoder;
@@ -105,6 +107,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.rotator.setRunMode(Motor.RunMode.RawPower);
     this.rotator.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
     this.rotatorController = new PIDController(0.015, 0.02, 0.0007);
+
     rotatorController.setTolerance(turretDegreesToMotorDegrees(2));
     this.encoder.setInverted(true);
     angleSimulation = new Follower(0, 0, 1, 60); // tune 60
@@ -376,7 +379,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   /** Calculates the angle offset for the turret */
   private void calculateTurretOffset() {
     horizontalAngleOffsetDegrees =
-        motorDegreesToTurretDegrees(encoder.getAngleNormalized() + getRotatorDegrees()) + 2;
+        motorDegreesToTurretDegrees(encoder.getAngleNormalized() + getRotatorDegrees()) + horizontalAngleOffsetDegreesConstant;
   }
 
   /**
