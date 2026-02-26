@@ -184,6 +184,7 @@ public class HomableRotator implements System {
     if (Double.isNaN(degrees) || Double.isInfinite(degrees)) return;
     targetAngle = degrees;
     motorController.setSetPoint(degrees);
+    motorSimulation.setValue(getCurrentAngle());
     motorSimulation.setTarget(degrees);
   }
 

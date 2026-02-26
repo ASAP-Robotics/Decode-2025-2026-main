@@ -194,7 +194,10 @@ public class ScoringSystem {
       turret.setHorizontalAngle(horizontalAngleOverride);
 
     } else {
-      turret.setHorizontalAngle(getRelativeTargetAngle());
+      turret.setHorizontalAngle(
+          getRelativeTargetAngle(),
+          spindex.getState() == Spindex.SpindexState.SHOOTING
+      );
     }
 
     if (turretDistanceOverride) {
@@ -605,16 +608,15 @@ public class ScoringSystem {
     double dx = targetPosition.getX(DistanceUnit.INCH) - virtualX;
     double dy = targetPosition.getY(DistanceUnit.INCH) - virtualY;
 
-    Pose2D virtual =
+    // store aimRad in the pose heading (since that's what you want)
+    return
         new Pose2D(
             DistanceUnit.INCH,
             virtualX,
             virtualY,
             AngleUnit.DEGREES,
-            robotPose.getHeading(AngleUnit.DEGREES));
-
-    // store aimRad in the pose heading (since that's what you want)
-    return virtual;
+            robotPose.getHeading(AngleUnit.DEGREES)
+        );
   }
 
   /**
