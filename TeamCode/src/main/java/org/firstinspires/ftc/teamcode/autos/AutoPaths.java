@@ -299,7 +299,7 @@ public class AutoPaths {
         new SequentialAction( // BIG BOI
             new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
             // new ObeliskSearch(limelight, telemetry),
-            new setAiming(90, -52, 2400, 24, flipy, scoringSystem),
+            new setAiming(90, -51, 2400, 24, flipy, scoringSystem),
             new SequentialAction( // shoot 1
                 drive
                     .actionBuilder(allianceColor.getAutoStartPosition())
@@ -311,7 +311,7 @@ public class AutoPaths {
                         new ProfileAccelConstraint(-50, 80))
                     .build(),
                 new shootAction(scoringSystem)),
-            new setAiming(90, -44, 2500, 24, flipy, scoringSystem),
+            new setAiming(90, -43, 2500, 26, flipy, scoringSystem),
             new SequentialAction( // pickup 1 PGP
                 drive
                     .actionBuilder(allianceColor.getAutoRRShootPosition())
@@ -323,7 +323,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 200))
                     .splineToLinearHeading(
-                        new Pose2d(14, -60 * flipy, flipy * (Math.toRadians(-90))),
+                        new Pose2d(14.25, -60 * flipy, flipy * (Math.toRadians(-90))),
                         (Math.PI / -2) * flipy,
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-30, 200))
@@ -348,11 +348,11 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .splineToLinearHeading(
-                        new Pose2d(13, -58 * flipy, flipy * Math.toRadians(-120)),
+                        new Pose2d(13, -59.5 * flipy, flipy * Math.toRadians(-120)),
                         flipy * Math.PI / -1,
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
-                    .waitSeconds(.75)
+                    .waitSeconds(.65)
                     .strafeToLinearHeading(
                         new Vector2d(13.25, -55 * flipy), flipy * Math.toRadians(-120))
                     .strafeToLinearHeading(
@@ -361,7 +361,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     // GATE PICKUP
-                    .waitSeconds(.29)
+                    .waitSeconds(.19)
                     // shoot3
                     .strafeToLinearHeading(
                         new Vector2d(secondShootX, secondShootY * flipy),
@@ -382,11 +382,11 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .splineToLinearHeading(
-                        new Pose2d(13, -58 * flipy, flipy * Math.toRadians(-120)),
+                        new Pose2d(13, -59.5 * flipy, flipy * Math.toRadians(-120)),
                         flipy * Math.PI / -1,
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
-                    .waitSeconds(.75)
+                    .waitSeconds(.65)
                     .strafeToLinearHeading(
                         new Vector2d(13.25, -55 * flipy), flipy * Math.toRadians(-120))
                     .strafeToLinearHeading(
@@ -395,7 +395,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     // GATE PICKUP
-                    .waitSeconds(.29)
+                    .waitSeconds(.19)
                     // shoot3
                     .strafeToLinearHeading(
                         new Vector2d(secondShootX, secondShootY * flipy),
@@ -404,7 +404,7 @@ public class AutoPaths {
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
                 new shootAction(scoringSystem),
-                new setAiming(70, -28, 2500, 29, flipy, scoringSystem)),
+                new setAiming(70, -25, 2450, 27, flipy, scoringSystem)),
             new SequentialAction( // pickup close
                 drive
                     .actionBuilder(
@@ -427,7 +427,7 @@ public class AutoPaths {
                             .position,
                         flipy * (Math.toRadians(-90)),
                         new TranslationalVelConstraint(300.0),
-                        new ProfileAccelConstraint(-50, 240 + 10))
+                        new ProfileAccelConstraint(-50, 200))
                     .build(),
                 new shootAction(scoringSystem)),
             new AutoEndShutdowAction(scoringSystem)));
