@@ -306,7 +306,7 @@ public class AutoPaths {
             new SequentialAction( // BIG BOI
                     new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
                     //new ObeliskSearch(limelight, telemetry),
-                    new setAiming(90, -50.5+angleOffset,2400, 24, flipy,  scoringSystem),
+                    new setAiming(90, -50.5,2400, 24, flipy,  scoringSystem),
                     new SequentialAction( // shoot 1
                             drive
                                     .actionBuilder(allianceColor.getAutoStartPosition())
