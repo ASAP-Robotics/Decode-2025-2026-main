@@ -72,7 +72,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   // amount horizontal angle can go over 180 or under -180 degrees before wrapping
   private static final double HORIZONTAL_HYSTERESIS = 20;
   private static final double HORIZONTAL_TOLERANCE = 5; // degrees
-  private static final double SHOOTING_CHANGE_THRESHOLD = 30; // amount turret angle can change while shooting
+  private static final double SHOOTING_CHANGE_THRESHOLD =
+      30; // amount turret angle can change while shooting
   protected Follower angleSimulation; // simulation of the horizontal angle of the turret
   protected SystemStatus turretStatus = SystemStatus.NOMINAL;
   private final ElcAbsEncoderAnalog encoder;
@@ -329,8 +330,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
     if (degrees > max || degrees < min) {
       // angle is wrapped to ensure the turret never turns more than ~one full rotation
-      target =
-          MathUtils.normalizeAround(degrees, HORIZONTAL_WRAP_CENTER_DEGREES);
+      target = MathUtils.normalizeAround(degrees, HORIZONTAL_WRAP_CENTER_DEGREES);
 
     } else {
       target = degrees;
