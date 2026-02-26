@@ -72,6 +72,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   // amount horizontal angle can go over 180 or under -180 degrees before wrapping
   private static final double HORIZONTAL_HYSTERESIS = 20;
   private static final double HORIZONTAL_TOLERANCE = 5; // degrees
+  private static final double SHOOTING_CHANGE_THRESHOLD =
+      30; // amount turret angle can change while shooting
   protected Follower angleSimulation; // simulation of the horizontal angle of the turret
   protected SystemStatus turretStatus = SystemStatus.NOMINAL;
   private final ElcAbsEncoderAnalog encoder;
@@ -315,25 +317,43 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
   /**
    * @param degrees the number of degrees from straight to move the turret
+   * @param shooting if the robot is shooting. If true, turret angle won't wrap around
    * @brief sets the side-to-side angle of the turret in degrees
    * @note the new value isn't applied until update() is called
    */
-  public void setHorizontalAngle(double degrees) {
+  public void setHorizontalAngle(double degrees, boolean shooting) {
     if (Double.isNaN(degrees)) return;
 
     double min = HORIZONTAL_WRAP_CENTER_DEGREES - 180 - HORIZONTAL_HYSTERESIS;
     double max = HORIZONTAL_WRAP_CENTER_DEGREES + 180 + HORIZONTAL_HYSTERESIS;
+    double target;
 
     if (degrees > max || degrees < min) {
       // angle is wrapped to ensure the turret never turns more than ~one full rotation
-      targetHorizontalAngleDegrees =
-          MathUtils.normalizeAround(degrees, HORIZONTAL_WRAP_CENTER_DEGREES);
+      target = MathUtils.normalizeAround(degrees, HORIZONTAL_WRAP_CENTER_DEGREES);
 
     } else {
-      targetHorizontalAngleDegrees = degrees;
+      target = degrees;
+    }
+
+    if (shooting) {
+      if (Math.abs(target - targetHorizontalAngleDegrees) <= SHOOTING_CHANGE_THRESHOLD)
+        targetHorizontalAngleDegrees = target;
+
+    } else {
+      targetHorizontalAngleDegrees = target;
     }
 
     angleSimulation.setTarget(targetHorizontalAngleDegrees);
+  }
+
+  /**
+   * @param degrees the number of degrees from straight to move the turret
+   * @brief sets the side-to-side angle of the turret in degrees
+   * @note the new value isn't applied until update() is called
+   */
+  public void setHorizontalAngle(double degrees) {
+    setHorizontalAngle(degrees, false);
   }
 
   /**
@@ -409,7 +429,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public boolean isAtTarget() {
     double angle = getHorizontalAngleDegrees();
     double target = getTargetHorizontalAngleDegrees();
-    return angle - 5 < target && angle + 5 > target;
+    return Math.abs(target - angle) <= HORIZONTAL_TOLERANCE;
   }
 
   /**

@@ -72,7 +72,7 @@ public class Spindex implements System {
   private static final double INTAKE_FLAP_CLOSED = 325;
   private static final double INTAKE_FLAP_OPEN = 240;
   private static final double INTAKE_DELAY_SECONDS = 0.01;
-  private static final double SHOOT_DELAY_SECONDS = 0.2; // todo tune
+  private static final double SHOOT_DELAY_SECONDS = 0.2;
   private static final double ANGLE_COMPARISON_THRESHOLD =
       0.1; // diff between to angle to be the same
 
@@ -84,9 +84,9 @@ public class Spindex implements System {
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // code assumptions: increasing angle shoots
-    new SpindexSlot(-103, 230), // slot 0
-    new SpindexSlot(17, -10), // slot 1
-    new SpindexSlot(137, 110) // slot 2
+    new SpindexSlot(-98, 230), // slot 0
+    new SpindexSlot(22, -10), // slot 1
+    new SpindexSlot(142, 110) // slot 2
   };
 
   private final SimpleTimer intakeDelay =
