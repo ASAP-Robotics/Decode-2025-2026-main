@@ -57,7 +57,7 @@ public class ColorSensorV3 implements System {
   protected ElapsedTime timeSinceStart = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   protected LinkedList<Reading> readings = new LinkedList<>();
   protected static final double DISCONNECT_TIME = 1.0; // seconds
-  protected static final double BALL_DISTANCE_THRESHOLD = 10.0; // inches
+  public static double BALL_DISTANCE_THRESHOLD = 2.7; // inches
 
   //FtcDashboard dashboard = FtcDashboard.getInstance();
   //Telemetry telemetry = dashboard.getTelemetry();
@@ -74,9 +74,9 @@ public class ColorSensorV3 implements System {
   /** Updates the color sensor readings, call every loop */
   public void update() {
     double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-    // telemetry.addData("Dist", distance);
+    //telemetry.addData("Dist", distance);
 
-    if (/*distance <= BALL_DISTANCE_THRESHOLD*/ true) {
+    if (distance <= BALL_DISTANCE_THRESHOLD) {
       float[] hsv = new float[3];
       Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsv);
       float h = hsv[0];
@@ -85,7 +85,6 @@ public class ColorSensorV3 implements System {
       //telemetry.addData("Hue", h);
       //telemetry.addData("Sat", s);
       //telemetry.addData("Val", v);
-      //telemetry.update();
 
       if (Math.abs(h - green) <= greenTolerance && s >= greenHueMin) { // green
         color = BallColor.GREEN; // intake has a green ball in it
@@ -100,6 +99,8 @@ public class ColorSensorV3 implements System {
     } else {
       color = BallColor.EMPTY;
     }
+
+    //telemetry.update();
 
     double now = timeSinceStart.seconds();
     readings.add(new Reading(now, distance));
