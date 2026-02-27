@@ -291,12 +291,7 @@ public class ScoringSystem {
         break;
 
       case FULL:
-        if (isReadyToShoot()) {
-          setIndicatorColor(RGBIndicator.Color.GREEN);
-
-        } else {
-          setIndicatorColor(RGBIndicator.Color.BLUE);
-        }
+        setIndicatorColor(RGBIndicator.Color.GREEN);
         break;
 
       case INTAKING:
@@ -305,14 +300,9 @@ public class ScoringSystem {
         for (BallColor ball : spindex.getSpindexContents()) {
           if (ball.isShootable()) numBalls++;
         }
-        switch (numBalls) {
-          case 1:
-            color = RGBIndicator.Color.ORANGE;
-            break;
 
-          case 2:
-            color = RGBIndicator.Color.YELLOW;
-            break;
+        if (numBalls != 0) {
+          color = RGBIndicator.Color.ORANGE;
         }
 
         setIndicatorColor(color);
@@ -343,7 +333,7 @@ public class ScoringSystem {
     boolean readyToShoot = isReadyToShoot();
     telemetry.addData("Ready to shoot", readyToShoot);
 
-    if (!readyToShoot) {
+    if (!readyToShoot && (state == State.FULL || state == State.SHOOTING)) {
       telemetry.addData("Turret ready to shoot", turret.isReadyToShoot());
       telemetry.addData("Spindex ready to shoot", spindex.isReadyToShoot());
     }
@@ -363,10 +353,10 @@ public class ScoringSystem {
 
     telemetry.addData("Color sensor enabled", spindex.isColorSensorEnabled());
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
-    telemetry.addData("Target distance", turret.getTargetDistance());
+    //telemetry.addData("Target distance", turret.getTargetDistance());
     telemetry.addData("Spindex state", spindex.getState());
-    telemetry.addData("Loop time (ms)", avLoopTime);
-    telemetry.addData("Loop time jitter (ms)", maxLoopTime - minLoopTime);
+    //telemetry.addData("Loop time (ms)", avLoopTime);
+    //telemetry.addData("Loop time jitter (ms)", maxLoopTime - minLoopTime);
   }
 
   /**

@@ -53,7 +53,7 @@ public class TeleOpRobot extends CommonRobot {
   protected SimpleTimer telemetryTimer = new SimpleTimer(0.67);
   protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
   protected SimpleTimer odometryResetTimer = new SimpleTimer(2);
-  private boolean limelightEnabled = true; // if limelight can reset location
+  private boolean limelightEnabled = false; // if limelight can reset location
   private int limelightUpdates = 0; // how many times limelight has reset the robot's location
   private final ElapsedTime timeSinceLastLimelightUpdate = new ElapsedTime();
   private final boolean fieldCentric;
@@ -160,22 +160,14 @@ public class TeleOpRobot extends CommonRobot {
             velocityPose.linearVel.x,
             velocityPose.linearVel.y);
     scoringSystem.setRobotPosition(virtual);
-    // telemetry.addLine("virtual x : " + Math.round(virtual.getX(DistanceUnit.INCH)) + " || real x
-    // : " + Math.round(location.position.x));
-    // telemetry.addLine("virtual y : " + Math.round(virtual.getY(DistanceUnit.INCH)) + " || real y
-    // : " + Math.round(location.position.y));
 
     updateDriverControls();
 
     scoringSystem.update(updateTelemetry);
 
     if (updateTelemetry) {
-      telemetry.addData("Limelight enabled", limelightEnabled);
       telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
-      telemetry.addData("Limelight updates", limelightUpdates);
-      telemetry.addData("Last Limelight update (s)", timeSinceLastLimelightUpdate.seconds());
-      telemetry.addData("Velocity", velocity);
-      telemetry.addData("Angular velocity", angleVel);
+      telemetry.addData("Limelight enabled", limelightEnabled);
     }
 
     if (limelightEnabled && odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25) {
@@ -219,9 +211,6 @@ public class TeleOpRobot extends CommonRobot {
 
   /** Handles backup driver inputs */
   private void updateDriverControls() {
-    // TODO: re-remap controls
-    // temporary
-
     if (gamepad2.left_trigger > TRIGGER_PRESSED_THRESHOLD) { // HYPER SHIFT
       // manual sequence setting
       if (gamepad2.dpadDownWasPressed()) {
