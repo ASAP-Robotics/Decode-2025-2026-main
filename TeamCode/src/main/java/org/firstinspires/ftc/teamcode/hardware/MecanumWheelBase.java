@@ -274,7 +274,7 @@ public class MecanumWheelBase {
    * @note this override uses robot-centric control. Call update(true) for field-centric control
    */
   public void update() {
-    update(fieldCentric);
+    update(fieldCentric, false);
   }
 
   /**
@@ -282,7 +282,7 @@ public class MecanumWheelBase {
    *
    * @param fieldCentric driving will be field-centric if true, robot-centric if false
    */
-  public void update(boolean fieldCentric) {
+  public void update(boolean fieldCentric, boolean slow) {
     double timeSinceLastUpdate = lastUpdateTimer.seconds(); // get time since last update
     lastUpdateTimer.reset(); // reset time since last update
     double maxIncrease = timeSinceLastUpdate / minAccelerationTime; // find max throttle increase
@@ -317,6 +317,13 @@ public class MecanumWheelBase {
     fr /= maxTargetSpeed;
     bl /= maxTargetSpeed;
     br /= maxTargetSpeed;
+
+    if (slow) { // decrease motor power if slow
+      fl /= 2;
+      fr /= 2;
+      bl /= 2;
+      br /= 2;
+    }
 
     // set motor target powers
     if (Math.abs(fl - powerFL) > POWER_TOLERANCE) {

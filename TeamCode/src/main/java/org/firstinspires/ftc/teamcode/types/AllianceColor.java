@@ -29,7 +29,6 @@ public enum AllianceColor {
       new Pose2d(-41, 54, Math.toRadians(90)), // starting pose
       new Pose2d(-11.3, 24.7, Math.toRadians(90)), // roadrunner shooting pose
       new Pose2D(DistanceUnit.INCH, -13, 24, AngleUnit.DEGREES, 90), // scoring system shooting pose
-      new Pose2d(0, 0, Math.toRadians(0)), // auto end position (will be discontinued)
       new Pose2D(DistanceUnit.INCH, -63, 60, AngleUnit.DEGREES, 0), // target location
       new Pose2D(DistanceUnit.INCH, 63, -63, AngleUnit.DEGREES, 0)), // reset location
   BLUE(
@@ -40,7 +39,6 @@ public enum AllianceColor {
       new Pose2d(-11.3, -24.7, Math.toRadians(-90)), // roadrunner shooting pose
       new Pose2D(
           DistanceUnit.INCH, -13, -24, AngleUnit.DEGREES, -90), // scoring system shooting pose
-      new Pose2d(0, 0, Math.toRadians(0)), // auto end position (will be discontinued)
       new Pose2D(DistanceUnit.INCH, -63, -60, AngleUnit.DEGREES, 0), // target location
       new Pose2D(DistanceUnit.INCH, 63, 63, AngleUnit.DEGREES, 0)); // reset location
 
@@ -52,7 +50,6 @@ public enum AllianceColor {
   private final Pose2d autoStartPosition;
   private final Pose2d autoRRShootPosition;
   private final Pose2D autoSSShootPosition;
-  private final Pose2d autoEndPosition;
 
   AllianceColor(
       int aprilTagId,
@@ -61,7 +58,6 @@ public enum AllianceColor {
       Pose2d autoStartPosition,
       Pose2d autoRRShootPosition,
       Pose2D autoSSShootPosition,
-      Pose2d autoEndPosition,
       Pose2D targetLocation,
       Pose2D resetLocation) {
     this.aprilTagId = aprilTagId;
@@ -70,7 +66,6 @@ public enum AllianceColor {
     this.autoStartPosition = autoStartPosition;
     this.autoRRShootPosition = autoRRShootPosition;
     this.autoSSShootPosition = autoSSShootPosition;
-    this.autoEndPosition = autoEndPosition;
     this.targetLocation = targetLocation;
     this.resetLocation = resetLocation;
   }
@@ -137,13 +132,5 @@ public enum AllianceColor {
    */
   public Pose2D getAutoSSShootPosition() {
     return autoSSShootPosition;
-  }
-
-  /**
-   * @brief gets the position of the robot at the end of auto (to use at the start of teleOp
-   * @return the position the robot finishes auto at
-   */
-  public Pose2d getAutoEndPosition() {
-    return autoEndPosition;
   }
 }
