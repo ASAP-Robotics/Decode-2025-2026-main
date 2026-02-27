@@ -44,17 +44,19 @@ public class ColorSensorV3 implements System {
   protected SystemStatus status = SystemStatus.NOMINAL;
   protected final ColorSensor colorSensor;
   protected final DistanceSensor distanceSensor;
-  public static double purple = 225.0;
-  public static double purpleTolerance = 10;
+  public static double purple = 200.0;
+  public static double purpleTolerance = 24;
   public static double green = 157.0;
-  public static double greenTolerance = 10;
-  public static double greenHueMin = 0.7;
+  public static double greenTolerance = 20;
+  public static double greenHueMin = 0.6;
   protected BallColor color = BallColor.INVALID;
   protected ElapsedTime timeSinceStart = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   protected LinkedList<Reading> readings = new LinkedList<>();
   protected static final double DISCONNECT_TIME = 1.0; // seconds
-  protected static final double BALL_DISTANCE_THRESHOLD = 2.5; // inches
+  public static double BALL_DISTANCE_THRESHOLD = 2.7; // inches
 
+  // FtcDashboard dashboard = FtcDashboard.getInstance();
+  // Telemetry telemetry = dashboard.getTelemetry();
   // private final Telemetry telemetry;
 
   public ColorSensorV3(HardwareMap hardwareMap, String deviceName /*, Telemetry telemetry*/) {
@@ -93,6 +95,8 @@ public class ColorSensorV3 implements System {
     } else {
       color = BallColor.EMPTY;
     }
+
+    // telemetry.update();
 
     double now = timeSinceStart.seconds();
     readings.add(new Reading(now, distance));
