@@ -55,7 +55,7 @@ public class RGBIndicator {
 
   public void update() {
     if (atColor) return;
-    double value = follower.getValue();
+    double value = /*follower.getValue()*/ follower.getTarget();
 
     if (Math.abs(value - lastSetValue) > UPDATE_TOLERANCE) {
       led.setPosition(value);
