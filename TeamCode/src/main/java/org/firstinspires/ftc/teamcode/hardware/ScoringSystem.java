@@ -353,10 +353,10 @@ public class ScoringSystem {
 
     telemetry.addData("Color sensor enabled", spindex.isColorSensorEnabled());
     telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
-    //telemetry.addData("Target distance", turret.getTargetDistance());
+    // telemetry.addData("Target distance", turret.getTargetDistance());
     telemetry.addData("Spindex state", spindex.getState());
-    //telemetry.addData("Loop time (ms)", avLoopTime);
-    //telemetry.addData("Loop time jitter (ms)", maxLoopTime - minLoopTime);
+    // telemetry.addData("Loop time (ms)", avLoopTime);
+    // telemetry.addData("Loop time jitter (ms)", maxLoopTime - minLoopTime);
   }
 
   /**
