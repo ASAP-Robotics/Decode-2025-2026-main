@@ -33,6 +33,7 @@ import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
+import org.firstinspires.ftc.teamcode.utils.BallSequenceFileReader;
 import org.firstinspires.ftc.teamcode.utils.PositionFileReader;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
@@ -196,12 +197,12 @@ public class TeleOpRobot extends CommonRobot {
       wheelBase.setRotation(
           AngleUnit.DEGREES.fromRadians(location.heading.toDouble())); // for field-centric control
       wheelBase.setThrottle(gamepad1.right_stick_x, gamepad1.right_stick_y, gamepad1.left_stick_x);
-      wheelBase.update();
+      wheelBase.update(false, gamepad1.left_trigger >= TRIGGER_PRESSED_THRESHOLD);
     } else {
       wheelBase.setRotation(
           AngleUnit.DEGREES.fromRadians(location.heading.toDouble())); // for field-centric control
       wheelBase.setThrottle(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
-      wheelBase.update(true);
+      wheelBase.update(true, gamepad1.left_trigger >= TRIGGER_PRESSED_THRESHOLD);
     }
 
     // update telemetry
@@ -231,11 +232,14 @@ public class TeleOpRobot extends CommonRobot {
 
       } else if (gamepad2.dpadRightWasPressed()) {
         scoringSystem.setBallSequence(BallSequence.PPG);
+
+      } else if (gamepad2.dpadUpWasPressed()) {
+        scoringSystem.setBallSequence(new BallSequenceFileReader().getSequence());
       }
 
-      // turret rehome !*!*!*! use with caution !*!*!*!
+      // shoot
       if (gamepad2.yWasPressed()) {
-        scoringSystem.reSyncTurretEncoder();
+        scoringSystem.shoot();
       }
 
       // home spindexer
@@ -277,9 +281,9 @@ public class TeleOpRobot extends CommonRobot {
         limelightEnabled = !limelightEnabled;
       }
 
-      // cancel shot
-      if (gamepad2.xWasPressed()) {
-        scoringSystem.cancelShot();
+      // turret rehome !*!*!*! use with caution !*!*!*!
+      if (gamepad2.yWasPressed()) {
+        scoringSystem.reSyncTurretEncoder();
       }
 
     } else { // normal
@@ -313,10 +317,13 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // shoot
-    if (gamepad1.right_trigger > TRIGGER_PRESSED_THRESHOLD
-        || gamepad1.rightBumperWasPressed()
-        || gamepad2.rightBumperWasPressed()) {
+    if (gamepad1.right_trigger > TRIGGER_PRESSED_THRESHOLD || gamepad1.rightBumperWasPressed()) {
       scoringSystem.shoot();
+    }
+
+    // cancel shot
+    if (gamepad2.rightBumperWasPressed()) {
+      scoringSystem.cancelShot();
     }
 
     // eject intake, unjam spindexer
