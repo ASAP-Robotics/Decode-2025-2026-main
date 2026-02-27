@@ -304,9 +304,9 @@ public class TeleOpRobot extends CommonRobot {
       } else if (gamepad2.dpadRightWasPressed()) {
         scoringSystem.adjustTurretAngleOffset(-1);
       } else if (gamepad2.dpadDownWasPressed()) {
-        scoringSystem.adjustTurretAngleOffset(5);
-      } else if (gamepad2.dpadUpWasPressed()) {
         scoringSystem.adjustTurretAngleOffset(-5);
+      } else if (gamepad2.dpadUpWasPressed()) {
+        scoringSystem.adjustTurretAngleOffset(5);
       }
     }
 

@@ -45,6 +45,7 @@ public class AutoRobot extends CommonRobot {
     CLOSE15,
     CLOSE12,
     ClOSE15_2GATE,
+    CLOSE15_3GATE
   }
 
   private AutoPaths autoPaths;
@@ -83,7 +84,11 @@ public class AutoRobot extends CommonRobot {
         drive = new MecanumDrive(hardwareMap, beginPose);
         auto = autoPaths.getCloseSide15Auto2Gate(scoringSystem, drive, telemetry);
         break;
-
+      case CLOSE15_3GATE:
+        beginPose = allianceColor.getAutoStartPosition();
+        drive = new MecanumDrive(hardwareMap, beginPose);
+        auto = autoPaths.getCloseSide15Auto2GatePickupWith3GateHit(scoringSystem, drive, telemetry);
+        break;
       default:
         beginPose = new Pose2d(0, 0, 0);
         break;
