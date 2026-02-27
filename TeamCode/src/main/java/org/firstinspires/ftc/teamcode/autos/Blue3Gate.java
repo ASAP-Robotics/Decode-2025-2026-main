@@ -8,28 +8,28 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 @Autonomous(name = "Blue Auto 15 3 Gate")
 public class Blue3Gate extends LinearOpMode {
-    @Override
-    public void runOpMode() throws InterruptedException {
-        if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
-            // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.BLUE);
-            AutoRobot robot =
-                    new AutoRobot(hardwareMap, telemetry, AllianceColor.BLUE, AutoRobot.paths.CLOSE15_3GATE);
+  @Override
+  public void runOpMode() throws InterruptedException {
+    if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
+      // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.BLUE);
+      AutoRobot robot =
+          new AutoRobot(hardwareMap, telemetry, AllianceColor.BLUE, AutoRobot.paths.CLOSE15_3GATE);
 
-            robot.init();
+      robot.init();
 
-            while (opModeInInit()) {
-                robot.initLoop();
-            }
+      while (opModeInInit()) {
+        robot.initLoop();
+      }
 
-            waitForStart();
+      waitForStart();
 
-            robot.start();
+      robot.start();
 
-            while (opModeIsActive()) {
-                robot.loop();
-            }
+      while (opModeIsActive()) {
+        robot.loop();
+      }
 
-            robot.stop();
-        }
+      robot.stop();
     }
+  }
 }

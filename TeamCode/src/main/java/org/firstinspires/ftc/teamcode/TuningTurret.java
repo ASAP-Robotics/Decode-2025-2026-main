@@ -28,7 +28,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Turret;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
 import org.firstinspires.ftc.teamcode.hardware.servos.Axon;
-import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 @TeleOp(name = "Tuning turret", group = "Tuning")
 @Config
