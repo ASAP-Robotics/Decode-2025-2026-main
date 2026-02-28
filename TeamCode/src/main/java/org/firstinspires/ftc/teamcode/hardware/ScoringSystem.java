@@ -112,6 +112,7 @@ public class ScoringSystem {
     if (auto) {
       turret.init(allianceColor.getObeliskOffset());
     } else {
+      turret.setHoodEnabled(false);
       turret.init(0);
     }
     turret.setActive(!isPreloaded);

@@ -91,6 +91,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private double currentRotatorPower = 0;
   private boolean rotationEnabled = true; // if turret can move side to side
   private boolean overrideVerticalAngle = false;
+  private boolean hoodEnabled = true;
 
   public Turret(
       DcMotorEx flywheelMotor,
@@ -240,6 +241,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
       calculateTurretOffset();
     }
     rotationEnabled = true;
+    hoodEnabled = true;
   }
 
   /**
@@ -252,7 +254,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
     double targetServoDegrees =
         overrideVerticalAngle ? testingVerticalAngleDegrees : targetVerticalAngleDegrees;
-    if (Math.abs(targetServoDegrees - lastSetVerticalAngleDegrees) > SERVO_UPDATE_TOLERANCE) {
+    if (Math.abs(targetServoDegrees - lastSetVerticalAngleDegrees) > SERVO_UPDATE_TOLERANCE && hoodEnabled) {
       hoodServo.setPosition(targetServoDegrees);
       lastSetVerticalAngleDegrees = targetServoDegrees;
     }
@@ -302,6 +304,14 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public void overrideVerticalAngle(double angleDegrees) {
     overrideVerticalAngle = true;
     testingVerticalAngleDegrees = angleDegrees;
+  }
+
+  /**
+   * Sets if the hood servo can move
+   * @param hoodEnabled if true, hood can move. If false, hood can't move
+   */
+  public void setHoodEnabled(boolean hoodEnabled) {
+    this.hoodEnabled = hoodEnabled;
   }
 
   /**

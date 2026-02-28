@@ -17,12 +17,16 @@
 package org.firstinspires.ftc.teamcode.hardware.sensors;
 
 import android.graphics.Color;
+
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.LinkedList;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
@@ -55,8 +59,8 @@ public class ColorSensorV3 implements System {
   protected static final double DISCONNECT_TIME = 1.0; // seconds
   public static double BALL_DISTANCE_THRESHOLD = 2.7; // inches
 
-  // FtcDashboard dashboard = FtcDashboard.getInstance();
-  // Telemetry telemetry = dashboard.getTelemetry();
+  //FtcDashboard dashboard = FtcDashboard.getInstance();
+  //Telemetry telemetry = dashboard.getTelemetry();
   // private final Telemetry telemetry;
 
   public ColorSensorV3(HardwareMap hardwareMap, String deviceName /*, Telemetry telemetry*/) {
@@ -70,7 +74,7 @@ public class ColorSensorV3 implements System {
   /** Updates the color sensor readings, call every loop */
   public void update() {
     double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-    // telemetry.addData("Dist", distance);
+    //telemetry.addData("Dist", distance);
 
     if (distance <= BALL_DISTANCE_THRESHOLD) {
       float[] hsv = new float[3];
@@ -78,9 +82,9 @@ public class ColorSensorV3 implements System {
       float h = hsv[0];
       float s = hsv[1];
       float v = hsv[2];
-      // telemetry.addData("Hue", h);
-      // telemetry.addData("Sat", s);
-      // telemetry.addData("Val", v);
+      //telemetry.addData("Hue", h);
+      //telemetry.addData("Sat", s);
+      //telemetry.addData("Val", v);
 
       if (Math.abs(h - green) <= greenTolerance && s >= greenHueMin) { // green
         color = BallColor.GREEN; // intake has a green ball in it
@@ -96,7 +100,8 @@ public class ColorSensorV3 implements System {
       color = BallColor.EMPTY;
     }
 
-    // telemetry.update();
+    //telemetry.addData("Color", color);
+    //telemetry.update();
 
     double now = timeSinceStart.seconds();
     readings.add(new Reading(now, distance));
