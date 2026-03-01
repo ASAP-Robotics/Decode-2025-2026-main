@@ -47,6 +47,7 @@ public class TeleOpRobot extends CommonRobot {
 
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
+  private double hoodOffset = 0;
   protected MecanumWheelBase wheelBase;
   protected PinpointLocalizer pinpoint;
   protected Limelight limelight;
@@ -129,6 +130,7 @@ public class TeleOpRobot extends CommonRobot {
     if (updateTelemetry) {
       telemetryTimer.start();
     }
+    scoringSystem.adjustHoodAngleOffset(hoodOffset);
 
     // get robot position
     PoseVelocity2d velocityPose = pinpoint.update();
@@ -269,11 +271,19 @@ public class TeleOpRobot extends CommonRobot {
       if (gamepad2.bWasPressed()) {
         limelightEnabled = !limelightEnabled;
       }
+      if (gamepad2.dpadDownWasPressed()) {
+        hoodOffset+=0.5;
+
+      } else if (gamepad2.dpadUpWasPressed()) {
+        hoodOffset-=0.5;
+
+      }
 
       // turret rehome !*!*!*! use with caution !*!*!*!
       if (gamepad2.yWasPressed()) {
         scoringSystem.reSyncTurretEncoder();
       }
+
 
     } else { // normal
       // unjam spindexer

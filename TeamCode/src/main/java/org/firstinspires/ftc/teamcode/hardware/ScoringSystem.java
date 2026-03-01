@@ -616,6 +616,9 @@ public class ScoringSystem {
     intake.timer.start(); // start intake timer
     clearingIntake = true; // we are clearing the intake
   }
+  public void adjustHoodAngleOffset(double offset){
+    turret.setHoodChangedOffset(offset);
+  }
 
   /**
    * Forces a re read of the turret's absolute encoder
