@@ -112,6 +112,7 @@ public class ScoringSystem {
     if (auto) {
       turret.init(allianceColor.getObeliskOffset());
     } else {
+      turret.setHoodEnabled(false);
       turret.init(0);
     }
     turret.setActive(!isPreloaded);
@@ -614,6 +615,10 @@ public class ScoringSystem {
     intake.eject(); // set intake to eject at full speed
     intake.timer.start(); // start intake timer
     clearingIntake = true; // we are clearing the intake
+  }
+
+  public void adjustHoodAngleOffset(double offset) {
+    turret.setHoodChangedOffset(offset);
   }
 
   /**

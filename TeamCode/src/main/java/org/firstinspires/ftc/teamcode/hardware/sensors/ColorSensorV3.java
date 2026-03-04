@@ -96,6 +96,7 @@ public class ColorSensorV3 implements System {
       color = BallColor.EMPTY;
     }
 
+    // telemetry.addData("Color", color);
     // telemetry.update();
 
     double now = timeSinceStart.seconds();
