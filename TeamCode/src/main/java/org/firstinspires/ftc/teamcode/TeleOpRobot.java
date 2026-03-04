@@ -272,18 +272,16 @@ public class TeleOpRobot extends CommonRobot {
         limelightEnabled = !limelightEnabled;
       }
       if (gamepad2.dpadDownWasPressed()) {
-        hoodOffset+=0.5;
+        hoodOffset += 0.5;
 
       } else if (gamepad2.dpadUpWasPressed()) {
-        hoodOffset-=0.5;
-
+        hoodOffset -= 0.5;
       }
 
       // turret rehome !*!*!*! use with caution !*!*!*!
       if (gamepad2.yWasPressed()) {
         scoringSystem.reSyncTurretEncoder();
       }
-
 
     } else { // normal
       // unjam spindexer

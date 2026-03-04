@@ -616,7 +616,8 @@ public class ScoringSystem {
     intake.timer.start(); // start intake timer
     clearingIntake = true; // we are clearing the intake
   }
-  public void adjustHoodAngleOffset(double offset){
+
+  public void adjustHoodAngleOffset(double offset) {
     turret.setHoodChangedOffset(offset);
   }
 

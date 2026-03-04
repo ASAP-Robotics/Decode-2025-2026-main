@@ -29,6 +29,7 @@ import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.Follower;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.jetbrains.annotations.TestOnly;
+
 @Config
 public class Turret extends Flywheel<Turret.LookupTableItem> {
   protected static class LookupTableItem extends Flywheel.LookupTableItem {
@@ -151,25 +152,25 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
       new LookupTableItem(0, 1900, 160, 1),
 
       // Tuned Data (Sorted Low to High)
-      new LookupTableItem(33.5, 2000, 110+hoodOffset, .82),
-      new LookupTableItem(41.0, 2100, 51+hoodOffset, .65),
-      new LookupTableItem(49.3, 2150, 50+hoodOffset, .64),
-      new LookupTableItem(52.9, 2300, 37+hoodOffset, .51),
-      new LookupTableItem(55.2, 2300, 38+hoodOffset, .57),
-      new LookupTableItem(56.7, 2350, 38+hoodOffset, .55),
-      new LookupTableItem(63.1, 2350, 39+hoodOffset, .6),
-      new LookupTableItem(66.4, 2400, 30+hoodOffset, .55),
-      new LookupTableItem(70.8, 2400, 29+hoodOffset, .55),
-      new LookupTableItem(78.3, 2500, 28+hoodOffset, .57),
-      new LookupTableItem(81.3, 2600, 26+hoodOffset, .6),
-      new LookupTableItem(85.6, 2600, 26+hoodOffset, .66),
-      new LookupTableItem(93.3, 2600, 30+hoodOffset, .71),
-      new LookupTableItem(95.4, 2600, 30+hoodOffset, .71),
-      new LookupTableItem(96.3, 2800, 15+hoodOffset, .61),
-      new LookupTableItem(104.1, 2800, 20+hoodOffset, .67),
-      new LookupTableItem(106.6, 2870, 12+hoodOffset, .65),
-      new LookupTableItem(122.2, 3000, 5+hoodOffset, .76),
-      new LookupTableItem(138.5, 3180, 0+hoodOffset, .89),
+      new LookupTableItem(33.5, 2000, 110 + hoodOffset, .82),
+      new LookupTableItem(41.0, 2100, 51 + hoodOffset, .65),
+      new LookupTableItem(49.3, 2150, 50 + hoodOffset, .64),
+      new LookupTableItem(52.9, 2300, 37 + hoodOffset, .51),
+      new LookupTableItem(55.2, 2300, 38 + hoodOffset, .57),
+      new LookupTableItem(56.7, 2350, 38 + hoodOffset, .55),
+      new LookupTableItem(63.1, 2350, 39 + hoodOffset, .6),
+      new LookupTableItem(66.4, 2400, 30 + hoodOffset, .55),
+      new LookupTableItem(70.8, 2400, 29 + hoodOffset, .55),
+      new LookupTableItem(78.3, 2500, 28 + hoodOffset, .57),
+      new LookupTableItem(81.3, 2600, 26 + hoodOffset, .6),
+      new LookupTableItem(85.6, 2600, 26 + hoodOffset, .66),
+      new LookupTableItem(93.3, 2600, 30 + hoodOffset, .71),
+      new LookupTableItem(95.4, 2600, 30 + hoodOffset, .71),
+      new LookupTableItem(96.3, 2800, 15 + hoodOffset, .61),
+      new LookupTableItem(104.1, 2800, 20 + hoodOffset, .67),
+      new LookupTableItem(106.6, 2870, 12 + hoodOffset, .65),
+      new LookupTableItem(122.2, 3000, 5 + hoodOffset, .76),
+      new LookupTableItem(138.5, 3180, 0 + hoodOffset, .89),
 
       // Extrapolated "infinite" point
       new LookupTableItem(Double.POSITIVE_INFINITY, 3100, 10, 1)
@@ -257,8 +258,9 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
     double targetServoDegrees =
         overrideVerticalAngle ? testingVerticalAngleDegrees : targetVerticalAngleDegrees;
-    if (Math.abs(targetServoDegrees - lastSetVerticalAngleDegrees) > SERVO_UPDATE_TOLERANCE && hoodEnabled) {
-      hoodServo.setPosition(targetServoDegrees+hoodChangedOffset);
+    if (Math.abs(targetServoDegrees - lastSetVerticalAngleDegrees) > SERVO_UPDATE_TOLERANCE
+        && hoodEnabled) {
+      hoodServo.setPosition(targetServoDegrees + hoodChangedOffset);
       lastSetVerticalAngleDegrees = targetServoDegrees;
     }
 
@@ -311,12 +313,14 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
   /**
    * Sets if the hood servo can move
+   *
    * @param hoodEnabled if true, hood can move. If false, hood can't move
    */
   public void setHoodEnabled(boolean hoodEnabled) {
     this.hoodEnabled = hoodEnabled;
   }
-  public void setHoodChangedOffset(double offset){
+
+  public void setHoodChangedOffset(double offset) {
     hoodChangedOffset = offset;
   }
 

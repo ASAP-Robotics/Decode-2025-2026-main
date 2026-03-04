@@ -65,7 +65,7 @@ public class AutoPaths {
   }
 
   ParallelAction getCloseSide15Auto(
-          ScoringSystem scoringSystem, MecanumDrive drive, Telemetry telemetry) {
+      ScoringSystem scoringSystem, MecanumDrive drive, Telemetry telemetry) {
     double secondShootX = -5.5;
     double secondShootY = -17;
     final int angleOffset;
@@ -77,83 +77,83 @@ public class AutoPaths {
       angleOffset = 0;
     }
     return new ParallelAction( // BIGGEST BOI
-            new updateScoring(scoringSystem, telemetry),
-            // new updateTelemetry(telemetry),
-            new SequentialAction( // BIG BOI
-                    new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
-                    // new ObeliskSearch(limelight, telemetry),
-                    new setAiming(90, -50.5 + angleOffset / -3, 2400, 24, flipy, scoringSystem),
-                    new SequentialAction( // shoot 1
-                            drive
-                                    .actionBuilder(allianceColor.getAutoStartPosition())
-                                    // -----SHOOT1------\\
-                                    .splineToLinearHeading(
-                                            allianceColor.getAutoRRShootPosition(),
-                                            (Math.PI / -8) * flipy,
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 80))
-                                    .build(),
-                            new shootAction(scoringSystem)),
-                    new setAiming(90, -43 + angleOffset, 2520, 26, flipy, scoringSystem),
-                    new SequentialAction( // pickup 1 PGP
-                            drive
-                                    .actionBuilder(allianceColor.getAutoRRShootPosition())
+        new updateScoring(scoringSystem, telemetry),
+        // new updateTelemetry(telemetry),
+        new SequentialAction( // BIG BOI
+            new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
+            // new ObeliskSearch(limelight, telemetry),
+            new setAiming(90, -50.5 + angleOffset / -3, 2400, 24, flipy, scoringSystem),
+            new SequentialAction( // shoot 1
+                drive
+                    .actionBuilder(allianceColor.getAutoStartPosition())
+                    // -----SHOOT1------\\
+                    .splineToLinearHeading(
+                        allianceColor.getAutoRRShootPosition(),
+                        (Math.PI / -8) * flipy,
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 80))
+                    .build(),
+                new shootAction(scoringSystem)),
+            new setAiming(90, -43 + angleOffset, 2520, 26, flipy, scoringSystem),
+            new SequentialAction( // pickup 1 PGP
+                drive
+                    .actionBuilder(allianceColor.getAutoRRShootPosition())
 
-                                    // pickup first (second slot)
-                                    .splineToLinearHeading(
-                                            new Pose2d(14, -27.9 * flipy, flipy * (Math.toRadians(-90))),
-                                            (Math.PI / -2) * flipy,
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 200))
-                                    .splineToLinearHeading(
-                                            new Pose2d(14.25, -59 * flipy, flipy * (Math.toRadians(-90))),
-                                            (Math.PI / -2) * flipy,
-                                            new TranslationalVelConstraint(180.0),
-                                            new ProfileAccelConstraint(-30, 140))
-                                    .waitSeconds(0.05)
-                                    // shoot 2
-                                    .strafeToLinearHeading(
-                                            new Vector2d(secondShootX, secondShootY * flipy),
-                                            flipy * (Math.toRadians(-90)),
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 240))
-                                    .build(),
-                            new shootAction(scoringSystem)),
-                    new SequentialAction( // pickup2 (gate pickup)
-                            // GATE PICKUP
-                            drive
-                                    .actionBuilder(
-                                            (new Pose2d(
-                                                    secondShootX, secondShootY * flipy, flipy * (Math.toRadians(-90)))))
-                                    .splineToLinearHeading(
-                                            new Pose2d(15, -30 * flipy, flipy * Math.toRadians(-90)),
-                                            flipy * Math.PI / -1,
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 240))
-                                    .splineToLinearHeading(
-                                            new Pose2d(13, -59.5 * flipy, flipy * Math.toRadians(-120)),
-                                            flipy * Math.PI / -1,
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 240))
-                                    .waitSeconds(.65)
-                                    .strafeToLinearHeading(
-                                            new Vector2d(13.25, -55 * flipy), flipy * Math.toRadians(-120))
-                                    .strafeToLinearHeading(
-                                            new Pose2d(16 + xOffset * flipy, -62.5 * flipy, flipy * Math.toRadians(-90))
-                                                    .position,
-                                            flipy * Math.toRadians(-90),
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 240))
-                                    // GATE PICKUP
-                                    .waitSeconds(.19)
-                                    // shoot3
-                                    .strafeToLinearHeading(
-                                            new Vector2d(secondShootX, secondShootY * flipy),
-                                            flipy * (Math.toRadians(-90)),
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 240))
-                                    .build(),
-                            new shootAction(scoringSystem)),
+                    // pickup first (second slot)
+                    .splineToLinearHeading(
+                        new Pose2d(14, -27.9 * flipy, flipy * (Math.toRadians(-90))),
+                        (Math.PI / -2) * flipy,
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 200))
+                    .splineToLinearHeading(
+                        new Pose2d(14.25, -59 * flipy, flipy * (Math.toRadians(-90))),
+                        (Math.PI / -2) * flipy,
+                        new TranslationalVelConstraint(180.0),
+                        new ProfileAccelConstraint(-30, 140))
+                    .waitSeconds(0.05)
+                    // shoot 2
+                    .strafeToLinearHeading(
+                        new Vector2d(secondShootX, secondShootY * flipy),
+                        flipy * (Math.toRadians(-90)),
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 240))
+                    .build(),
+                new shootAction(scoringSystem)),
+            new SequentialAction( // pickup2 (gate pickup)
+                // GATE PICKUP
+                drive
+                    .actionBuilder(
+                        (new Pose2d(
+                            secondShootX, secondShootY * flipy, flipy * (Math.toRadians(-90)))))
+                    .splineToLinearHeading(
+                        new Pose2d(15, -30 * flipy, flipy * Math.toRadians(-90)),
+                        flipy * Math.PI / -1,
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 240))
+                    .splineToLinearHeading(
+                        new Pose2d(13, -59.5 * flipy, flipy * Math.toRadians(-120)),
+                        flipy * Math.PI / -1,
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 240))
+                    .waitSeconds(.65)
+                    .strafeToLinearHeading(
+                        new Vector2d(13.25, -55 * flipy), flipy * Math.toRadians(-120))
+                    .strafeToLinearHeading(
+                        new Pose2d(16 + xOffset * flipy, -62.5 * flipy, flipy * Math.toRadians(-90))
+                            .position,
+                        flipy * Math.toRadians(-90),
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 240))
+                    // GATE PICKUP
+                    .waitSeconds(.19)
+                    // shoot3
+                    .strafeToLinearHeading(
+                        new Vector2d(secondShootX, secondShootY * flipy),
+                        flipy * (Math.toRadians(-90)),
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 240))
+                    .build(),
+                new shootAction(scoringSystem)),
             new SequentialAction(
                 drive
                     .actionBuilder(
@@ -177,33 +177,33 @@ public class AutoPaths {
                     .build(),
                 new shootAction(scoringSystem),
                 new setAiming(70, -28 + angleOffset, 2500, 29, flipy, scoringSystem)),
-                    new SequentialAction( // pickup close
-                            drive
-                                    .actionBuilder(
-                                            (new Pose2d(
-                                                    secondShootX, secondShootY * flipy, flipy * (Math.toRadians(-90)))))
-                                    // go to pickup 4
-                                    .splineToLinearHeading(
-                                            // pickup PPG first slot
-                                            new Pose2d(
-                                                    -16 + xOffset * flipy * 2, -51 * flipy, flipy * (Math.toRadians(-90))),
-                                            (Math.PI / -3) * flipy,
-                                            new TranslationalVelConstraint(150.0),
-                                            new ProfileAccelConstraint(-50, 180))
-                                    .waitSeconds(.1)
-                                    // shoot 5 and leave3
-                                    .strafeToLinearHeading(
-                                            new Pose2d(
-                                                    secondShootX - 30,
-                                                    secondShootY * flipy,
-                                                    flipy * (Math.toRadians(-90)))
-                                                    .position,
-                                            flipy * (Math.toRadians(-90)),
-                                            new TranslationalVelConstraint(300.0),
-                                            new ProfileAccelConstraint(-50, 240))
-                                    .build(),
-                            new shootAction(scoringSystem)),
-                    new AutoEndShutdowAction(scoringSystem)));
+            new SequentialAction( // pickup close
+                drive
+                    .actionBuilder(
+                        (new Pose2d(
+                            secondShootX, secondShootY * flipy, flipy * (Math.toRadians(-90)))))
+                    // go to pickup 4
+                    .splineToLinearHeading(
+                        // pickup PPG first slot
+                        new Pose2d(
+                            -16 + xOffset * flipy * 2, -51 * flipy, flipy * (Math.toRadians(-90))),
+                        (Math.PI / -3) * flipy,
+                        new TranslationalVelConstraint(150.0),
+                        new ProfileAccelConstraint(-50, 180))
+                    .waitSeconds(.1)
+                    // shoot 5 and leave3
+                    .strafeToLinearHeading(
+                        new Pose2d(
+                                secondShootX - 30,
+                                secondShootY * flipy,
+                                flipy * (Math.toRadians(-90)))
+                            .position,
+                        flipy * (Math.toRadians(-90)),
+                        new TranslationalVelConstraint(300.0),
+                        new ProfileAccelConstraint(-50, 240))
+                    .build(),
+                new shootAction(scoringSystem)),
+            new AutoEndShutdowAction(scoringSystem)));
   }
 
   ParallelAction getCloseSide12Auto(
@@ -219,120 +219,120 @@ public class AutoPaths {
       angleOffset = 0;
     }
     return new ParallelAction( // BIGGEST BOI
-            new updateScoring(scoringSystem, telemetry),
-            // new updateTelemetry(telemetry),
-            new SequentialAction( // BIG BOI
-                    new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
-                    // new ObeliskSearch(limelight, telemetry),
-                    new setAiming(90, -50.5 + angleOffset / -3, 2400, 24, flipy, scoringSystem),
-                    new SequentialAction( // shoot 1
-                            drive
-                                    .actionBuilder(allianceColor.getAutoStartPosition())
-                                    // -----SHOOT1------\\
-                                    .splineToLinearHeading(
-                                            allianceColor.getAutoRRShootPosition(),
-                                            (Math.PI / -8) * flipy,
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 80))
-                                    .build(),
-                            new shootAction(scoringSystem)),
-                    new setAiming(90, -43 + angleOffset, 2520, 26, flipy, scoringSystem),
-                    new SequentialAction( // pickup 1 PGP
-                            drive
-                                    .actionBuilder(allianceColor.getAutoRRShootPosition())
+        new updateScoring(scoringSystem, telemetry),
+        // new updateTelemetry(telemetry),
+        new SequentialAction( // BIG BOI
+            new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
+            // new ObeliskSearch(limelight, telemetry),
+            new setAiming(90, -50.5 + angleOffset / -3, 2400, 24, flipy, scoringSystem),
+            new SequentialAction( // shoot 1
+                drive
+                    .actionBuilder(allianceColor.getAutoStartPosition())
+                    // -----SHOOT1------\\
+                    .splineToLinearHeading(
+                        allianceColor.getAutoRRShootPosition(),
+                        (Math.PI / -8) * flipy,
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 80))
+                    .build(),
+                new shootAction(scoringSystem)),
+            new setAiming(90, -43 + angleOffset, 2520, 26, flipy, scoringSystem),
+            new SequentialAction( // pickup 1 PGP
+                drive
+                    .actionBuilder(allianceColor.getAutoRRShootPosition())
 
-                                    // pickup first (second slot)
-                                    .splineToLinearHeading(
-                                            new Pose2d(14, -27.9 * flipy, flipy * (Math.toRadians(-90))),
-                                            (Math.PI / -2) * flipy,
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 200))
-                                    .splineToLinearHeading(
-                                            new Pose2d(14.25, -59 * flipy, flipy * (Math.toRadians(-90))),
-                                            (Math.PI / -2) * flipy,
-                                            new TranslationalVelConstraint(180.0),
-                                            new ProfileAccelConstraint(-30, 140))
-                                    .waitSeconds(0.05)
-                                    .strafeToLinearHeading(
-                                            new Pose2d(11, -53 * flipy, flipy * (Math.toRadians(-90))).position,
-                                            flipy * (Math.toRadians(-90)))
-                                    .strafeToLinearHeading(
-                                            new Pose2d(4, -58 * flipy, flipy * (Math.toRadians(-90))).position,
-                                            flipy * (Math.toRadians(-90)))
-                                    .strafeToLinearHeading(
-                                            new Pose2d(4, -30 * flipy, flipy * (Math.toRadians(-90))).position,
-                                            flipy * (Math.toRadians(-90)))
-                                    // shoot 2
-                                    .strafeToLinearHeading(
-                                            new Vector2d(secondShootX, secondShootY * flipy),
-                                            flipy * (Math.toRadians(-90)),
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 240))
-                                    .build(),
-                            new shootAction(scoringSystem)),
-                    new SequentialAction( // pickup2 (gate pickup)
-                            // GATE PICKUP
-                            drive
-                                    .actionBuilder(
-                                            (new Pose2d(
-                                                    secondShootX, secondShootY * flipy, flipy * (Math.toRadians(-90)))))
-                                    .splineToLinearHeading(
-                                            new Pose2d(15, -30 * flipy, flipy * Math.toRadians(-90)),
-                                            flipy * Math.PI / -1,
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 240))
-                                    .splineToLinearHeading(
-                                            new Pose2d(13, -59.5 * flipy, flipy * Math.toRadians(-120)),
-                                            flipy * Math.PI / -1,
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 240))
-                                    .waitSeconds(.65)
-                                    .strafeToLinearHeading(
-                                            new Vector2d(13.25, -55 * flipy), flipy * Math.toRadians(-120))
-                                    .strafeToLinearHeading(
-                                            new Pose2d(16 + xOffset * flipy, -62.5 * flipy, flipy * Math.toRadians(-90))
-                                                    .position,
-                                            flipy * Math.toRadians(-90),
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 240))
-                                    // GATE PICKUP
-                                    .waitSeconds(.19)
-                                    // shoot3
-                                    .strafeToLinearHeading(
-                                            new Vector2d(secondShootX, secondShootY * flipy),
-                                            flipy * (Math.toRadians(-90)),
-                                            new TranslationalVelConstraint(250.0),
-                                            new ProfileAccelConstraint(-50, 240))
-                                    .build(),
-                            new shootAction(scoringSystem),
-                            new setAiming(70, -25 + angleOffset, 2475, 27, flipy, scoringSystem)),
-                    new SequentialAction( // pickup close
-                            drive
-                                    .actionBuilder(
-                                            (new Pose2d(
-                                                    secondShootX, secondShootY * flipy, flipy * (Math.toRadians(-90)))))
-                                    // go to pickup 4
-                                    .splineToLinearHeading(
-                                            // pickup PPG first slot
-                                            new Pose2d(
-                                                    -16 + xOffset * flipy * 2, -51 * flipy, flipy * (Math.toRadians(-90))),
-                                            (Math.PI / -3) * flipy,
-                                            new TranslationalVelConstraint(150.0),
-                                            new ProfileAccelConstraint(-50, 180))
-                                    .waitSeconds(.1)
-                                    // shoot 5 and leave3
-                                    .strafeToLinearHeading(
-                                            new Pose2d(
-                                                    secondShootX - 30,
-                                                    secondShootY * flipy,
-                                                    flipy * (Math.toRadians(-90)))
-                                                    .position,
-                                            flipy * (Math.toRadians(-90)),
-                                            new TranslationalVelConstraint(300.0),
-                                            new ProfileAccelConstraint(-50, 240))
-                                    .build(),
-                            new shootAction(scoringSystem)),
-                    new AutoEndShutdowAction(scoringSystem)));
+                    // pickup first (second slot)
+                    .splineToLinearHeading(
+                        new Pose2d(14, -27.9 * flipy, flipy * (Math.toRadians(-90))),
+                        (Math.PI / -2) * flipy,
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 200))
+                    .splineToLinearHeading(
+                        new Pose2d(14.25, -59 * flipy, flipy * (Math.toRadians(-90))),
+                        (Math.PI / -2) * flipy,
+                        new TranslationalVelConstraint(180.0),
+                        new ProfileAccelConstraint(-30, 140))
+                    .waitSeconds(0.05)
+                    .strafeToLinearHeading(
+                        new Pose2d(11, -53 * flipy, flipy * (Math.toRadians(-90))).position,
+                        flipy * (Math.toRadians(-90)))
+                    .strafeToLinearHeading(
+                        new Pose2d(4, -58 * flipy, flipy * (Math.toRadians(-90))).position,
+                        flipy * (Math.toRadians(-90)))
+                    .strafeToLinearHeading(
+                        new Pose2d(4, -30 * flipy, flipy * (Math.toRadians(-90))).position,
+                        flipy * (Math.toRadians(-90)))
+                    // shoot 2
+                    .strafeToLinearHeading(
+                        new Vector2d(secondShootX, secondShootY * flipy),
+                        flipy * (Math.toRadians(-90)),
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 240))
+                    .build(),
+                new shootAction(scoringSystem)),
+            new SequentialAction( // pickup2 (gate pickup)
+                // GATE PICKUP
+                drive
+                    .actionBuilder(
+                        (new Pose2d(
+                            secondShootX, secondShootY * flipy, flipy * (Math.toRadians(-90)))))
+                    .splineToLinearHeading(
+                        new Pose2d(15, -30 * flipy, flipy * Math.toRadians(-90)),
+                        flipy * Math.PI / -1,
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 240))
+                    .splineToLinearHeading(
+                        new Pose2d(13, -59.5 * flipy, flipy * Math.toRadians(-120)),
+                        flipy * Math.PI / -1,
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 240))
+                    .waitSeconds(.65)
+                    .strafeToLinearHeading(
+                        new Vector2d(13.25, -55 * flipy), flipy * Math.toRadians(-120))
+                    .strafeToLinearHeading(
+                        new Pose2d(16 + xOffset * flipy, -62.5 * flipy, flipy * Math.toRadians(-90))
+                            .position,
+                        flipy * Math.toRadians(-90),
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 240))
+                    // GATE PICKUP
+                    .waitSeconds(.19)
+                    // shoot3
+                    .strafeToLinearHeading(
+                        new Vector2d(secondShootX, secondShootY * flipy),
+                        flipy * (Math.toRadians(-90)),
+                        new TranslationalVelConstraint(250.0),
+                        new ProfileAccelConstraint(-50, 240))
+                    .build(),
+                new shootAction(scoringSystem),
+                new setAiming(70, -25 + angleOffset, 2475, 27, flipy, scoringSystem)),
+            new SequentialAction( // pickup close
+                drive
+                    .actionBuilder(
+                        (new Pose2d(
+                            secondShootX, secondShootY * flipy, flipy * (Math.toRadians(-90)))))
+                    // go to pickup 4
+                    .splineToLinearHeading(
+                        // pickup PPG first slot
+                        new Pose2d(
+                            -16 + xOffset * flipy * 2, -51 * flipy, flipy * (Math.toRadians(-90))),
+                        (Math.PI / -3) * flipy,
+                        new TranslationalVelConstraint(150.0),
+                        new ProfileAccelConstraint(-50, 180))
+                    .waitSeconds(.1)
+                    // shoot 5 and leave3
+                    .strafeToLinearHeading(
+                        new Pose2d(
+                                secondShootX - 30,
+                                secondShootY * flipy,
+                                flipy * (Math.toRadians(-90)))
+                            .position,
+                        flipy * (Math.toRadians(-90)),
+                        new TranslationalVelConstraint(300.0),
+                        new ProfileAccelConstraint(-50, 240))
+                    .build(),
+                new shootAction(scoringSystem)),
+            new AutoEndShutdowAction(scoringSystem)));
   }
 
   ParallelAction getCloseSide15Auto2Gate(
