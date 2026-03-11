@@ -217,7 +217,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @brief gets if the turret is ready to shoot a ball
    * @return true if the flywheel is up to speed, the turret is at its target rotation, and the hood
    *     is in place, false otherwise
-   * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
+   * @note does not check the flywheel speed; call update() to update flywheel speed reading
    */
   @Override
   public boolean isReadyToShoot() {
@@ -316,14 +316,35 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   public void setHoodEnabled(boolean hoodEnabled) {
     this.hoodEnabled = hoodEnabled;
   }
-  public void setHoodChangedOffset(double offset){
+
+  /**
+   * Sets the (adjustable) hood offset
+   * @param offset the amount to offset the hood angle by
+   */
+  public void setHoodChangedOffset(double offset) {
     hoodChangedOffset = offset;
+  }
+
+  /**
+   * Changes the hood angle offset by a given amount
+   * @param offset the amount to change the hood angle offset by
+   */
+  public void adjustHoodOffset(double offset){
+    hoodChangedOffset += offset;
+  }
+
+  /**
+   * Gets the (changeable portion of the) hood angle offset
+   * @return the hood angle offset
+   */
+  public double getHoodOffset() {
+    return hoodChangedOffset;
   }
 
   /**
    * @brief sets the distance to the target
    * @param distance the new distance to the target, in arbitrary units
-   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   * @note we are actually using the percentage of the camera view occupied by the aprilTag, instead
    *     of distance
    * @note the new value isn't applied until update() is called
    */
@@ -454,7 +475,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   /**
    * @brief sets the angle of the servo in degrees
    * @param degrees the number of degrees to move the servo to
-   * @note doesn't update the turret
+   * @note does not update the turret
    * @note do not use externally except for tuning
    */
   public void setVerticalAngle(double degrees) {
@@ -492,7 +513,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @brief gets the angle for a given distance from the lookup table
    * @param distance the distance to get the angle for
    * @return servo angle for the given distance
-   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   * @note we are actually using the percentage of the camera view occupied by the aprilTag, instead
    *     of distance
    */
   protected double getAngleLookup(double distance) {

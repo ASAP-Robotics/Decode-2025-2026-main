@@ -90,7 +90,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   /**
    * @brief returns if the flywheel is fully up to speed
    * @return true if flywheel is at speed, false if flywheel is below target speed
-   * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
+   * @note does not check the flywheel speed; call update() to update flywheel speed reading
    */
   public boolean isReadyToShoot() {
     return isEnabled && isActive && (isAtSpeed() /* || speedSimulation.isAtTarget()*/);
@@ -248,7 +248,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   /**
    * @brief sets the distance to the target
    * @param distance the new distance to the target, in arbitrary units
-   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   * @note we are actually using the percentage of the camera view occupied by the aprilTag, instead
    *     of distance
    * @note the new value isn't applied until update() is called
    */
@@ -353,7 +353,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @brief gets the RPM for a given distance from the lookup table
    * @param distance the target distance to get flywheel RPM for
    * @return the flywheel RPM for the given distance
-   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   * @note we are actually using the percentage of the camera view occupied by the aprilTag, instead
    *     of distance
    */
   protected double getRPMLookup(double distance) {
