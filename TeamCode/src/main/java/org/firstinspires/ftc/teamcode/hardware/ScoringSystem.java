@@ -616,6 +616,7 @@ public class ScoringSystem {
 
   /**
    * Changes the hood angle offset by a given amount
+   *
    * @param offset the amount to change the hood angle offset by
    */
   public void adjustHoodAngleOffset(double offset) {
@@ -624,6 +625,7 @@ public class ScoringSystem {
 
   /**
    * Changes the speed offset of the flywheel (in RPM) by the given amount
+   *
    * @param offset the amount to change the flywheel RPM offset by
    */
   public void adjustFlywheelRpmOffset(double offset) {

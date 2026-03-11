@@ -29,6 +29,7 @@ import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.Follower;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.jetbrains.annotations.TestOnly;
+
 @Config
 public class Turret extends Flywheel<Turret.LookupTableItem> {
   protected static class LookupTableItem extends Flywheel.LookupTableItem {
@@ -257,7 +258,8 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
     double targetServoDegrees =
         overrideVerticalAngle ? testingVerticalAngleDegrees : targetVerticalAngleDegrees;
-    if (Math.abs(targetServoDegrees - lastSetVerticalAngleDegrees) > SERVO_UPDATE_TOLERANCE && hoodEnabled) {
+    if (Math.abs(targetServoDegrees - lastSetVerticalAngleDegrees) > SERVO_UPDATE_TOLERANCE
+        && hoodEnabled) {
       hoodServo.setPosition(targetServoDegrees + HOOD_OFFSET + hoodChangedOffset);
       lastSetVerticalAngleDegrees = targetServoDegrees;
     }
@@ -311,6 +313,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
   /**
    * Sets if the hood servo can move
+   *
    * @param hoodEnabled if true, hood can move. If false, hood can't move
    */
   public void setHoodEnabled(boolean hoodEnabled) {
@@ -319,6 +322,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
   /**
    * Sets the (adjustable) hood offset
+   *
    * @param offset the amount to offset the hood angle by
    */
   public void setHoodChangedOffset(double offset) {
@@ -327,14 +331,16 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
   /**
    * Changes the hood angle offset by a given amount
+   *
    * @param offset the amount to change the hood angle offset by
    */
-  public void adjustHoodOffset(double offset){
+  public void adjustHoodOffset(double offset) {
     hoodChangedOffset += offset;
   }
 
   /**
    * Gets the (changeable portion of the) hood angle offset
+   *
    * @return the hood angle offset
    */
   public double getHoodOffset() {

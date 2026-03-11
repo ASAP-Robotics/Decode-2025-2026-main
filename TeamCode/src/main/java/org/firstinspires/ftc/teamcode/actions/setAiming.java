@@ -1,10 +1,8 @@
 package org.firstinspires.ftc.teamcode.actions; // file: MySetPositionAction.java
 
 import androidx.annotation.NonNull;
-
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 
 public class setAiming implements Action {

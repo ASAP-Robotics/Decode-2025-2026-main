@@ -162,6 +162,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
 
   /**
    * Sets the speed offset of the flywheel (in RPM)
+   *
    * @param offsetRpm the amount to change the flywheel RPM by
    */
   public void setSpeedOffset(double offsetRpm) {
@@ -170,6 +171,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
 
   /**
    * Changes the speed offset of the flywheel (in RPM) by the given amount
+   *
    * @param offsetChangeRpm the amount to change the flywheel RPM offset by
    */
   public void changeSpeedOffset(double offsetChangeRpm) {
@@ -178,6 +180,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
 
   /**
    * Gets the speed offset for the flywheel's RPM
+   *
    * @return the amount the flywheel RPM is being offset by
    */
   public double getSpeedOffset() {
