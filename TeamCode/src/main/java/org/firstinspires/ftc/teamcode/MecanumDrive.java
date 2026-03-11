@@ -75,8 +75,8 @@ public final class MecanumDrive {
     public double maxProfileAccel = 50;
 
     // turn profile parameters (in radians)
-    public double maxAngVel = Math.PI; // shared with path
-    public double maxAngAccel = Math.PI;
+    public double maxAngVel = java.lang.Math.PI; // shared with path
+    public double maxAngAccel = java.lang.Math.PI;
 
     // path controller gains
     public double axialGain = 4.0;
@@ -278,7 +278,7 @@ public final class MecanumDrive {
 
     double maxPowerMag = 1;
     for (DualNum<Time> power : wheelVels.all()) {
-      maxPowerMag = Math.max(maxPowerMag, power.value());
+      maxPowerMag = java.lang.Math.max(maxPowerMag, power.value());
     }
 
     leftFront.setPower(wheelVels.leftFront.get(0) / maxPowerMag);
@@ -298,7 +298,7 @@ public final class MecanumDrive {
 
       List<Double> disps =
           com.acmerobotics.roadrunner.Math.range(
-              0, t.path.length(), Math.max(2, (int) Math.ceil(t.path.length() / 2)));
+              0, t.path.length(), java.lang.Math.max(2, (int) java.lang.Math.ceil(t.path.length() / 2)));
       xPoints = new double[disps.size()];
       yPoints = new double[disps.size()];
       for (int i = 0; i < disps.size(); i++) {
@@ -364,12 +364,12 @@ public final class MecanumDrive {
 
       p.put("x", localizer.getPose().position.x);
       p.put("y", localizer.getPose().position.y);
-      p.put("heading (deg)", Math.toDegrees(localizer.getPose().heading.toDouble()));
+      p.put("heading (deg)", java.lang.Math.toDegrees(localizer.getPose().heading.toDouble()));
 
       Pose2d error = txWorldTarget.value().minusExp(localizer.getPose());
       p.put("xError", error.position.x);
       p.put("yError", error.position.y);
-      p.put("headingError (deg)", Math.toDegrees(error.heading.toDouble()));
+      p.put("headingError (deg)", java.lang.Math.toDegrees(error.heading.toDouble()));
 
       // only draw when active; only one drive action should be active at a time
       Canvas c = p.fieldOverlay();
