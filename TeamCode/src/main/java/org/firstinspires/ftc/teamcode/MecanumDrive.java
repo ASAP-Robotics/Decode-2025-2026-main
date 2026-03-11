@@ -298,7 +298,9 @@ public final class MecanumDrive {
 
       List<Double> disps =
           com.acmerobotics.roadrunner.Math.range(
-              0, t.path.length(), java.lang.Math.max(2, (int) java.lang.Math.ceil(t.path.length() / 2)));
+              0,
+              t.path.length(),
+              java.lang.Math.max(2, (int) java.lang.Math.ceil(t.path.length() / 2)));
       xPoints = new double[disps.size()];
       yPoints = new double[disps.size()];
       for (int i = 0; i < disps.size(); i++) {
