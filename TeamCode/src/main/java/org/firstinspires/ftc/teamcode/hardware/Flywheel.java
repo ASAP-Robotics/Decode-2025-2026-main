@@ -52,6 +52,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   private double currentSpeed = 0; // the latest speed (RPM) of the flywheel
   private double targetDistance = 0; // the distance (inches) to the target
   private double lastSetSpeed = 0; // the last RPM the flywheel was set to spin at
+  private double speedOffset = 0; // amount for speed (RPM) to be offset by
   private DcMotor.RunMode flywheelRunMode = DcMotor.RunMode.RUN_USING_ENCODER;
   protected double speedOverride = 2000;
   private boolean overrideRPM = false;
@@ -157,6 +158,30 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   @TestOnly
   public void tunePIDF(double p, double i, double d, double f) {
     this.flywheel.setVelocityPIDFCoefficients(p, i, d, f);
+  }
+
+  /**
+   * Sets the speed offset of the flywheel (in RPM)
+   * @param offsetRpm the amount to change the flywheel RPM by
+   */
+  public void setSpeedOffset(double offsetRpm) {
+    speedOffset = offsetRpm;
+  }
+
+  /**
+   * Changes the speed offset of the flywheel (in RPM) by the given amount
+   * @param offsetChangeRpm the amount to change the flywheel RPM offset by
+   */
+  public void changeSpeedOffset(double offsetChangeRpm) {
+    speedOffset += offsetChangeRpm;
+  }
+
+  /**
+   * Gets the speed offset for the flywheel's RPM
+   * @return the amount the flywheel RPM is being offset by
+   */
+  public double getSpeedOffset() {
+    return speedOffset;
   }
 
   /**
@@ -296,7 +321,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @note use setIdleSpeed() to set the idle speed
    */
   private void idleMotor() {
-    targetSpeed = idleSpeed;
+    targetSpeed = idleSpeed + speedOffset;
 
     if (flywheelRunMode != DcMotor.RunMode.RUN_WITHOUT_ENCODER) {
       flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -318,7 +343,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @note use `setTargetDistance()` to set the distance from the target
    */
   private void startMotor() {
-    targetSpeed = getRPMLookup(targetDistance); // store target speed
+    targetSpeed = getRPMLookup(targetDistance) + speedOffset; // store target speed
 
     if (flywheelRunMode != DcMotor.RunMode.RUN_USING_ENCODER) {
       flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

@@ -264,11 +264,20 @@ public class TeleOpRobot extends CommonRobot {
         limelightEnabled = !limelightEnabled;
       }
 
+      // turret flap angle offset
       if (gamepad2.dpadDownWasPressed()) {
         scoringSystem.adjustHoodAngleOffset(0.5);
 
       } else if (gamepad2.dpadUpWasPressed()) {
         scoringSystem.adjustHoodAngleOffset(-0.5);
+      }
+
+      // turret flywheel RPM offset
+      if (gamepad2.dpadLeftWasPressed()) {
+        scoringSystem.adjustFlywheelRpmOffset(-10);
+
+      } else if (gamepad2.dpadRightWasPressed()) {
+        scoringSystem.adjustFlywheelRpmOffset(10);
       }
 
       // turret rehome !*!*!*! use with caution !*!*!*!

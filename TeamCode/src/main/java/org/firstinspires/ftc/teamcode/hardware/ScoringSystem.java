@@ -354,6 +354,7 @@ public class ScoringSystem {
     telemetry.addData("Color sensor enabled", spindex.isColorSensorEnabled());
     telemetry.addData("Turret offset", turret.getHorizontalAngleOffsetDegrees());
     telemetry.addData("Hood offset", turret.getHoodOffset());
+    telemetry.addData("RPM offset", turret.getSpeedOffset());
     // telemetry.addData("Target distance", turret.getTargetDistance());
     telemetry.addData("Spindex state", spindex.getState());
     // telemetry.addData("Loop time (ms)", avLoopTime);
@@ -619,6 +620,14 @@ public class ScoringSystem {
    */
   public void adjustHoodAngleOffset(double offset) {
     turret.adjustHoodOffset(offset);
+  }
+
+  /**
+   * Changes the speed offset of the flywheel (in RPM) by the given amount
+   * @param offset the amount to change the flywheel RPM offset by
+   */
+  public void adjustFlywheelRpmOffset(double offset) {
+    turret.changeSpeedOffset(offset);
   }
 
   /**
