@@ -46,10 +46,7 @@ public class ScoringSystem {
   }
 
   public static double ballTime = 1;
-
-  private final double ballTimeSlope = 0.00715145; // the slope for the ball time equation
-  private final double ballTimeOffset = -0.0353098; // the offset for the ball time equation
-  public static double balltimeConstant = 0.05;
+  public static double ballTimeConstant = 0.05;
   private final ActiveIntake intake; // the intake on the robot
   private final Turret turret; // the flywheel on the robot
   protected Turret.LookupTableItem[] LOOKUP_TABLE;
@@ -57,7 +54,7 @@ public class ScoringSystem {
   private final RGBIndicator indicator1; // first indicator light
   private final RGBIndicator indicator2; // second indicator light
   protected State state = State.UNINITIALISED; // the state of the scoring system
-  private BallSequence ballSequence = BallSequence.GPP; // the sequence being shot
+  private BallSequence ballSequence; // the sequence being shot
   public final AllianceColor allianceColor; // the alliance we are on
   // private boolean turretAimOverride = false; // if the aim of the turret is overridden
   private boolean turretVerticalAngleOverride = false;
@@ -316,7 +313,8 @@ public class ScoringSystem {
 
   /** Updates (or adds the data of) the telemetry from the scoring systems */
   private void updateTelemetry() {
-
+    /*
+    // loop time stuff - un-comment if needed
     double avLoopTime = 0;
     double minLoopTime = Double.POSITIVE_INFINITY;
     double maxLoopTime = Double.NEGATIVE_INFINITY;
@@ -326,6 +324,7 @@ public class ScoringSystem {
       if (log.first < minLoopTime) minLoopTime = log.first;
     }
     avLoopTime /= loopTimes.size();
+    */
 
     telemetry.addData("State", state.toString());
     telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
@@ -333,6 +332,15 @@ public class ScoringSystem {
 
     boolean readyToShoot = isReadyToShoot();
     telemetry.addData("Ready to shoot", readyToShoot);
+
+    telemetry.addData("Color sensor enabled", spindex.isColorSensorEnabled());
+    telemetry.addData("Turret offset", turret.getHorizontalAngleOffsetDegrees());
+    telemetry.addData("Hood offset", turret.getHoodOffset());
+    telemetry.addData("RPM offset", turret.getSpeedOffset());
+    // telemetry.addData("Target distance", turret.getTargetDistance());
+    telemetry.addData("Spindex state", spindex.getState());
+    // telemetry.addData("Loop time (ms)", avLoopTime);
+    // telemetry.addData("Loop time jitter (ms)", maxLoopTime - minLoopTime);
 
     if (!readyToShoot && (state == State.FULL || state == State.SHOOTING)) {
       telemetry.addData("Turret ready to shoot", turret.isReadyToShoot());
@@ -351,13 +359,6 @@ public class ScoringSystem {
       telemetry.addData("Spindex status", spindex.getStatus().message);
       telemetry.addData("Turret status", turret.getStatus().message);
     }
-
-    telemetry.addData("Color sensor enabled", spindex.isColorSensorEnabled());
-    telemetry.addData("Angle offset", turret.getHorizontalAngleOffsetDegrees());
-    // telemetry.addData("Target distance", turret.getTargetDistance());
-    telemetry.addData("Spindex state", spindex.getState());
-    // telemetry.addData("Loop time (ms)", avLoopTime);
-    // telemetry.addData("Loop time jitter (ms)", maxLoopTime - minLoopTime);
   }
 
   /**
@@ -392,7 +393,7 @@ public class ScoringSystem {
         }
       }
 
-      return balltimeConstant
+      return ballTimeConstant
           + MathUtils.map(
               distance,
               LOOKUP_TABLE[indexUnder].getDistance(),
@@ -593,10 +594,6 @@ public class ScoringSystem {
     double virtualX = robotPose.getX(DistanceUnit.INCH) + leadX;
     double virtualY = robotPose.getY(DistanceUnit.INCH) + leadY;
 
-    // field aim angle FROM virtual robot TO real target
-    double dx = targetPosition.getX(DistanceUnit.INCH) - virtualX;
-    double dy = targetPosition.getY(DistanceUnit.INCH) - virtualY;
-
     // store aimRad in the pose heading (since that's what you want)
     return new Pose2D(
         DistanceUnit.INCH,
@@ -617,12 +614,26 @@ public class ScoringSystem {
     clearingIntake = true; // we are clearing the intake
   }
 
+  /**
+   * Changes the hood angle offset by a given amount
+   *
+   * @param offset the amount to change the hood angle offset by
+   */
   public void adjustHoodAngleOffset(double offset) {
-    turret.setHoodChangedOffset(offset);
+    turret.adjustHoodOffset(offset);
   }
 
   /**
-   * Forces a re read of the turret's absolute encoder
+   * Changes the speed offset of the flywheel (in RPM) by the given amount
+   *
+   * @param offset the amount to change the flywheel RPM offset by
+   */
+  public void adjustFlywheelRpmOffset(double offset) {
+    turret.changeSpeedOffset(offset);
+  }
+
+  /**
+   * Forces a re-read of the turret's absolute encoder
    *
    * @note intended only as a driver backup
    */

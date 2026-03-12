@@ -202,7 +202,7 @@ public class Limelight {
   }
 
   /**
-   * @brief checks if the spread or difference between max an min values in a list is too large
+   * @brief checks if the spread or difference between max and min values in a list is too large
    * @param data a list of doubles to check
    * @param maxSpread the maximum allowed spread
    * @return true if the spread is above the given threshold, false otherwise

@@ -52,6 +52,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   private double currentSpeed = 0; // the latest speed (RPM) of the flywheel
   private double targetDistance = 0; // the distance (inches) to the target
   private double lastSetSpeed = 0; // the last RPM the flywheel was set to spin at
+  private double speedOffset = 0; // amount for speed (RPM) to be offset by
   private DcMotor.RunMode flywheelRunMode = DcMotor.RunMode.RUN_USING_ENCODER;
   protected double speedOverride = 2000;
   private boolean overrideRPM = false;
@@ -90,7 +91,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   /**
    * @brief returns if the flywheel is fully up to speed
    * @return true if flywheel is at speed, false if flywheel is below target speed
-   * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
+   * @note does not check the flywheel speed; call update() to update flywheel speed reading
    */
   public boolean isReadyToShoot() {
     return isEnabled && isActive && (isAtSpeed() /* || speedSimulation.isAtTarget()*/);
@@ -157,6 +158,33 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   @TestOnly
   public void tunePIDF(double p, double i, double d, double f) {
     this.flywheel.setVelocityPIDFCoefficients(p, i, d, f);
+  }
+
+  /**
+   * Sets the speed offset of the flywheel (in RPM)
+   *
+   * @param offsetRpm the amount to change the flywheel RPM by
+   */
+  public void setSpeedOffset(double offsetRpm) {
+    speedOffset = offsetRpm;
+  }
+
+  /**
+   * Changes the speed offset of the flywheel (in RPM) by the given amount
+   *
+   * @param offsetChangeRpm the amount to change the flywheel RPM offset by
+   */
+  public void changeSpeedOffset(double offsetChangeRpm) {
+    speedOffset += offsetChangeRpm;
+  }
+
+  /**
+   * Gets the speed offset for the flywheel's RPM
+   *
+   * @return the amount the flywheel RPM is being offset by
+   */
+  public double getSpeedOffset() {
+    return speedOffset;
   }
 
   /**
@@ -248,7 +276,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
   /**
    * @brief sets the distance to the target
    * @param distance the new distance to the target, in arbitrary units
-   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   * @note we are actually using the percentage of the camera view occupied by the aprilTag, instead
    *     of distance
    * @note the new value isn't applied until update() is called
    */
@@ -296,7 +324,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @note use setIdleSpeed() to set the idle speed
    */
   private void idleMotor() {
-    targetSpeed = idleSpeed;
+    targetSpeed = idleSpeed + speedOffset;
 
     if (flywheelRunMode != DcMotor.RunMode.RUN_WITHOUT_ENCODER) {
       flywheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -318,7 +346,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @note use `setTargetDistance()` to set the distance from the target
    */
   private void startMotor() {
-    targetSpeed = getRPMLookup(targetDistance); // store target speed
+    targetSpeed = getRPMLookup(targetDistance) + speedOffset; // store target speed
 
     if (flywheelRunMode != DcMotor.RunMode.RUN_USING_ENCODER) {
       flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -353,7 +381,7 @@ public abstract class Flywheel<T extends Flywheel.LookupTableItem> implements Sy
    * @brief gets the RPM for a given distance from the lookup table
    * @param distance the target distance to get flywheel RPM for
    * @return the flywheel RPM for the given distance
-   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   * @note we are actually using the percentage of the camera view occupied by the aprilTag, instead
    *     of distance
    */
   protected double getRPMLookup(double distance) {
