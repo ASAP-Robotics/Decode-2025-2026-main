@@ -64,7 +64,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
   private static final double HORIZONTAL_WRAP_CENTER_DEGREES = -90.0;
   private double hoodChangedOffset = 0;
-  public static int hoodOffset = 6;
+  public static int hoodOffset = 7;
   // amount position has to change to actually set servo
   private static final double SERVO_UPDATE_TOLERANCE = 0.5; // degrees
   // amount power has to change by to actually set (rotator) motor
@@ -158,11 +158,11 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
       new LookupTableItem(52.9, 2300, 37 + hoodOffset, .51),
       new LookupTableItem(55.2, 2300, 38 + hoodOffset, .57),
       new LookupTableItem(56.7, 2350, 38 + hoodOffset, .55),
-      new LookupTableItem(63.1, 2350, 39 + hoodOffset, .6),
+      new LookupTableItem(63.1, 2350, 39 + hoodOffset, .60),
       new LookupTableItem(66.4, 2400, 30 + hoodOffset, .55),
       new LookupTableItem(70.8, 2400, 29 + hoodOffset, .55),
       new LookupTableItem(78.3, 2500, 28 + hoodOffset, .57),
-      new LookupTableItem(81.3, 2600, 26 + hoodOffset, .6),
+      new LookupTableItem(81.3, 2600, 26 + hoodOffset, .60),
       new LookupTableItem(85.6, 2600, 26 + hoodOffset, .66),
       new LookupTableItem(93.3, 2600, 30 + hoodOffset, .71),
       new LookupTableItem(95.4, 2600, 30 + hoodOffset, .71),
