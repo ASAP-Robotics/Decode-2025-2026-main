@@ -159,12 +159,12 @@ public class TeleOpRobot extends CommonRobot {
 
     updateDriverControls();
 
-    scoringSystem.update(updateTelemetry);
-
     if (updateTelemetry) {
       telemetry.addData("Pinpoint disconnected", pinpoint.isFaulted());
       telemetry.addData("Limelight enabled", limelightEnabled);
     }
+
+    scoringSystem.update(updateTelemetry);
 
     if (limelightEnabled && odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25) {
       Pose2D limelightPose = limelight.getRobotPosition(scoringSystem.getTurretAngle());

@@ -333,6 +333,15 @@ public class ScoringSystem {
     boolean readyToShoot = isReadyToShoot();
     telemetry.addData("Ready to shoot", readyToShoot);
 
+    telemetry.addData("Color sensor enabled", spindex.isColorSensorEnabled());
+    telemetry.addData("Turret offset", turret.getHorizontalAngleOffsetDegrees());
+    telemetry.addData("Hood offset", turret.getHoodOffset());
+    telemetry.addData("RPM offset", turret.getSpeedOffset());
+    // telemetry.addData("Target distance", turret.getTargetDistance());
+    telemetry.addData("Spindex state", spindex.getState());
+    // telemetry.addData("Loop time (ms)", avLoopTime);
+    // telemetry.addData("Loop time jitter (ms)", maxLoopTime - minLoopTime);
+
     if (!readyToShoot && (state == State.FULL || state == State.SHOOTING)) {
       telemetry.addData("Turret ready to shoot", turret.isReadyToShoot());
       telemetry.addData("Spindex ready to shoot", spindex.isReadyToShoot());
@@ -350,15 +359,6 @@ public class ScoringSystem {
       telemetry.addData("Spindex status", spindex.getStatus().message);
       telemetry.addData("Turret status", turret.getStatus().message);
     }
-
-    telemetry.addData("Color sensor enabled", spindex.isColorSensorEnabled());
-    telemetry.addData("Turret offset", turret.getHorizontalAngleOffsetDegrees());
-    telemetry.addData("Hood offset", turret.getHoodOffset());
-    telemetry.addData("RPM offset", turret.getSpeedOffset());
-    // telemetry.addData("Target distance", turret.getTargetDistance());
-    telemetry.addData("Spindex state", spindex.getState());
-    // telemetry.addData("Loop time (ms)", avLoopTime);
-    // telemetry.addData("Loop time jitter (ms)", maxLoopTime - minLoopTime);
   }
 
   /**
