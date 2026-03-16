@@ -47,6 +47,8 @@ public class ScoringSystem {
 
   public static double ballTime = 1;
   public static double ballTimeConstant = 0.05;
+  public static boolean MANUAL_LIGHTS = false;
+  public static RGBIndicator.Color MANUAL_LIGHT_COLOR = RGBIndicator.Color.WHITE;
   private final ActiveIntake intake; // the intake on the robot
   private final Turret turret; // the flywheel on the robot
   protected Turret.LookupTableItem[] LOOKUP_TABLE;
@@ -94,6 +96,10 @@ public class ScoringSystem {
     this.telemetry = telemetry;
     this.targetPosition = this.allianceColor.getTargetLocation();
     this.ballSequence = new BallSequenceFileReader().getSequence();
+    MANUAL_LIGHT_COLOR =
+        this.allianceColor == AllianceColor.RED ?
+            RGBIndicator.Color.RED :
+            RGBIndicator.Color.BLUE;
   }
 
   /**
@@ -275,36 +281,41 @@ public class ScoringSystem {
 
   /** Updates the indicator lights */
   private void updateIndicators() {
-    switch (state) {
-      case UNINITIALISED:
-        if (spindex.isAtTarget() && turret.isAtTarget()) {
+    if (MANUAL_LIGHTS) {
+      setIndicatorColor(MANUAL_LIGHT_COLOR);
+
+    } else {
+      switch (state) {
+        case UNINITIALISED:
+          if (spindex.isAtTarget() && turret.isAtTarget()) {
+            setIndicatorColor(RGBIndicator.Color.GREEN);
+          } else {
+            setIndicatorColor(RGBIndicator.Color.VIOLET);
+          }
+          break;
+
+        case SHOOTING:
+          setIndicatorColor(RGBIndicator.Color.WHITE);
+          break;
+
+        case FULL:
           setIndicatorColor(RGBIndicator.Color.GREEN);
-        } else {
-          setIndicatorColor(RGBIndicator.Color.VIOLET);
-        }
-        break;
+          break;
 
-      case SHOOTING:
-        setIndicatorColor(RGBIndicator.Color.WHITE);
-        break;
+        case INTAKING:
+          int numBalls = 0;
+          RGBIndicator.Color color = RGBIndicator.Color.RED;
+          for (BallColor ball : spindex.getSpindexContents()) {
+            if (ball.isShootable()) numBalls++;
+          }
 
-      case FULL:
-        setIndicatorColor(RGBIndicator.Color.GREEN);
-        break;
+          if (numBalls != 0) {
+            color = RGBIndicator.Color.ORANGE;
+          }
 
-      case INTAKING:
-        int numBalls = 0;
-        RGBIndicator.Color color = RGBIndicator.Color.RED;
-        for (BallColor ball : spindex.getSpindexContents()) {
-          if (ball.isShootable()) numBalls++;
-        }
-
-        if (numBalls != 0) {
-          color = RGBIndicator.Color.ORANGE;
-        }
-
-        setIndicatorColor(color);
-        break;
+          setIndicatorColor(color);
+          break;
+      }
     }
 
     indicator1.update();
