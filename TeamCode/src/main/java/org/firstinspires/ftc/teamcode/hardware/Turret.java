@@ -64,7 +64,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
   private static final double HORIZONTAL_WRAP_CENTER_DEGREES = -90.0;
   private double hoodChangedOffset = 0;
-  public static int hoodOffset = 6;
+  public static int HOOD_OFFSET = 6;
   // amount position has to change to actually set servo
   private static final double SERVO_UPDATE_TOLERANCE = 0.5; // degrees
   // amount power has to change by to actually set (rotator) motor
@@ -87,7 +87,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   private final Axon hoodServo;
   private double targetHorizontalAngleDegrees = 0;
   private double horizontalAngleOffsetDegrees = -2;
-  private double horizontalAngleOffsetDegreesConstant = 2;
+  private static final double horizontalAngleOffsetDegreesConstant = 2;
   // target angle for servo moving flap
   private double targetVerticalAngleDegrees = 50;
   private double testingVerticalAngleDegrees = 50;
@@ -152,25 +152,25 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
       new LookupTableItem(0, 1900, 160, 1),
 
       // Tuned Data (Sorted Low to High)
-      new LookupTableItem(33.5, 2000, 110 + hoodOffset, .82),
-      new LookupTableItem(41.0, 2100, 51 + hoodOffset, .65),
-      new LookupTableItem(49.3, 2150, 50 + hoodOffset, .64),
-      new LookupTableItem(52.9, 2300, 37 + hoodOffset, .51),
-      new LookupTableItem(55.2, 2300, 38 + hoodOffset, .57),
-      new LookupTableItem(56.7, 2350, 38 + hoodOffset, .55),
-      new LookupTableItem(63.1, 2350, 39 + hoodOffset, .6),
-      new LookupTableItem(66.4, 2400, 30 + hoodOffset, .55),
-      new LookupTableItem(70.8, 2400, 29 + hoodOffset, .55),
-      new LookupTableItem(78.3, 2500, 28 + hoodOffset, .57),
-      new LookupTableItem(81.3, 2600, 26 + hoodOffset, .6),
-      new LookupTableItem(85.6, 2600, 26 + hoodOffset, .66),
-      new LookupTableItem(93.3, 2600, 30 + hoodOffset, .71),
-      new LookupTableItem(95.4, 2600, 30 + hoodOffset, .71),
-      new LookupTableItem(96.3, 2800, 15 + hoodOffset, .61),
-      new LookupTableItem(104.1, 2800, 20 + hoodOffset, .67),
-      new LookupTableItem(106.6, 2870, 12 + hoodOffset, .65),
-      new LookupTableItem(122.2, 3000, 5 + hoodOffset, .76),
-      new LookupTableItem(138.5, 3180, 0 + hoodOffset, .89),
+      new LookupTableItem(33.5, 2000, 110, .82),
+      new LookupTableItem(41.0, 2100, 51, .65),
+      new LookupTableItem(49.3, 2150, 50, .64),
+      new LookupTableItem(52.9, 2300, 37, .51),
+      new LookupTableItem(55.2, 2300, 38, .57),
+      new LookupTableItem(56.7, 2350, 38, .55),
+      new LookupTableItem(63.1, 2350, 39, .6),
+      new LookupTableItem(66.4, 2400, 30, .55),
+      new LookupTableItem(70.8, 2400, 29, .55),
+      new LookupTableItem(78.3, 2500, 28, .57),
+      new LookupTableItem(81.3, 2600, 26, .6),
+      new LookupTableItem(85.6, 2600, 26, .66),
+      new LookupTableItem(93.3, 2600, 30, .71),
+      new LookupTableItem(95.4, 2600, 30, .71),
+      new LookupTableItem(96.3, 2800, 15, .61),
+      new LookupTableItem(104.1, 2800, 20, .67),
+      new LookupTableItem(106.6, 2870, 12, .65),
+      new LookupTableItem(122.2, 3000, 5, .76),
+      new LookupTableItem(138.5, 3180, 0, .89),
 
       // Extrapolated "infinite" point
       new LookupTableItem(Double.POSITIVE_INFINITY, 3100, 10, 1)
@@ -218,7 +218,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @brief gets if the turret is ready to shoot a ball
    * @return true if the flywheel is up to speed, the turret is at its target rotation, and the hood
    *     is in place, false otherwise
-   * @note doesn't check the flywheel speed; call update() to update flywheel speed reading
+   * @note does not check the flywheel speed; call update() to update flywheel speed reading
    */
   @Override
   public boolean isReadyToShoot() {
@@ -260,7 +260,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
         overrideVerticalAngle ? testingVerticalAngleDegrees : targetVerticalAngleDegrees;
     if (Math.abs(targetServoDegrees - lastSetVerticalAngleDegrees) > SERVO_UPDATE_TOLERANCE
         && hoodEnabled) {
-      hoodServo.setPosition(targetServoDegrees + hoodChangedOffset);
+      hoodServo.setPosition(targetServoDegrees + HOOD_OFFSET + hoodChangedOffset);
       lastSetVerticalAngleDegrees = targetServoDegrees;
     }
 
@@ -320,14 +320,37 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     this.hoodEnabled = hoodEnabled;
   }
 
+  /**
+   * Sets the (adjustable) hood offset
+   *
+   * @param offset the amount to offset the hood angle by
+   */
   public void setHoodChangedOffset(double offset) {
     hoodChangedOffset = offset;
   }
 
   /**
+   * Changes the hood angle offset by a given amount
+   *
+   * @param offset the amount to change the hood angle offset by
+   */
+  public void adjustHoodOffset(double offset) {
+    hoodChangedOffset += offset;
+  }
+
+  /**
+   * Gets the (changeable portion of the) hood angle offset
+   *
+   * @return the hood angle offset
+   */
+  public double getHoodOffset() {
+    return hoodChangedOffset;
+  }
+
+  /**
    * @brief sets the distance to the target
    * @param distance the new distance to the target, in arbitrary units
-   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   * @note we are actually using the percentage of the camera view occupied by the aprilTag, instead
    *     of distance
    * @note the new value isn't applied until update() is called
    */
@@ -458,7 +481,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   /**
    * @brief sets the angle of the servo in degrees
    * @param degrees the number of degrees to move the servo to
-   * @note doesn't update the turret
+   * @note does not update the turret
    * @note do not use externally except for tuning
    */
   public void setVerticalAngle(double degrees) {
@@ -496,7 +519,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
    * @brief gets the angle for a given distance from the lookup table
    * @param distance the distance to get the angle for
    * @return servo angle for the given distance
-   * @note we are actually using the percentage of the camera view occupied by the apriltag, instead
+   * @note we are actually using the percentage of the camera view occupied by the aprilTag, instead
    *     of distance
    */
   protected double getAngleLookup(double distance) {
