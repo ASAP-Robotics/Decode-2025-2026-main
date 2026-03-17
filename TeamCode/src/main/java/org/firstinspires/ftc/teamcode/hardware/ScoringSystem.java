@@ -97,9 +97,7 @@ public class ScoringSystem {
     this.targetPosition = this.allianceColor.getTargetLocation();
     this.ballSequence = new BallSequenceFileReader().getSequence();
     MANUAL_LIGHT_COLOR =
-        this.allianceColor == AllianceColor.RED ?
-            RGBIndicator.Color.RED :
-            RGBIndicator.Color.BLUE;
+        this.allianceColor == AllianceColor.RED ? RGBIndicator.Color.RED : RGBIndicator.Color.BLUE;
   }
 
   /**
