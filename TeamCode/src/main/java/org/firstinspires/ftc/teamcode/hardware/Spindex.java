@@ -481,13 +481,6 @@ public class Spindex implements System {
       if (output[i] == sequenceColors[i]) matches++;
     }
 
-    /* old logic that didn't account for balls rolling down the ramp
-    for (BallColor color : sequence.getBallColors()) { // for each desired color
-      if (spindex[index].color == color) matches++; // check if slot will match
-      if (++index >= spindex.length) index = 0; // increment slot
-    }
-     */
-
     return matches;
   }
 
