@@ -464,13 +464,21 @@ public class Spindex implements System {
    * @note will return -1 on invalid parameters
    */
   public int getIndexMatches(int index, BallSequence sequence) {
-    if (index >= spindex.length || index < 0 || sequence == null) return NULL;
+    if (index >= spindex.length || index < 0 || sequence == null) return NULL; // check parameters
 
+    BallColor[] sequenceColors = sequence.getBallColors();
+    BallColor[] output = new BallColor[spindex.length];
     int matches = 0;
 
-    for (BallColor color : sequence.getBallColors()) {
-      if (spindex[index].color == color) matches++;
-      if (++index >= spindex.length) index = 0;
+    for (int i = 0, workingIndex = index, outputIndex = 0; i < spindex.length; i++) {
+      BallColor color = spindex[workingIndex].color; // get slot color
+      if (color.isShootable()) output[outputIndex++] = color; // add ball to output if shootable
+
+      if (++workingIndex >= spindex.length) workingIndex = 0; // increment slot
+    }
+
+    for (int i = 0; i < spindex.length; i++) {
+      if (output[i] == sequenceColors[i]) matches++;
     }
 
     return matches;
@@ -644,8 +652,6 @@ public class Spindex implements System {
             ? UnidirectionalHomableRotator.DirectionConstraint.REVERSE_ONLY
             : UnidirectionalHomableRotator.DirectionConstraint.NONE);
 
-    // spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.NONE); //
-    // todo figure out why this was broken and why this fixed it
     spinner.setAngle(target);
   }
 
