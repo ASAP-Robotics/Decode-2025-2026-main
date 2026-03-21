@@ -57,9 +57,9 @@ public class Spindex implements System {
   private static class SpindexSlot {
     // the color of ball in the spindex slot
     public BallColor color;
-    // the position to move the spindex to to intake a ball into this slot
+    // the position to move the spindex to in order to intake a ball into this slot
     public final double intakePosition;
-    // the position to move the spindex to to prepare to shoot a ball from this slot
+    // the position to move the spindex to in order to prepare to shoot a ball from this slot
     public final double shootPosition;
 
     public SpindexSlot(double intakePosition, double shootPosition) {
@@ -97,7 +97,8 @@ public class Spindex implements System {
   private BallSequence sequence = BallSequence.GPP; // the sequence that is to be shot
   private boolean enabled = true; // if spindex can move, sense, etc.
   private boolean colorSensorEnabled = true; // if color sensor is enabled
-  private int currentIndex = NULL; // the current index the spindex is at, dependant on the state
+  private int currentIndex = NULL; // the current index the spindex is at, dependent on the state
+  private int sortingOffset = 0; // offset for sorting, basically the number of balls in the ramp
   private BallColor intakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake the most recent time checked
   private BallColor oldIntakeColor =
@@ -337,6 +338,22 @@ public class Spindex implements System {
   }
 
   /**
+   * Sets the sorting offset, equivalent to the number of balls in the ramp (can be negative)
+   * @param sortingOffset the number of balls in the ramp
+   */
+  public void setSortingOffset(int sortingOffset) {
+    this.sortingOffset = sortingOffset;
+  }
+
+  /**
+   * Gets the current sorting offset being used, basically how many balls are in the ramp
+   * @return the current sorting offset
+   */
+  public int getSortingOffset() {
+    return sortingOffset;
+  }
+
+  /**
    * Sets the ball sequence that the spindex tries to shoot
    *
    * @param sequence the sequence to shoot
@@ -346,7 +363,7 @@ public class Spindex implements System {
   }
 
   /**
-   * Returns if the spindex is at its target position (in a "idle" or inactive state)
+   * Returns if the spindex is at its target position (in an "idle" or inactive state)
    *
    * @return true if the spindex is at its target angle and set to the correct target angle for the
    *     mode the spindex is in and the intake flap is at its target, false otherwise
@@ -466,7 +483,7 @@ public class Spindex implements System {
   public int getIndexMatches(int index, BallSequence sequence) {
     if (index >= spindex.length || index < 0 || sequence == null) return NULL; // check parameters
 
-    BallColor[] sequenceColors = sequence.getBallColors();
+    BallColor[] sequenceColors = sequence.getBallColors(sortingOffset);
     BallColor[] output = new BallColor[spindex.length];
     int matches = 0;
 
