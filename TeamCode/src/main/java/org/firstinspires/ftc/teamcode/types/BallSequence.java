@@ -31,6 +31,7 @@ public enum BallSequence {
 
   /**
    * Gets an array of `BallColor`s representing the sequence
+   *
    * @return an array of `BallColor`s in the sequence
    */
   public BallColor[] getBallColors() {
@@ -39,6 +40,7 @@ public enum BallSequence {
 
   /**
    * Gets an array of `BallColor`s representing the sequence
+   *
    * @param offset amount to offset the colors by, equivalent to the number of balls in the ramp
    * @return an array of `BallColor`s in the sequence
    */

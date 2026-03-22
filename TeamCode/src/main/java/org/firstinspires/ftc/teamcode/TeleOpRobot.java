@@ -176,8 +176,8 @@ public class TeleOpRobot extends CommonRobot {
         }
       }
 
-      if (ScoringSystem.TELEMETRY_VERBOSITY.verbosity >=
-          ScoringSystem.Verbosity.EXCESSIVE.verbosity) {
+      if (ScoringSystem.TELEMETRY_VERBOSITY.verbosity
+          >= ScoringSystem.Verbosity.EXCESSIVE.verbosity) {
         telemetry.addData("Positon (real)", realRobot);
         telemetry.addData("Position (virtual)", virtual);
       }

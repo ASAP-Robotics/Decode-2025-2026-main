@@ -339,6 +339,7 @@ public class Spindex implements System {
 
   /**
    * Sets the sorting offset, equivalent to the number of balls in the ramp (can be negative)
+   *
    * @param sortingOffset the number of balls in the ramp
    */
   public void setSortingOffset(int sortingOffset) {
@@ -347,6 +348,7 @@ public class Spindex implements System {
 
   /**
    * Gets the current sorting offset being used, basically how many balls are in the ramp
+   *
    * @return the current sorting offset
    */
   public int getSortingOffset() {
