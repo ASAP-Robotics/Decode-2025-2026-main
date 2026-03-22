@@ -346,6 +346,7 @@ public class ScoringSystem {
     }
 
     telemetry.addData("🎞️Sequence", ballSequence);
+    telemetry.addData("⏩Sorting offset", getSortingOffset());
 
     telemetry.addData("↔️Turret offset", turret.getHorizontalAngleOffsetDegrees());
     telemetry.addData("↕️Hood offset", turret.getHoodOffset());

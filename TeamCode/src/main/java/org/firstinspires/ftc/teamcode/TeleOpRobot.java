@@ -50,6 +50,7 @@ public class TeleOpRobot extends CommonRobot {
   private static final double MANUAL_SHOOTING_DIST = 75; // inches
   private static final double MANUAL_SHOOTING_ANGLE = 180; // degrees from straight (intake)
   private static final double TRIGGER_PRESSED_THRESHOLD = 0.67;
+  private static final double TRIGGER_RELEASED_THRESHOLD = 0.33;
 
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
@@ -60,6 +61,8 @@ public class TeleOpRobot extends CommonRobot {
   protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
   protected SimpleTimer odometryResetTimer = new SimpleTimer(2);
   private final boolean fieldCentric;
+  private boolean sortingOffsetCounterUpTriggered = false;
+  private boolean sortingOffsetCounterDownTriggered = false;
 
   public TeleOpRobot(
       HardwareMap hardwareMap,
@@ -343,6 +346,26 @@ public class TeleOpRobot extends CommonRobot {
     if (gamepad2.leftBumperWasPressed()) {
       scoringSystem.clearIntake();
       scoringSystem.unJamSpindexer();
+    }
+
+    // increment sorting offset
+    if (gamepad2.right_stick_y > TRIGGER_PRESSED_THRESHOLD && !sortingOffsetCounterUpTriggered) {
+      sortingOffsetCounterUpTriggered = true;
+      sortingOffsetCounterDownTriggered = false;
+      scoringSystem.setSortingOffset((scoringSystem.getSortingOffset() + 1) % 3);
+    }
+
+    // decrement sorting offset
+    if (gamepad2.right_stick_y < -TRIGGER_PRESSED_THRESHOLD && !sortingOffsetCounterDownTriggered) {
+      sortingOffsetCounterDownTriggered = true;
+      sortingOffsetCounterUpTriggered = false;
+      scoringSystem.setSortingOffset((scoringSystem.getSortingOffset() + 2) % 3);
+    }
+
+    // stick up and down release reset logic
+    if (Math.abs(gamepad2.right_stick_y) < TRIGGER_RELEASED_THRESHOLD) {
+      sortingOffsetCounterDownTriggered = false;
+      sortingOffsetCounterUpTriggered = false;
     }
   }
 }
