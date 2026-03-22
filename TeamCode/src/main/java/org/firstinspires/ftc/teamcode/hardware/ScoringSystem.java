@@ -29,8 +29,6 @@ import org.firstinspires.ftc.teamcode.hardware.indicators.RGBIndicator;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
-import org.firstinspires.ftc.teamcode.types.SystemReport;
-import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.BallSequenceFileReader;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
@@ -45,10 +43,25 @@ public class ScoringSystem {
     SHOOTING
   }
 
+  public enum Verbosity {
+    MINIMAL(0),
+    NORMAL(1),
+    DEBUG(2),
+    EXCESSIVE(3);
+
+    public final int verbosity;
+    Verbosity(int verbosity) {
+      this.verbosity = verbosity;
+    }
+  }
+
+  // FTC Dashboard config variables
   public static double ballTime = 1;
   public static double ballTimeConstant = 0.05;
+  public static Verbosity TELEMETRY_VERBOSITY; // how verbose the telemetry is
   public static boolean MANUAL_LIGHTS = false;
   public static RGBIndicator.Color MANUAL_LIGHT_COLOR = RGBIndicator.Color.WHITE;
+
   private final ActiveIntake intake; // the intake on the robot
   private final Turret turret; // the flywheel on the robot
   protected Turret.LookupTableItem[] LOOKUP_TABLE;
@@ -322,51 +335,44 @@ public class ScoringSystem {
 
   /** Updates (or adds the data of) the telemetry from the scoring systems */
   private void updateTelemetry() {
-    /*
-    // loop time stuff - un-comment if needed
-    double avLoopTime = 0;
-    double minLoopTime = Double.POSITIVE_INFINITY;
-    double maxLoopTime = Double.NEGATIVE_INFINITY;
-    for (Pair<Double, Double> log : loopTimes) {
-      avLoopTime += log.first;
-      if (log.first > maxLoopTime) maxLoopTime = log.first;
-      if (log.first < minLoopTime) minLoopTime = log.first;
-    }
-    avLoopTime /= loopTimes.size();
-    */
+    if (TELEMETRY_VERBOSITY.verbosity >= Verbosity.NORMAL.verbosity) {
+      telemetry.addData("🎚️State", state.toString());
+      telemetry.addData("⚙️Mag", Arrays.toString(spindex.getSpindexContents()));
+      telemetry.addData("🏹Ready to shoot", isReadyToShoot() ? "✅" : "❌");
 
-    telemetry.addData("State", state.toString());
-    telemetry.addData("Mag", Arrays.toString(spindex.getSpindexContents()));
-    telemetry.addData("Sequence", ballSequence);
-
-    boolean readyToShoot = isReadyToShoot();
-    telemetry.addData("Ready to shoot", readyToShoot);
-
-    telemetry.addData("Color sensor enabled", spindex.isColorSensorEnabled());
-    telemetry.addData("Turret offset", turret.getHorizontalAngleOffsetDegrees());
-    telemetry.addData("Hood offset", turret.getHoodOffset());
-    telemetry.addData("RPM offset", turret.getSpeedOffset());
-    // telemetry.addData("Target distance", turret.getTargetDistance());
-    telemetry.addData("Spindex state", spindex.getState());
-    // telemetry.addData("Loop time (ms)", avLoopTime);
-    // telemetry.addData("Loop time jitter (ms)", maxLoopTime - minLoopTime);
-
-    if (!readyToShoot && (state == State.FULL || state == State.SHOOTING)) {
-      telemetry.addData("Turret ready to shoot", turret.isReadyToShoot());
-      telemetry.addData("Spindex ready to shoot", spindex.isReadyToShoot());
+      telemetry.addData("💿Spindex status", spindex.getStatus().message);
+      telemetry.addData("🔫Turret status", turret.getStatus().message);
     }
 
-    SystemReport spindexReport = spindex.getStatus();
-    SystemReport turretReport = turret.getStatus();
+    telemetry.addData("🎞️Sequence", ballSequence);
 
-    if (spindexReport.status == SystemStatus.NOMINAL
-        && turretReport.status == SystemStatus.NOMINAL) {
-      telemetry.addData("System status", "🟩Normal"); // emoji might not work
+    telemetry.addData("↔️Turret offset", turret.getHorizontalAngleOffsetDegrees());
+    telemetry.addData("↕️Hood offset", turret.getHoodOffset());
+    telemetry.addData("🔄️RPM offset", turret.getSpeedOffset());
+    telemetry.addData("🎨Color sensor enabled", spindex.isColorSensorEnabled() ? "✅" : "❌");
 
-    } else {
-      telemetry.addData("System status", "🟥Abnormal"); // emoji might not work
-      telemetry.addData("Spindex status", spindex.getStatus().message);
-      telemetry.addData("Turret status", turret.getStatus().message);
+    if (TELEMETRY_VERBOSITY.verbosity >= Verbosity.DEBUG.verbosity) {
+      telemetry.addData("🎡Spindex state", spindex.getState());
+      telemetry.addData("📏Target distance", turret.getTargetDistance());
+    }
+
+    if (TELEMETRY_VERBOSITY.verbosity >= Verbosity.DEBUG.verbosity) {
+      double avLoopTime = 0;
+      double minLoopTime = Double.POSITIVE_INFINITY;
+      double maxLoopTime = Double.NEGATIVE_INFINITY;
+      for (Pair<Double, Double> log : loopTimes) {
+        avLoopTime += log.first;
+        if (log.first > maxLoopTime) maxLoopTime = log.first;
+        if (log.first < minLoopTime) minLoopTime = log.first;
+      }
+      avLoopTime /= loopTimes.size();
+      telemetry.addData("⏱️Loop time (ms)", avLoopTime);
+      telemetry.addData("📉Loop time jitter (ms)", maxLoopTime - minLoopTime);
+    }
+
+    if (TELEMETRY_VERBOSITY.verbosity >= Verbosity.DEBUG.verbosity) {
+      telemetry.addData("🚀Turret ready to shoot", turret.isReadyToShoot() ? "✅" : "❌");
+      telemetry.addData("🛸Spindex ready to shoot", spindex.isReadyToShoot() ? "✅" : "❌");
     }
   }
 
