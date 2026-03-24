@@ -18,14 +18,15 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
+import java.util.List;
 
 @TeleOp(group = "2nd robot", name = "2nd Robot Main")
 @Config
@@ -33,12 +34,26 @@ public class SecondRobotMain extends LinearOpMode {
   // FtcDashboard tuning variables
   // TODO: tune
   public static double VELOCITY = 0.0;
-  public static double KP = 0.0;
-  public static double KI = 0.0;
-  public static double KD = 0.0;
-  public static double KF = 0.0;
+  public static double
+      KP = 0.0,
+      KI = 0.0,
+      KD = 0.0,
+      KF = 0.0;
+
+  private double oldVelocity = VELOCITY;
+  private double
+      oldKP = KP,
+      oldKI = KI,
+      oldKD = KD,
+      oldKF = KF;
 
   public void runOpMode() {
+    // bulk reading code
+    List<LynxModule> allHubs = this.hardwareMap.getAll(LynxModule.class);
+    for (LynxModule hub : allHubs) {
+      hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+    }
+
     Telemetry dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
 
     DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
@@ -64,16 +79,24 @@ public class SecondRobotMain extends LinearOpMode {
       wheelBase.setThrottle(gamepad1.right_stick_x, gamepad1.right_stick_y, gamepad1.left_stick_x);
       wheelBase.update(false, gamepad1.left_bumper); // update wheels
 
-      // maybe make analog with a trigger?
-      intake.setPower(gamepad1.right_trigger >= 0.67 ? 1.0 : 0.0); // turn intake on / off
+      intake.setPower(gamepad1.right_trigger); // set intake power
 
-      flywheel.setVelocityPIDFCoefficients(KP, KI, KD, KF); // set PIDF constants
-      flywheel.setVelocity(VELOCITY, AngleUnit.DEGREES); // might want to be able to turn off
+      if (oldKP != KP || oldKI != KI || oldKD != KD || oldKF != KF)
+        flywheel.setVelocityPIDFCoefficients(KP, KI, KD, KF); // set PIDF constants if changed
+      // might want to be able to turn off
+      if (oldVelocity != VELOCITY)
+        flywheel.setVelocity(VELOCITY, AngleUnit.DEGREES); // set velocity if changed
 
       // telemetry
       dashboardTelemetry.addData("Deg/s (actual)", flywheel.getVelocity(AngleUnit.DEGREES));
       dashboardTelemetry.addData("Deg/s (target)", VELOCITY);
       dashboardTelemetry.update();
+
+      oldVelocity = VELOCITY;
+      oldKP = KP;
+      oldKI = KI;
+      oldKD = KD;
+      oldKF = KF;
     }
 
     wheelBase.stop();
