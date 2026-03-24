@@ -59,7 +59,7 @@ public class ScoringSystem {
   // FTC Dashboard config variables
   public static double ballTime = 1;
   public static double ballTimeConstant = 0.05;
-  public static Verbosity TELEMETRY_VERBOSITY; // how verbose the telemetry is
+  public static Verbosity TELEMETRY_VERBOSITY = Verbosity.NORMAL; // how verbose the telemetry is
   public static boolean MANUAL_LIGHTS = false;
   public static RGBIndicator.Color MANUAL_LIGHT_COLOR = RGBIndicator.Color.WHITE;
 
