@@ -28,7 +28,7 @@ public class MecanumWheelBase {
   private double throttleX = 0, throttleY = 0, throttleZ = 0; // processed (robot) throttle values
   private double powerFL = 0, powerFR = 0, powerBL = 0, powerBR = 0; // last set power values
   private double minAccelerationTime; // the time in seconds to go from 0 to full speed
-  private boolean fieldCentric = false; // whether or not to use field-centric control
+  private boolean fieldCentric = false; // weather or not to use field-centric control
   private final ElapsedTime lastUpdateTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
 
   public MecanumWheelBase(
