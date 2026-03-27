@@ -23,6 +23,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
@@ -33,12 +35,12 @@ import java.util.List;
 public class SecondRobotMain extends LinearOpMode {
   // FtcDashboard tuning variables
   // TODO: tune
-  public static double VELOCITY = 0.0;
+  public static double VELOCITY = 130;
   public static double
-      KP = 0.0,
-      KI = 0.0,
+      KP = 1,
+      KI = 1,
       KD = 0.0,
-      KF = 0.0;
+      KF = 16;
 
   private double oldVelocity = VELOCITY;
   private double
@@ -62,6 +64,7 @@ public class SecondRobotMain extends LinearOpMode {
     intake.setPower(0);
 
     DcMotorEx flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
+    flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
     flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     flywheel.setVelocity(0.0, AngleUnit.DEGREES);
@@ -76,15 +79,17 @@ public class SecondRobotMain extends LinearOpMode {
     waitForStart();
 
     while (opModeIsActive()) {
+      //VELOCITY = gamepad1.left_trigger > 0.67 ? -140 : 50;
+
       wheelBase.setThrottle(gamepad1.right_stick_x, gamepad1.right_stick_y, gamepad1.left_stick_x);
       wheelBase.update(false, gamepad1.left_bumper); // update wheels
 
-      intake.setPower(gamepad1.right_trigger); // set intake power
+      intake.setPower(Math.max(gamepad1.right_trigger, 0.1)); // set intake power
 
-      if (oldKP != KP || oldKI != KI || oldKD != KD || oldKF != KF)
+      //if (oldKP != KP || oldKI != KI || oldKD != KD || oldKF != KF)
         flywheel.setVelocityPIDFCoefficients(KP, KI, KD, KF); // set PIDF constants if changed
       // might want to be able to turn off
-      if (oldVelocity != VELOCITY)
+      //if (oldVelocity != VELOCITY)
         flywheel.setVelocity(VELOCITY, AngleUnit.DEGREES); // set velocity if changed
 
       // telemetry

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,19 +44,25 @@ public class MecanumWheelBase {
     this.backRight = backRight;
     this.minAccelerationTime = accelerationTime;
     this.sensitivityCurve = sensitivityCurve;
+
     // set motors to power-based control
     this.frontLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
     this.frontRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
     this.backLeft.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
     this.backRight.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+
     // set motors to float when set to zero power
     this.frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
     this.frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
     this.backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
     this.backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-    // reverse motors on left side of the robot
-    this.frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
-    this.backLeft.setDirection(DcMotorEx.Direction.REVERSE);
+
+    // --- FLIPPED DIRECTIONS ---
+    // Left side is now FORWARD, Right side is now REVERSE
+    this.frontLeft.setDirection(DcMotorEx.Direction.FORWARD);
+    this.backLeft.setDirection(DcMotorEx.Direction.FORWARD);
+    this.frontRight.setDirection(DcMotorEx.Direction.REVERSE);
+    this.backRight.setDirection(DcMotorEx.Direction.REVERSE);
   }
 
   public MecanumWheelBase(
@@ -123,7 +129,7 @@ public class MecanumWheelBase {
    * @param y the throttle controlling the y-axis speed
    * @param z the throttle controlling turning speed
    * @note inputs must be between 1 and -1, values below 0 reverse direction. Does not set motors;
-   *     call update() to apply
+   * call update() to apply
    */
   public void setThrottle(double x, double y, double z) {
     setThrottleX(x, false);
