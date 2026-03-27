@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,33 @@ public enum BallSequence {
     this.ballColors = ballColors;
   }
 
+  /**
+   * Gets an array of `BallColor`s representing the sequence
+   *
+   * @return an array of `BallColor`s in the sequence
+   */
   public BallColor[] getBallColors() {
-    return ballColors.clone();
+    return getBallColors(0);
+  }
+
+  /**
+   * Gets an array of `BallColor`s representing the sequence
+   *
+   * @param offset amount to offset the colors by, equivalent to the number of balls in the ramp
+   * @return an array of `BallColor`s in the sequence
+   */
+  public BallColor[] getBallColors(int offset) {
+    // this was written by ChatGPT, needs testing
+    int n = ballColors.length;
+    offset = ((offset % n) + n) % n;
+
+    BallColor[] result = new BallColor[n];
+
+    for (int i = 0; i < n; i++) {
+      result[(i + offset) % n] = ballColors[i];
+    }
+
+    return result;
   }
 
   public int getAprilTagId() {
