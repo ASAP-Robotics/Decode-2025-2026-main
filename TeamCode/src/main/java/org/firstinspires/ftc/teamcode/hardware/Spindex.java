@@ -82,6 +82,14 @@ public class Spindex implements System {
     ShootingMode(boolean slow) {
       this.slow = slow;
     }
+
+    /**
+     * Returns the "toggled" or opposite shooting mode
+     * @return the opposite shooting mode
+     */
+    public ShootingMode toggle() {
+      return this == FAST ? SLOW : FAST;
+    }
   }
 
   // config vars (FTC Dashboard)

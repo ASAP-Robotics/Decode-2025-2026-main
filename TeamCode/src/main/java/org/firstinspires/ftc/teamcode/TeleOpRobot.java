@@ -277,7 +277,10 @@ public class TeleOpRobot extends CommonRobot {
         scoringSystem.setSpindexEmpty();
       }
 
-      // gamepad 2 b is open for use here
+      // toggle shooting mode
+      if (gamepad2.bWasPressed()) {
+        scoringSystem.toggleShootingMode();
+      }
 
       // turret flap angle offset
       if (gamepad2.dpadDownWasPressed()) {

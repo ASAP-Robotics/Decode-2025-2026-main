@@ -343,6 +343,8 @@ public class ScoringSystem {
 
       telemetry.addData("💿Spindex status", spindex.getStatus().message);
       telemetry.addData("🔫Turret status", turret.getStatus().message);
+
+      telemetry.addData("📨Shooting mode", spindex.getShootingMode().toString());
     }
 
     telemetry.addData("🎞️Sequence", ballSequence);
@@ -544,6 +546,31 @@ public class ScoringSystem {
    */
   public int getSortingOffset() {
     return spindex.getSortingOffset();
+  }
+
+  /**
+   * Sets the shooting mode of the robot
+   *
+   * @param shootingMode the new shooting mode
+   */
+  public void setShootingMode(Spindex.ShootingMode shootingMode) {
+    spindex.setShootingMode(shootingMode);
+  }
+
+  /**
+   * Gets the shooting mode of the robot
+   *
+   * @return the shooting mode
+   */
+  public Spindex.ShootingMode getShootingMode() {
+    return spindex.getShootingMode();
+  }
+
+  /**
+   * Toggles the shooting mode of the robot (fast to slow and vice versa)
+   */
+  public void toggleShootingMode() {
+    setShootingMode(getShootingMode().toggle());
   }
 
   /**
