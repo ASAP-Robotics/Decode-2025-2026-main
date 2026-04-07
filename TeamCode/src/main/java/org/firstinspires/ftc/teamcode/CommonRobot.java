@@ -51,14 +51,14 @@ public abstract class CommonRobot {
     if (this.bulkRead) {
       allHubs = this.hardwareMap.getAll(LynxModule.class);
       for (LynxModule hub : allHubs) {
-        hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
       }
     }
 
     this.telemetry = telemetry;
     this.allianceColor = allianceColor;
 
-    Spindex spindex = new Spindex(hardwareMap, telemetry);
+    Spindex spindex = new Spindex(hardwareMap);
 
     Servo rawTurretHood = this.hardwareMap.get(Servo.class, "turretHood");
     Axon turretHood = new Axon(rawTurretHood);
@@ -81,7 +81,7 @@ public abstract class CommonRobot {
   /**
    * Clears the cache of sensor data
    *
-   * @note MUST be called to get new sensor data if bulk reading enabled
+   * @note should be called to get new sensor data if bulk reading enabled
    * @note returns without doing anything if bulk reading not enabled in constructor
    */
   public void clearSensorCache() {

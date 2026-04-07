@@ -337,7 +337,7 @@ public class ScoringSystem {
   /** Updates (or adds the data of) the telemetry from the scoring systems */
   private void updateTelemetry() {
     if (TELEMETRY_VERBOSITY.verbosity >= Verbosity.NORMAL.verbosity) {
-      telemetry.addData("🎚️State", state.toString());
+      telemetry.addData("🎛️State", state.toString());
       telemetry.addData("⚙️Mag", Arrays.toString(spindex.getSpindexContents()));
       telemetry.addData("🏹Ready to shoot", isReadyToShoot() ? "✅" : "❌");
 

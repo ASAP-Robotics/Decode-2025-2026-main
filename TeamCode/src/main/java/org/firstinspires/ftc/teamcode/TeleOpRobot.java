@@ -43,14 +43,12 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
  */
 @Config
 public class TeleOpRobot extends CommonRobot {
-  // FTC Dashboard config vars
+  // config vars (FTC Dashboard)
   public static boolean limelightEnabled = false; // if limelight can reset location
-
-  // Config vars
-  private static final double MANUAL_SHOOTING_DIST = 75; // inches
-  private static final double MANUAL_SHOOTING_ANGLE = 180; // degrees from straight (intake)
-  private static final double TRIGGER_PRESSED_THRESHOLD = 0.67;
-  private static final double TRIGGER_RELEASED_THRESHOLD = 0.33;
+  public static double MANUAL_SHOOTING_DIST = 75; // inches
+  public static double MANUAL_SHOOTING_ANGLE = 180; // degrees from straight (intake)
+  public static double TRIGGER_PRESSED_THRESHOLD = 0.67;
+  public static double TRIGGER_RELEASED_THRESHOLD = 0.33;
 
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;

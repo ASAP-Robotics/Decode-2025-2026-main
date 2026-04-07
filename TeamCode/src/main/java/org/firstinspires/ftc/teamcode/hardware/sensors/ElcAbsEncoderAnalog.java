@@ -16,18 +16,23 @@
 
 package org.firstinspires.ftc.teamcode.hardware.sensors;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.jetbrains.annotations.TestOnly;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Analog-only driver for the ELC Encoder V2.
  *
  * <p>- Uses ONLY the analog absolute output Supports inversion
  */
+@Config
 public class ElcAbsEncoderAnalog {
+  public static int SENSOR_READS = 3; // number of times to read the analog encoder
   private final AnalogInput absoluteEncoder;
   private boolean inverted = false;
 
@@ -43,7 +48,20 @@ public class ElcAbsEncoderAnalog {
 
   /** Returns raw absolute angle (0–360) */
   public double getAngle() {
-    double voltage = absoluteEncoder.getVoltage();
+    List<Double> voltages = new LinkedList<>();
+
+    for (int i = 0; i < SENSOR_READS; i++) {
+      voltages.add(absoluteEncoder.getVoltage());
+    }
+
+    double voltage = 0;
+
+    for (Double reading : voltages) {
+      voltage += reading;
+    }
+
+    voltage /= voltages.size();
+
     voltage = Range.clip(voltage, 0.0, absoluteEncoder.getMaxVoltage());
 
     double angle = (voltage / absoluteEncoder.getMaxVoltage()) * 360.0;
