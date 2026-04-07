@@ -22,7 +22,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
@@ -36,14 +35,12 @@ import org.firstinspires.ftc.teamcode.types.SystemStatus;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 /**
- * Class to control the behavior of a passive-transfer spindexer (spindex).
- * Contains sorting logic, and high-level control of motor movement and other related hardware.
+ * Class to control the behavior of a passive-transfer spindexer (spindex). Contains sorting logic,
+ * and high-level control of motor movement and other related hardware.
  */
 @Config
 public class Spindex implements System {
-  /**
-   * Simple enum to track the spindex's mode / state
-   */
+  /** Simple enum to track the spindex's mode / state */
   public enum SpindexState {
     UNINITIALIZED(false),
     INTAKING(true),
@@ -57,9 +54,7 @@ public class Spindex implements System {
     }
   }
 
-  /**
-   * Simple class to store info tied to each spindex slot
-   */
+  /** Simple class to store info tied to each spindex slot */
   private static class SpindexSlot {
     // the color of ball in the spindex slot
     public BallColor color;
@@ -77,9 +72,7 @@ public class Spindex implements System {
     }
   }
 
-  /**
-   * Simple enum to contain shooting modes
-   */
+  /** Simple enum to contain shooting modes */
   public enum ShootingMode {
     FAST(false),
     SLOW(true);
@@ -110,7 +103,7 @@ public class Spindex implements System {
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // code assumptions: increasing angle shoots
-      // todo add / tune real shoot end positions
+    // todo add / tune real shoot end positions
     new SpindexSlot(-96, 233, -7), // slot 0
     new SpindexSlot(24, -7, 113), // slot 1
     new SpindexSlot(144, 113, 233) // slot 2
@@ -334,7 +327,8 @@ public class Spindex implements System {
 
     switch (shootingMode) {
       case FAST:
-        spinner.setDirectionConstraint(UnidirectionalHomableRotator.DirectionConstraint.FORWARD_ONLY);
+        spinner.setDirectionConstraint(
+            UnidirectionalHomableRotator.DirectionConstraint.FORWARD_ONLY);
         spinner.manualChangeTargetAngle(400.0);
         // this empties the entire mag; we don't ever need to only partially shoot it
         break;
@@ -445,6 +439,7 @@ public class Spindex implements System {
 
   /**
    * Gets the shooting mode of the spindexer
+   *
    * @return the spindexer's shooting mode
    */
   public ShootingMode getShootingMode() {
@@ -472,6 +467,7 @@ public class Spindex implements System {
 
   /**
    * Gets the color of ball in the intake position
+   *
    * @return the color of ball in the intake
    * @note the returned value is stored, call update() to update it
    */

@@ -20,10 +20,10 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.jetbrains.annotations.TestOnly;
 import java.util.LinkedList;
 import java.util.List;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.jetbrains.annotations.TestOnly;
 
 /**
  * Analog-only driver for the ELC Encoder V2.
