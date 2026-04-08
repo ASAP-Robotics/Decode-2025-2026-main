@@ -43,14 +43,12 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
  */
 @Config
 public class TeleOpRobot extends CommonRobot {
-  // FTC Dashboard config vars
+  // config vars (FTC Dashboard)
   public static boolean limelightEnabled = false; // if limelight can reset location
-
-  // Config vars
-  private static final double MANUAL_SHOOTING_DIST = 75; // inches
-  private static final double MANUAL_SHOOTING_ANGLE = 180; // degrees from straight (intake)
-  private static final double TRIGGER_PRESSED_THRESHOLD = 0.67;
-  private static final double TRIGGER_RELEASED_THRESHOLD = 0.33;
+  public static double MANUAL_SHOOTING_DIST = 75; // inches
+  public static double MANUAL_SHOOTING_ANGLE = 180; // degrees from straight (intake)
+  public static double TRIGGER_PRESSED_THRESHOLD = 0.67;
+  public static double TRIGGER_RELEASED_THRESHOLD = 0.33;
 
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
@@ -279,7 +277,10 @@ public class TeleOpRobot extends CommonRobot {
         scoringSystem.setSpindexEmpty();
       }
 
-      // gamepad 2 b is open for use here
+      // toggle shooting mode
+      if (gamepad2.bWasPressed()) {
+        scoringSystem.toggleShootingMode();
+      }
 
       // turret flap angle offset
       if (gamepad2.dpadDownWasPressed()) {
@@ -352,14 +353,14 @@ public class TeleOpRobot extends CommonRobot {
     if (gamepad2.right_stick_y > TRIGGER_PRESSED_THRESHOLD && !sortingOffsetCounterUpTriggered) {
       sortingOffsetCounterUpTriggered = true;
       sortingOffsetCounterDownTriggered = false;
-      scoringSystem.setSortingOffset((scoringSystem.getSortingOffset() + 1) % 3);
+      scoringSystem.setSortingOffset((scoringSystem.getSortingOffset() + 2) % 3);
     }
 
     // decrement sorting offset
     if (gamepad2.right_stick_y < -TRIGGER_PRESSED_THRESHOLD && !sortingOffsetCounterDownTriggered) {
       sortingOffsetCounterDownTriggered = true;
       sortingOffsetCounterUpTriggered = false;
-      scoringSystem.setSortingOffset((scoringSystem.getSortingOffset() + 2) % 3);
+      scoringSystem.setSortingOffset((scoringSystem.getSortingOffset() + 1) % 3);
     }
 
     // stick up and down release reset logic

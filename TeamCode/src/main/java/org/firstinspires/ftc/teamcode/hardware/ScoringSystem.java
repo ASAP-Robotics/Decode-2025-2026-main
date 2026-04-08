@@ -337,12 +337,14 @@ public class ScoringSystem {
   /** Updates (or adds the data of) the telemetry from the scoring systems */
   private void updateTelemetry() {
     if (TELEMETRY_VERBOSITY.verbosity >= Verbosity.NORMAL.verbosity) {
-      telemetry.addData("🎚️State", state.toString());
+      telemetry.addData("🎛️State", state.toString());
       telemetry.addData("⚙️Mag", Arrays.toString(spindex.getSpindexContents()));
       telemetry.addData("🏹Ready to shoot", isReadyToShoot() ? "✅" : "❌");
 
       telemetry.addData("💿Spindex status", spindex.getStatus().message);
       telemetry.addData("🔫Turret status", turret.getStatus().message);
+
+      telemetry.addData("📨Shooting mode", spindex.getShootingMode().toString());
     }
 
     telemetry.addData("🎞️Sequence", ballSequence);
@@ -544,6 +546,29 @@ public class ScoringSystem {
    */
   public int getSortingOffset() {
     return spindex.getSortingOffset();
+  }
+
+  /**
+   * Sets the shooting mode of the robot
+   *
+   * @param shootingMode the new shooting mode
+   */
+  public void setShootingMode(Spindex.ShootingMode shootingMode) {
+    spindex.setShootingMode(shootingMode);
+  }
+
+  /**
+   * Gets the shooting mode of the robot
+   *
+   * @return the shooting mode
+   */
+  public Spindex.ShootingMode getShootingMode() {
+    return spindex.getShootingMode();
+  }
+
+  /** Toggles the shooting mode of the robot (fast to slow and vice versa) */
+  public void toggleShootingMode() {
+    setShootingMode(getShootingMode().toggle());
   }
 
   /**
