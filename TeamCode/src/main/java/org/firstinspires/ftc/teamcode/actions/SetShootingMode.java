@@ -22,9 +22,7 @@ import com.acmerobotics.roadrunner.Action;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
 
-/**
- * Action to set the shooting mode of the robot (fast / slow)
- */
+/** Action to set the shooting mode of the robot (fast / slow) */
 public class SetShootingMode implements Action {
   private final ScoringSystem scoringSystem;
   private final Spindex.ShootingMode shootingMode;

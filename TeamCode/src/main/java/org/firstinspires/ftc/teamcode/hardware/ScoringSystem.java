@@ -566,9 +566,7 @@ public class ScoringSystem {
     return spindex.getShootingMode();
   }
 
-  /**
-   * Toggles the shooting mode of the robot (fast to slow and vice versa)
-   */
+  /** Toggles the shooting mode of the robot (fast to slow and vice versa) */
   public void toggleShootingMode() {
     setShootingMode(getShootingMode().toggle());
   }
