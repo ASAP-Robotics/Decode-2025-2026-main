@@ -353,14 +353,14 @@ public class TeleOpRobot extends CommonRobot {
     if (gamepad2.right_stick_y > TRIGGER_PRESSED_THRESHOLD && !sortingOffsetCounterUpTriggered) {
       sortingOffsetCounterUpTriggered = true;
       sortingOffsetCounterDownTriggered = false;
-      scoringSystem.setSortingOffset((scoringSystem.getSortingOffset() + 1) % 3);
+      scoringSystem.setSortingOffset((scoringSystem.getSortingOffset() + 2) % 3);
     }
 
     // decrement sorting offset
     if (gamepad2.right_stick_y < -TRIGGER_PRESSED_THRESHOLD && !sortingOffsetCounterDownTriggered) {
       sortingOffsetCounterDownTriggered = true;
       sortingOffsetCounterUpTriggered = false;
-      scoringSystem.setSortingOffset((scoringSystem.getSortingOffset() + 2) % 3);
+      scoringSystem.setSortingOffset((scoringSystem.getSortingOffset() + 1) % 3);
     }
 
     // stick up and down release reset logic

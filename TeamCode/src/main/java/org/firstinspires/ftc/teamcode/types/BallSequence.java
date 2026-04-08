@@ -47,6 +47,7 @@ public enum BallSequence {
   public BallColor[] getBallColors(int offset) {
     // this was written by ChatGPT, needs testing
     int n = ballColors.length;
+    offset = -offset; // needs testing - to make offset more intuitive
     offset = ((offset % n) + n) % n;
 
     BallColor[] result = new BallColor[n];
