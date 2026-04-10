@@ -93,6 +93,23 @@ public class Spindex implements System {
     }
   }
 
+  /**
+   * Simple enum to contain sorting modes
+   */
+  public enum SortingMode {
+    SORTED,
+    FAST;
+
+    /**
+     * Returns the "toggled" or opposite sorting mode
+     *
+     * @return the opposite sorting mode
+     */
+    public SortingMode toggle() {
+      return this == SORTED ? FAST : SORTED;
+    }
+  }
+
   // config vars (FTC Dashboard)
   public static double INTAKE_FLAP_CLOSED = 325;
   public static double INTAKE_FLAP_OPEN = 240;
@@ -100,6 +117,7 @@ public class Spindex implements System {
   public static double SHOOT_DELAY_SECONDS = 0.2;
   public static double SLOW_MODE_SLOT_DELAY_SECONDS = 0.2;
   public static ShootingMode shootingMode = ShootingMode.FAST;
+  public static SortingMode sortingMode = SortingMode.SORTED;
 
   private static final double ANGLE_COMPARISON_THRESHOLD =
       0.1; // diff between to angle to be the same
@@ -112,7 +130,6 @@ public class Spindex implements System {
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // code assumptions: increasing angle shoots
-    // todo add / tune real shoot end positions
     new SpindexSlot(-96, 233, -7), // slot 0
     new SpindexSlot(24, -7, 113), // slot 1
     new SpindexSlot(144, 113, 233) // slot 2
@@ -456,6 +473,26 @@ public class Spindex implements System {
   }
 
   /**
+   * Sets the sorting mode of the spindexer
+   *
+   * @param newSortingMode the new sorting mode of the spindexer
+   * @note prefer using this method over setting directly
+   */
+  public void setSortingMode(SortingMode newSortingMode) {
+    if (newSortingMode == null) return;
+    sortingMode = newSortingMode;
+  }
+
+  /**
+   * Gets the sorting mode of the spindexer
+   *
+   * @return the spindexer's sorting mode
+   */
+  public SortingMode getSortingMode() {
+    return sortingMode;
+  }
+
+  /**
    * Returns if the spindex is at its target position (in an "idle" or inactive state)
    *
    * @return true if the spindex is at its target angle and set to the correct target angle for the
@@ -601,16 +638,16 @@ public class Spindex implements System {
    *
    * @param sequence the sequence of the shot being evaluated
    * @return the index of the best slot to start shooting from
-   * @note if sequence is null, this will return 0
+   * @note if sequence is null, this will behave as if not sorting
    */
   public int getBestStartIndex(BallSequence sequence) {
-    if (sequence == null) return 0; // trying to fail in a non-catastrophic way
     int bestIndex = 0;
     int bestIndexMatches = Integer.MIN_VALUE;
     double bestIndexDist = Double.POSITIVE_INFINITY;
 
     for (int i = 0; i < spindex.length; i++) {
-      int thisIndexMatches = getIndexMatches(i, sequence);
+      int thisIndexMatches =
+          sortingMode == SortingMode.SORTED && sequence != null ? getIndexMatches(i, sequence) : 0;
       double thisIndexDist =
           spinner.getAngleTravel(
               spindex[i].shootStartPosition,

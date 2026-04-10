@@ -298,6 +298,11 @@ public class TeleOpRobot extends CommonRobot {
         scoringSystem.adjustFlywheelRpmOffset(10);
       }
 
+      // toggle sorting mode
+      if (gamepad2.xWasPressed()) {
+        scoringSystem.toggleSortingMode();
+      }
+
       // turret rehome !*!*!*! use with caution !*!*!*!
       if (gamepad2.yWasPressed()) {
         scoringSystem.reSyncTurretEncoder();
