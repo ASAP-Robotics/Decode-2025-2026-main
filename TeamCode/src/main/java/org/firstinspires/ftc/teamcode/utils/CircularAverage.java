@@ -20,8 +20,8 @@ import org.jetbrains.annotations.TestOnly;
 
 /**
  * Simple class to encapsulate a fixed-size circular buffer of the `double` type, with no way to
- * read values in any specific order.
- * This is intended to be used for averaging a fixed number of values.
+ * read values in any specific order. This is intended to be used for averaging a fixed number of
+ * values.
  */
 public class CircularAverage {
   public final int length; // number of elements in buffer
@@ -65,6 +65,7 @@ public class CircularAverage {
 
   /**
    * Gets if the buffer is full (if old values are being overwritten)
+   *
    * @return if the buffer is full
    */
   public boolean isFull() {
@@ -73,6 +74,7 @@ public class CircularAverage {
 
   /**
    * Gets a copy of the internal buffer
+   *
    * @return the internal buffer
    */
   @TestOnly
@@ -82,6 +84,7 @@ public class CircularAverage {
 
   /**
    * Gets the current internal index
+   *
    * @return the current internal index
    */
   @TestOnly

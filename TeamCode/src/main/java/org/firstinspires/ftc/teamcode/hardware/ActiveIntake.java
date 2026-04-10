@@ -27,9 +27,7 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
 @Config
 public class ActiveIntake {
-  /**
-   * Simple enum to capture the state of the intake
-   */
+  /** Simple enum to capture the state of the intake */
   public enum State {
     OFF(0),
     INTAKING(1),
@@ -44,8 +42,8 @@ public class ActiveIntake {
   }
 
   // config vars
-  private final static int READING_NUMBER = 10; // number of past readings to average
-  private final static double TIMER_DURATION = 1.0;
+  private static final int READING_NUMBER = 10; // number of past readings to average
+  private static final double TIMER_DURATION = 1.0;
 
   // config vars (FTC Dashboard)
   // todo tune these values to be reasonable
@@ -120,9 +118,7 @@ public class ActiveIntake {
     return current >= STALL_CURRENT;
   }
 
-  /**
-   * Sets the power of the motor according to the current state
-   */
+  /** Sets the power of the motor according to the current state */
   private void setMotorPower() {
     intakeMotor.setPower(this.state.motorPower);
   }
