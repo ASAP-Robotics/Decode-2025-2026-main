@@ -216,13 +216,8 @@ public class TeleOpRobot extends CommonRobot {
       }
 
       // shoot
-      if (gamepad2.yWasPressed()) {
-        scoringSystem.shoot();
-      }
-
-      // home spindexer
       if (gamepad2.aWasPressed()) {
-        scoringSystem.homeSpindexer();
+        scoringSystem.shoot();
       }
 
       // override aiming
@@ -246,6 +241,11 @@ public class TeleOpRobot extends CommonRobot {
                     location.getY(DistanceUnit.INCH),
                     location.getHeading(AngleUnit.RADIANS)),
                 false);
+      }
+
+      // home spindexer
+      if (gamepad2.yWasPressed()) {
+        scoringSystem.homeSpindexer();
       }
 
     } else if (gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD) { // HYPER ALT
