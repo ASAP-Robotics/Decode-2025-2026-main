@@ -20,7 +20,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -30,7 +29,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
-import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -44,7 +42,6 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 @Config
 public class TeleOpRobot extends CommonRobot {
   // config vars (FTC Dashboard)
-  public static boolean limelightEnabled = false; // if limelight can reset location
   public static double MANUAL_SHOOTING_DIST = 75; // inches
   public static double MANUAL_SHOOTING_ANGLE = 180; // degrees from straight (intake)
   public static double TRIGGER_PRESSED_THRESHOLD = 0.67;
@@ -54,10 +51,8 @@ public class TeleOpRobot extends CommonRobot {
   protected Gamepad gamepad2;
   protected MecanumWheelBase wheelBase;
   protected PinpointLocalizer pinpoint;
-  protected Limelight limelight;
   protected SimpleTimer telemetryTimer = new SimpleTimer(0.67);
   protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
-  protected SimpleTimer odometryResetTimer = new SimpleTimer(2);
   private final boolean fieldCentric;
   private boolean sortingOffsetCounterUpTriggered = false;
   private boolean sortingOffsetCounterDownTriggered = false;
@@ -70,8 +65,6 @@ public class TeleOpRobot extends CommonRobot {
       Gamepad gamepad2,
       boolean fieldCentric) {
     super(hardwareMap, telemetry, allianceColor, true);
-    Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
-    this.limelight = new Limelight(rawLimelight, this.allianceColor);
 
     pinpoint = new PinpointLocalizer(hardwareMap, new PositionFileReader().getPosition(), true);
 
@@ -98,7 +91,6 @@ public class TeleOpRobot extends CommonRobot {
       clearSensorCache();
       pinpoint.update();
     }
-    limelight.init();
     scoringSystem.init(false, false); // initialize scoring systems
   }
 
@@ -116,10 +108,8 @@ public class TeleOpRobot extends CommonRobot {
   public void start() {
     clearSensorCache();
     telemetryTimer.start();
-    limelight.start();
     scoringSystem.start(false); // start scoring systems up
     pinpointErrorTimer.start(); // maybe change
-    odometryResetTimer.start();
   }
 
   /**
@@ -143,10 +133,6 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     Pose2d location = pinpoint.getPose();
-    double velocity =
-        Math.hypot(Math.abs(velocityPose.linearVel.x), Math.abs(velocityPose.linearVel.y));
-    double angleVel = Math.abs(velocityPose.angVel);
-    // ^ directionless velocity of the robot, in inches per second
 
     // update scoring systems
     Pose2D realRobot =
@@ -181,18 +167,6 @@ public class TeleOpRobot extends CommonRobot {
           >= ScoringSystem.Verbosity.EXCESSIVE.verbosity) {
         telemetry.addData("Positon (real)", realRobot);
         telemetry.addData("Position (virtual)", virtual);
-      }
-    }
-
-    if (limelightEnabled && odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25) {
-      Pose2D limelightPose = limelight.getRobotPosition(scoringSystem.getTurretAngle());
-      if (limelightPose != null) {
-        pinpoint.setPose(
-            new Pose2d(
-                limelightPose.getX(DistanceUnit.INCH),
-                limelightPose.getY(DistanceUnit.INCH),
-                limelightPose.getHeading(AngleUnit.RADIANS)));
-        odometryResetTimer.start();
       }
     }
 
