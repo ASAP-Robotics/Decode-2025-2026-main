@@ -93,9 +93,7 @@ public class Spindex implements System {
     }
   }
 
-  /**
-   * Simple enum to contain sorting modes
-   */
+  /** Simple enum to contain sorting modes */
   public enum SortingMode {
     SORTED,
     FAST;
