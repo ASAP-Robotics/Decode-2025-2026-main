@@ -23,6 +23,7 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -46,13 +47,15 @@ public class TeleOpRobot extends CommonRobot {
   public static double MANUAL_SHOOTING_ANGLE = 180; // degrees from straight (intake)
   public static double TRIGGER_PRESSED_THRESHOLD = 0.67;
   public static double TRIGGER_RELEASED_THRESHOLD = 0.33;
+  public static double TELEMETRY_UPDATE_INTERVAL = 0.67; // seconds
+  public static double PINPOINT_ERROR_TIMEOUT = 1.0; // seconds
 
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
   protected MecanumWheelBase wheelBase;
   protected PinpointLocalizer pinpoint;
-  protected SimpleTimer telemetryTimer = new SimpleTimer(0.67);
-  protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
+  protected ElapsedTime telemetryTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+  protected ElapsedTime pinpointErrorTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   private final boolean fieldCentric;
   private boolean sortingOffsetCounterUpTriggered = false;
   private boolean sortingOffsetCounterDownTriggered = false;
@@ -107,9 +110,9 @@ public class TeleOpRobot extends CommonRobot {
    */
   public void start() {
     clearSensorCache();
-    telemetryTimer.start();
+    telemetryTimer.reset();
     scoringSystem.start(false); // start scoring systems up
-    pinpointErrorTimer.start(); // maybe change
+    pinpointErrorTimer.reset();
   }
 
   /**
@@ -118,17 +121,17 @@ public class TeleOpRobot extends CommonRobot {
   public void loop() {
     clearSensorCache();
 
-    boolean updateTelemetry = telemetryTimer.isFinished();
+    boolean updateTelemetry = telemetryTimer.seconds() >= TELEMETRY_UPDATE_INTERVAL;
     if (updateTelemetry) {
-      telemetryTimer.start();
+      telemetryTimer.reset();
     }
 
     // get robot position
     PoseVelocity2d velocityPose = pinpoint.update();
     boolean faulted = pinpoint.isFaulted();
-    if (!faulted) pinpointErrorTimer.start();
+    if (!faulted) pinpointErrorTimer.reset();
 
-    if (faulted && pinpointErrorTimer.isFinished()) {
+    if (faulted && pinpointErrorTimer.seconds() >= PINPOINT_ERROR_TIMEOUT) {
       scoringSystem.overrideAiming(MANUAL_SHOOTING_DIST, MANUAL_SHOOTING_ANGLE);
     }
 
