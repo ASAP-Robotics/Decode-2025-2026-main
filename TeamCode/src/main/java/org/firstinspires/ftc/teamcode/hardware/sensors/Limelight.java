@@ -29,6 +29,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
+// this code should be removed soon
+@Deprecated
 public class Limelight {
   protected static class Result {
     public LLResult result;

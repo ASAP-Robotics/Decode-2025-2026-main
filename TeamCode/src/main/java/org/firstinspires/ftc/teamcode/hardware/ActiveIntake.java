@@ -16,51 +16,59 @@
 
 package org.firstinspires.ftc.teamcode.hardware;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import java.util.LinkedList;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.utils.CircularAverage;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
+@Config
 public class ActiveIntake {
-  private static class CurrentReading {
-    public double current;
-    public double timeStamp;
+  /**
+   * Simple enum to capture the state of the intake
+   */
+  public enum State {
+    OFF(0),
+    INTAKING(1),
+    EJECTING_IDLE(-0.5),
+    EJECTING_FAST(-1);
 
-    public CurrentReading(double current, double timeStamp) {
-      this.current = current;
-      this.timeStamp = timeStamp;
+    public final double motorPower;
+
+    State(double motorPower) {
+      this.motorPower = motorPower;
     }
   }
 
+  // config vars
+  private final static int READING_NUMBER = 10; // number of past readings to average
+  private final static double TIMER_DURATION = 1.0;
+
+  // config vars (FTC Dashboard)
+  // todo tune these values to be reasonable
+  public static double STALL_CURRENT = 5; // current at or above which intake is considered stalled
+  public static double READING_INTERVAL = 0.01; // interval (seconds) to read motor current
+  public static double AUTO_RESTART_INTERVAL = 1.0; // ^ interval (seconds) to re-command motor
+  // (in case of stall and undervoltage shutdown)
+
   private final DcMotorEx intakeMotor; // the motor driving the intake
-  private boolean idling = true; // if the intake is idling
-  private boolean intaking = false; // if the intake is intaking
-  private boolean ejecting = false; // if the intake is ejecting
-  private boolean ballIn = false; // if there is a ball in the intake
+  private State state = State.OFF; // state of the intake
   private double current; // last computed average current, in amps
-  private double stallCurrent; // current at or above which intake is considered stalled
-  private double readingTime; // time span (seconds) to take current reading average over
-  private final ElapsedTime timeSinceStart; // timer to track time since object creation
-  private final LinkedList<CurrentReading>
-      currentReadings; // list of current readings and timestamps
-  public org.firstinspires.ftc.teamcode.utils.SimpleTimer timer = new SimpleTimer(1);
+  private final CircularAverage average = new CircularAverage(READING_NUMBER);
+  private final ElapsedTime timeSinceAutoRestart; // timer to track time since auto restart
+  private final SimpleTimer readingTimer = new SimpleTimer(); // timer for reading interval
+  public SimpleTimer timer = new SimpleTimer(TIMER_DURATION);
 
   public ActiveIntake(DcMotorEx intakeMotor) {
-    this(intakeMotor, 6.7, 10);
-  }
-
-  public ActiveIntake(DcMotorEx intakeMotor, double readingTime, double stallCurrent) {
     this.intakeMotor = intakeMotor;
     this.intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     this.intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); // brake if zero power
     this.current = 0.0; // start at zero current
-    this.stallCurrent = stallCurrent;
-    this.readingTime = readingTime;
-    this.timeSinceStart = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
-    this.currentReadings = new LinkedList<>();
+    this.timeSinceAutoRestart = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+    this.readingTimer.start(READING_INTERVAL);
   }
 
   /**
@@ -68,114 +76,39 @@ public class ActiveIntake {
    * @note currently, this only updates the current readings for the motor
    */
   public void update() {
-    double amps = intakeMotor.getCurrent(CurrentUnit.AMPS); // read current
-    double now = timeSinceStart.time(); // get time
-    currentReadings.add(new CurrentReading(amps, now)); // add new reading
-
-    // remove old readings
-    while (!currentReadings.isEmpty() && now - currentReadings.getFirst().timeStamp > readingTime) {
-      currentReadings.removeFirst();
+    // handle current averaging for stall detection
+    if (readingTimer.isFinished()) {
+      readingTimer.start(READING_INTERVAL); // restart timer (time could change at runtime)
+      double amps = intakeMotor.getCurrent(CurrentUnit.AMPS); // read current
+      average.write(amps); // record reading
+      current = average.average(); // find average current
     }
 
-    // if there are no current readings, current is 0 (this should never happen, but just in case)
-    if (currentReadings.isEmpty()) {
-      current = 0.0;
-
-    } else { // if there are current samples
-      // find average of current readings:
-      double sum = 0; // start counting from 0
-      for (CurrentReading s : currentReadings) { // for each current reading
-        sum += s.current; // add it to the sum
-      }
-      current = sum / currentReadings.size(); // divide sum by number of readings
+    // re-set motor power periodically in case of stall and undervoltage shutoff
+    if (timeSinceAutoRestart.seconds() >= AUTO_RESTART_INTERVAL) {
+      timeSinceAutoRestart.reset();
+      setMotorPower();
     }
   }
 
   /**
-   * @brief stops the intake from spinning
+   * Sets the state of the intake
+   *
+   * @param state the new state of the intake
    */
-  public void stop() {
-    if (!intaking && !ejecting && !idling) return;
-    intakeMotor.setPower(0);
-    intaking = false;
-    ejecting = false;
-    idling = false;
+  public void setState(State state) {
+    if (this.state == state) return;
+    this.state = state;
+    setMotorPower();
   }
 
   /**
-   * @brief spins intake up to bring balls in
+   * Gets the state of the intake
+   *
+   * @return the current state of the intake
    */
-  public void intake() {
-    if (intaking && !ejecting && !idling) return;
-    intakeMotor.setPower(1);
-    intaking = true;
-    ejecting = false;
-    idling = false;
-  }
-
-  /**
-   * @brief spins intake up to half speed to hold balls in the mag
-   */
-  public void intakeIdle() {
-    if (intaking && !ejecting && idling) return;
-    intakeMotor.setPower(0.5);
-    intaking = true;
-    ejecting = false;
-    idling = true;
-  }
-
-  /**
-   * @brief spins intake up in reverse to spit balls out
-   */
-  public void eject() {
-    if (!intaking && ejecting && !idling) return;
-    intakeMotor.setPower(-1);
-    intaking = false;
-    ejecting = true;
-    idling = false;
-  }
-
-  /**
-   * @brief spins intake up in reverse to half speed to keep balls out of the mag
-   */
-  public void ejectIdle() {
-    if (!intaking && ejecting && idling) return;
-    intakeMotor.setPower(-0.5);
-    intaking = false;
-    ejecting = true;
-    idling = true;
-  }
-
-  /**
-   * @brief sets the time over which current reading averages are computed, in seconds
-   * @param timeSeconds the time over which current reading averages are computed, in seconds
-   */
-  public void setAverageTimeSeconds(double timeSeconds) {
-    readingTime = timeSeconds;
-  }
-
-  /**
-   * @brief gets the time over which current reading averages are computed, in seconds
-   * @return the time over which current reading averages are computed, in seconds
-   */
-  public double getAverageTimeSeconds() {
-    return readingTime;
-  }
-
-  /**
-   * @brief sets the average current at or over which the intake is considered stalled
-   * @param stallCurrentAmps the stall current of the intake motor
-   */
-  public void setStallCurrentAmps(double stallCurrentAmps) {
-    stallCurrent = stallCurrentAmps;
-  }
-
-  /**
-   * @brief gets the average current at or over which the intake is considered stalled
-   * @return the currently set stall current of the intake motor, in amps
-   */
-  public double getStallCurrentAmps() {
-    return stallCurrent;
+  public State getState() {
+    return state;
   }
 
   /**
@@ -184,64 +117,13 @@ public class ActiveIntake {
    * @note does not update motor current readings, call update() to update motor current reading
    */
   public boolean isStalled() {
-    return current >= stallCurrent;
+    return current >= STALL_CURRENT;
   }
 
   /**
-   * @brief gets the average current of the intake motor
-   * @return the average current drawn by the intake motor, in amps
+   * Sets the power of the motor according to the current state
    */
-  public double getAverageCurrentAmps() {
-    return current;
-  }
-
-  /**
-   * @brief returns if the intake is in use (busy)
-   * @return true if intake is spinning at full speed, false if intake is stopped or idling
-   */
-  public boolean isBusy() {
-    return (intaking || ejecting) && !idling;
-  }
-
-  /**
-   * @brief returns if the intake is intaking
-   * @return true if intake is intaking, false if ejecting or stopped
-   */
-  public boolean isIntaking() {
-    return intaking;
-  }
-
-  /**
-   * @brief returns if the intake is ejecting
-   * @return true if intake is ejecting, false if intaking or stopped
-   */
-  public boolean isEjecting() {
-    return ejecting;
-  }
-
-  /**
-   * @brief returns if the intake is idling (spinning at half speed)
-   * @return true if the intake is idling, false if the intake is spinning at full speed or stopped
-   */
-  public boolean isIdling() {
-    return idling;
-  }
-
-  /**
-   * @brief returns if a ball is in the intake
-   * @return true if a ball is in the intake, false if the intake is empty
-   * @note this is basically just a wrapper around a variable that isn't used in any core methods
-   */
-  public boolean isBallIn() {
-    return ballIn;
-  }
-
-  /**
-   * @brief sets if a ball is in the intake
-   * @param ballIn true if a ball is in the intake, false if the intake is empty
-   * @brief this is basically just a wrapper around a variable that isn't used in any core methods
-   */
-  public void setBallIn(boolean ballIn) {
-    this.ballIn = ballIn;
+  private void setMotorPower() {
+    intakeMotor.setPower(this.state.motorPower);
   }
 }
