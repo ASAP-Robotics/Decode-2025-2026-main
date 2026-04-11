@@ -74,13 +74,15 @@ public class Spindex implements System {
 
   /** Simple enum to contain shooting modes */
   public enum ShootingMode {
-    FAST(false),
-    SLOW(true);
+    FAST(false, "Fast ⚡"),
+    SLOW(true, "Slow 🎯");
 
     public final boolean slow;
+    public final String displayText;
 
-    ShootingMode(boolean slow) {
+    ShootingMode(boolean slow, String displayText) {
       this.slow = slow;
+      this.displayText = displayText;
     }
 
     /**
@@ -95,8 +97,14 @@ public class Spindex implements System {
 
   /** Simple enum to contain sorting modes */
   public enum SortingMode {
-    SORTED,
-    FAST;
+    SORTED("Sorted 🔁"),
+    FAST("Unsorted 🔀");
+
+    public final String displayText;
+
+    SortingMode(String displayText) {
+      this.displayText = displayText;
+    }
 
     /**
      * Returns the "toggled" or opposite sorting mode

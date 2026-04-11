@@ -343,9 +343,6 @@ public class ScoringSystem {
 
       telemetry.addData("💿Spindex status", spindex.getStatus().message);
       telemetry.addData("🔫Turret status", turret.getStatus().message);
-
-      telemetry.addData("📨Shooting mode", spindex.getShootingMode().toString());
-      telemetry.addData("🧮Sorting mode", spindex.getSortingMode().toString());
     }
 
     telemetry.addData("🎞️Sequence", ballSequence);
@@ -355,6 +352,9 @@ public class ScoringSystem {
     telemetry.addData("↕️Hood offset", turret.getHoodOffset());
     telemetry.addData("🔄️RPM offset", turret.getSpeedOffset());
     telemetry.addData("🎨Color sensor enabled", spindex.isColorSensorEnabled() ? "✅" : "❌");
+
+    telemetry.addData("📨Shooting mode", spindex.getShootingMode().displayText);
+    telemetry.addData("🧮Sorting mode", spindex.getSortingMode().displayText);
 
     if (TELEMETRY_VERBOSITY.verbosity >= Verbosity.DEBUG.verbosity) {
       telemetry.addData("🎡Spindex state", spindex.getState());
