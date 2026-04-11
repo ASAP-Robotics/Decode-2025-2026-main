@@ -30,6 +30,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
+import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
@@ -50,6 +51,9 @@ public class TeleOpRobot extends CommonRobot {
   public static double TRIGGER_PRESSED_THRESHOLD = 0.67;
   public static double TRIGGER_RELEASED_THRESHOLD = 0.33;
 
+  // config vars
+  private static final double TIME_TO_ENDGAME = 100; // seconds
+
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
   protected MecanumWheelBase wheelBase;
@@ -58,6 +62,8 @@ public class TeleOpRobot extends CommonRobot {
   protected SimpleTimer telemetryTimer = new SimpleTimer(0.67);
   protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
   protected SimpleTimer odometryResetTimer = new SimpleTimer(2);
+  protected SimpleTimer endgameTimer = new SimpleTimer(TIME_TO_ENDGAME);
+  protected boolean endgame = false;
   private final boolean fieldCentric;
   private boolean sortingOffsetCounterUpTriggered = false;
   private boolean sortingOffsetCounterDownTriggered = false;
@@ -99,6 +105,7 @@ public class TeleOpRobot extends CommonRobot {
       pinpoint.update();
     }
     limelight.init();
+    scoringSystem.setSortingMode(Spindex.SortingMode.FAST); // start unsorted
     scoringSystem.init(false, false); // initialize scoring systems
   }
 
@@ -120,6 +127,7 @@ public class TeleOpRobot extends CommonRobot {
     scoringSystem.start(false); // start scoring systems up
     pinpointErrorTimer.start(); // maybe change
     odometryResetTimer.start();
+    endgameTimer.start();
   }
 
   /**
@@ -127,6 +135,12 @@ public class TeleOpRobot extends CommonRobot {
    */
   public void loop() {
     clearSensorCache();
+
+    // switch to sorting in endgame
+    if (!endgame && endgameTimer.isFinished()) {
+      endgame = true;
+      scoringSystem.setSortingMode(Spindex.SortingMode.SORTED);
+    }
 
     boolean updateTelemetry = telemetryTimer.isFinished();
     if (updateTelemetry) {
@@ -177,10 +191,15 @@ public class TeleOpRobot extends CommonRobot {
         }
       }
 
+      if (ScoringSystem.TELEMETRY_VERBOSITY.verbosity >= ScoringSystem.Verbosity.DEBUG.verbosity) {
+        telemetry.addData("🏁Endgame", endgame);
+      }
+
       if (ScoringSystem.TELEMETRY_VERBOSITY.verbosity
           >= ScoringSystem.Verbosity.EXCESSIVE.verbosity) {
-        telemetry.addData("Positon (real)", realRobot);
-        telemetry.addData("Position (virtual)", virtual);
+        telemetry.addData("⌚Time to endgame", endgameTimer.remaining());
+        telemetry.addData("🌎Positon (real)", realRobot);
+        telemetry.addData("🌐Position (virtual)", virtual);
       }
     }
 
