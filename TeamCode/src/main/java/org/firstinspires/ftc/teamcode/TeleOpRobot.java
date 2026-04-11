@@ -131,13 +131,13 @@ public class TeleOpRobot extends CommonRobot {
     clearSensorCache();
 
     boolean updateTelemetry = telemetryTimer.seconds() >= TELEMETRY_UPDATE_INTERVAL;
-    
+
     // switch to sorting in endgame
     if (!endgame && endgameTimer.isFinished()) {
       endgame = true;
       scoringSystem.setSortingMode(Spindex.SortingMode.SORTED);
     }
-    
+
     if (updateTelemetry) {
       telemetryTimer.reset();
     }
