@@ -30,6 +30,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
+import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -50,12 +51,17 @@ public class TeleOpRobot extends CommonRobot {
   public static double TELEMETRY_UPDATE_INTERVAL = 0.67; // seconds
   public static double PINPOINT_ERROR_TIMEOUT = 1.0; // seconds
 
+  // config vars
+  private static final double TIME_TO_ENDGAME = 100; // seconds
+
   protected Gamepad gamepad1;
   protected Gamepad gamepad2;
   protected MecanumWheelBase wheelBase;
   protected PinpointLocalizer pinpoint;
   protected ElapsedTime telemetryTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   protected ElapsedTime pinpointErrorTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+  protected SimpleTimer endgameTimer = new SimpleTimer(TIME_TO_ENDGAME);
+  protected boolean endgame = false;
   private final boolean fieldCentric;
   private boolean sortingOffsetCounterUpTriggered = false;
   private boolean sortingOffsetCounterDownTriggered = false;
@@ -94,6 +100,8 @@ public class TeleOpRobot extends CommonRobot {
       clearSensorCache();
       pinpoint.update();
     }
+
+    scoringSystem.setSortingMode(Spindex.SortingMode.FAST); // start unsorted
     scoringSystem.init(false, false); // initialize scoring systems
   }
 
@@ -113,6 +121,7 @@ public class TeleOpRobot extends CommonRobot {
     telemetryTimer.reset();
     scoringSystem.start(false); // start scoring systems up
     pinpointErrorTimer.reset();
+    endgameTimer.start();
   }
 
   /**
@@ -122,6 +131,13 @@ public class TeleOpRobot extends CommonRobot {
     clearSensorCache();
 
     boolean updateTelemetry = telemetryTimer.seconds() >= TELEMETRY_UPDATE_INTERVAL;
+    
+    // switch to sorting in endgame
+    if (!endgame && endgameTimer.isFinished()) {
+      endgame = true;
+      scoringSystem.setSortingMode(Spindex.SortingMode.SORTED);
+    }
+    
     if (updateTelemetry) {
       telemetryTimer.reset();
     }
@@ -166,10 +182,15 @@ public class TeleOpRobot extends CommonRobot {
         }
       }
 
+      if (ScoringSystem.TELEMETRY_VERBOSITY.verbosity >= ScoringSystem.Verbosity.DEBUG.verbosity) {
+        telemetry.addData("🏁Endgame", endgame);
+      }
+
       if (ScoringSystem.TELEMETRY_VERBOSITY.verbosity
           >= ScoringSystem.Verbosity.EXCESSIVE.verbosity) {
-        telemetry.addData("Positon (real)", realRobot);
-        telemetry.addData("Position (virtual)", virtual);
+        telemetry.addData("⌚Time to endgame", endgameTimer.remaining());
+        telemetry.addData("🌎Positon (real)", realRobot);
+        telemetry.addData("🌐Position (virtual)", virtual);
       }
     }
 
@@ -273,6 +294,11 @@ public class TeleOpRobot extends CommonRobot {
 
       } else if (gamepad2.dpadRightWasPressed()) {
         scoringSystem.adjustFlywheelRpmOffset(10);
+      }
+
+      // toggle sorting mode
+      if (gamepad2.xWasPressed()) {
+        scoringSystem.toggleSortingMode();
       }
 
       // turret rehome !*!*!*! use with caution !*!*!*!

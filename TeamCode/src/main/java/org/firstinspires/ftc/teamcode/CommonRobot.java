@@ -36,7 +36,7 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
  * @brief class to contain the configuration of the robot, to avoid code duplication
  */
 public abstract class CommonRobot {
-  protected boolean bulkRead;
+  protected final boolean bulkRead;
   protected List<LynxModule> allHubs; // for loop time optimization
   protected HardwareMap hardwareMap;
   protected Telemetry telemetry;
