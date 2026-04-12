@@ -49,7 +49,7 @@ public class TuningSpindexer extends LinearOpMode {
   public void runOpMode() {
     ElapsedTime loopTime = new ElapsedTime();
 
-    ActiveIntake intake = new ActiveIntake(hardwareMap.get(DcMotorEx.class, "intake"));
+    ActiveIntake intake = new ActiveIntake(hardwareMap);
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
