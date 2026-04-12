@@ -21,7 +21,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public class MathUtils {
-  public final static double COMPARISON_THRESHOLD = 1e-6;
+  public static final double COMPARISON_THRESHOLD = 1e-6;
 
   /**
    * @brief maps a number from one range to another

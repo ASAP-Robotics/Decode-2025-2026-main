@@ -153,9 +153,7 @@ public class ActiveIntake {
     return current >= STALL_CURRENT;
   }
 
-  /**
-   * Starts clearing the intake for a (short) period of time
-   */
+  /** Starts clearing the intake for a (short) period of time */
   public void clear() {
     clearing = true;
     clearingTimer.start();
@@ -207,7 +205,7 @@ public class ActiveIntake {
   }
 
   /**
-   * Gets if there is a ball in the pinch point of the intake  spindexer
+   * Gets if there is a ball in the pinch point of the intake spindexer
    *
    * @return if the pinch point break beam has been broken recently
    */
@@ -218,9 +216,11 @@ public class ActiveIntake {
   /** Sets the power of the motor according to the current state */
   private void setMotorPower() {
     double targetPower =
-        clearing ? PowerLevel.CLEARING.motorPower :
-            ((turnOffWhenEmpty && !containsBall()) ?
-                PowerLevel.OFF.motorPower : state.powerLevel.motorPower);
+        clearing
+            ? PowerLevel.CLEARING.motorPower
+            : ((turnOffWhenEmpty && !containsBall())
+                ? PowerLevel.OFF.motorPower
+                : state.powerLevel.motorPower);
     boolean newTargetPower = !MathUtils.areEqual(targetPower, intakeMotor.getPower());
 
     if (newTargetPower || timeSinceMotorSet.seconds() >= AUTO_RESTART_INTERVAL) {
