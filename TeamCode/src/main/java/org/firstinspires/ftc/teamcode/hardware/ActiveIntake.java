@@ -31,8 +31,8 @@ public class ActiveIntake {
   public enum State {
     OFF(0),
     INTAKING(1),
-    EJECTING_IDLE(-0.5),
-    EJECTING_FAST(-1);
+    EJECTING_IDLE(-0.4),
+    EJECTING_FAST(-0.6);
 
     public final double motorPower;
 
@@ -42,12 +42,11 @@ public class ActiveIntake {
   }
 
   // config vars
-  private static final int READING_NUMBER = 10; // number of past readings to average
+  private static final int READING_NUMBER = 50; // number of past readings to average
   private static final double TIMER_DURATION = 1.0;
 
   // config vars (FTC Dashboard)
-  // todo tune these values to be reasonable
-  public static double STALL_CURRENT = 5; // current at or above which intake is considered stalled
+  public static double STALL_CURRENT = 6; // current at or above which intake is considered stalled
   public static double READING_INTERVAL = 0.01; // interval (seconds) to read motor current
   public static double AUTO_RESTART_INTERVAL = 1.0; // ^ interval (seconds) to re-command motor
   // (in case of stall and undervoltage shutdown)
