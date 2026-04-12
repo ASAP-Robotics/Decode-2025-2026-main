@@ -31,6 +31,7 @@ import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
 
 @TeleOp(name = "Tuning spindexer", group = "Tuning")
 @Config
+@Deprecated
 public class TuningSpindexer extends LinearOpMode {
   public static int target_loop_time = 20;
   public static double angle = 0;
@@ -60,7 +61,7 @@ public class TuningSpindexer extends LinearOpMode {
 
     waitForStart();
     spindex.start();
-    intake.intake();
+    intake.setState(ActiveIntake.State.INTAKING);
 
     while (opModeIsActive()) {
       // it shouldn't matter where this goes

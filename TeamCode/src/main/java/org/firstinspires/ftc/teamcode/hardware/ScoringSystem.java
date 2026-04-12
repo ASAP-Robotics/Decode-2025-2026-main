@@ -153,7 +153,7 @@ public class ScoringSystem {
 
     if (isPreloaded) {
       switchModeToFull();
-      intake.stop();
+      intake.setState(ActiveIntake.State.OFF);
       clearingIntake = true;
       intake.timer.start();
 
@@ -173,7 +173,7 @@ public class ScoringSystem {
   public void stop() {
     turret.disable(); // stop the flywheel
     turret.update();
-    intake.stop(); // stop the intake
+    intake.setState(ActiveIntake.State.OFF); // stop the intake
   }
 
   /**
@@ -255,7 +255,7 @@ public class ScoringSystem {
   /** Updates everything to do with the intake */
   private void updateIntake() {
     if (shutDown) {
-      intake.stop();
+      intake.setState(ActiveIntake.State.OFF);
       return;
     }
 
@@ -265,7 +265,8 @@ public class ScoringSystem {
 
       } else return;
 
-    } else if (intake.isStalled() && intake.isIntaking()) { // if intake is intaking and stalled
+    } else if (intake.isStalled() && intake.getState() == ActiveIntake.State.INTAKING) {
+      // ^ if intake is intaking and stalled
       clearIntake(); // eject the intake to clear the blockage
       return;
     }
@@ -276,17 +277,17 @@ public class ScoringSystem {
 
       case FULL:
       case SHOOTING:
-        if (intake.isIntaking()) {
+        if (intake.getState() == ActiveIntake.State.INTAKING) {
           if (spindex.isAtTarget() && fullWait.isFinished()) clearIntake();
 
         } else {
-          intake.ejectIdle();
+          intake.setState(ActiveIntake.State.EJECTING_IDLE);
         }
         break;
 
       case INTAKING:
       default:
-        intake.intake();
+        intake.setState(ActiveIntake.State.INTAKING);
         break;
     }
   }
@@ -386,7 +387,7 @@ public class ScoringSystem {
    */
   protected void switchModeToFull() {
     state = State.FULL;
-    intake.intake();
+    intake.setState(ActiveIntake.State.INTAKING);
     spindex.prepToShootSequence(ballSequence); // prep spindex to shoot current sequence
     turret.activate(); // get ready to shoot at any time
     fullWait.start();
@@ -397,7 +398,7 @@ public class ScoringSystem {
    */
   protected void switchModeToIntaking() {
     state = State.INTAKING;
-    intake.intake(); // start the intake spinning
+    intake.setState(ActiveIntake.State.INTAKING); // start the intake spinning
     turret.idle(); // flywheel doesn't need to at full speed
   }
 
@@ -435,7 +436,7 @@ public class ScoringSystem {
     // ^ return false if there are no balls in the mag
     spindex.prepToShootSequence(ballSequence);
     state = State.SHOOTING;
-    intake.ejectIdle(); // start the intake spinning
+    intake.setState(ActiveIntake.State.EJECTING_IDLE); // start the intake spinning
     turret.activate(); // start the flywheel spinning
     return true;
   }
@@ -693,7 +694,7 @@ public class ScoringSystem {
    *     malfunctioned); not intended for external use normally or regularly
    */
   public void clearIntake() {
-    intake.eject(); // set intake to eject at full speed
+    intake.setState(ActiveIntake.State.EJECTING_FAST); // set intake to eject at full speed
     intake.timer.start(); // start intake timer
     clearingIntake = true; // we are clearing the intake
   }

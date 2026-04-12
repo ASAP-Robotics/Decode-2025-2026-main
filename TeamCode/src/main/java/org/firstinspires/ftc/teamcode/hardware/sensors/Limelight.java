@@ -29,6 +29,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
+@Deprecated
 public class Limelight {
   protected static class Result {
     public LLResult result;
@@ -173,7 +174,7 @@ public class Limelight {
     List<Double> sorted = new LinkedList<>(data);
     sorted.sort(Double::compare);
 
-    int start = (int) (sorted.size() * Limelight.OUTLIER_PERCENTAGE);
+    int start = (int) (sorted.size() * OUTLIER_PERCENTAGE);
     int end = sorted.size() - start;
 
     if (start >= end) return data; // this shouldn't be necessary, but just in case

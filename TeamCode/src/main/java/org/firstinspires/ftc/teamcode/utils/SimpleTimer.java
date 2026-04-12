@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,10 @@ public class SimpleTimer {
   private final ElapsedTime timer = new ElapsedTime();
   private double duration; // seconds
   private boolean running = false;
+
+  public SimpleTimer() {
+    this(1.0);
+  }
 
   public SimpleTimer(double durationSeconds) {
     this.duration = durationSeconds;
