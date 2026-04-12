@@ -121,6 +121,9 @@ public class ActiveIntake {
       clear();
     }
 
+    // stop clearing when done
+    if (clearing && clearingTimer.isFinished()) clearing = false;
+
     // set motor power
     setMotorPower();
   }
