@@ -150,6 +150,7 @@ public class Spindex implements System {
   // slow mode
   private SpindexState state = SpindexState.UNINITIALIZED; // the current state of the spindex
   private BallSequence sequence = BallSequence.GPP; // the sequence that is to be shot
+  private boolean pinchPointFull = false; // if the pinch point of the intake / spindex holds a ball
   private boolean enabled = true; // if spindex can move, sense, etc.
   private boolean colorSensorEnabled = true; // if color sensor is enabled
   private boolean waitingForTimer = false; // if the spindex is waiting for a timer to finish
@@ -220,7 +221,7 @@ public class Spindex implements System {
     // direction constraints assume that forwards shoots, backwards doesn't
     switch (state) {
       case INTAKING: // if the spindex is intaking
-        if (intakeDelay.isRunning()) break; // wait for ball te get all the way in
+        if (intakeDelay.isRunning() || pinchPointFull) break; // wait for ball te get all the way in
 
         if (isFull()) {
           prepToShootSequence(sequence);
@@ -231,6 +232,7 @@ public class Spindex implements System {
         currentIndex = getColorIndex(BallColor.EMPTY);
 
         turnSpindexNoShoot(spindex[currentIndex].intakePosition); // move spindex to position
+        // the above line could be a good place to put the pinch point logic if needed
 
         if (getIsIntakeColorNew() && isAtTarget() && intakeColor.isShootable()) {
           storeIntakeColor();
@@ -589,6 +591,15 @@ public class Spindex implements System {
     }
 
     switchToIntaking();
+  }
+
+  /**
+   * Sets if the pinch point between the intake and spindexer contains an artifact
+   *
+   * @param pinchPointFull if there is an artifact in the pinch point
+   */
+  public void setIsPinchPointFull(boolean pinchPointFull) {
+    this.pinchPointFull = pinchPointFull;
   }
 
   /**

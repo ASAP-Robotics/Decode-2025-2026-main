@@ -233,6 +233,7 @@ public class ScoringSystem {
   /** Updates everything to do with the spindexer */
   private void updateSpindex() {
     spindex.setSequence(ballSequence);
+    spindex.setIsPinchPointFull(intake.pinchableBall());
     if (state == State.SHOOTING && isReadyToShoot() && !shutDown) {
       spindex.shoot();
     }

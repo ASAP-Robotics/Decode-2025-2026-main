@@ -70,6 +70,7 @@ public class ActiveIntake {
   public static double AUTO_RESTART_INTERVAL = 1.0; // ^ interval (seconds) to re-command motor
   // (in case of stall and undervoltage shutdown)
   public static double FULL_TIMEOUT = 1.5; // seconds (to remain "full" after sensor sees ball)
+  public static double PINCH_TIMEOUT = 0.2; // seconds pinch point remains "full" after beam broken
 
   private final DcMotorEx intakeMotor; // the motor driving the intake
   private final BreakBeam frontSensor; // the break beam sensor across the very front of the intake
@@ -199,7 +200,7 @@ public class ActiveIntake {
   }
 
   /**
-   * Gets if the intake contains a ball
+   * Gets if the intake could contain a ball
    *
    * @return if a break beam sensor has been broken recently
    */
@@ -213,7 +214,7 @@ public class ActiveIntake {
    * @return if the pinch point break beam has been broken recently
    */
   public boolean pinchableBall() {
-    return timeSincePinch.seconds() <= FULL_TIMEOUT;
+    return timeSincePinch.seconds() <= PINCH_TIMEOUT;
   }
 
   /** Sets the power of the motor according to the current state */
