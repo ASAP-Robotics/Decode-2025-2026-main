@@ -34,8 +34,8 @@ public class ActiveIntake {
   public enum PowerLevel {
     OFF(0),
     INTAKING(1),
-    REPELLING(-0.4),
-    CLEARING(-0.6);
+    REPELLING(-0.5),
+    CLEARING(-0.75);
 
     public final double motorPower;
 
@@ -69,7 +69,7 @@ public class ActiveIntake {
   public static double READING_INTERVAL = 0.01; // interval (seconds) to read motor current
   public static double AUTO_RESTART_INTERVAL = 1.0; // ^ interval (seconds) to re-command motor
   // (in case of stall and undervoltage shutdown)
-  public static double FULL_TIMEOUT = 1.0; // seconds (to remain "full" after sensor sees ball)
+  public static double FULL_TIMEOUT = 1.5; // seconds (to remain "full" after sensor sees ball)
 
   private final DcMotorEx intakeMotor; // the motor driving the intake
   private final BreakBeam frontSensor; // the break beam sensor across the very front of the intake

@@ -26,7 +26,7 @@ public class BreakBeamSensorTest extends LinearOpMode {
   private BreakBeam sensor;
 
   public void runOpMode() {
-    sensor = new BreakBeam(hardwareMap.get(DigitalChannel.class, "breakBeam"));
+    sensor = new BreakBeam(hardwareMap.get(DigitalChannel.class, "pinchSensor"));
 
     waitForStart();
 
