@@ -152,25 +152,23 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
       new LookupTableItem(0, 1900, 68, 1),
 
       // Tuned Data (Sorted Low to High)
-            new LookupTableItem(32.8, 1850, 65, .82),
-            new LookupTableItem(40.5, 2200, 48, .65),
-            new LookupTableItem(49.4, 2380, 36.5, .64),
-
-            new LookupTableItem(52.9, 2410, 35, .51),
-            new LookupTableItem(56.7, 2450, 33, .55),
-            new LookupTableItem(63.1, 2490, 33, .60),
-            new LookupTableItem(66.5, 2510, 33, .55),
-
-            new LookupTableItem(70.8, 2590, 30, .55),
-            new LookupTableItem(78.3, 2690, 28, .57),
-            new LookupTableItem(81.3, 2720, 27, .60),
-            new LookupTableItem(85.6, 2780, 26, .66),
-            new LookupTableItem(93.3, 2800, 25, .71),
-            new LookupTableItem(96.3, 2820, 23, .61),
-            new LookupTableItem(104, 2780, 31, .67),
-            new LookupTableItem(106.6, 2850, 27, .65),
-            new LookupTableItem(122.2, 3020, 20, .76),
-            new LookupTableItem(138.5, 3140, 17.5, .89),
+      new LookupTableItem(32.8, 1850, 65, .82),
+      new LookupTableItem(40.5, 2200, 48, .65),
+      new LookupTableItem(49.4, 2380, 36.5, .64),
+      new LookupTableItem(52.9, 2410, 35, .51),
+      new LookupTableItem(56.7, 2450, 33, .55),
+      new LookupTableItem(63.1, 2490, 33, .60),
+      new LookupTableItem(66.5, 2510, 33, .55),
+      new LookupTableItem(70.8, 2590, 30, .55),
+      new LookupTableItem(78.3, 2690, 28, .57),
+      new LookupTableItem(81.3, 2720, 27, .60),
+      new LookupTableItem(85.6, 2780, 26, .66),
+      new LookupTableItem(93.3, 2800, 25, .71),
+      new LookupTableItem(96.3, 2820, 23, .61),
+      new LookupTableItem(104, 2780, 31, .67),
+      new LookupTableItem(106.6, 2850, 27, .65),
+      new LookupTableItem(122.2, 3020, 20, .76),
+      new LookupTableItem(138.5, 3140, 17.5, .89),
 
       // Extrapolated "infinite" point
       new LookupTableItem(Double.POSITIVE_INFINITY, 3100, 10, 1)
