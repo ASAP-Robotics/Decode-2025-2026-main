@@ -17,14 +17,13 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 import java.io.File;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-//@TeleOp(name = "File usage test", group = "Testing")
+// @TeleOp(name = "File usage test", group = "Testing")
 @Deprecated
 public class FileUsageTest extends LinearOpMode {
 

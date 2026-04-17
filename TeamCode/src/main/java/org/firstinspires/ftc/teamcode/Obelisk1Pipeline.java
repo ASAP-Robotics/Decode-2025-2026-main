@@ -4,7 +4,6 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 import java.io.File;
 import java.util.List;
@@ -12,7 +11,7 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.json.JSONObject;
 
-//@TeleOp(name = "Limelight Biggest AprilTag", group = "Vision")
+// @TeleOp(name = "Limelight Biggest AprilTag", group = "Vision")
 @Deprecated
 public class Obelisk1Pipeline extends OpMode {
 

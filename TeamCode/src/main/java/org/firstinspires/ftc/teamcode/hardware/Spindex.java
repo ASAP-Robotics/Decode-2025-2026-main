@@ -222,7 +222,8 @@ public class Spindex implements System {
     // direction constraints assume that forwards shoots, backwards doesn't
     switch (state) {
       case INTAKING: // if the spindex is intaking
-        if (intakeDelay.isRunning() || (pinchPointFull && PROTECT_PINCH_PINT)) break; // wait for ball the get all the way in
+        if (intakeDelay.isRunning() || (pinchPointFull && PROTECT_PINCH_PINT))
+          break; // wait for ball the get all the way in
 
         if (isFull()) {
           prepToShootSequence(sequence);

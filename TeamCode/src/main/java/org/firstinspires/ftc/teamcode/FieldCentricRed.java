@@ -17,10 +17,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
-//@TeleOp(name = "Red Field Centric", group = "1A_Drive")
+// @TeleOp(name = "Red Field Centric", group = "1A_Drive")
 @Deprecated
 public class FieldCentricRed extends LinearOpMode {
   @Override
