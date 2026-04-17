@@ -149,7 +149,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     // note: "distance" numbers *MUST* go from low to high
     return new LookupTableItem[] {
       // Extrapolated 0 point
-      new LookupTableItem(0, 1900, 68, 1),
+      new LookupTableItem(0, 1800, 70, 1),
 
       // Tuned Data (Sorted Low to High)
       new LookupTableItem(32.8, 1850, 65, .82),
@@ -171,7 +171,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
       new LookupTableItem(138.5, 3140, 17.5, .89),
 
       // Extrapolated "infinite" point
-      new LookupTableItem(Double.POSITIVE_INFINITY, 3100, 10, 1)
+      new LookupTableItem(Double.POSITIVE_INFINITY, 3150, 17.5, 1)
     };
   }
 
