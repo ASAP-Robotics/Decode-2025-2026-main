@@ -64,7 +64,7 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
 
   private static final double HORIZONTAL_WRAP_CENTER_DEGREES = -90.0;
   private double hoodChangedOffset = 0;
-  public static int HOOD_OFFSET = 6;
+  public static int HOOD_OFFSET = 0;
   // amount position has to change to actually set servo
   private static final double SERVO_UPDATE_TOLERANCE = 0.5; // degrees
   // amount power has to change by to actually set (rotator) motor
@@ -149,31 +149,29 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     // note: "distance" numbers *MUST* go from low to high
     return new LookupTableItem[] {
       // Extrapolated 0 point
-      new LookupTableItem(0, 1900, 160, 1),
+      new LookupTableItem(0, 1800, 70, 1),
 
       // Tuned Data (Sorted Low to High)
-      new LookupTableItem(33.5, 2000, 110, .82),
-      new LookupTableItem(41.0, 2100, 51, .65),
-      new LookupTableItem(49.3, 2150, 50, .64),
-      new LookupTableItem(52.9, 2300, 37, .51),
-      new LookupTableItem(55.2, 2300, 38, .57),
-      new LookupTableItem(56.7, 2350, 38, .55),
-      new LookupTableItem(63.1, 2350, 39, .6),
-      new LookupTableItem(66.4, 2400, 30, .55),
-      new LookupTableItem(70.8, 2400, 29, .55),
-      new LookupTableItem(78.3, 2500, 28, .57),
-      new LookupTableItem(81.3, 2600, 26, .6),
-      new LookupTableItem(85.6, 2600, 26, .66),
-      new LookupTableItem(93.3, 2600, 30, .71),
-      new LookupTableItem(95.4, 2600, 30, .71),
-      new LookupTableItem(96.3, 2800, 15, .61),
-      new LookupTableItem(104.1, 2800, 20, .67),
-      new LookupTableItem(106.6, 2870, 12, .65),
-      new LookupTableItem(122.2, 3000, 5, .76),
-      new LookupTableItem(138.5, 3180, 0, .89),
+      new LookupTableItem(32.8, 1850, 65, .82),
+      new LookupTableItem(40.5, 2200, 48, .65),
+      new LookupTableItem(49.4, 2380, 36.5, .64),
+      new LookupTableItem(52.9, 2410, 35, .51),
+      new LookupTableItem(56.7, 2450, 33, .55),
+      new LookupTableItem(63.1, 2490, 33, .60),
+      new LookupTableItem(66.5, 2510, 33, .55),
+      new LookupTableItem(70.8, 2590, 30, .55),
+      new LookupTableItem(78.3, 2690, 28, .57),
+      new LookupTableItem(81.3, 2720, 27, .60),
+      new LookupTableItem(85.6, 2780, 26, .66),
+      new LookupTableItem(93.3, 2800, 25, .71),
+      new LookupTableItem(96.3, 2820, 23, .61),
+      new LookupTableItem(104, 2780, 31, .67),
+      new LookupTableItem(106.6, 2850, 27, .65),
+      new LookupTableItem(122.2, 3020, 20, .76),
+      new LookupTableItem(138.5, 3140, 17.5, .89),
 
       // Extrapolated "infinite" point
-      new LookupTableItem(Double.POSITIVE_INFINITY, 3100, 10, 1)
+      new LookupTableItem(Double.POSITIVE_INFINITY, 3150, 17.5, 1)
     };
   }
 
