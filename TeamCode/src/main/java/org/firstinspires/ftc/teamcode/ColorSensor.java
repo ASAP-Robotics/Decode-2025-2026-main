@@ -17,7 +17,7 @@ public class ColorSensor extends LinearOpMode {
   protected RGBIndicator light2;
 
   public void runOpMode() {
-    colorSensorV3 = new ColorSensorV3(hardwareMap, "colorSensor");
+    colorSensorV3 = new ColorSensorV3(hardwareMap, "colorSensor", "intakeBeam");
     light1 = new RGBIndicator(hardwareMap, "indicator1");
     light2 = new RGBIndicator(hardwareMap, "indicator2");
 

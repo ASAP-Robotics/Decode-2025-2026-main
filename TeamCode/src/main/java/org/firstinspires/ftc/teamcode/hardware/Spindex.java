@@ -174,7 +174,7 @@ public class Spindex implements System {
             5,
             true);
     this.intakeBlocker = new Axon(hardwareMap, "intakeBlocker", "intakeBlockerEncoder");
-    this.colorSensor = new ColorSensorV3(hardwareMap, "colorSensor");
+    this.colorSensor = new ColorSensorV3(hardwareMap, "colorSensor", "intakeBeam");
   }
 
   /**
