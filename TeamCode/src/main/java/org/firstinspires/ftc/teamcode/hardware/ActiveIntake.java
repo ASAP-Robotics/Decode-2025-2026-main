@@ -16,6 +16,7 @@
 
 package org.firstinspires.ftc.teamcode.hardware;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -23,6 +24,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
 import org.firstinspires.ftc.teamcode.utils.CircularAverage;
@@ -65,13 +68,15 @@ public class ActiveIntake {
   private static final String PINCH_SENSOR_NAME = "pinchSensor";
 
   // config vars (FTC Dashboard)
+  public static boolean SHOW_TELEMETRY = false;
   public static double STALL_CURRENT = 6; // current at or above which intake is considered stalled
   public static double READING_INTERVAL = 0.01; // interval (seconds) to read motor current
   public static double AUTO_RESTART_INTERVAL = 1.0; // ^ interval (seconds) to re-command motor
   // (in case of stall and undervoltage shutdown)
-  public static double FULL_TIMEOUT = 1.5; // seconds (to remain "full" after sensor sees ball)
-  public static double PINCH_TIMEOUT = 0.2; // seconds pinch point remains "full" after beam broken
+  public static double FULL_TIMEOUT = 0.5; // seconds (to remain "full" after sensor sees ball)
+  public static double PINCH_TIMEOUT = 0.1; // seconds pinch point remains "full" after beam broken
 
+  private final Telemetry telemetry;
   private final DcMotorEx intakeMotor; // the motor driving the intake
   private final BreakBeam frontSensor; // the break beam sensor across the very front of the intake
   private final BreakBeam pinchSensor; // the break beam sensor across the spindexer's pinch point
@@ -94,6 +99,7 @@ public class ActiveIntake {
     intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); // brake if zero power
     current = 0.0; // start at zero current
+    telemetry = FtcDashboard.getInstance().getTelemetry();
     timeSinceMotorSet = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
     timeSinceFront = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
     timeSincePinch = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
@@ -116,6 +122,14 @@ public class ActiveIntake {
     // read break beam sensors
     if (frontSensor.isBroken()) timeSinceFront.reset();
     if (pinchSensor.isBroken()) timeSincePinch.reset();
+
+    if (SHOW_TELEMETRY) {
+      telemetry.addData("Pinch sensor", timeSincePinch.seconds());
+      telemetry.addData("Front sensor", timeSinceFront.seconds());
+      telemetry.addData("Full threshold", FULL_TIMEOUT);
+      telemetry.addData("Pinch thresh.", PINCH_TIMEOUT);
+      telemetry.update();
+    }
 
     // auto-clear if stalled
     if (stalled() && !clearing && state == State.INTAKING) {
@@ -222,7 +236,7 @@ public class ActiveIntake {
     double targetPower =
         clearing
             ? PowerLevel.CLEARING.motorPower
-            : ((turnOffWhenEmpty && !containsBall())
+            : ((turnOffWhenEmpty && !containsBall() && state != State.INTAKING)
                 ? PowerLevel.OFF.motorPower
                 : state.powerLevel.motorPower);
     boolean newTargetPower = !MathUtils.areEqual(targetPower, intakeMotor.getPower());

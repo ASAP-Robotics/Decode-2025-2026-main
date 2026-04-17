@@ -27,6 +27,7 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 /**
  * @brief class to contain the behavior of the robot in Auto, to avoid code duplication
  */
+@Deprecated
 public class plzwork extends CommonRobot {
   // stuff (variables, etc., see TeleOpRobot) goes here; TODO: update
   boolean move = true;

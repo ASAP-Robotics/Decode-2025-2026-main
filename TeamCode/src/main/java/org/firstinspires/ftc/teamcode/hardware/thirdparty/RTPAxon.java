@@ -26,6 +26,7 @@ package org.firstinspires.ftc.teamcode.hardware.thirdparty;
 import android.annotation.SuppressLint;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -378,6 +379,7 @@ public class RTPAxon {
 
   // TeleOp test class for manual tuning and testing
   @TeleOp(name = "Cont. Rotation Axon Test", group = "test")
+  @Disabled
   public static class CRAxonTest extends LinearOpMode {
 
     @Override

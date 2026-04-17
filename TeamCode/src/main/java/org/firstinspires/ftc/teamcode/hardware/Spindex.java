@@ -117,6 +117,7 @@ public class Spindex implements System {
   }
 
   // config vars (FTC Dashboard)
+  public static boolean PROTECT_PINCH_PINT = true;
   public static double INTAKE_FLAP_CLOSED = 325;
   public static double INTAKE_FLAP_OPEN = 240;
   public static double INTAKE_DELAY_SECONDS = 0.01;
@@ -136,9 +137,9 @@ public class Spindex implements System {
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // code assumptions: increasing angle shoots
-    new SpindexSlot(-96, 233, -7), // slot 0
-    new SpindexSlot(24, -7, 113), // slot 1
-    new SpindexSlot(144, 113, 233) // slot 2
+    new SpindexSlot(-102, 233, -7), // slot 0
+    new SpindexSlot(18, -7, 113), // slot 1
+    new SpindexSlot(138, 113, 233) // slot 2
   };
 
   private final SimpleTimer intakeDelay =
@@ -221,7 +222,7 @@ public class Spindex implements System {
     // direction constraints assume that forwards shoots, backwards doesn't
     switch (state) {
       case INTAKING: // if the spindex is intaking
-        if (intakeDelay.isRunning() || pinchPointFull) break; // wait for ball te get all the way in
+        if (intakeDelay.isRunning() || (pinchPointFull && PROTECT_PINCH_PINT)) break; // wait for ball the get all the way in
 
         if (isFull()) {
           prepToShootSequence(sequence);

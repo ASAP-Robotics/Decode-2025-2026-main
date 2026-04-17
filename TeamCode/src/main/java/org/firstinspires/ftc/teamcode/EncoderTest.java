@@ -16,11 +16,13 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
 
 @TeleOp
+@Disabled
 public class EncoderTest extends LinearOpMode {
   @Override
   public void runOpMode() {

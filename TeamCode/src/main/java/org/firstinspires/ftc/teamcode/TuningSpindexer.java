@@ -20,6 +20,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -29,8 +30,8 @@ import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotat
 import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
 
 @TeleOp(name = "Tuning spindexer", group = "Tuning")
+@Disabled
 @Config
-@Deprecated
 public class TuningSpindexer extends LinearOpMode {
   public static int target_loop_time = 20;
   public static double angle = 0;

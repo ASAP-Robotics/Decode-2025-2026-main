@@ -12,7 +12,8 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.json.JSONObject;
 
-@TeleOp(name = "Limelight Biggest AprilTag", group = "Vision")
+//@TeleOp(name = "Limelight Biggest AprilTag", group = "Vision")
+@Deprecated
 public class Obelisk1Pipeline extends OpMode {
 
   private int lastWrittenTagId = -1;
