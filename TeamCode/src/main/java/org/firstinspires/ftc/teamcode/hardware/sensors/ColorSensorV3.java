@@ -41,7 +41,7 @@ public class ColorSensorV3 implements System {
   public static double GREEN_HUE_TOLERANCE = 20;
   public static double GREEN_SATURATION_MIN = 0.6;
   public static double BALL_DISTANCE_THRESHOLD = 2.7; // inches
-  public static double BREAK_BEAM_TIMEOUT = 0.25; // seconds
+  public static double BREAK_BEAM_TIMEOUT = 0.05; // seconds
   public static double DISCONNECT_TIME = 1.0; // seconds
 
   protected SystemStatus status = SystemStatus.NOMINAL;

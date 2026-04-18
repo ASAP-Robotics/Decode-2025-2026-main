@@ -233,7 +233,7 @@ public class ScoringSystem {
   /** Updates everything to do with the spindexer */
   private void updateSpindex() {
     spindex.setSequence(ballSequence);
-    spindex.setIsPinchPointFull(intake.pinchableBall());
+    spindex.setIsPinchPointFull(intake.pinchableBall()); // todo add driver backup
     if (state == State.SHOOTING && isReadyToShoot() && !shutDown) {
       spindex.shoot();
     }
@@ -470,13 +470,13 @@ public class ScoringSystem {
   }
 
   /**
-   * Sets the intake as full manually
+   * Sets the intake as full manually, and overrides the pinch point to be "empty"
    *
    * @param ball the color of ball in the intake
    * @note intended as a driver backup only
    */
   public void setIntakeFull(BallColor ball) {
-    spindex.setIntakeColor(ball);
+    spindex.manualIntake(ball);
   }
 
   /**

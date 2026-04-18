@@ -317,7 +317,7 @@ public class TeleOpRobot extends CommonRobot {
         scoringSystem.toggleColorSensorEnabled();
       }
 
-      // manual intake full
+      // manual intake full / pinch point empty
       if (gamepad2.xWasPressed()) {
         scoringSystem.setIntakeFull(BallColor.PURPLE);
       } else if (gamepad2.aWasPressed()) {

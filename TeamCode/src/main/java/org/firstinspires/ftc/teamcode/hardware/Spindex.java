@@ -158,6 +158,7 @@ public class Spindex implements System {
   // (specifically when slow shooting, for now)
   private int currentIndex = NULL; // the current index the spindex is at, dependent on the state
   private int sortingOffset = 0; // offset for sorting, basically the number of balls in the ramp
+  private int pinchPointEmptyLoops = 0; // loops for pinch point empty override to be active
   private BallColor intakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake the most recent time checked
   private BallColor oldIntakeColor =
@@ -222,7 +223,9 @@ public class Spindex implements System {
     // direction constraints assume that forwards shoots, backwards doesn't
     switch (state) {
       case INTAKING: // if the spindex is intaking
-        if (intakeDelay.isRunning() || (pinchPointFull && PROTECT_PINCH_PINT))
+        boolean pinchBackup = pinchPointEmptyLoops > 0;
+        if (pinchBackup) pinchPointEmptyLoops--;
+        if (!pinchBackup && (intakeDelay.isRunning() || (pinchPointFull && PROTECT_PINCH_PINT)))
           break; // wait for ball the get all the way in
 
         if (isFull()) {
@@ -532,12 +535,14 @@ public class Spindex implements System {
   }
 
   /**
-   * Sets the color of ball in the intake
+   * Sets the color of ball in the intake, and overrides the pinch point as being empty
    *
    * @param color the color of ball in the intake
    * @note intended as a driver backup
    */
-  public void setIntakeColor(BallColor color) {
+  public void manualIntake(BallColor color) {
+    if (!state.checkSensor || !color.isShootable()) return;
+    pinchPointEmptyLoops = 2; // override the pinch point as "empty" for two loops
     setSpindexIndexColor(currentIndex, color);
   }
 
