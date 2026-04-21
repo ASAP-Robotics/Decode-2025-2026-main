@@ -36,11 +36,11 @@ public class ColorSensorV3 implements System {
   // config vars (FTC Dashboard)
   public static boolean SHOW_TELEMETRY = false;
   public static double PURPLE_HUE = 200.0;
-  public static double PURPLE_HUE_TOLERANCE = 24;
+  public static double PURPLE_HUE_TOLERANCE = 30;
   public static double GREEN_HUE = 157.0;
   public static double GREEN_HUE_TOLERANCE = 20;
   public static double GREEN_SATURATION_MIN = 0.6;
-  public static double BALL_DISTANCE_THRESHOLD = 2.7; // inches
+  public static double BALL_DISTANCE_THRESHOLD = 2.3; // inches
   public static double BREAK_BEAM_TIMEOUT = 0.05; // seconds
   public static double DISCONNECT_TIME = 1.0; // seconds
 
@@ -76,7 +76,7 @@ public class ColorSensorV3 implements System {
       telemetry.addData("Beam broken", beamBroken);
     }
 
-    if (beamBroken && distance <= BALL_DISTANCE_THRESHOLD) {
+    if (beamBroken || distance <= BALL_DISTANCE_THRESHOLD) {
       float[] hsv = new float[3];
       Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsv);
       float h = hsv[0];

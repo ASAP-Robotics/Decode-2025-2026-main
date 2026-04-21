@@ -239,7 +239,7 @@ public class Spindex implements System {
         turnSpindexNoShoot(spindex[currentIndex].intakePosition); // move spindex to position
         // the above line could be a good place to put the pinch point logic if needed
 
-        if (getIsIntakeColorNew() && isAtTarget() && intakeColor.isShootable()) {
+        if (isAtTarget() && intakeColor.isShootable()) {
           storeIntakeColor();
           intakeDelay.start(); // start movement delay
         }
@@ -532,6 +532,16 @@ public class Spindex implements System {
    */
   public BallColor getIntakeColor() {
     return intakeColor;
+  }
+
+  /**
+   * Gets the old color of ball in the intake position
+   *
+   * @return the color of ball in the intake
+   * @note the returned value is stored, call update() to update it
+   */
+  public BallColor getOldIntakeColor() {
+    return oldIntakeColor;
   }
 
   /**
