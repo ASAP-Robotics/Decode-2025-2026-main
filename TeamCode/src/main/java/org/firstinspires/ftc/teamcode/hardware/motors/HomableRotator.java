@@ -280,7 +280,7 @@ public class HomableRotator implements System {
   }
 
   /**
-   * Gets if the motor is at it's target angle
+   * Gets if the motor is at its target angle
    *
    * @return true if at target, false otherwise
    */
@@ -353,7 +353,7 @@ public class HomableRotator implements System {
   }
 
   /**
-   * Sets the I tuning value for the PID controller
+   * Sets the "I" tuning value for the PID controller
    *
    * @param ki integral
    */
@@ -389,7 +389,7 @@ public class HomableRotator implements System {
   }
 
   /**
-   * Gets the I tuning value from the PID controller
+   * Gets the "I" tuning value from the PID controller
    *
    * @return integral
    */
