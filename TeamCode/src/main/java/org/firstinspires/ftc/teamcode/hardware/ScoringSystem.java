@@ -31,7 +31,6 @@ import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.utils.BallSequenceFileReader;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
-import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.jetbrains.annotations.TestOnly;
 
 @Config
@@ -87,7 +86,6 @@ public class ScoringSystem {
   private Pose2D robotPosition =
       new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0); // the position of the robot
   private final Telemetry telemetry;
-  private final SimpleTimer fullWait = new SimpleTimer(0.5);
   private final ElapsedTime timeSinceStart = new ElapsedTime();
   private final ElapsedTime loopTime = new ElapsedTime();
   private final LinkedList<Pair<Double, Double>> loopTimes = new LinkedList<>();
@@ -233,7 +231,7 @@ public class ScoringSystem {
   /** Updates everything to do with the spindexer */
   private void updateSpindex() {
     spindex.setSequence(ballSequence);
-    spindex.setIsPinchPointFull(intake.pinchableBall()); // todo add driver backup
+    spindex.setIsPinchPointFull(intake.pinchableBall());
     if (state == State.SHOOTING && isReadyToShoot() && !shutDown) {
       spindex.shoot();
     }
@@ -267,15 +265,7 @@ public class ScoringSystem {
 
       case FULL:
       case SHOOTING:
-        if (intake.state() == ActiveIntake.State.INTAKING) {
-          if (spindex.isAtTarget() && fullWait.isFinished()) {
-            clearIntake();
-            intake.setState(ActiveIntake.State.REPELLING);
-          }
-
-        } else {
-          intake.setState(ActiveIntake.State.REPELLING);
-        }
+        intake.setState(ActiveIntake.State.REPELLING);
         break;
 
       case INTAKING:
@@ -353,6 +343,7 @@ public class ScoringSystem {
     if (TELEMETRY_VERBOSITY.verbosity >= Verbosity.DEBUG.verbosity) {
       telemetry.addData("🎡Spindex state", spindex.getState());
       telemetry.addData("📏Target distance", turret.getTargetDistance());
+      telemetry.addData("📐Turret angle (target)", turret.getHorizontalAngleDegrees());
     }
 
     if (TELEMETRY_VERBOSITY.verbosity >= Verbosity.DEBUG.verbosity) {
@@ -380,10 +371,10 @@ public class ScoringSystem {
    */
   protected void switchModeToFull() {
     state = State.FULL;
-    intake.setState(ActiveIntake.State.INTAKING);
+    intake.setState(ActiveIntake.State.REPELLING); // start the intake spinning
+    clearIntake(); // clear the intake
     spindex.prepToShootSequence(ballSequence); // prep spindex to shoot current sequence
     turret.activate(); // get ready to shoot at any time
-    fullWait.start();
   }
 
   /**
@@ -630,15 +621,6 @@ public class ScoringSystem {
    */
   protected double getRelativeTargetAngle() {
     return getAbsoluteTargetAngle() - robotPosition.getHeading(AngleUnit.DEGREES) + 180;
-  }
-
-  /**
-   * Gets the angle of the turret relative to straight
-   *
-   * @return the angle of the turret, in degrees
-   */
-  public double getTurretAngle() {
-    return turret.getHorizontalAngleDegrees();
   }
 
   public Pose2D getVirtualRobotPosition(
