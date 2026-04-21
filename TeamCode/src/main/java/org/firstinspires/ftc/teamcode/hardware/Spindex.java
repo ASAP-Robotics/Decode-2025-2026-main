@@ -158,11 +158,9 @@ public class Spindex implements System {
   // (specifically when slow shooting, for now)
   private int currentIndex = NULL; // the current index the spindex is at, dependent on the state
   private int sortingOffset = 0; // offset for sorting, basically the number of balls in the ramp
-  private int pinchPointEmptyLoops = 0; // loops for pinch point empty override to be active
+  private boolean pinchBackup = false; // if the pinch point empty backup is active
   private BallColor intakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake the most recent time checked
-  private BallColor oldIntakeColor =
-      BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
   public Spindex(HardwareMap hardwareMap) {
     this.spinner =
@@ -220,13 +218,12 @@ public class Spindex implements System {
     if (!isIndexValid(currentIndex)) state = SpindexState.UNINITIALIZED; // shouldn't happen
 
     // do something different depending on the spindex state / mode
-    // direction constraints assume that forwards shoots, backwards doesn't
     switch (state) {
       case INTAKING: // if the spindex is intaking
-        boolean pinchBackup = pinchPointEmptyLoops > 0;
-        if (pinchBackup) pinchPointEmptyLoops--;
         if (!pinchBackup && (intakeDelay.isRunning() || (pinchPointFull && PROTECT_PINCH_PINT)))
           break; // wait for ball the get all the way in
+
+        pinchBackup = false;
 
         if (isFull()) {
           prepToShootSequence(sequence);
@@ -237,7 +234,6 @@ public class Spindex implements System {
         currentIndex = getColorIndex(BallColor.EMPTY);
 
         turnSpindexNoShoot(spindex[currentIndex].intakePosition); // move spindex to position
-        // the above line could be a good place to put the pinch point logic if needed
 
         if (isAtTarget() && intakeColor.isShootable()) {
           storeIntakeColor();
@@ -291,7 +287,6 @@ public class Spindex implements System {
 
     spinner.update();
 
-    oldIntakeColor = intakeColor; // store old intake color
     if (colorSensorEnabled && state.checkSensor && isAtTarget()) {
       colorSensor.update();
       intakeColor = colorSensor.getColor(); // update intake color
@@ -346,12 +341,7 @@ public class Spindex implements System {
     intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake
     currentIndex = getBestStartIndex(sequence); // set new index
     state = SpindexState.SHOOTING_READY; // spindex in shooting mode
-    if ( // this might be redundant
-    Math.abs(
-            AngleUnit.normalizeDegrees(spinner.getTargetAngle())
-                - AngleUnit.normalizeDegrees(spindex[currentIndex].shootStartPosition))
-        >= ANGLE_COMPARISON_THRESHOLD)
-      shootDelay.start(); // start delay if spinner hasn't been set yet
+    // probably redundant code was removed here, if things are breaking this could be it
   }
 
   /**
@@ -516,15 +506,6 @@ public class Spindex implements System {
   }
 
   /**
-   * Returns if the color of ball in the intake is different from the last reading
-   *
-   * @return true if the color of ball in the intake changed, false if it didn't
-   */
-  protected boolean getIsIntakeColorNew() {
-    return intakeColor != oldIntakeColor;
-  }
-
-  /**
    * Gets the color of ball in the intake position
    *
    * @return the color of ball in the intake
@@ -535,16 +516,6 @@ public class Spindex implements System {
   }
 
   /**
-   * Gets the old color of ball in the intake position
-   *
-   * @return the color of ball in the intake
-   * @note the returned value is stored, call update() to update it
-   */
-  public BallColor getOldIntakeColor() {
-    return oldIntakeColor;
-  }
-
-  /**
    * Sets the color of ball in the intake, and overrides the pinch point as being empty
    *
    * @param color the color of ball in the intake
@@ -552,7 +523,7 @@ public class Spindex implements System {
    */
   public void manualIntake(BallColor color) {
     if (!state.checkSensor || !color.isShootable()) return;
-    pinchPointEmptyLoops = 2; // override the pinch point as "empty" for two loops
+    pinchBackup = true; // override the pinch point as "empty" for the next loop
     setSpindexIndexColor(currentIndex, color);
   }
 
