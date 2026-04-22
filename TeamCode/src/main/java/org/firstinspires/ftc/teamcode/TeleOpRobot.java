@@ -221,7 +221,27 @@ public class TeleOpRobot extends CommonRobot {
 
   /** Handles backup driver inputs */
   private void updateDriverControls() {
-    if (gamepad2.left_trigger > TRIGGER_PRESSED_THRESHOLD) { // HYPER SHIFT
+    if (gamepad2.left_trigger > TRIGGER_PRESSED_THRESHOLD &&
+        gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD) { // SHIFT + ALT
+      // reset odometry !*!*!*! use with caution !*!*!*!
+      if (gamepad2.xWasPressed()) {
+        Pose2D location = scoringSystem.allianceColor.getResetLocation();
+        pinpoint =
+            new PinpointLocalizer(
+                hardwareMap,
+                new Pose2d(
+                    location.getX(DistanceUnit.INCH),
+                    location.getY(DistanceUnit.INCH),
+                    location.getHeading(AngleUnit.RADIANS)),
+                false);
+      }
+
+      // turret rehome !*!*!*! use with caution !*!*!*!
+      if (gamepad2.yWasPressed()) {
+        scoringSystem.reSyncTurretEncoder();
+      }
+
+    } else if (gamepad2.left_trigger > TRIGGER_PRESSED_THRESHOLD) { // SHIFT
       // manual sequence setting
       if (gamepad2.dpadDownWasPressed()) {
         scoringSystem.setBallSequence(BallSequence.PGP);
@@ -236,9 +256,9 @@ public class TeleOpRobot extends CommonRobot {
         scoringSystem.setBallSequence(new BallSequenceFileReader().getSequence());
       }
 
-      // shoot
+      // home spindexer
       if (gamepad2.aWasPressed()) {
-        scoringSystem.shoot();
+        scoringSystem.homeSpindexer();
       }
 
       // override aiming
@@ -251,33 +271,25 @@ public class TeleOpRobot extends CommonRobot {
         }
       }
 
-      // reset odometry !*!*!*! use with caution !*!*!*!
+      // unjam spindexer
       if (gamepad2.xWasPressed()) {
-        Pose2D location = scoringSystem.allianceColor.getResetLocation();
-        pinpoint =
-            new PinpointLocalizer(
-                hardwareMap,
-                new Pose2d(
-                    location.getX(DistanceUnit.INCH),
-                    location.getY(DistanceUnit.INCH),
-                    location.getHeading(AngleUnit.RADIANS)),
-                false);
+        scoringSystem.unJamSpindexer();
       }
 
-      // home spindexer
+      // color sensor enable toggle
       if (gamepad2.yWasPressed()) {
-        scoringSystem.homeSpindexer();
+        scoringSystem.toggleColorSensorEnabled();
       }
 
-    } else if (gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD) { // HYPER ALT
+    } else if (gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD) { // ALT
       // manual set empty
       if (gamepad2.aWasPressed()) {
         scoringSystem.setSpindexEmpty();
       }
 
-      // toggle shooting mode
+      // toggle sorting mode
       if (gamepad2.bWasPressed()) {
-        scoringSystem.toggleShootingMode();
+        scoringSystem.toggleSortingMode();
       }
 
       // turret flap angle offset
@@ -296,25 +308,17 @@ public class TeleOpRobot extends CommonRobot {
         scoringSystem.adjustFlywheelRpmOffset(10);
       }
 
-      // toggle sorting mode
-      if (gamepad2.xWasPressed()) {
-        scoringSystem.toggleSortingMode();
-      }
-
-      // turret rehome !*!*!*! use with caution !*!*!*!
-      if (gamepad2.yWasPressed()) {
-        scoringSystem.reSyncTurretEncoder();
-      }
+      // (alt) x and y unused
 
     } else { // normal
-      // unjam spindexer
+      // toggle shooting mode
       if (gamepad2.bWasPressed()) {
-        scoringSystem.unJamSpindexer();
+        scoringSystem.toggleShootingMode();
       }
 
-      // color sensor enable toggle
+      // shoot
       if (gamepad2.yWasPressed()) {
-        scoringSystem.toggleColorSensorEnabled();
+        scoringSystem.shoot();
       }
 
       // manual intake full / pinch point empty
@@ -336,13 +340,13 @@ public class TeleOpRobot extends CommonRobot {
       }
     }
 
-    // shoot
-    if (gamepad1.right_trigger > TRIGGER_PRESSED_THRESHOLD || gamepad1.rightBumperWasPressed()) {
+    // shoot (driver 1)
+    if (gamepad1.rightBumperWasPressed()) {
       scoringSystem.shoot();
     }
 
     // cancel shot
-    if (gamepad2.rightBumperWasPressed()) {
+    if (gamepad2.rightBumperWasPressed() || gamepad1.right_trigger > TRIGGER_PRESSED_THRESHOLD) {
       scoringSystem.cancelShot();
     }
 
