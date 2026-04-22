@@ -221,8 +221,8 @@ public class TeleOpRobot extends CommonRobot {
 
   /** Handles backup driver inputs */
   private void updateDriverControls() {
-    if (gamepad2.left_trigger > TRIGGER_PRESSED_THRESHOLD &&
-        gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD) { // SHIFT + ALT
+    if (gamepad2.left_trigger > TRIGGER_PRESSED_THRESHOLD
+        && gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD) { // SHIFT + ALT
       // reset odometry !*!*!*! use with caution !*!*!*!
       if (gamepad2.xWasPressed()) {
         Pose2D location = scoringSystem.allianceColor.getResetLocation();
