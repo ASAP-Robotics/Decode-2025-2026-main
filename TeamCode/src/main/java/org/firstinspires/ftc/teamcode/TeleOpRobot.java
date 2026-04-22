@@ -347,9 +347,14 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // eject intake, unjam spindexer
-    if (gamepad2.leftBumperWasPressed()) {
+    if (gamepad2.leftBumperWasPressed() || gamepad1.leftBumperWasPressed()) {
       scoringSystem.clearIntake();
       scoringSystem.unJamSpindexer();
+    }
+
+    // home spindexer (driver 1)
+    if (gamepad1.left_trigger > TRIGGER_PRESSED_THRESHOLD) {
+      scoringSystem.homeSpindexer();
     }
 
     // increment sorting offset

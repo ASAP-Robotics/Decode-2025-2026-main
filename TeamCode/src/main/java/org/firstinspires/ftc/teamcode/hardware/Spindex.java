@@ -132,9 +132,9 @@ public class Spindex implements System {
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // code assumptions: increasing angle shoots
-    new SpindexSlot(-102, 233, -7), // slot 0
-    new SpindexSlot(18, -7, 113), // slot 1
-    new SpindexSlot(138, 113, 233) // slot 2
+    new SpindexSlot(-72, 258, 18), // slot 0
+    new SpindexSlot(48, 18, 138), // slot 1
+    new SpindexSlot(168, 138, 258) // slot 2
   };
 
   private final SimpleTimer shootDelay =
