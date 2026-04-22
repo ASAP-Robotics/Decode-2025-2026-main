@@ -17,12 +17,14 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.hardware.indicators.RGBIndicator;
 
 @TeleOp
 @Config
+@Disabled
 public class IndicatorTest extends LinearOpMode {
   public static RGBIndicator.Color color = RGBIndicator.Color.OFF;
 

@@ -20,10 +20,10 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -31,7 +31,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
-import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -45,11 +44,12 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 @Config
 public class TeleOpRobot extends CommonRobot {
   // config vars (FTC Dashboard)
-  public static boolean limelightEnabled = false; // if limelight can reset location
   public static double MANUAL_SHOOTING_DIST = 75; // inches
   public static double MANUAL_SHOOTING_ANGLE = 180; // degrees from straight (intake)
   public static double TRIGGER_PRESSED_THRESHOLD = 0.67;
   public static double TRIGGER_RELEASED_THRESHOLD = 0.33;
+  public static double TELEMETRY_UPDATE_INTERVAL = 0.67; // seconds
+  public static double PINPOINT_ERROR_TIMEOUT = 1.0; // seconds
 
   // config vars
   private static final double TIME_TO_ENDGAME = 100; // seconds
@@ -58,10 +58,8 @@ public class TeleOpRobot extends CommonRobot {
   protected Gamepad gamepad2;
   protected MecanumWheelBase wheelBase;
   protected PinpointLocalizer pinpoint;
-  protected Limelight limelight;
-  protected SimpleTimer telemetryTimer = new SimpleTimer(0.67);
-  protected SimpleTimer pinpointErrorTimer = new SimpleTimer(1);
-  protected SimpleTimer odometryResetTimer = new SimpleTimer(2);
+  protected ElapsedTime telemetryTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+  protected ElapsedTime pinpointErrorTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   protected SimpleTimer endgameTimer = new SimpleTimer(TIME_TO_ENDGAME);
   protected boolean endgame = false;
   private final boolean fieldCentric;
@@ -76,8 +74,6 @@ public class TeleOpRobot extends CommonRobot {
       Gamepad gamepad2,
       boolean fieldCentric) {
     super(hardwareMap, telemetry, allianceColor, true);
-    Limelight3A rawLimelight = this.hardwareMap.get(Limelight3A.class, "limelight");
-    this.limelight = new Limelight(rawLimelight, this.allianceColor);
 
     pinpoint = new PinpointLocalizer(hardwareMap, new PositionFileReader().getPosition(), true);
 
@@ -104,7 +100,7 @@ public class TeleOpRobot extends CommonRobot {
       clearSensorCache();
       pinpoint.update();
     }
-    limelight.init();
+
     scoringSystem.setSortingMode(Spindex.SortingMode.FAST); // start unsorted
     scoringSystem.init(false, false); // initialize scoring systems
   }
@@ -122,11 +118,9 @@ public class TeleOpRobot extends CommonRobot {
    */
   public void start() {
     clearSensorCache();
-    telemetryTimer.start();
-    limelight.start();
+    telemetryTimer.reset();
     scoringSystem.start(false); // start scoring systems up
-    pinpointErrorTimer.start(); // maybe change
-    odometryResetTimer.start();
+    pinpointErrorTimer.reset();
     endgameTimer.start();
   }
 
@@ -136,31 +130,28 @@ public class TeleOpRobot extends CommonRobot {
   public void loop() {
     clearSensorCache();
 
+    boolean updateTelemetry = telemetryTimer.seconds() >= TELEMETRY_UPDATE_INTERVAL;
+
     // switch to sorting in endgame
     if (!endgame && endgameTimer.isFinished()) {
       endgame = true;
       scoringSystem.setSortingMode(Spindex.SortingMode.SORTED);
     }
 
-    boolean updateTelemetry = telemetryTimer.isFinished();
     if (updateTelemetry) {
-      telemetryTimer.start();
+      telemetryTimer.reset();
     }
 
     // get robot position
     PoseVelocity2d velocityPose = pinpoint.update();
     boolean faulted = pinpoint.isFaulted();
-    if (!faulted) pinpointErrorTimer.start();
+    if (!faulted) pinpointErrorTimer.reset();
 
-    if (faulted && pinpointErrorTimer.isFinished()) {
+    if (faulted && pinpointErrorTimer.seconds() >= PINPOINT_ERROR_TIMEOUT) {
       scoringSystem.overrideAiming(MANUAL_SHOOTING_DIST, MANUAL_SHOOTING_ANGLE);
     }
 
     Pose2d location = pinpoint.getPose();
-    double velocity =
-        Math.hypot(Math.abs(velocityPose.linearVel.x), Math.abs(velocityPose.linearVel.y));
-    double angleVel = Math.abs(velocityPose.angVel);
-    // ^ directionless velocity of the robot, in inches per second
 
     // update scoring systems
     Pose2D realRobot =
@@ -200,18 +191,6 @@ public class TeleOpRobot extends CommonRobot {
         telemetry.addData("⌚Time to endgame", endgameTimer.remaining());
         telemetry.addData("🌎Positon (real)", realRobot);
         telemetry.addData("🌐Position (virtual)", virtual);
-      }
-    }
-
-    if (limelightEnabled && odometryResetTimer.isFinished() && velocity < 2 && angleVel < 0.25) {
-      Pose2D limelightPose = limelight.getRobotPosition(scoringSystem.getTurretAngle());
-      if (limelightPose != null) {
-        pinpoint.setPose(
-            new Pose2d(
-                limelightPose.getX(DistanceUnit.INCH),
-                limelightPose.getY(DistanceUnit.INCH),
-                limelightPose.getHeading(AngleUnit.RADIANS)));
-        odometryResetTimer.start();
       }
     }
 
@@ -258,13 +237,8 @@ public class TeleOpRobot extends CommonRobot {
       }
 
       // shoot
-      if (gamepad2.yWasPressed()) {
-        scoringSystem.shoot();
-      }
-
-      // home spindexer
       if (gamepad2.aWasPressed()) {
-        scoringSystem.homeSpindexer();
+        scoringSystem.shoot();
       }
 
       // override aiming
@@ -288,6 +262,11 @@ public class TeleOpRobot extends CommonRobot {
                     location.getY(DistanceUnit.INCH),
                     location.getHeading(AngleUnit.RADIANS)),
                 false);
+      }
+
+      // home spindexer
+      if (gamepad2.yWasPressed()) {
+        scoringSystem.homeSpindexer();
       }
 
     } else if (gamepad2.right_trigger > TRIGGER_PRESSED_THRESHOLD) { // HYPER ALT
@@ -338,7 +317,7 @@ public class TeleOpRobot extends CommonRobot {
         scoringSystem.toggleColorSensorEnabled();
       }
 
-      // manual intake full
+      // manual intake full / pinch point empty
       if (gamepad2.xWasPressed()) {
         scoringSystem.setIntakeFull(BallColor.PURPLE);
       } else if (gamepad2.aWasPressed()) {
@@ -368,9 +347,14 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     // eject intake, unjam spindexer
-    if (gamepad2.leftBumperWasPressed()) {
+    if (gamepad2.leftBumperWasPressed() || gamepad1.leftBumperWasPressed()) {
       scoringSystem.clearIntake();
       scoringSystem.unJamSpindexer();
+    }
+
+    // home spindexer (driver 1)
+    if (gamepad1.left_trigger > TRIGGER_PRESSED_THRESHOLD) {
+      scoringSystem.homeSpindexer();
     }
 
     // increment sorting offset

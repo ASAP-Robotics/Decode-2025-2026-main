@@ -16,12 +16,15 @@
 
 package org.firstinspires.ftc.teamcode.hardware.motors;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import java.util.LinkedList;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
@@ -35,6 +38,7 @@ import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
  * Class to contain a motor that is set to a given angle setpoint, which can be homed via an
  * absolute encoder
  */
+@Config
 public class HomableRotator implements System {
   public enum State {
     NORMAL,
@@ -53,14 +57,15 @@ public class HomableRotator implements System {
     }
   }
 
-  private static final double ANGLE_OFFSET = -90; // offset between encoder and hardware zero
+  public static boolean SHOW_TELEMETRY = false; // if dashboard telemetry should be shown
+  public static double ANGLE_OFFSET = 0; // offset between encoder and hardware zero
+  public static double READING_TIME = 1; // seconds
+  public static double STALL_CURRENT = 2.0; // amps
+  public static double STALL_ANGLE_DEVIATION =
+      30; // degrees, must have moved more than this to not be stalled
   private static final double COUNTS_PER_REV = 4000; // CPR of the digital encoder
   private static final double UPDATE_TOLERANCE =
       0.01; // amount power has to change by to actually set motor
-  protected static final double READING_TIME = 1; // seconds
-  protected static final double STALL_CURRENT = 1; // amps
-  protected static final double STALL_ANGLE_DEVIATION =
-      15; // degrees, must have moved more than this to not be stalled
 
   protected final MotorEx motor;
   protected final ElcAbsEncoderAnalog encoder;
@@ -69,6 +74,7 @@ public class HomableRotator implements System {
   protected final SimpleTimer disableTimer = new SimpleTimer(1);
   protected final Follower homingSetpointFollower;
   protected final ElapsedTime timeSinceStart = new ElapsedTime();
+  protected final Telemetry telemetry = FtcDashboard.getInstance().getTelemetry();
   protected final boolean inverted;
   private final LinkedList<Reading> readings = new LinkedList<>();
   protected State state = State.UNINITIALIZED;
@@ -145,6 +151,15 @@ public class HomableRotator implements System {
           && maxAngle > minAngle
           && maxAngle - minAngle < STALL_ANGLE_DEVIATION) {
         disable();
+      }
+
+      if (SHOW_TELEMETRY) {
+        telemetry.addData("Motor power", currentMotorPower);
+        telemetry.addData("Current", current);
+        telemetry.addData("Angle travel", maxAngle - minAngle);
+        telemetry.addData("Target angle", targetAngle);
+        telemetry.addData("Angle", currentAngle);
+        telemetry.update();
       }
     }
 
@@ -280,7 +295,7 @@ public class HomableRotator implements System {
   }
 
   /**
-   * Gets if the motor is at it's target angle
+   * Gets if the motor is at its target angle
    *
    * @return true if at target, false otherwise
    */
@@ -353,7 +368,7 @@ public class HomableRotator implements System {
   }
 
   /**
-   * Sets the I tuning value for the PID controller
+   * Sets the "I" tuning value for the PID controller
    *
    * @param ki integral
    */
@@ -389,7 +404,7 @@ public class HomableRotator implements System {
   }
 
   /**
-   * Gets the I tuning value from the PID controller
+   * Gets the "I" tuning value from the PID controller
    *
    * @return integral
    */

@@ -31,7 +31,6 @@ import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
 import org.firstinspires.ftc.teamcode.utils.BallSequenceFileReader;
 import org.firstinspires.ftc.teamcode.utils.MathUtils;
-import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 import org.jetbrains.annotations.TestOnly;
 
 @Config
@@ -86,9 +85,7 @@ public class ScoringSystem {
   private final Pose2D targetPosition; // the position of the target to shoot at
   private Pose2D robotPosition =
       new Pose2D(DistanceUnit.INCH, 0, 0, AngleUnit.DEGREES, 0); // the position of the robot
-  private boolean clearingIntake = false; // if the intake is being reversed to clear a blockage
   private final Telemetry telemetry;
-  private final SimpleTimer fullWait = new SimpleTimer(0.5);
   private final ElapsedTime timeSinceStart = new ElapsedTime();
   private final ElapsedTime loopTime = new ElapsedTime();
   private final LinkedList<Pair<Double, Double>> loopTimes = new LinkedList<>();
@@ -131,6 +128,8 @@ public class ScoringSystem {
       turret.init(0);
     }
     turret.setActive(!isPreloaded);
+    intake.setTurnOffWhenEmpty(!auto);
+    intake.setState(ActiveIntake.State.OFF);
     LOOKUP_TABLE = turret.fillLookupTable();
   }
 
@@ -138,6 +137,7 @@ public class ScoringSystem {
   public void initLoop() {
     spindex.update();
     turret.update();
+    intake.update();
     updateIndicators();
   }
 
@@ -153,9 +153,8 @@ public class ScoringSystem {
 
     if (isPreloaded) {
       switchModeToFull();
-      intake.stop();
-      clearingIntake = true;
-      intake.timer.start();
+      intake.clear();
+      intake.setState(ActiveIntake.State.REPELLING);
 
     } else {
       switchModeToIntaking();
@@ -173,7 +172,6 @@ public class ScoringSystem {
   public void stop() {
     turret.disable(); // stop the flywheel
     turret.update();
-    intake.stop(); // stop the intake
   }
 
   /**
@@ -233,6 +231,7 @@ public class ScoringSystem {
   /** Updates everything to do with the spindexer */
   private void updateSpindex() {
     spindex.setSequence(ballSequence);
+    spindex.setIsPinchPointFull(intake.pinchableBall());
     if (state == State.SHOOTING && isReadyToShoot() && !shutDown) {
       spindex.shoot();
     }
@@ -255,38 +254,23 @@ public class ScoringSystem {
   /** Updates everything to do with the intake */
   private void updateIntake() {
     if (shutDown) {
-      intake.stop();
-      return;
-    }
-
-    if (clearingIntake) { // if clearing the intake
-      if (intake.timer.isFinished()) { // if done clearing the intake
-        clearingIntake = false;
-
-      } else return;
-
-    } else if (intake.isStalled() && intake.isIntaking()) { // if intake is intaking and stalled
-      clearIntake(); // eject the intake to clear the blockage
+      intake.setState(ActiveIntake.State.OFF);
       return;
     }
 
     switch (state) {
       case UNINITIALISED:
+        intake.setState(ActiveIntake.State.OFF);
         break;
 
       case FULL:
       case SHOOTING:
-        if (intake.isIntaking()) {
-          if (spindex.isAtTarget() && fullWait.isFinished()) clearIntake();
-
-        } else {
-          intake.ejectIdle();
-        }
+        intake.setState(ActiveIntake.State.REPELLING);
         break;
 
       case INTAKING:
       default:
-        intake.intake();
+        intake.setState(ActiveIntake.State.INTAKING);
         break;
     }
   }
@@ -359,6 +343,7 @@ public class ScoringSystem {
     if (TELEMETRY_VERBOSITY.verbosity >= Verbosity.DEBUG.verbosity) {
       telemetry.addData("🎡Spindex state", spindex.getState());
       telemetry.addData("📏Target distance", turret.getTargetDistance());
+      telemetry.addData("📐Turret angle (target)", turret.getHorizontalAngleDegrees());
     }
 
     if (TELEMETRY_VERBOSITY.verbosity >= Verbosity.DEBUG.verbosity) {
@@ -386,10 +371,10 @@ public class ScoringSystem {
    */
   protected void switchModeToFull() {
     state = State.FULL;
-    intake.intake();
+    intake.setState(ActiveIntake.State.REPELLING); // start the intake spinning
+    clearIntake(); // clear the intake
     spindex.prepToShootSequence(ballSequence); // prep spindex to shoot current sequence
     turret.activate(); // get ready to shoot at any time
-    fullWait.start();
   }
 
   /**
@@ -397,7 +382,7 @@ public class ScoringSystem {
    */
   protected void switchModeToIntaking() {
     state = State.INTAKING;
-    intake.intake(); // start the intake spinning
+    intake.setState(ActiveIntake.State.INTAKING); // start the intake spinning
     turret.idle(); // flywheel doesn't need to at full speed
   }
 
@@ -435,7 +420,7 @@ public class ScoringSystem {
     // ^ return false if there are no balls in the mag
     spindex.prepToShootSequence(ballSequence);
     state = State.SHOOTING;
-    intake.ejectIdle(); // start the intake spinning
+    intake.setState(ActiveIntake.State.REPELLING); // start the intake spinning
     turret.activate(); // start the flywheel spinning
     return true;
   }
@@ -476,13 +461,13 @@ public class ScoringSystem {
   }
 
   /**
-   * Sets the intake as full manually
+   * Sets the intake as full manually, and overrides the pinch point to be "empty"
    *
    * @param ball the color of ball in the intake
    * @note intended as a driver backup only
    */
   public void setIntakeFull(BallColor ball) {
-    spindex.setIntakeColor(ball);
+    spindex.manualIntake(ball);
   }
 
   /**
@@ -638,15 +623,6 @@ public class ScoringSystem {
     return getAbsoluteTargetAngle() - robotPosition.getHeading(AngleUnit.DEGREES) + 180;
   }
 
-  /**
-   * Gets the angle of the turret relative to straight
-   *
-   * @return the angle of the turret, in degrees
-   */
-  public double getTurretAngle() {
-    return turret.getHorizontalAngleDegrees();
-  }
-
   public Pose2D getVirtualRobotPosition(
       Pose2D robotPose,
       Pose2D targetPosition,
@@ -693,9 +669,7 @@ public class ScoringSystem {
    *     malfunctioned); not intended for external use normally or regularly
    */
   public void clearIntake() {
-    intake.eject(); // set intake to eject at full speed
-    intake.timer.start(); // start intake timer
-    clearingIntake = true; // we are clearing the intake
+    intake.clear();
   }
 
   /**

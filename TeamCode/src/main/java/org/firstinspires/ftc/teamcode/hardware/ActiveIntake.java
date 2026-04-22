@@ -16,51 +16,93 @@
 
 package org.firstinspires.ftc.teamcode.hardware;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import java.util.LinkedList;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.hardware.sensors.BreakBeam;
+import org.firstinspires.ftc.teamcode.utils.CircularAverage;
+import org.firstinspires.ftc.teamcode.utils.MathUtils;
 import org.firstinspires.ftc.teamcode.utils.SimpleTimer;
 
+@Config
 public class ActiveIntake {
-  private static class CurrentReading {
-    public double current;
-    public double timeStamp;
+  public enum PowerLevel {
+    OFF(0),
+    INTAKING(1),
+    REPELLING(-0.5),
+    CLEARING(-0.75);
 
-    public CurrentReading(double current, double timeStamp) {
-      this.current = current;
-      this.timeStamp = timeStamp;
+    public final double motorPower;
+
+    PowerLevel(double motorPower) {
+      this.motorPower = motorPower;
     }
   }
 
-  private final DcMotorEx intakeMotor; // the motor driving the intake
-  private boolean idling = true; // if the intake is idling
-  private boolean intaking = false; // if the intake is intaking
-  private boolean ejecting = false; // if the intake is ejecting
-  private boolean ballIn = false; // if there is a ball in the intake
-  private double current; // last computed average current, in amps
-  private double stallCurrent; // current at or above which intake is considered stalled
-  private double readingTime; // time span (seconds) to take current reading average over
-  private final ElapsedTime timeSinceStart; // timer to track time since object creation
-  private final LinkedList<CurrentReading>
-      currentReadings; // list of current readings and timestamps
-  public org.firstinspires.ftc.teamcode.utils.SimpleTimer timer = new SimpleTimer(1);
+  /** Simple enum to capture the state of the intake */
+  public enum State {
+    OFF(PowerLevel.OFF),
+    INTAKING(PowerLevel.INTAKING),
+    REPELLING(PowerLevel.REPELLING);
 
-  public ActiveIntake(DcMotorEx intakeMotor) {
-    this(intakeMotor, 6.7, 10);
+    public final PowerLevel powerLevel;
+
+    State(PowerLevel powerLevel) {
+      this.powerLevel = powerLevel;
+    }
   }
 
-  public ActiveIntake(DcMotorEx intakeMotor, double readingTime, double stallCurrent) {
-    this.intakeMotor = intakeMotor;
-    this.intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-    this.intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); // brake if zero power
-    this.current = 0.0; // start at zero current
-    this.stallCurrent = stallCurrent;
-    this.readingTime = readingTime;
-    this.timeSinceStart = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
-    this.currentReadings = new LinkedList<>();
+  // config vars
+  private static final int READING_NUMBER = 50; // number of past readings to average
+  private static final double CLEARING_DURATION = 1.0; // seconds (how long to clear intake for)
+  private static final String MOTOR_NAME = "intake";
+  private static final String FRONT_SENSOR_NAME = "frontSensor";
+  private static final String PINCH_SENSOR_NAME = "pinchSensor";
+
+  // config vars (FTC Dashboard)
+  public static boolean SHOW_TELEMETRY = false;
+  public static double STALL_CURRENT = 6; // current at or above which intake is considered stalled
+  public static double READING_INTERVAL = 0.01; // interval (seconds) to read motor current
+  public static double AUTO_RESTART_INTERVAL = 1.0; // ^ interval (seconds) to re-command motor
+  // (in case of stall and undervoltage shutdown)
+  public static double FULL_TIMEOUT = 0.5; // seconds (to remain "full" after sensor sees ball)
+  public static double PINCH_TIMEOUT = 0.1; // seconds pinch point remains "full" after beam broken
+
+  private final Telemetry telemetry;
+  private final DcMotorEx intakeMotor; // the motor driving the intake
+  private final BreakBeam frontSensor; // the break beam sensor across the very front of the intake
+  private final BreakBeam pinchSensor; // the break beam sensor across the spindexer's pinch point
+  private State state = State.OFF; // state of the intake
+  private boolean clearing = false; // if the intake is being cleared
+  private boolean turnOffWhenEmpty = false; // if the intake should turn off when "empty"
+  private double current; // last computed average current, in amps
+  private final CircularAverage average = new CircularAverage(READING_NUMBER);
+  private final ElapsedTime timeSinceMotorSet; // timer to track time since auto restart
+  private final ElapsedTime timeSinceFront; // timer to track time since ball seen by front sensor
+  private final ElapsedTime timeSincePinch; // timer to track time since ball seen by pinch sensor
+  private final SimpleTimer readingTimer = new SimpleTimer(); // timer for reading interval
+  private final SimpleTimer clearingTimer = new SimpleTimer(CLEARING_DURATION);
+
+  public ActiveIntake(HardwareMap hardwareMap) {
+    intakeMotor = hardwareMap.get(DcMotorEx.class, MOTOR_NAME);
+    frontSensor = new BreakBeam(hardwareMap.get(DigitalChannel.class, FRONT_SENSOR_NAME));
+    pinchSensor = new BreakBeam(hardwareMap.get(DigitalChannel.class, PINCH_SENSOR_NAME));
+
+    intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+    intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); // brake if zero power
+    current = 0.0; // start at zero current
+    telemetry = FtcDashboard.getInstance().getTelemetry();
+    timeSinceMotorSet = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+    timeSinceFront = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+    timeSincePinch = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+    readingTimer.start(READING_INTERVAL);
   }
 
   /**
@@ -68,114 +110,55 @@ public class ActiveIntake {
    * @note currently, this only updates the current readings for the motor
    */
   public void update() {
-    double amps = intakeMotor.getCurrent(CurrentUnit.AMPS); // read current
-    double now = timeSinceStart.time(); // get time
-    currentReadings.add(new CurrentReading(amps, now)); // add new reading
-
-    // remove old readings
-    while (!currentReadings.isEmpty() && now - currentReadings.getFirst().timeStamp > readingTime) {
-      currentReadings.removeFirst();
+    // handle current averaging for stall detection
+    if (readingTimer.isFinished()) {
+      readingTimer.start(READING_INTERVAL); // restart timer (time could change at runtime)
+      double amps = intakeMotor.getCurrent(CurrentUnit.AMPS); // read current
+      average.write(amps); // record reading
+      current = average.average(); // find average current
     }
 
-    // if there are no current readings, current is 0 (this should never happen, but just in case)
-    if (currentReadings.isEmpty()) {
-      current = 0.0;
+    // read break beam sensors
+    if (frontSensor.isBroken()) timeSinceFront.reset();
+    if (pinchSensor.isBroken()) timeSincePinch.reset();
 
-    } else { // if there are current samples
-      // find average of current readings:
-      double sum = 0; // start counting from 0
-      for (CurrentReading s : currentReadings) { // for each current reading
-        sum += s.current; // add it to the sum
-      }
-      current = sum / currentReadings.size(); // divide sum by number of readings
+    if (SHOW_TELEMETRY) {
+      telemetry.addData("Pinch sensor", timeSincePinch.seconds());
+      telemetry.addData("Front sensor", timeSinceFront.seconds());
+      telemetry.addData("Full threshold", FULL_TIMEOUT);
+      telemetry.addData("Pinch thresh.", PINCH_TIMEOUT);
+      telemetry.update();
     }
+
+    // auto-clear if stalled
+    if (stalled() && !clearing && state == State.INTAKING) {
+      clear();
+    }
+
+    // stop clearing when done
+    if (clearing && clearingTimer.isFinished()) clearing = false;
+
+    // set motor power
+    setMotorPower();
   }
 
   /**
-   * @brief stops the intake from spinning
+   * Sets the state of the intake
+   *
+   * @param state the new state of the intake
    */
-  public void stop() {
-    if (!intaking && !ejecting && !idling) return;
-    intakeMotor.setPower(0);
-    intaking = false;
-    ejecting = false;
-    idling = false;
+  public void setState(State state) {
+    if (this.state == state) return;
+    this.state = state;
   }
 
   /**
-   * @brief spins intake up to bring balls in
+   * Gets the state of the intake
+   *
+   * @return the current state of the intake
    */
-  public void intake() {
-    if (intaking && !ejecting && !idling) return;
-    intakeMotor.setPower(1);
-    intaking = true;
-    ejecting = false;
-    idling = false;
-  }
-
-  /**
-   * @brief spins intake up to half speed to hold balls in the mag
-   */
-  public void intakeIdle() {
-    if (intaking && !ejecting && idling) return;
-    intakeMotor.setPower(0.5);
-    intaking = true;
-    ejecting = false;
-    idling = true;
-  }
-
-  /**
-   * @brief spins intake up in reverse to spit balls out
-   */
-  public void eject() {
-    if (!intaking && ejecting && !idling) return;
-    intakeMotor.setPower(-1);
-    intaking = false;
-    ejecting = true;
-    idling = false;
-  }
-
-  /**
-   * @brief spins intake up in reverse to half speed to keep balls out of the mag
-   */
-  public void ejectIdle() {
-    if (!intaking && ejecting && idling) return;
-    intakeMotor.setPower(-0.5);
-    intaking = false;
-    ejecting = true;
-    idling = true;
-  }
-
-  /**
-   * @brief sets the time over which current reading averages are computed, in seconds
-   * @param timeSeconds the time over which current reading averages are computed, in seconds
-   */
-  public void setAverageTimeSeconds(double timeSeconds) {
-    readingTime = timeSeconds;
-  }
-
-  /**
-   * @brief gets the time over which current reading averages are computed, in seconds
-   * @return the time over which current reading averages are computed, in seconds
-   */
-  public double getAverageTimeSeconds() {
-    return readingTime;
-  }
-
-  /**
-   * @brief sets the average current at or over which the intake is considered stalled
-   * @param stallCurrentAmps the stall current of the intake motor
-   */
-  public void setStallCurrentAmps(double stallCurrentAmps) {
-    stallCurrent = stallCurrentAmps;
-  }
-
-  /**
-   * @brief gets the average current at or over which the intake is considered stalled
-   * @return the currently set stall current of the intake motor, in amps
-   */
-  public double getStallCurrentAmps() {
-    return stallCurrent;
+  public State state() {
+    return state;
   }
 
   /**
@@ -183,65 +166,83 @@ public class ActiveIntake {
    * @return true if the current of the intake motor is over the stall current, false otherwise
    * @note does not update motor current readings, call update() to update motor current reading
    */
-  public boolean isStalled() {
-    return current >= stallCurrent;
+  public boolean stalled() {
+    return current >= STALL_CURRENT;
+  }
+
+  /** Starts clearing the intake for a (short) period of time */
+  public void clear() {
+    clearing = true;
+    clearingTimer.start();
   }
 
   /**
-   * @brief gets the average current of the intake motor
-   * @return the average current drawn by the intake motor, in amps
+   * Gets if the intake is being cleared
+   *
+   * @return if the intake is being cleared
    */
-  public double getAverageCurrentAmps() {
-    return current;
+  public boolean isClearing() {
+    return clearing;
   }
 
   /**
-   * @brief returns if the intake is in use (busy)
-   * @return true if intake is spinning at full speed, false if intake is stopped or idling
+   * Sets if the intake will turn off when empty
+   *
+   * @param turnOffWhenEmpty if the intake should turn off when empty
    */
-  public boolean isBusy() {
-    return (intaking || ejecting) && !idling;
+  public void setTurnOffWhenEmpty(boolean turnOffWhenEmpty) {
+    this.turnOffWhenEmpty = turnOffWhenEmpty;
   }
 
   /**
-   * @brief returns if the intake is intaking
-   * @return true if intake is intaking, false if ejecting or stopped
+   * Gets if the intake is currently configured to turn off when empty
+   *
+   * @return if the intake turns off when empty
    */
-  public boolean isIntaking() {
-    return intaking;
+  public boolean turnsOffWhenEmpty() {
+    return turnOffWhenEmpty;
   }
 
   /**
-   * @brief returns if the intake is ejecting
-   * @return true if intake is ejecting, false if intaking or stopped
+   * Effectively sets the intake as containing a ball for some (short) amount of time
+   *
+   * @note intended as a driver backup
    */
-  public boolean isEjecting() {
-    return ejecting;
+  public void setContainsBall() {
+    timeSinceFront.reset();
   }
 
   /**
-   * @brief returns if the intake is idling (spinning at half speed)
-   * @return true if the intake is idling, false if the intake is spinning at full speed or stopped
+   * Gets if the intake could contain a ball
+   *
+   * @return if a break beam sensor has been broken recently
    */
-  public boolean isIdling() {
-    return idling;
+  public boolean containsBall() {
+    return timeSinceFront.seconds() <= FULL_TIMEOUT || timeSincePinch.seconds() <= FULL_TIMEOUT;
   }
 
   /**
-   * @brief returns if a ball is in the intake
-   * @return true if a ball is in the intake, false if the intake is empty
-   * @note this is basically just a wrapper around a variable that isn't used in any core methods
+   * Gets if there is a ball in the pinch point of the intake spindexer
+   *
+   * @return if the pinch point break beam has been broken recently
    */
-  public boolean isBallIn() {
-    return ballIn;
+  public boolean pinchableBall() {
+    return timeSincePinch.seconds() <= PINCH_TIMEOUT;
   }
 
-  /**
-   * @brief sets if a ball is in the intake
-   * @param ballIn true if a ball is in the intake, false if the intake is empty
-   * @brief this is basically just a wrapper around a variable that isn't used in any core methods
-   */
-  public void setBallIn(boolean ballIn) {
-    this.ballIn = ballIn;
+  /** Sets the power of the motor according to the current state */
+  private void setMotorPower() {
+    double targetPower =
+        clearing
+            ? PowerLevel.CLEARING.motorPower
+            : ((turnOffWhenEmpty && !containsBall() && state != State.INTAKING)
+                ? PowerLevel.OFF.motorPower
+                : state.powerLevel.motorPower);
+    boolean newTargetPower = !MathUtils.areEqual(targetPower, intakeMotor.getPower());
+
+    if (newTargetPower || timeSinceMotorSet.seconds() >= AUTO_RESTART_INTERVAL) {
+      timeSinceMotorSet.reset();
+      intakeMotor.setPower(targetPower);
+    }
   }
 }

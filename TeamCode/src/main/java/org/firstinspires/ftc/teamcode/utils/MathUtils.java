@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 ASAP Robotics (FTC Team 22029)
+ * Copyright 2025-2026 ASAP Robotics (FTC Team 22029)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public class MathUtils {
+  public static final double COMPARISON_THRESHOLD = 1e-6;
+
   /**
    * @brief maps a number from one range to another
    * @param x the number to map
@@ -84,5 +86,28 @@ public class MathUtils {
         AngleUnit.DEGREES,
         AngleUnit.normalizeDegrees(
             pose1.getHeading(AngleUnit.DEGREES) - pose2.getHeading(AngleUnit.DEGREES)));
+  }
+
+  /**
+   * Gets if two numbers are effectively the same
+   *
+   * @param a the first number
+   * @param b the second number
+   * @param tolerance the tolerance to use when comparing numbers
+   * @return if the numbers are within the tolerance of each other
+   */
+  public static boolean areEqual(double a, double b, double tolerance) {
+    return Math.abs(a - b) <= tolerance;
+  }
+
+  /**
+   * Gets if two numbers are effectively the same
+   *
+   * @param a the first number
+   * @param b the second number
+   * @return if the numbers are close enough to be "equal"
+   */
+  public static boolean areEqual(double a, double b) {
+    return areEqual(a, b, COMPARISON_THRESHOLD);
   }
 }

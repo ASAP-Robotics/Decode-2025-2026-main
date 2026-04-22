@@ -22,7 +22,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotator;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ColorSensorV3;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
@@ -117,16 +116,13 @@ public class Spindex implements System {
   }
 
   // config vars (FTC Dashboard)
+  public static boolean PROTECT_PINCH_PINT = true;
   public static double INTAKE_FLAP_CLOSED = 325;
   public static double INTAKE_FLAP_OPEN = 240;
-  public static double INTAKE_DELAY_SECONDS = 0.01;
   public static double SHOOT_DELAY_SECONDS = 0.2;
   public static double SLOW_MODE_SLOT_DELAY_SECONDS = 0.2;
   public static ShootingMode shootingMode = ShootingMode.FAST;
   public static SortingMode sortingMode = SortingMode.SORTED;
-
-  private static final double ANGLE_COMPARISON_THRESHOLD =
-      0.1; // diff between to angle to be the same
 
   SystemReport sensorReport = new SystemReport(SystemStatus.NOMINAL); // latest color sensor report
   SystemReport spinnerReport = new SystemReport(SystemStatus.NOMINAL); // latest spinner report
@@ -136,13 +132,11 @@ public class Spindex implements System {
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // code assumptions: increasing angle shoots
-    new SpindexSlot(-96, 233, -7), // slot 0
-    new SpindexSlot(24, -7, 113), // slot 1
-    new SpindexSlot(144, 113, 233) // slot 2
+    new SpindexSlot(-72, 258, 18), // slot 0
+    new SpindexSlot(48, 18, 138), // slot 1
+    new SpindexSlot(168, 138, 258) // slot 2
   };
 
-  private final SimpleTimer intakeDelay =
-      new SimpleTimer(INTAKE_DELAY_SECONDS); // timer to let ball get all the way in before moving
   private final SimpleTimer shootDelay =
       new SimpleTimer(SHOOT_DELAY_SECONDS); // timer to let ramp drop before shooting
   private final SimpleTimer slotWaitDelay =
@@ -150,16 +144,16 @@ public class Spindex implements System {
   // slow mode
   private SpindexState state = SpindexState.UNINITIALIZED; // the current state of the spindex
   private BallSequence sequence = BallSequence.GPP; // the sequence that is to be shot
+  private boolean pinchPointFull = false; // if the pinch point of the intake / spindex holds a ball
   private boolean enabled = true; // if spindex can move, sense, etc.
   private boolean colorSensorEnabled = true; // if color sensor is enabled
   private boolean waitingForTimer = false; // if the spindex is waiting for a timer to finish
   // (specifically when slow shooting, for now)
   private int currentIndex = NULL; // the current index the spindex is at, dependent on the state
   private int sortingOffset = 0; // offset for sorting, basically the number of balls in the ramp
+  private boolean pinchBackup = false; // if the pinch point empty backup is active
   private BallColor intakeColor =
       BallColor.UNKNOWN; // the color of ball in the intake the most recent time checked
-  private BallColor oldIntakeColor =
-      BallColor.UNKNOWN; // the color of ball in the intake last time checked
 
   public Spindex(HardwareMap hardwareMap) {
     this.spinner =
@@ -172,7 +166,7 @@ public class Spindex implements System {
             5,
             true);
     this.intakeBlocker = new Axon(hardwareMap, "intakeBlocker", "intakeBlockerEncoder");
-    this.colorSensor = new ColorSensorV3(hardwareMap, "colorSensor");
+    this.colorSensor = new ColorSensorV3(hardwareMap, "colorSensor", "intakeBeam");
   }
 
   /**
@@ -217,10 +211,12 @@ public class Spindex implements System {
     if (!isIndexValid(currentIndex)) state = SpindexState.UNINITIALIZED; // shouldn't happen
 
     // do something different depending on the spindex state / mode
-    // direction constraints assume that forwards shoots, backwards doesn't
     switch (state) {
       case INTAKING: // if the spindex is intaking
-        if (intakeDelay.isRunning()) break; // wait for ball te get all the way in
+        if (PROTECT_PINCH_PINT && pinchPointFull && !pinchBackup)
+          break; // wait for ball to clear pinch point
+
+        pinchBackup = false;
 
         if (isFull()) {
           prepToShootSequence(sequence);
@@ -232,9 +228,8 @@ public class Spindex implements System {
 
         turnSpindexNoShoot(spindex[currentIndex].intakePosition); // move spindex to position
 
-        if (getIsIntakeColorNew() && isAtTarget() && intakeColor.isShootable()) {
+        if (isAtTarget() && intakeColor.isShootable()) {
           storeIntakeColor();
-          intakeDelay.start(); // start movement delay
         }
         break;
 
@@ -284,7 +279,6 @@ public class Spindex implements System {
 
     spinner.update();
 
-    oldIntakeColor = intakeColor; // store old intake color
     if (colorSensorEnabled && state.checkSensor && isAtTarget()) {
       colorSensor.update();
       intakeColor = colorSensor.getColor(); // update intake color
@@ -339,12 +333,7 @@ public class Spindex implements System {
     intakeBlocker.setPosition(INTAKE_FLAP_CLOSED); // close intake
     currentIndex = getBestStartIndex(sequence); // set new index
     state = SpindexState.SHOOTING_READY; // spindex in shooting mode
-    if ( // this might be redundant
-    Math.abs(
-            AngleUnit.normalizeDegrees(spinner.getTargetAngle())
-                - AngleUnit.normalizeDegrees(spindex[currentIndex].shootStartPosition))
-        >= ANGLE_COMPARISON_THRESHOLD)
-      shootDelay.start(); // start delay if spinner hasn't been set yet
+    // probably redundant code was removed here, if things are breaking this could be it
   }
 
   /**
@@ -509,31 +498,14 @@ public class Spindex implements System {
   }
 
   /**
-   * Returns if the color of ball in the intake is different from the last reading
-   *
-   * @return true if the color of ball in the intake changed, false if it didn't
-   */
-  protected boolean getIsIntakeColorNew() {
-    return intakeColor != oldIntakeColor;
-  }
-
-  /**
-   * Gets the color of ball in the intake position
-   *
-   * @return the color of ball in the intake
-   * @note the returned value is stored, call update() to update it
-   */
-  public BallColor getIntakeColor() {
-    return intakeColor;
-  }
-
-  /**
-   * Sets the color of ball in the intake
+   * Sets the color of ball in the intake, and overrides the pinch point as being empty
    *
    * @param color the color of ball in the intake
    * @note intended as a driver backup
    */
-  public void setIntakeColor(BallColor color) {
+  public void manualIntake(BallColor color) {
+    if (!state.checkSensor || !color.isShootable()) return;
+    pinchBackup = true; // override the pinch point as "empty" for the next loop
     setSpindexIndexColor(currentIndex, color);
   }
 
@@ -592,13 +564,12 @@ public class Spindex implements System {
   }
 
   /**
-   * Returns the spindex index that is currently active
+   * Sets if the pinch point between the intake and spindexer contains an artifact
    *
-   * @return the index that is at the intake, or NULL (-1) if the spindex isn't at an intake index
-   * @note what the "active" index means depends on state / mode (e.g. intaking vs shooting)
+   * @param pinchPointFull if there is an artifact in the pinch point
    */
-  public int getIndex() {
-    return currentIndex;
+  public void setIsPinchPointFull(boolean pinchPointFull) {
+    this.pinchPointFull = pinchPointFull;
   }
 
   /**
@@ -701,17 +672,6 @@ public class Spindex implements System {
   }
 
   /**
-   * Gets the color of ball at a given index in the spindex
-   *
-   * @param index the index to get the color of contained ball of
-   * @return the color of ball in the given index in the spindex
-   */
-  public BallColor getIndexColor(int index) {
-    if (!isIndexValid(index)) return BallColor.INVALID; // return on invalid parameters
-    return spindex[index].color; // return color of ball at index
-  }
-
-  /**
    * Gets if the spindex is full
    *
    * @return true if there are no empty slots in the spindex, false otherwise
@@ -807,20 +767,6 @@ public class Spindex implements System {
             : UnidirectionalHomableRotator.DirectionConstraint.NONE);
 
     spinner.setAngle(target);
-  }
-
-  /**
-   * Checks if the target position of the spindex is the same as the position supplied
-   *
-   * @param positionToCheck the position to compare against the spindex's target position
-   * @return true if the supplied position is the same as the spindex's target position, false
-   *     otherwise
-   */
-  private boolean isSpindexPosition(double positionToCheck) {
-    return Math.abs(
-            AngleUnit.normalizeDegrees(spinner.getTargetAngle())
-                - AngleUnit.normalizeDegrees(positionToCheck))
-        < ANGLE_COMPARISON_THRESHOLD;
   }
 
   /**

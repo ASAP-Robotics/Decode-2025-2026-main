@@ -67,8 +67,7 @@ public abstract class CommonRobot {
     DcMotorEx flywheelMotor = this.hardwareMap.get(DcMotorEx.class, "flywheel");
     Turret turret = new Turret(flywheelMotor, turretRotator, turretEncoder, turretHood, 1900);
 
-    DcMotorEx intakeMotor = this.hardwareMap.get(DcMotorEx.class, "intake");
-    ActiveIntake intake = new ActiveIntake(intakeMotor);
+    ActiveIntake intake = new ActiveIntake(hardwareMap);
 
     RGBIndicator indicator1 = new RGBIndicator(hardwareMap, "indicator1");
     RGBIndicator indicator2 = new RGBIndicator(hardwareMap, "indicator2");

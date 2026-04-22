@@ -20,9 +20,9 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.ActiveIntake;
@@ -30,6 +30,7 @@ import org.firstinspires.ftc.teamcode.hardware.motors.UnidirectionalHomableRotat
 import org.firstinspires.ftc.teamcode.hardware.sensors.ElcAbsEncoderAnalog;
 
 @TeleOp(name = "Tuning spindexer", group = "Tuning")
+@Disabled
 @Config
 public class TuningSpindexer extends LinearOpMode {
   public static int target_loop_time = 20;
@@ -48,7 +49,7 @@ public class TuningSpindexer extends LinearOpMode {
   public void runOpMode() {
     ElapsedTime loopTime = new ElapsedTime();
 
-    ActiveIntake intake = new ActiveIntake(hardwareMap.get(DcMotorEx.class, "intake"));
+    ActiveIntake intake = new ActiveIntake(hardwareMap);
 
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
@@ -60,7 +61,7 @@ public class TuningSpindexer extends LinearOpMode {
 
     waitForStart();
     spindex.start();
-    intake.intake();
+    intake.setState(ActiveIntake.State.INTAKING);
 
     while (opModeIsActive()) {
       // it shouldn't matter where this goes

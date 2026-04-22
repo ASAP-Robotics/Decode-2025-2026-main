@@ -17,10 +17,10 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp(name = "Motor Full Power", group = "Test")
+// @TeleOp(name = "Motor Full Power", group = "Test")
+@Deprecated
 public class MotorFullPower extends LinearOpMode {
 
   @Override

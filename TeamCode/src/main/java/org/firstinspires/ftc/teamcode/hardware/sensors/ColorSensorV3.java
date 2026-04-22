@@ -17,12 +17,14 @@
 package org.firstinspires.ftc.teamcode.hardware.sensors;
 
 import android.graphics.Color;
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import java.util.LinkedList;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.interfaces.System;
 import org.firstinspires.ftc.teamcode.types.BallColor;
@@ -31,61 +33,66 @@ import org.firstinspires.ftc.teamcode.types.SystemStatus;
 
 @Config
 public class ColorSensorV3 implements System {
-  protected static class Reading {
-    public final double timestamp;
-    public final double distance;
-
-    public Reading(double timestamp, double distance) {
-      this.timestamp = timestamp;
-      this.distance = distance;
-    }
-  }
+  // config vars (FTC Dashboard)
+  public static boolean SHOW_TELEMETRY = false;
+  public static double PURPLE_HUE = 200.0;
+  public static double PURPLE_HUE_TOLERANCE = 30;
+  public static double GREEN_HUE = 157.0;
+  public static double GREEN_HUE_TOLERANCE = 20;
+  public static double GREEN_SATURATION_MIN = 0.6;
+  public static double BALL_DISTANCE_THRESHOLD = 2.3; // inches
+  public static double BREAK_BEAM_TIMEOUT = 0.05; // seconds
+  public static double DISCONNECT_TIME = 1.0; // seconds
 
   protected SystemStatus status = SystemStatus.NOMINAL;
+  // maybe use NormalizedColorSensor
   protected final ColorSensor colorSensor;
   protected final DistanceSensor distanceSensor;
-  public static double purple = 200.0;
-  public static double purpleTolerance = 24;
-  public static double green = 157.0;
-  public static double greenTolerance = 20;
-  public static double greenHueMin = 0.6;
+  protected final BreakBeam breakBeam;
   protected BallColor color = BallColor.INVALID;
-  protected ElapsedTime timeSinceStart = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
-  protected LinkedList<Reading> readings = new LinkedList<>();
-  protected static final double DISCONNECT_TIME = 1.0; // seconds
-  public static double BALL_DISTANCE_THRESHOLD = 2.7; // inches
+  protected final ElapsedTime breakBeamTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+  protected final ElapsedTime readingChangeTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
+  protected double lastDistance = Double.POSITIVE_INFINITY;
 
-  // FtcDashboard dashboard = FtcDashboard.getInstance();
-  // Telemetry telemetry = dashboard.getTelemetry();
-  // private final Telemetry telemetry;
+  private final Telemetry telemetry;
 
-  public ColorSensorV3(HardwareMap hardwareMap, String deviceName /*, Telemetry telemetry*/) {
-    this.colorSensor = hardwareMap.get(ColorSensor.class, deviceName);
-    this.distanceSensor = hardwareMap.get(DistanceSensor.class, deviceName);
+  public ColorSensorV3(HardwareMap hardwareMap, String colorSensorName, String breakBeamName) {
+    this.colorSensor = hardwareMap.get(ColorSensor.class, colorSensorName);
+    this.distanceSensor = hardwareMap.get(DistanceSensor.class, colorSensorName);
+    this.breakBeam = new BreakBeam(hardwareMap.get(DigitalChannel.class, breakBeamName));
     this.colorSensor.enableLed(true);
-    // this.telemetry = telemetry;
-    this.timeSinceStart.reset();
+    this.telemetry = FtcDashboard.getInstance().getTelemetry();
   }
 
   /** Updates the color sensor readings, call every loop */
   public void update() {
-    double distance = distanceSensor.getDistance(DistanceUnit.INCH);
-    // telemetry.addData("Dist", distance);
+    if (breakBeam.isBroken()) breakBeamTimer.reset();
 
-    if (distance <= BALL_DISTANCE_THRESHOLD) {
+    boolean beamBroken = breakBeamTimer.seconds() <= BREAK_BEAM_TIMEOUT;
+    double distance = distanceSensor.getDistance(DistanceUnit.INCH);
+
+    if (SHOW_TELEMETRY) {
+      telemetry.addData("Dist", distance);
+      telemetry.addData("Beam broken", beamBroken);
+    }
+
+    if (beamBroken || distance <= BALL_DISTANCE_THRESHOLD) {
       float[] hsv = new float[3];
       Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsv);
       float h = hsv[0];
       float s = hsv[1];
       float v = hsv[2];
-      // telemetry.addData("Hue", h);
-      // telemetry.addData("Sat", s);
-      // telemetry.addData("Val", v);
 
-      if (Math.abs(h - green) <= greenTolerance && s >= greenHueMin) { // green
+      if (SHOW_TELEMETRY) {
+        telemetry.addData("Hue", h);
+        telemetry.addData("Sat", s);
+        telemetry.addData("Val", v);
+      }
+
+      if (Math.abs(h - GREEN_HUE) <= GREEN_HUE_TOLERANCE && s >= GREEN_SATURATION_MIN) { // green
         color = BallColor.GREEN; // intake has a green ball in it
 
-      } else if (Math.abs(h - purple) <= purpleTolerance) { // purple
+      } else if (Math.abs(h - PURPLE_HUE) <= PURPLE_HUE_TOLERANCE) { // purple
         color = BallColor.PURPLE; // intake has a purple ball in it
 
       } else { // color can't be determined
@@ -96,24 +103,16 @@ public class ColorSensorV3 implements System {
       color = BallColor.EMPTY;
     }
 
-    // telemetry.addData("Color", color);
-    // telemetry.update();
+    if (SHOW_TELEMETRY) {
+      telemetry.addData("Color", color);
+      telemetry.update();
+    }
 
-    double now = timeSinceStart.seconds();
-    readings.add(new Reading(now, distance));
-    // remove old readings
-    while (!readings.isEmpty() && now - readings.getFirst().timestamp > DISCONNECT_TIME) {
-      readings.removeFirst();
-    }
-    boolean connected = false;
-    Reading previousReading = readings.isEmpty() ? null : readings.getLast();
-    for (Reading reading : readings) {
-      if (reading.distance != previousReading.distance) {
-        connected = true;
-        break;
-      }
-      previousReading = reading;
-    }
+    if (distance != lastDistance) readingChangeTimer.reset();
+    lastDistance = distance;
+
+    boolean connected = readingChangeTimer.seconds() <= DISCONNECT_TIME;
+
     status = connected ? SystemStatus.NOMINAL : SystemStatus.INOPERABLE;
   }
 
