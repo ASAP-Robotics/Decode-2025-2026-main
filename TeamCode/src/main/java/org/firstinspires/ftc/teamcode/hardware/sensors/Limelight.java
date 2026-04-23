@@ -18,18 +18,22 @@ package org.firstinspires.ftc.teamcode.hardware.sensors;
 
 import static org.firstinspires.ftc.teamcode.types.Helpers.NULL;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
-@Deprecated
+@Config
 public class Limelight {
   protected static class Result {
     public LLResult result;
@@ -46,11 +50,15 @@ public class Limelight {
     UNINITIALIZED
   }
 
-  private static final double AVERAGE_TIME = 3; // time period to average location over, seconds
-  private static final double MAX_POSITION_DEVIATION = 3; // for average, inches
-  private static final double MAX_ANGLE_DEVIATION = 3; // for average, degrees
-  private static final double OUTLIER_PERCENTAGE = 0.4; // the percent of values to trim as outliers
+  // config vars (FTC Dashboard)
+  public static double AVERAGE_TIME = 3; // time period to average location over, seconds
+  public static double MAX_POSITION_DEVIATION = 3; // for average, inches
+  public static double MAX_ANGLE_DEVIATION = 3; // for average, degrees
+  public static double OUTLIER_PERCENTAGE = 0.4; // the percent of values to trim as outliers
+  public static boolean SHOW_TELEMETRY = false;
+
   private final Limelight3A limelight;
+  private final Telemetry telemetry = FtcDashboard.getInstance().getTelemetry();
   private final AllianceColor allianceColor;
   private LimeLightMode mode;
   private final LinkedList<Result> results = new LinkedList<>();
@@ -95,14 +103,9 @@ public class Limelight {
    */
   public void update() {
     LLResult result = limelight.getLatestResult();
-    if (result == null || !result.isValid()) {
-      isResultValid = false;
-      return;
-    } else {
-      isResultValid = true;
-    }
+    isResultValid = result != null && result.isValid();
 
-    double now = timeSinceStart.time();
+    double now = timeSinceStart.seconds();
     try {
       // only add result if it is valid
       if (isResultValid) results.add(new Result(result, now));
@@ -116,6 +119,12 @@ public class Limelight {
     }
 
     if (!isPipelineCorrect()) limelight.pipelineSwitch(getPipeline());
+
+    if (SHOW_TELEMETRY) {
+      telemetry.addData("Result valid", isResultValid);
+      telemetry.addData("No. results", results.size());
+      telemetry.update();
+    }
   }
 
   /**
@@ -123,7 +132,7 @@ public class Limelight {
    * @return the 2D position of limelight on the field, or null if invalid
    */
   public Pose2D getPosition() {
-    if (!isResultValid || results.isEmpty()) {
+    if (!isResultValid || results.size() < 5) {
       return null;
     }
 
@@ -148,10 +157,18 @@ public class Limelight {
     List<Double> yt = trimOutliers(ys);
     List<Double> ht = trimOutliers(hs);
 
+    boolean xSpreadTooLarge = isSpreadTooLarge(xt, MAX_POSITION_DEVIATION);
+    boolean ySpreadTooLarge = isSpreadTooLarge(yt, MAX_POSITION_DEVIATION);
+    boolean hSpreadTooLarge = isSpreadTooLarge(ht, MAX_ANGLE_DEVIATION);
+
+    if (SHOW_TELEMETRY) {
+      telemetry.addData("X spread too large", xSpreadTooLarge);
+      telemetry.addData("Y spread too large", ySpreadTooLarge);
+      telemetry.addData("H spread too large", hSpreadTooLarge);
+    }
+
     // if spread is too large, return null
-    if (isSpreadTooLarge(xt, MAX_POSITION_DEVIATION)
-        || isSpreadTooLarge(yt, MAX_POSITION_DEVIATION)
-        || isSpreadTooLarge(ht, MAX_ANGLE_DEVIATION)) {
+    if (xSpreadTooLarge || ySpreadTooLarge || hSpreadTooLarge) {
       return null;
     }
 
@@ -159,6 +176,12 @@ public class Limelight {
     Double avgX = average(xt);
     Double avgY = average(yt);
     Double avgH = average(ht);
+
+    if (SHOW_TELEMETRY) {
+      telemetry.addData("X", avgX);
+      telemetry.addData("Y", avgY);
+      telemetry.addData("H", avgH);
+    }
 
     return new Pose2D(DistanceUnit.INCH, avgX, avgY, AngleUnit.DEGREES, avgH);
   }

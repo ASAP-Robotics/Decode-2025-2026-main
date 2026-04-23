@@ -20,6 +20,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -31,6 +32,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.hardware.MecanumWheelBase;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 import org.firstinspires.ftc.teamcode.hardware.Spindex;
+import org.firstinspires.ftc.teamcode.hardware.sensors.Limelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -58,6 +60,7 @@ public class TeleOpRobot extends CommonRobot {
   protected Gamepad gamepad2;
   protected MecanumWheelBase wheelBase;
   protected PinpointLocalizer pinpoint;
+  protected Limelight limelight;
   protected ElapsedTime telemetryTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   protected ElapsedTime pinpointErrorTimer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
   protected SimpleTimer endgameTimer = new SimpleTimer(TIME_TO_ENDGAME);
@@ -76,6 +79,11 @@ public class TeleOpRobot extends CommonRobot {
     super(hardwareMap, telemetry, allianceColor, true);
 
     pinpoint = new PinpointLocalizer(hardwareMap, new PositionFileReader().getPosition(), true);
+    limelight =
+        new Limelight(
+            this.hardwareMap.get(Limelight3A.class, "limelight"),
+            this.allianceColor
+        );
 
     this.gamepad1 = gamepad1;
     this.gamepad2 = gamepad2;
@@ -103,6 +111,8 @@ public class TeleOpRobot extends CommonRobot {
 
     scoringSystem.setSortingMode(Spindex.SortingMode.FAST); // start unsorted
     scoringSystem.init(false, false); // initialize scoring systems
+
+    limelight.init();
   }
 
   /**
@@ -120,6 +130,7 @@ public class TeleOpRobot extends CommonRobot {
     clearSensorCache();
     telemetryTimer.reset();
     scoringSystem.start(false); // start scoring systems up
+    limelight.start();
     pinpointErrorTimer.reset();
     endgameTimer.start();
   }
@@ -141,6 +152,9 @@ public class TeleOpRobot extends CommonRobot {
     if (updateTelemetry) {
       telemetryTimer.reset();
     }
+
+    limelight.update();
+    limelight.getRobotPosition(scoringSystem.getTurretAngle());
 
     // get robot position
     PoseVelocity2d velocityPose = pinpoint.update();

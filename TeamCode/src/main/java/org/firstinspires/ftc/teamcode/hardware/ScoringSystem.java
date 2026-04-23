@@ -664,6 +664,14 @@ public class ScoringSystem {
   }
 
   /**
+   * Gets the horizontal angle of the turret
+   * @return the horizontal angle of the turret
+   */
+  public double getTurretAngle() {
+    return turret.getHorizontalAngleDegrees();
+  }
+
+  /**
    * @brief sets the intake to eject at full speed (for some amount of time)
    * @note intended for external use only in emergency game situations (when something has
    *     malfunctioned); not intended for external use normally or regularly
