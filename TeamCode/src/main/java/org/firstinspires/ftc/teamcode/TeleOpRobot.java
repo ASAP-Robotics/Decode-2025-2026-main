@@ -102,7 +102,7 @@ public class TeleOpRobot extends CommonRobot {
     }
 
     scoringSystem.setSortingMode(Spindex.SortingMode.FAST); // start unsorted
-    scoringSystem.init(false, false); // initialize scoring systems
+    scoringSystem.init(false, false, 0); // initialize scoring systems
   }
 
   /**

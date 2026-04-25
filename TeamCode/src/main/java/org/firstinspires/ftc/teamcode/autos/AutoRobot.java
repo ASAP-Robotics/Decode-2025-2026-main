@@ -40,7 +40,7 @@ public class AutoRobot extends CommonRobot {
 
   private ParallelAction auto;
 
-  public enum paths {
+  public enum AutoPath {
     FARSIDE,
     CLOSE15,
     CLOSE12,
@@ -48,17 +48,17 @@ public class AutoRobot extends CommonRobot {
     CLOSE15_3GATE
   }
 
-  private AutoPaths autoPaths;
-
-  private final SearchLimelight limelight;
+    private final SearchLimelight limelight;
   protected MecanumDrive drive;
+  protected double obeliskAngle;
 
   public AutoRobot(
-      HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor, paths path) {
+      HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor, AutoPath path) {
     super(hardwareMap, telemetry, allianceColor, false);
 
     limelight = new SearchLimelight(hardwareMap);
-    autoPaths = new AutoPaths(allianceColor);
+    AutoPaths autoPaths = new AutoPaths(allianceColor);
+
     if (allianceColor == AllianceColor.RED) {
       flipy = -1;
     }
@@ -68,30 +68,40 @@ public class AutoRobot extends CommonRobot {
         beginPose = new Pose2d(63, -8.6 * flipy, Math.toRadians(-90) * flipy);
         drive = new MecanumDrive(hardwareMap, beginPose);
         auto = autoPaths.getFarSideAuto(scoringSystem, drive, telemetry);
+        obeliskAngle = 90;
         break;
       case CLOSE15:
         beginPose = allianceColor.getAutoStartPosition();
         drive = new MecanumDrive(hardwareMap, beginPose);
         auto = autoPaths.getCloseSide15Auto(scoringSystem, drive, telemetry);
+        obeliskAngle = 150;
         break;
       case CLOSE12:
         beginPose = allianceColor.getAutoStartPosition();
         drive = new MecanumDrive(hardwareMap, beginPose);
         auto = autoPaths.getCloseSide12Auto(scoringSystem, drive, telemetry);
+        obeliskAngle = 150;
         break;
       case ClOSE15_2GATE:
         beginPose = allianceColor.getAutoStartPosition();
         drive = new MecanumDrive(hardwareMap, beginPose);
         auto = autoPaths.getCloseSide15Auto2Gate(scoringSystem, drive, telemetry);
+        obeliskAngle = 150;
         break;
       case CLOSE15_3GATE:
         beginPose = allianceColor.getAutoStartPosition();
         drive = new MecanumDrive(hardwareMap, beginPose);
         auto = autoPaths.getCloseSide15Auto2GatePickupWith3GateHit(scoringSystem, drive, telemetry);
+        obeliskAngle = 150;
         break;
       default:
         beginPose = new Pose2d(0, 0, 0);
+        obeliskAngle = 0;
         break;
+    }
+
+    if (allianceColor.flipObeliskAngle) {
+      obeliskAngle *= -1;
     }
   }
 
@@ -111,7 +121,7 @@ public class AutoRobot extends CommonRobot {
 
     sleep(2000);
 
-    scoringSystem.init(true, true);
+    scoringSystem.init(true, true, obeliskAngle);
   }
 
   public void initLoop() {

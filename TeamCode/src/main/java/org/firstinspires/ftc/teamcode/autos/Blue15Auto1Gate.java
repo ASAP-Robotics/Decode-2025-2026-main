@@ -13,7 +13,7 @@ public class Blue15Auto1Gate extends LinearOpMode {
     if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
       // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.BLUE);
       AutoRobot robot =
-          new AutoRobot(hardwareMap, telemetry, AllianceColor.BLUE, AutoRobot.paths.CLOSE15);
+          new AutoRobot(hardwareMap, telemetry, AllianceColor.BLUE, AutoRobot.AutoPath.CLOSE15);
 
       robot.init();
 

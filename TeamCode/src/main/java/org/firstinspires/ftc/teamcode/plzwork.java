@@ -44,7 +44,7 @@ public class plzwork extends CommonRobot {
    * @brief to be called once, when the opMode is initialized
    */
   public void init() {
-    scoringSystem.init(true, false);
+    scoringSystem.init(true, false, 0);
   }
 
   /**
