@@ -9,11 +9,13 @@ import com.acmerobotics.roadrunner.Vector2d;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.actions.AutoEndShutdowAction;
+import org.firstinspires.ftc.teamcode.actions.SetShootingMode;
 import org.firstinspires.ftc.teamcode.actions.setAiming;
 import org.firstinspires.ftc.teamcode.actions.setScoringPose;
-import org.firstinspires.ftc.teamcode.actions.shootAction;
+import org.firstinspires.ftc.teamcode.actions.ShootAction;
 import org.firstinspires.ftc.teamcode.actions.updateScoring;
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
+import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 public class AutoPaths {
@@ -37,7 +39,7 @@ public class AutoPaths {
         new SequentialAction( // BIG BOI
             new setAiming(122, -65, 3030, 35, flipy, scoringSystem), // 1
             new SequentialAction( // shoot 1
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
                 new setAiming(122, -73, 2990, 36, flipy, scoringSystem),
             new SequentialAction( // shoot 2
                 drive
@@ -60,7 +62,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(160.0),
                         new ProfileAccelConstraint(-60, 130))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
                 new SequentialAction( // shoot 3
                         drive
                                 .actionBuilder(new Pose2d(62.8, -28 * flipy, Math.toRadians(-90) * flipy))
@@ -77,7 +79,7 @@ public class AutoPaths {
                                         new TranslationalVelConstraint(160.0),
                                         new ProfileAccelConstraint(-30, 80))
                                 .build(),
-                        new shootAction(scoringSystem)),
+                        new ShootAction(scoringSystem)),
                 new SequentialAction( // shoot 3
                         drive
                                 .actionBuilder(new Pose2d(62.8, -28 * flipy, Math.toRadians(-90) * flipy))
@@ -94,7 +96,7 @@ public class AutoPaths {
                                         new TranslationalVelConstraint(160.0),
                                         new ProfileAccelConstraint(-30, 80))
                                 .build(),
-                        new shootAction(scoringSystem)),
+                        new ShootAction(scoringSystem)),
                 new SequentialAction( // shoot 3
                         drive
                                 .actionBuilder(new Pose2d(62.8, -28 * flipy, Math.toRadians(-90) * flipy))
@@ -111,7 +113,7 @@ public class AutoPaths {
                                         new TranslationalVelConstraint(160.0),
                                         new ProfileAccelConstraint(-30, 80))
                                 .build(),
-                        new shootAction(scoringSystem)),
+                        new ShootAction(scoringSystem)),
             new SequentialAction(
                     drive
                             .actionBuilder(new Pose2d(62.8, -28 * flipy, Math.toRadians(-90) * flipy))
@@ -154,7 +156,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 80))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new setAiming(90, -43 + angleOffset, 2520, 26, flipy, scoringSystem),
             new SequentialAction( // pickup 1 PGP
                 drive
@@ -179,7 +181,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new SequentialAction( // pickup2 (gate pickup)
                 // GATE PICKUP
                 drive
@@ -214,7 +216,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new SequentialAction(
                 drive
                     .actionBuilder(
@@ -236,7 +238,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem),
+                new ShootAction(scoringSystem),
                 new setAiming(70, -28 + angleOffset, 2500, 29, flipy, scoringSystem)),
             new SequentialAction( // pickup close
                 drive
@@ -263,7 +265,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(300.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new AutoEndShutdowAction(scoringSystem)));
   }
 
@@ -296,7 +298,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 80))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new setAiming(90, -43 + angleOffset, 2520, 26, flipy, scoringSystem),
             new SequentialAction( // pickup 1 PGP
                 drive
@@ -330,7 +332,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new SequentialAction( // pickup2 (gate pickup)
                 // GATE PICKUP
                 drive
@@ -365,7 +367,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem),
+                new ShootAction(scoringSystem),
                 new setAiming(70, -25 + angleOffset, 2475, 27, flipy, scoringSystem)),
             new SequentialAction( // pickup close
                 drive
@@ -392,7 +394,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(300.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new AutoEndShutdowAction(scoringSystem)));
   }
 
@@ -414,7 +416,7 @@ public class AutoPaths {
         new SequentialAction( // BIG BOI
             new SequentialAction(new setScoringPose(scoringSystem, allianceColor)), // 1
             // new ObeliskSearch(limelight, telemetry),
-            new setAiming(90, -49.5 + angleOffset / -3, 2400, 36, flipy, scoringSystem),
+            new setAiming(90, -49.5 + angleOffset / -3, 2400, 37, flipy, scoringSystem),
             new SequentialAction( // shoot 1
                 drive
                     .actionBuilder(allianceColor.getAutoStartPosition())
@@ -425,7 +427,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 80))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new setAiming(90, -42 + angleOffset, 2500, 38, flipy, scoringSystem),
             new SequentialAction( // pickup 1 PGP
                 drive
@@ -450,7 +452,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new SequentialAction( // pickup2 (gate pickup)
                 // GATE PICKUP
                 drive
@@ -485,7 +487,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new SequentialAction(
                 // GATE PICKUP
                 drive
@@ -520,7 +522,8 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem),
+                new SetShootingMode(scoringSystem, Spindex.ShootingMode.SLOW),
+                new ShootAction(scoringSystem),
                 new setAiming(70, -24 + angleOffset, 2455, 39, flipy, scoringSystem)),
             new SequentialAction( // pickup close
                 drive
@@ -547,7 +550,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(300.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new AutoEndShutdowAction(scoringSystem)));
   }
 
@@ -580,7 +583,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 80))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new setAiming(90, -43 + angleOffset, 2520, 26, flipy, scoringSystem),
             new SequentialAction( // pickup 1 PGP
                 drive
@@ -608,7 +611,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new SequentialAction( // pickup2 (gate pickup)
                 // GATE PICKUP
                 drive
@@ -643,7 +646,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new SequentialAction(
                 // GATE PICKUP
                 drive
@@ -678,7 +681,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(250.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem),
+                new ShootAction(scoringSystem),
                 new setAiming(70, -25 + angleOffset, 2475, 27, flipy, scoringSystem)),
             new SequentialAction( // pickup close
                 drive
@@ -705,7 +708,7 @@ public class AutoPaths {
                         new TranslationalVelConstraint(300.0),
                         new ProfileAccelConstraint(-50, 240))
                     .build(),
-                new shootAction(scoringSystem)),
+                new ShootAction(scoringSystem)),
             new AutoEndShutdowAction(scoringSystem)));
   }
 }

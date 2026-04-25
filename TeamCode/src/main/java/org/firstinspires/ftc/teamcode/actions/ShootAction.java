@@ -2,13 +2,13 @@ package org.firstinspires.ftc.teamcode.actions; // file: MySetPositionAction.jav
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import org.firstinspires.ftc.robotcore.external.navigation.*;
+
 import org.firstinspires.ftc.teamcode.hardware.ScoringSystem;
 
-public class shootAction implements Action {
+public class ShootAction implements Action {
   private final ScoringSystem scoringSystem;
 
-  public shootAction(ScoringSystem scoringSystem) {
+  public ShootAction(ScoringSystem scoringSystem) {
     this.scoringSystem = scoringSystem;
   }
 

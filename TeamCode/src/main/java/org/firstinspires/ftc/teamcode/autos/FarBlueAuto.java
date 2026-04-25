@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.tuning.TuningOpModes;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
-@Autonomous(name = "Far Blue Auto", group = "Autos")
+@Autonomous(name = "Blue Far Auto")
 public class FarBlueAuto extends LinearOpMode {
   @Override
   public void runOpMode() throws InterruptedException {
