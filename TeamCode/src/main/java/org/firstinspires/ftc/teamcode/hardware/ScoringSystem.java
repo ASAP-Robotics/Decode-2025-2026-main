@@ -225,6 +225,8 @@ public class ScoringSystem {
     if (turretRPMOverride) {
       turret.overrideRpm(rpmOverride);
     }
+
+    if (spindex.fullSlots() >= 2) turret.activate(); // experimental
   }
 
   /** Updates everything to do with the spindexer */
