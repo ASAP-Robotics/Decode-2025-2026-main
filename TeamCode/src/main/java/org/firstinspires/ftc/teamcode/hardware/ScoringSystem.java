@@ -542,7 +542,6 @@ public class ScoringSystem {
    */
   public void setShootingMode(Spindex.ShootingMode shootingMode) {
     spindex.setShootingMode(shootingMode);
-
   }
 
   /**
