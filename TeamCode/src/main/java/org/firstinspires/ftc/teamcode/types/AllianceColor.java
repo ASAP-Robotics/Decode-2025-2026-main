@@ -23,6 +23,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public enum AllianceColor {
   RED(
+      false,
       24,
       2,
       150,
@@ -32,6 +33,7 @@ public enum AllianceColor {
       new Pose2D(DistanceUnit.INCH, -63, 60, AngleUnit.DEGREES, 0), // target location
       new Pose2D(DistanceUnit.INCH, 63, -63, AngleUnit.DEGREES, 0)), // reset location
   BLUE(
+      true,
       20,
       1,
       -150,
@@ -42,6 +44,7 @@ public enum AllianceColor {
       new Pose2D(DistanceUnit.INCH, -63, -60, AngleUnit.DEGREES, 0), // target location
       new Pose2D(DistanceUnit.INCH, 63, 63, AngleUnit.DEGREES, 0)); // reset location
 
+  public final boolean flipObeliskAngle;
   private final int aprilTagId;
   private final int limelightPipeline;
   private final double obeliskOffset;
@@ -52,6 +55,7 @@ public enum AllianceColor {
   private final Pose2D autoSSShootPosition;
 
   AllianceColor(
+      boolean flipObeliskAngle,
       int aprilTagId,
       int limelightPipeline,
       double obeliskOffset,
@@ -60,6 +64,7 @@ public enum AllianceColor {
       Pose2D autoSSShootPosition,
       Pose2D targetLocation,
       Pose2D resetLocation) {
+    this.flipObeliskAngle = flipObeliskAngle;
     this.aprilTagId = aprilTagId;
     this.limelightPipeline = limelightPipeline;
     this.obeliskOffset = obeliskOffset;

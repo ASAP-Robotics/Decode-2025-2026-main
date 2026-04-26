@@ -120,7 +120,7 @@ public class Spindex implements System {
   public static double INTAKE_FLAP_CLOSED = 325;
   public static double INTAKE_FLAP_OPEN = 240;
   public static double SHOOT_DELAY_SECONDS = 0.2;
-  public static double SLOW_MODE_SLOT_DELAY_SECONDS = 0.2;
+  public static double SLOW_MODE_SLOT_DELAY_SECONDS = 0.05;
   public static ShootingMode shootingMode = ShootingMode.FAST;
   public static SortingMode sortingMode = SortingMode.SORTED;
 
@@ -132,9 +132,9 @@ public class Spindex implements System {
   private final ColorSensorV3 colorSensor; // the color sensor at the intake
   private final SpindexSlot[] spindex = {
     // code assumptions: increasing angle shoots
-    new SpindexSlot(-72, 258, 18), // slot 0
-    new SpindexSlot(48, 18, 138), // slot 1
-    new SpindexSlot(168, 138, 258) // slot 2
+    new SpindexSlot(-70, 258, 18), // slot 0
+    new SpindexSlot(50, 18, 138), // slot 1
+    new SpindexSlot(170, 138, 258) // slot 2
   };
 
   private final SimpleTimer shootDelay =
@@ -695,6 +695,20 @@ public class Spindex implements System {
     }
 
     return true;
+  }
+
+  /**
+   * Gets how many full (shootable) slots are in the spindex
+   *
+   * @return the number of shootable balls in the spindex
+   */
+  public int fullSlots() {
+    int count = 0;
+    for (SpindexSlot slot : spindex) {
+      if (slot.color.isShootable()) count++;
+    }
+
+    return count;
   }
 
   /**

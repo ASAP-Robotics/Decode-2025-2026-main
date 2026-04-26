@@ -58,7 +58,7 @@ public class HomableRotator implements System {
   }
 
   public static boolean SHOW_TELEMETRY = false; // if dashboard telemetry should be shown
-  public static double ANGLE_OFFSET = 0; // offset between encoder and hardware zero
+  public static double ANGLE_OFFSET = 5; // offset between encoder and hardware zero
   public static double READING_TIME = 1; // seconds
   public static double STALL_CURRENT = 2.0; // amps
   public static double STALL_ANGLE_DEVIATION =

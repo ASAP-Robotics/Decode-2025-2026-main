@@ -6,14 +6,14 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.tuning.TuningOpModes;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
-@Autonomous(name = "Blue Far Auto")
-public class FarBlueAuto extends LinearOpMode {
+@Autonomous(name = "Red Far Auto")
+public class FarRedAuto extends LinearOpMode {
   @Override
   public void runOpMode() throws InterruptedException {
     if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
       // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.BLUE);
       AutoRobot robot =
-          new AutoRobot(hardwareMap, telemetry, AllianceColor.BLUE, AutoRobot.AutoPath.FARSIDE);
+          new AutoRobot(hardwareMap, telemetry, AllianceColor.RED, AutoRobot.AutoPath.FARSIDE);
 
       robot.init();
 

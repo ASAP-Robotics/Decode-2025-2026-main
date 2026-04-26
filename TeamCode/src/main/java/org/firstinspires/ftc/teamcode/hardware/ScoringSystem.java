@@ -118,15 +118,16 @@ public class ScoringSystem {
    * @param auto if opMode is Auto (as opposed to TeleOp)
    * @note call when OpMode is initialized ("Init" is pressed)
    */
-  public void init(boolean isPreloaded, boolean auto) {
+  public void init(boolean isPreloaded, boolean auto, double turretAngle) {
     setIndicatorColor(RGBIndicator.Color.VIOLET);
     spindex.init(BallSequence.GPP, isPreloaded, auto);
     if (auto) {
-      turret.init(allianceColor.getObeliskOffset());
+      turret.init(turretAngle);
     } else {
       turret.setHoodEnabled(false);
       turret.init(0);
     }
+    if (auto) turret.setIdleSpeed(2400);
     turret.setActive(!isPreloaded);
     intake.setTurnOffWhenEmpty(!auto);
     intake.setState(ActiveIntake.State.OFF);
@@ -153,8 +154,6 @@ public class ScoringSystem {
 
     if (isPreloaded) {
       switchModeToFull();
-      intake.clear();
-      intake.setState(ActiveIntake.State.REPELLING);
 
     } else {
       switchModeToIntaking();
@@ -226,6 +225,8 @@ public class ScoringSystem {
     if (turretRPMOverride) {
       turret.overrideRpm(rpmOverride);
     }
+
+    if (spindex.fullSlots() >= 2) turret.activate(); // experimental
   }
 
   /** Updates everything to do with the spindexer */
