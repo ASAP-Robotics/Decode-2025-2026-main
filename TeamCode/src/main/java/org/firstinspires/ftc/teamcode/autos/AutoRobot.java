@@ -49,7 +49,7 @@ public class AutoRobot extends CommonRobot {
     CLOSE15_3GATE
   }
 
-    private final SearchLimelight limelight;
+  private final SearchLimelight limelight;
   protected MecanumDrive drive;
   protected double obeliskAngle;
 

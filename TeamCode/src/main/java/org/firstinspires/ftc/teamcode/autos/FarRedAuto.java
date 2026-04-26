@@ -8,28 +8,28 @@ import org.firstinspires.ftc.teamcode.types.AllianceColor;
 
 @Autonomous(name = "Red Far Auto")
 public class FarRedAuto extends LinearOpMode {
-    @Override
-    public void runOpMode() throws InterruptedException {
-        if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
-            // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.BLUE);
-            AutoRobot robot =
-                    new AutoRobot(hardwareMap, telemetry, AllianceColor.RED, AutoRobot.AutoPath.FARSIDE);
+  @Override
+  public void runOpMode() throws InterruptedException {
+    if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
+      // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.BLUE);
+      AutoRobot robot =
+          new AutoRobot(hardwareMap, telemetry, AllianceColor.RED, AutoRobot.AutoPath.FARSIDE);
 
-            robot.init();
+      robot.init();
 
-            while (opModeInInit()) {
-                robot.initLoop();
-            }
+      while (opModeInInit()) {
+        robot.initLoop();
+      }
 
-            waitForStart();
+      waitForStart();
 
-            robot.start();
+      robot.start();
 
-            while (opModeIsActive()) {
-                robot.loop();
-            }
+      while (opModeIsActive()) {
+        robot.loop();
+      }
 
-            robot.stop();
-        }
+      robot.stop();
     }
+  }
 }

@@ -699,6 +699,7 @@ public class Spindex implements System {
 
   /**
    * Gets how many full (shootable) slots are in the spindex
+   *
    * @return the number of shootable balls in the spindex
    */
   public int fullSlots() {

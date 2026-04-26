@@ -13,7 +13,8 @@ public class Red2Gate extends LinearOpMode {
     if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
       // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.RED);
       AutoRobot robot =
-          new AutoRobot(hardwareMap, telemetry, AllianceColor.RED, AutoRobot.AutoPath.ClOSE15_2GATE);
+          new AutoRobot(
+              hardwareMap, telemetry, AllianceColor.RED, AutoRobot.AutoPath.ClOSE15_2GATE);
 
       robot.init();
 
