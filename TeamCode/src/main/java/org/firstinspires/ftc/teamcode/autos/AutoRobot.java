@@ -26,6 +26,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.CommonRobot;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.hardware.Spindex;
 import org.firstinspires.ftc.teamcode.hardware.sensors.SearchLimelight;
 import org.firstinspires.ftc.teamcode.types.AllianceColor;
 import org.firstinspires.ftc.teamcode.types.BallSequence;
@@ -48,13 +49,15 @@ public class AutoRobot extends CommonRobot {
     CLOSE15_3GATE
   }
 
-  private final SearchLimelight limelight;
+    private final SearchLimelight limelight;
   protected MecanumDrive drive;
   protected double obeliskAngle;
 
   public AutoRobot(
       HardwareMap hardwareMap, Telemetry telemetry, AllianceColor allianceColor, AutoPath path) {
     super(hardwareMap, telemetry, allianceColor, false);
+
+    Spindex.SLOW_MODE_SLOT_DELAY_SECONDS = 0.1;
 
     limelight = new SearchLimelight(hardwareMap);
     AutoPaths autoPaths = new AutoPaths(allianceColor);

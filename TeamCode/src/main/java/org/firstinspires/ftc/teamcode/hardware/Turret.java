@@ -153,32 +153,32 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
     // note: "distance" numbers *MUST* go from low to high
     return new LookupTableItem[] {
       // Extrapolated 0 point
-      new LookupTableItem(0, 1850, 76, 1),
+      new LookupTableItem(0, 1850, 76, .59),
 
       // Tuned Data (Sorted Low to High)
-      new LookupTableItem(32.8, 1850, 71, .82),
-      new LookupTableItem(41.5, 2140, 55, .65),
-      new LookupTableItem(49.5, 2220, 48, .64),
-      new LookupTableItem(52.9, 2330, 43, .51),
-      new LookupTableItem(56.7, 2410, 41, .55),
-      new LookupTableItem(63.1, 2465, 39.25, .60),
-      new LookupTableItem(66.5, 2490, 39, .55),
-      new LookupTableItem(70.8, 2538, 37, .55),
-      new LookupTableItem(78.3, 2618, 35, .57),
-      new LookupTableItem(81.3, 2642, 34, .60),
-      new LookupTableItem(85.6, 2652, 34, .66),
-      new LookupTableItem(93.3, 2795, 29, .71),
-      new LookupTableItem(96.3, 2825, 27, .61),
-      new LookupTableItem(104, 2870, 27, .67),
-      new LookupTableItem(106.6, 2902, 26, .65),
-      new LookupTableItem(122.2, 2940, 36, .76),
-      new LookupTableItem(130.5, 3000, 35.5, .89),
-      new LookupTableItem(138.5, 3090, 35, .89),
-      new LookupTableItem(144.7, 3150, 32.3, .89),
-      new LookupTableItem(148.8, 3245, 30.5, .89),
-      new LookupTableItem(158.5, 3290, 30, .89),
+      new LookupTableItem(32.8,  1850, 71,    .59),
+      new LookupTableItem(41.5,  2140, 55,    .47),
+      new LookupTableItem(49.5,  2220, 48,    .47),
+      new LookupTableItem(52.9,  2330, 43,    .43),
+      new LookupTableItem(56.7,  2410, 41.5,  .45),
+      new LookupTableItem(63.1,  2465, 39.25, .45),
+      new LookupTableItem(66.5,  2490, 39,    .53),
+      new LookupTableItem(70.8,  2538, 37,    .52),
+      new LookupTableItem(78.3,  2618, 35,    .56),
+      new LookupTableItem(81.3,  2642, 34,    .57),
+      new LookupTableItem(85.6,  2652, 34,    .67),
+      new LookupTableItem(93.3,  2795, 29,    .56),
+      new LookupTableItem(96.3,  2825, 27,    .62),
+      new LookupTableItem(104,   2870, 27,    .60),
+      new LookupTableItem(106.6, 2902, 26,    .69),
+      new LookupTableItem(122.2, 2940, 36,    .98),
+      new LookupTableItem(130.5, 3000, 35.5,  .98),
+      new LookupTableItem(138.5, 3090, 35,    .98),
+      new LookupTableItem(144.7, 3150, 32.3,  .98),
+      new LookupTableItem(148.8, 3245, 30.5,  .98),
+      new LookupTableItem(158.5, 3290, 30,    .98),
       // Extrapolated "infinite" point
-      new LookupTableItem(Double.POSITIVE_INFINITY, 3150, 35, 1)
+      new LookupTableItem(Double.POSITIVE_INFINITY, 3290, 30, 1)
     };
   }
 

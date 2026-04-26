@@ -13,7 +13,7 @@ public class FarBlueAuto extends LinearOpMode {
     if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
       // SimpleAuto robot = new SimpleAuto(hardwareMap, telemetry, AllianceColor.BLUE);
       AutoRobot robot =
-          new AutoRobot(hardwareMap, telemetry, AllianceColor.BLUE, AutoRobot.AutoPath.FARSIDE);
+              new AutoRobot(hardwareMap, telemetry, AllianceColor.BLUE, AutoRobot.AutoPath.FARSIDE);
 
       robot.init();
 

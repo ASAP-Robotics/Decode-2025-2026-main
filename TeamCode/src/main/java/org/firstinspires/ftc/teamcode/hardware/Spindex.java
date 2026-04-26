@@ -120,7 +120,7 @@ public class Spindex implements System {
   public static double INTAKE_FLAP_CLOSED = 325;
   public static double INTAKE_FLAP_OPEN = 240;
   public static double SHOOT_DELAY_SECONDS = 0.2;
-  public static double SLOW_MODE_SLOT_DELAY_SECONDS = 0.2;
+  public static double SLOW_MODE_SLOT_DELAY_SECONDS = 0.05;
   public static ShootingMode shootingMode = ShootingMode.FAST;
   public static SortingMode sortingMode = SortingMode.SORTED;
 
@@ -699,7 +699,6 @@ public class Spindex implements System {
 
   /**
    * Gets how many full (shootable) slots are in the spindex
-   *
    * @return the number of shootable balls in the spindex
    */
   public int fullSlots() {

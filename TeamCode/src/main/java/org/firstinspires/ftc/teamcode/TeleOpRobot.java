@@ -75,6 +75,8 @@ public class TeleOpRobot extends CommonRobot {
       boolean fieldCentric) {
     super(hardwareMap, telemetry, allianceColor, true);
 
+    Spindex.SLOW_MODE_SLOT_DELAY_SECONDS = 0.05;
+
     pinpoint = new PinpointLocalizer(hardwareMap, new PositionFileReader().getPosition(), true);
 
     this.gamepad1 = gamepad1;
