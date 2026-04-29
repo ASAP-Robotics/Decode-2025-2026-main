@@ -326,6 +326,15 @@ public class HomableRotator implements System {
   }
 
   /**
+   * Gets if the motor is disabled
+   *
+   * @return if the motor is disabled
+   */
+  public boolean isDisabled() {
+    return disabled;
+  }
+
+  /**
    * Sets the tolerance of the motor (how close to the target is "at target")
    *
    * @param degrees tolerance
