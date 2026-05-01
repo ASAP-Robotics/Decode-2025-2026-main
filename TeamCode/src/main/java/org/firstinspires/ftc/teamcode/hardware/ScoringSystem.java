@@ -709,6 +709,16 @@ public class ScoringSystem {
   }
 
   /**
+   * Adjusts the turret offset by single full rotations of the encoder (fifth turns of th turret)
+   *
+   * @param rotations the number of encoder rotations to adjust by (can be negative)
+   * @note intended asa driver backup for if the opMode starts with the turret not facing forward
+   */
+  public void setTurretEncoderErrorRotations(int rotations) {
+    turret.changeEncoderErrorTurns(rotations);
+  }
+
+  /**
    * Prepares systems for Autonomous shutdown
    *
    * @note only to be called at the end of Auto OpModes
