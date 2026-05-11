@@ -448,6 +448,18 @@ public class Turret extends Flywheel<Turret.LookupTableItem> {
   }
 
   /**
+   * Adjusts the turret offset by single full rotations of the encoder (fifth turns of th turret)
+   *
+   * @param rotations the number of encoder rotations to adjust by (can be negative)
+   * @note intended asa driver backup for if the opMode starts with the turret not facing forward
+   */
+  public void changeEncoderErrorTurns(int rotations) {
+    double adjustment = motorDegreesToTurretDegrees(rotations * 360.0);
+    changeHorizontalAngleOffsetDegrees(adjustment);
+    HORIZONTAL_WRAP_CENTER_DEGREES -= adjustment;
+  }
+
+  /**
    * @brief changes the horizontal angle offset for the turret, to account for belt slippage
    * @param deltaDegrees the amount to change the horizontal angle offset by, in degrees
    */

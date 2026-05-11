@@ -238,6 +238,14 @@ public class TeleOpRobot extends CommonRobot {
                 false);
       }
 
+      // adjust turret encoder error turns
+      if (gamepad2.dpadLeftWasPressed()) {
+        scoringSystem.setTurretEncoderErrorRotations(1);
+
+      } else if (gamepad2.dpadRightWasPressed()) {
+        scoringSystem.setTurretEncoderErrorRotations(-1);
+      }
+
       // turret rehome !*!*!*! use with caution !*!*!*!
       if (gamepad2.yWasPressed()) {
         scoringSystem.reSyncTurretEncoder();

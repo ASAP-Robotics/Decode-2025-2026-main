@@ -46,7 +46,8 @@ public class AutoRobot extends CommonRobot {
     CLOSE15,
     CLOSE12,
     ClOSE15_2GATE,
-    CLOSE15_3GATE
+    CLOSE15_3GATE,
+    FARSIDE_NO_SPIKE
   }
 
   private final SearchLimelight limelight;
@@ -96,6 +97,12 @@ public class AutoRobot extends CommonRobot {
         drive = new MecanumDrive(hardwareMap, beginPose);
         auto = autoPaths.getCloseSide15Auto2GatePickupWith3GateHit(scoringSystem, drive, telemetry);
         obeliskAngle = 150;
+        break;
+      case FARSIDE_NO_SPIKE:
+        beginPose = new Pose2d(63, -8.6 * flipy, Math.toRadians(-90) * flipy);
+        drive = new MecanumDrive(hardwareMap, beginPose);
+        auto = autoPaths.getFarSideNoSpikeMarkAuto(scoringSystem, drive, telemetry);
+        obeliskAngle = 90;
         break;
       default:
         beginPose = new Pose2d(0, 0, 0);

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2026 ASAP Robotics (FTC Team 22029)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.firstinspires.ftc.teamcode.autos;
 
 import com.acmerobotics.roadrunner.ParallelAction;
@@ -70,14 +86,14 @@ public class AutoPaths {
                         new Pose2d(62.8, -61 * flipy, flipy * (Math.toRadians(-90))),
                         (Math.PI / -2) * flipy,
                         new TranslationalVelConstraint(110.0),
-                        new ProfileAccelConstraint(-30, 50))
+                        new ProfileAccelConstraint(-40, 50))
                     .waitSeconds(0.55)
                     // shoot 3
                     .strafeToLinearHeading(
                         new Vector2d(62.8, -28 * flipy),
                         flipy * (Math.toRadians(-90)),
                         new TranslationalVelConstraint(160.0),
-                        new ProfileAccelConstraint(-30, 80))
+                        new ProfileAccelConstraint(-40, 80))
                     .build(),
                 new ShootAction(scoringSystem)),
             new SequentialAction( // shoot 3
@@ -87,14 +103,91 @@ public class AutoPaths {
                         new Pose2d(62.8, -61 * flipy, flipy * (Math.toRadians(-90))),
                         (Math.PI / -2) * flipy,
                         new TranslationalVelConstraint(70.0),
-                        new ProfileAccelConstraint(-30, 80))
+                        new ProfileAccelConstraint(-40, 80))
                     .waitSeconds(0.55)
                     // shoot 3
                     .strafeToLinearHeading(
                         new Vector2d(62.8, -28 * flipy),
                         flipy * (Math.toRadians(-90)),
                         new TranslationalVelConstraint(160.0),
+                        new ProfileAccelConstraint(-40, 80))
+                    .build(),
+                new ShootAction(scoringSystem)),
+            new SequentialAction( // shoot 3
+                drive
+                    .actionBuilder(new Pose2d(62.8, -28 * flipy, Math.toRadians(-90) * flipy))
+                    .splineToLinearHeading(
+                        new Pose2d(50, -38 * flipy, flipy * (Math.toRadians(-90))),
+                        (Math.PI / -4) * flipy,
+                        new TranslationalVelConstraint(160.0),
+                        new ProfileAccelConstraint(-60, 130))
+                    .splineToLinearHeading(
+                        new Pose2d(50, -61 * flipy, flipy * (Math.toRadians(-90))),
+                        (Math.PI / -4) * flipy,
+                        new TranslationalVelConstraint(110.0),
+                        new ProfileAccelConstraint(-60, 130))
+                    // shoot 3
+                    .strafeToLinearHeading(
+                        new Vector2d(62.8, -28 * flipy),
+                        flipy * (Math.toRadians(-90)),
+                        new TranslationalVelConstraint(160.0),
+                        new ProfileAccelConstraint(-40, 80))
+                    .build(),
+                new ShootAction(scoringSystem)),
+            new SequentialAction(
+                drive
+                    .actionBuilder(new Pose2d(62.8, -28 * flipy, Math.toRadians(-90) * flipy))
+                    .splineToLinearHeading(
+                        new Pose2d(62.8, -40 * flipy, flipy * (Math.toRadians(-90))),
+                        (Math.PI / -2) * flipy,
+                        new TranslationalVelConstraint(110.0),
                         new ProfileAccelConstraint(-30, 80))
+                    .build()),
+            new AutoEndShutdowAction(scoringSystem)));
+  }
+
+  ParallelAction getFarSideNoSpikeMarkAuto(
+      ScoringSystem scoringSystem, MecanumDrive drive, Telemetry telemetry) {
+    return new ParallelAction( // BIGGEST BOI
+        new updateScoring(scoringSystem, telemetry),
+        // new updateTelemetry(telemetry),
+        new SequentialAction( // BIG BOI
+            new setAiming(122, -65 - angleOffset, 3030, 35, flipy, scoringSystem), // 1
+            new SequentialAction( // shoot 1
+                new ShootAction(scoringSystem)),
+            new setAiming(122, -73 - angleOffset, 2990, 36, flipy, scoringSystem),
+            new SequentialAction( // shoot 2
+                drive
+                    .actionBuilder(new Pose2d(62.8, -10.5 * flipy, Math.toRadians(-90) * flipy))
+                    .splineToLinearHeading(
+                        new Pose2d(62.8, -61 * flipy, flipy * (Math.toRadians(-90))),
+                        (Math.PI / -2) * flipy,
+                        new TranslationalVelConstraint(70.0),
+                        new ProfileAccelConstraint(-40, 80))
+                    .waitSeconds(0.55)
+                    // shoot 2
+                    .strafeToLinearHeading(
+                        new Vector2d(62.8, -28 * flipy),
+                        flipy * (Math.toRadians(-90)),
+                        new TranslationalVelConstraint(160.0),
+                        new ProfileAccelConstraint(-60, 130))
+                    .build(),
+                new ShootAction(scoringSystem)),
+            new SequentialAction( // shoot 3
+                drive
+                    .actionBuilder(new Pose2d(62.8, -28 * flipy, Math.toRadians(-90) * flipy))
+                    .splineToLinearHeading(
+                        new Pose2d(62.8, -61 * flipy, flipy * (Math.toRadians(-90))),
+                        (Math.PI / -2) * flipy,
+                        new TranslationalVelConstraint(110.0),
+                        new ProfileAccelConstraint(-40, 50))
+                    .waitSeconds(0.55)
+                    // shoot 3
+                    .strafeToLinearHeading(
+                        new Vector2d(62.8, -28 * flipy),
+                        flipy * (Math.toRadians(-90)),
+                        new TranslationalVelConstraint(160.0),
+                        new ProfileAccelConstraint(-40, 80))
                     .build(),
                 new ShootAction(scoringSystem)),
             new SequentialAction( // shoot 3
@@ -104,14 +197,31 @@ public class AutoPaths {
                         new Pose2d(62.8, -61 * flipy, flipy * (Math.toRadians(-90))),
                         (Math.PI / -2) * flipy,
                         new TranslationalVelConstraint(70.0),
-                        new ProfileAccelConstraint(-30, 80))
+                        new ProfileAccelConstraint(-40, 80))
                     .waitSeconds(0.55)
                     // shoot 3
                     .strafeToLinearHeading(
                         new Vector2d(62.8, -28 * flipy),
                         flipy * (Math.toRadians(-90)),
                         new TranslationalVelConstraint(160.0),
-                        new ProfileAccelConstraint(-30, 80))
+                        new ProfileAccelConstraint(-40, 80))
+                    .build(),
+                new ShootAction(scoringSystem)),
+            new SequentialAction( // shoot 3
+                drive
+                    .actionBuilder(new Pose2d(62.8, -28 * flipy, Math.toRadians(-90) * flipy))
+                    .splineToLinearHeading(
+                        new Pose2d(62.8, -61 * flipy, flipy * (Math.toRadians(-90))),
+                        (Math.PI / -2) * flipy,
+                        new TranslationalVelConstraint(70.0),
+                        new ProfileAccelConstraint(-40, 80))
+                    .waitSeconds(0.55)
+                    // shoot 3
+                    .strafeToLinearHeading(
+                        new Vector2d(62.8, -28 * flipy),
+                        flipy * (Math.toRadians(-90)),
+                        new TranslationalVelConstraint(160.0),
+                        new ProfileAccelConstraint(-40, 80))
                     .build(),
                 new ShootAction(scoringSystem)),
             new SequentialAction(
@@ -470,7 +580,7 @@ public class AutoPaths {
                         new ProfileAccelConstraint(-50, 240))
                     .waitSeconds(.15)
                     .strafeToLinearHeading(
-                        new Vector2d(13.25, -55 * flipy), flipy * Math.toRadians(-120))
+                        new Vector2d(13.25, -55 * flipy), flipy * Math.toRadians(-112))
                     .strafeToLinearHeading(
                         new Pose2d(16 + xOffset * flipy, -62.5 * flipy, flipy * Math.toRadians(-90))
                             .position,
@@ -505,7 +615,7 @@ public class AutoPaths {
                         new ProfileAccelConstraint(-50, 240))
                     .waitSeconds(.15)
                     .strafeToLinearHeading(
-                        new Vector2d(13.25, -55 * flipy), flipy * Math.toRadians(-120))
+                        new Vector2d(13.25, -55 * flipy), flipy * Math.toRadians(-112))
                     .strafeToLinearHeading(
                         new Pose2d(16 + xOffset * flipy, -62.5 * flipy, flipy * Math.toRadians(-90))
                             .position,
