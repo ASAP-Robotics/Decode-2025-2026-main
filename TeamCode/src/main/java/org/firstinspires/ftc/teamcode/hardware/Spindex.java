@@ -223,7 +223,8 @@ public class Spindex implements System {
           break;
         } // prepare to shoot if full
 
-        if (isAtTarget() || spinner.isDisabled()) intakeBlocker.setPosition(INTAKE_FLAP_OPEN); // open intake
+        if (isAtTarget() || spinner.isDisabled())
+          intakeBlocker.setPosition(INTAKE_FLAP_OPEN); // open intake
         currentIndex = getColorIndex(BallColor.EMPTY);
 
         turnSpindexNoShoot(spindex[currentIndex].intakePosition); // move spindex to position
@@ -241,7 +242,10 @@ public class Spindex implements System {
         break;
 
       case SHOOTING: // if the spindex is shooting
-        intakeBlocker.setPosition(spinner.isDisabled() ? INTAKE_FLAP_OPEN : INTAKE_FLAP_CLOSED); // close intake (just in case)
+        intakeBlocker.setPosition(
+            spinner.isDisabled()
+                ? INTAKE_FLAP_OPEN
+                : INTAKE_FLAP_CLOSED); // close intake (just in case)
 
         switch (shootingMode) {
           case FAST:
@@ -330,7 +334,8 @@ public class Spindex implements System {
    */
   public void prepToShootSequence(BallSequence sequence) {
     if (state == SpindexState.SHOOTING) return; // return if shooting
-    intakeBlocker.setPosition(spinner.isDisabled() ? INTAKE_FLAP_OPEN : INTAKE_FLAP_CLOSED); // close intake
+    intakeBlocker.setPosition(
+        spinner.isDisabled() ? INTAKE_FLAP_OPEN : INTAKE_FLAP_CLOSED); // close intake
     currentIndex = getBestStartIndex(sequence); // set new index
     state = SpindexState.SHOOTING_READY; // spindex in shooting mode
     // probably redundant code was removed here, if things are breaking this could be it
@@ -343,7 +348,10 @@ public class Spindex implements System {
    */
   public void shoot() {
     if (!isReadyToShoot()) return;
-    intakeBlocker.setPosition(spinner.isDisabled() ? INTAKE_FLAP_OPEN : INTAKE_FLAP_CLOSED); // close intake (just in case)
+    intakeBlocker.setPosition(
+        spinner.isDisabled()
+            ? INTAKE_FLAP_OPEN
+            : INTAKE_FLAP_CLOSED); // close intake (just in case)
     state = SpindexState.SHOOTING;
 
     switch (shootingMode) {

@@ -145,6 +145,7 @@ public class AutoPaths {
                     .build()),
             new AutoEndShutdowAction(scoringSystem)));
   }
+
   ParallelAction getFarSideNoSpikeMarkAuto(
       ScoringSystem scoringSystem, MecanumDrive drive, Telemetry telemetry) {
     return new ParallelAction( // BIGGEST BOI
