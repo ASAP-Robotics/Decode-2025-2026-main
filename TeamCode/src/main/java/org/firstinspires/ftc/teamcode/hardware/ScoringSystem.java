@@ -61,7 +61,6 @@ public class ScoringSystem {
   public static Verbosity TELEMETRY_VERBOSITY = Verbosity.NORMAL; // how verbose the telemetry is
   public static boolean MANUAL_LIGHTS = false;
   public static RGBIndicator.Color MANUAL_LIGHT_COLOR = RGBIndicator.Color.WHITE;
-  public static boolean enablePinchPointProtection = true; // if the pinch point sensor is used
 
   private final ActiveIntake intake; // the intake on the robot
   private final Turret turret; // the flywheel on the robot
@@ -133,7 +132,6 @@ public class ScoringSystem {
     intake.setTurnOffWhenEmpty(!auto);
     intake.setState(ActiveIntake.State.OFF);
     LOOKUP_TABLE = turret.fillLookupTable();
-    enablePinchPointProtection = !auto;
   }
 
   /** To be called repeatedly while the robot is in init */
@@ -234,7 +232,7 @@ public class ScoringSystem {
   /** Updates everything to do with the spindexer */
   private void updateSpindex() {
     spindex.setSequence(ballSequence);
-    spindex.setIsPinchPointFull(intake.pinchableBall() && enablePinchPointProtection);
+    spindex.setIsPinchPointFull(intake.pinchableBall());
     if (state == State.SHOOTING && isReadyToShoot() && !shutDown) {
       spindex.shoot();
     }
