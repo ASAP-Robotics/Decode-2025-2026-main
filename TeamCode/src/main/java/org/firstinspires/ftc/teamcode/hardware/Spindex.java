@@ -192,6 +192,7 @@ public class Spindex implements System {
 
     state = isPreloaded ? SpindexState.SHOOTING_READY : SpindexState.INTAKING;
     currentIndex = 0; // spindex at index 0
+    PROTECT_PINCH_POINT = !auto;
   }
 
   /** Starts up the spindex */

@@ -35,7 +35,7 @@ import org.firstinspires.ftc.teamcode.types.SystemStatus;
 public class ColorSensorV3 implements System {
   // config vars (FTC Dashboard)
   public static boolean SHOW_TELEMETRY = false;
-  public static double PURPLE_HUE = 200.0;
+  public static double PURPLE_HUE = 220.0;
   public static double PURPLE_HUE_TOLERANCE = 30;
   public static double GREEN_HUE = 157.0;
   public static double GREEN_HUE_TOLERANCE = 20;
@@ -76,7 +76,7 @@ public class ColorSensorV3 implements System {
       telemetry.addData("Beam broken", beamBroken);
     }
 
-    if (beamBroken /*|| distance <= BALL_DISTANCE_THRESHOLD*/) {
+    if (beamBroken || distance <= BALL_DISTANCE_THRESHOLD) {
       float[] hsv = new float[3];
       Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsv);
       float h = hsv[0];
